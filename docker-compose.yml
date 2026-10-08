@@ -1,0 +1,55 @@
+# NF-14 Démarrage complet en une commande : docker compose up --build
+# Front : http://localhost:3000 — API : http://localhost:8085 (Swagger UI : /swagger-ui.html)
+name: traceagile
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: traceagile
+      POSTGRES_USER: traceagile
+      POSTGRES_PASSWORD: traceagile
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traceagile -d traceagile"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      target: api
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      TRACEAGILE_DB_URL: jdbc:postgresql://postgres:5432/traceagile
+      TRACEAGILE_DB_USER: traceagile
+      TRACEAGILE_DB_PASSWORD: traceagile
+      TRACEAGILE_JWT_SECRET: ${TRACEAGILE_JWT_SECRET:-compose-demo-secret-please-change-0123456789}
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  mock-execution-server:
+    build:
+      context: ./backend
+      target: mock-execution-server
+    ports:
+      - "8090:8090"
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:

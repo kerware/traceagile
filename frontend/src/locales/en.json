@@ -1,0 +1,98 @@
+{
+  "app": { "name": "TraceAgile" },
+  "auth": {
+    "title": "Sign in to TraceAgile",
+    "login": "Login",
+    "password": "Password",
+    "submit": "Sign in",
+    "logout": "Sign out",
+    "required": "Required field",
+    "failed": "Unable to sign in"
+  },
+  "layout": {
+    "selectProject": "Select a project",
+    "search": "Search (Ctrl+K)",
+    "toggleTheme": "Toggle light / dark theme",
+    "projects": "Projects",
+    "userMenu": "User menu"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "backlog": "Backlog",
+    "tests": "Tests",
+    "exploratory": "Exploratory",
+    "planning": "Planning",
+    "campaigns": "Campaigns",
+    "myExecutions": "My executions",
+    "traceability": "Traceability",
+    "defects": "Defects",
+    "reports": "Reports",
+    "administration": "Administration"
+  },
+  "projects": {
+    "title": "Projects",
+    "create": "New project",
+    "empty": "No visible project. Ask an administrator to add you to a project.",
+    "key": "Key",
+    "keyHint": "3 to 10 uppercase letters, e.g. SHOP",
+    "keyInvalid": "3 to 10 uppercase letters (A-Z)",
+    "name": "Name",
+    "description": "Description",
+    "save": "Create project",
+    "cancel": "Cancel",
+    "created": "Project {{key}} created",
+    "coverage": "Coverage",
+    "activeSprint": "Active sprint",
+    "notYet": "—",
+    "open": "Open",
+    "members": "{{count}} member(s)"
+  },
+  "roles": {
+    "ADMINISTRATOR": "Administrator",
+    "PRODUCT_OWNER": "Product Owner",
+    "TESTER": "Tester / QA",
+    "DEVELOPER": "Developer",
+    "VIEWER": "Viewer",
+    "SYSTEM_ADMIN": "System administrator"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Users",
+    "projects": "Projects and members",
+    "newUser": "New user",
+    "login": "Login",
+    "displayName": "Display name",
+    "email": "E-mail",
+    "password": "Password",
+    "passwordHint": "At least 8 characters",
+    "systemAdmin": "System administrator",
+    "active": "Active",
+    "inactive": "Inactive",
+    "create": "Create",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "userCreated": "User {{login}} created",
+    "members": "Members of project {{key}}",
+    "addMember": "Add member",
+    "role": "Role",
+    "remove": "Remove",
+    "saveMembers": "Save members",
+    "membersSaved": "Members saved",
+    "chooseProject": "Select a project to manage its members.",
+    "emailInvalid": "Invalid e-mail address",
+    "loginInvalid": "2 to 32 characters among a-z, 0-9, . _ -"
+  },
+  "comingSoon": {
+    "title": "{{screen}}",
+    "body": "This screen will be delivered in batch {{lot}} (see SPECIFICATION.md §16.2)."
+  },
+  "dashboard": {
+    "welcome": "Project {{name}}",
+    "body": "Dashboard widgets (§9.1) will be delivered in batch 8."
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "forbidden": "You do not have the required permissions for this action.",
+    "notFound": "Page not found"
+  }
+}

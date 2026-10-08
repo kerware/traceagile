@@ -1,0 +1,98 @@
+{
+  "app": { "name": "TraceAgile" },
+  "auth": {
+    "title": "Connexion à TraceAgile",
+    "login": "Login",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "logout": "Se déconnecter",
+    "required": "Champ obligatoire",
+    "failed": "Connexion impossible"
+  },
+  "layout": {
+    "selectProject": "Choisir un projet",
+    "search": "Rechercher (Ctrl+K)",
+    "toggleTheme": "Basculer thème clair / sombre",
+    "projects": "Projets",
+    "userMenu": "Menu utilisateur"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "backlog": "Backlog",
+    "tests": "Tests",
+    "exploratory": "Exploratoire",
+    "planning": "Planification",
+    "campaigns": "Campagnes",
+    "myExecutions": "Mes exécutions",
+    "traceability": "Traçabilité",
+    "defects": "Anomalies",
+    "reports": "Rapports",
+    "administration": "Administration"
+  },
+  "projects": {
+    "title": "Projets",
+    "create": "Nouveau projet",
+    "empty": "Aucun projet visible. Demandez à un administrateur de vous ajouter à un projet.",
+    "key": "Clé",
+    "keyHint": "3 à 10 lettres majuscules, ex. SHOP",
+    "keyInvalid": "3 à 10 lettres majuscules (A-Z)",
+    "name": "Nom",
+    "description": "Description",
+    "save": "Créer le projet",
+    "cancel": "Annuler",
+    "created": "Projet {{key}} créé",
+    "coverage": "Couverture",
+    "activeSprint": "Sprint actif",
+    "notYet": "—",
+    "open": "Ouvrir",
+    "members": "{{count}} membre(s)"
+  },
+  "roles": {
+    "ADMINISTRATOR": "Administrateur",
+    "PRODUCT_OWNER": "Product Owner",
+    "TESTER": "Testeur / QA",
+    "DEVELOPER": "Développeur",
+    "VIEWER": "Lecteur",
+    "SYSTEM_ADMIN": "Administrateur système"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Utilisateurs",
+    "projects": "Projets et membres",
+    "newUser": "Nouvel utilisateur",
+    "login": "Login",
+    "displayName": "Nom affiché",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "passwordHint": "8 caractères minimum",
+    "systemAdmin": "Administrateur système",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "create": "Créer",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "userCreated": "Utilisateur {{login}} créé",
+    "members": "Membres du projet {{key}}",
+    "addMember": "Ajouter un membre",
+    "role": "Rôle",
+    "remove": "Retirer",
+    "saveMembers": "Enregistrer les membres",
+    "membersSaved": "Membres enregistrés",
+    "chooseProject": "Choisissez un projet pour gérer ses membres.",
+    "emailInvalid": "Adresse e-mail invalide",
+    "loginInvalid": "2 à 32 caractères parmi a-z, 0-9, . _ -"
+  },
+  "comingSoon": {
+    "title": "{{screen}}",
+    "body": "Cet écran sera livré au lot {{lot}} (voir SPECIFICATION.md §16.2)."
+  },
+  "dashboard": {
+    "welcome": "Projet {{name}}",
+    "body": "Les widgets du tableau de bord (§9.1) seront livrés au lot 8."
+  },
+  "errors": {
+    "generic": "Une erreur est survenue",
+    "forbidden": "Vous n'avez pas les droits nécessaires pour cette action.",
+    "notFound": "Page introuvable"
+  }
+}

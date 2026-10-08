@@ -1,0 +1,750 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "TraceAgile API",
+    "description" : "API de gestion des exigences agiles et des tests (prototype).",
+    "version" : "v1"
+  },
+  "servers" : [ {
+    "url" : "http://localhost",
+    "description" : "Generated server url"
+  } ],
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "paths" : {
+    "/api/v1/projects/{key}/members" : {
+      "get" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "members",
+        "parameters" : [ {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MemberResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "replaceMembers",
+        "parameters" : [ {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/MemberRequest"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MemberResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users" : {
+      "get" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "list",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Zero-based page index (0..N)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "The size of the page to be returned",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 50,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateUserRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects" : {
+      "get" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Zero-based page index (0..N)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "The size of the page to be returned",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 50,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "create_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateProjectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh" : {
+      "post" : {
+        "tags" : [ "Authentification" ],
+        "operationId" : "refresh",
+        "parameters" : [ {
+          "name" : "traceagile_refresh",
+          "in" : "cookie",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "tags" : [ "Authentification" ],
+        "operationId" : "logout",
+        "parameters" : [ {
+          "name" : "traceagile_refresh",
+          "in" : "cookie",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/v1/auth/login" : {
+      "post" : {
+        "tags" : [ "Authentification" ],
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/v1/users/{id}" : {
+      "get" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "get",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "update",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateUserRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{key}" : {
+      "get" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "get_1",
+        "parameters" : [ {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me" : {
+      "get" : {
+        "tags" : [ "Authentification" ],
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "MemberRequest" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "ADMINISTRATOR", "PRODUCT_OWNER", "TESTER", "DEVELOPER", "VIEWER" ]
+          }
+        },
+        "required" : [ "login", "role" ]
+      },
+      "MemberResponse" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "ADMINISTRATOR", "PRODUCT_OWNER", "TESTER", "DEVELOPER", "VIEWER" ]
+          }
+        },
+        "required" : [ "displayName", "login", "role" ]
+      },
+      "CreateUserRequest" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "[a-z0-9._-]{2,32}"
+          },
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "minLength" : 1
+          },
+          "displayName" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "password" : {
+            "type" : "string",
+            "maxLength" : 72,
+            "minLength" : 8
+          },
+          "systemAdmin" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "email", "login", "password" ]
+      },
+      "UserResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "login" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "active" : {
+            "type" : "boolean"
+          },
+          "systemAdmin" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "required" : [ "active", "createdAt", "displayName", "email", "id", "login", "systemAdmin", "updatedAt", "version" ]
+      },
+      "CreateProjectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "[A-Z]{3,10}"
+          },
+          "name" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "key", "name" ]
+      },
+      "ProjectResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "memberCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "myRole" : {
+            "type" : "string",
+            "description" : "Rôle de l'utilisateur courant ; absent pour un administrateur système non membre",
+            "enum" : [ "ADMINISTRATOR", "PRODUCT_OWNER", "TESTER", "DEVELOPER", "VIEWER" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "archived", "createdAt", "id", "key", "memberCount", "name", "version" ]
+      },
+      "MeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "login" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "systemAdmin" : {
+            "type" : "boolean"
+          },
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MembershipResponse"
+            }
+          }
+        },
+        "required" : [ "displayName", "email", "id", "login", "projects", "systemAdmin" ]
+      },
+      "MembershipResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "ADMINISTRATOR", "PRODUCT_OWNER", "TESTER", "DEVELOPER", "VIEWER" ]
+          }
+        },
+        "required" : [ "key", "name", "role" ]
+      },
+      "TokenResponse" : {
+        "type" : "object",
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "tokenType" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "user" : {
+            "$ref" : "#/components/schemas/MeResponse"
+          }
+        },
+        "required" : [ "accessToken", "expiresIn", "tokenType", "user" ]
+      },
+      "LoginRequest" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "password" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "login", "password" ]
+      },
+      "UpdateUserRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email"
+          },
+          "displayName" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "password" : {
+            "type" : "string",
+            "maxLength" : 72,
+            "minLength" : 8
+          },
+          "active" : {
+            "type" : "boolean"
+          },
+          "systemAdmin" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "PageResponseUserResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "PageResponseProjectResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProjectResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "page", "size", "totalElements" ]
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

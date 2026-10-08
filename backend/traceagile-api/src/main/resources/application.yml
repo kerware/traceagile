@@ -1,0 +1,50 @@
+server:
+  port: 8085
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: traceagile-api
+  datasource:
+    url: ${TRACEAGILE_DB_URL:jdbc:postgresql://localhost:5433/traceagile}
+    username: ${TRACEAGILE_DB_USER:traceagile}
+    password: ${TRACEAGILE_DB_PASSWORD:traceagile}
+  jpa:
+    # Le mapping DTO se fait dans les contrôleurs, après la transaction applicative (ADR-0002).
+    open-in-view: true
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  data:
+    web:
+      pageable:
+        default-page-size: 50
+        max-page-size: 200
+  mvc:
+    problemdetails:
+      enabled: true
+
+traceagile:
+  security:
+    # Secret de développement uniquement : surchargé par TRACEAGILE_JWT_SECRET en dehors du poste local.
+    jwt-secret: ${TRACEAGILE_JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
+    access-token-ttl: 15m
+    refresh-cookie-secure: ${TRACEAGILE_COOKIE_SECURE:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  default-produces-media-type: application/json
+
+# NF-15 Journaux structurés JSON (format ECS), avec le correlationId du MDC.
+logging:
+  structured:
+    format:
+      console: ecs
