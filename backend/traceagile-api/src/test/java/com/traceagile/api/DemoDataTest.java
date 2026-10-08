@@ -4,6 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.api.demo.DemoDataLoader;
+import com.traceagile.api.demo.DemoTestsLoader;
+import com.traceagile.application.testcase.TestCaseService;
+import com.traceagile.application.traceability.TraceLinkService;
+import com.traceagile.domain.testcase.TestCase;
+import com.traceagile.domain.testcase.TestCaseStatus;
+import com.traceagile.domain.testcase.TestKind;
+import com.traceagile.domain.testcase.TestTechnique;
 import com.traceagile.application.administration.ProjectRepository;
 import com.traceagile.application.administration.UserRepository;
 import com.traceagile.application.requirement.RequirementRepository;
@@ -33,14 +40,21 @@ class DemoDataTest extends AbstractApiTest {
     RequirementService requirements;
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    DemoTestsLoader testsLoader;
+    @Autowired
+    TestCaseService testCases;
+    @Autowired
+    TraceLinkService links;
 
     DemoDataLoader loader() {
-        return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper);
+        return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
+                testsLoader);
     }
 
     @Test
     @Transactional
-    @DisplayName("§15.1 SHOP : 3 épics, 8 features, 25 stories, 4 règles métier, 4 ENF ; chargement idempotent")
+    @DisplayName("§15.1 SHOP : backlog (3 épics, 8 features, 25 stories, 4 règles, 4 ENF) et tests (20 manuels, 8 chartes, 30 automatisés) ; idempotent")
     void shopRequirements() throws Exception {
         loader().run(null);
         loader().run(null);
@@ -60,5 +74,18 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(byTitle.get("Livraison gratuite dès 50 € d'achat").getType()).isEqualTo(RequirementType.BUSINESS_RULE);
         assertThat(byTitle.get("Temps de réponse des pages").isTransverse()).isTrue();
         assertThat(users.findByLogin("qa2")).isPresent();
+
+        // Lot 2 : 20 manuels, 8 chartes, 30 automatisés (16 BDD), 2 orphelins, au moins 3 stories non couvertes.
+        List<TestCase> all = testCases.all("SHOP");
+        Map<TestKind, Long> byKind = all.stream().collect(Collectors.groupingBy(TestCase::getKind, Collectors.counting()));
+        assertThat(byKind).containsExactlyInAnyOrderEntriesOf(Map.of(TestKind.MANUAL, 20L, TestKind.EXPLORATORY, 8L, TestKind.AUTOMATED, 30L));
+        Map<TestTechnique, Long> byTechnique = all.stream().filter(t -> t.getAutomation() != null)
+                .collect(Collectors.groupingBy(t -> t.getAutomation().getTechnique(), Collectors.counting()));
+        assertThat(byTechnique).containsKeys(TestTechnique.BDD, TestTechnique.UI, TestTechnique.API, TestTechnique.UNIT,
+                TestTechnique.DATA_DRIVEN, TestTechnique.PERFORMANCE);
+        assertThat(byTechnique.get(TestTechnique.BDD)).isEqualTo(16L);
+        assertThat(all).allSatisfy(t -> assertThat(t.getStatus()).isEqualTo(TestCaseStatus.READY));
+        assertThat(all.stream().filter(t -> links.requirementsOf(t).isEmpty())).hasSize(2);
+        assertThat(stories.stream().filter(s -> links.testsOf(s).isEmpty())).hasSizeGreaterThanOrEqualTo(3);
     }
 }

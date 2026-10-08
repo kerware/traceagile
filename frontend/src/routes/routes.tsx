@@ -7,7 +7,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { PROJECT_SCREENS } from '../layouts/navigation';
 
 /** Écrans déjà livrés ; les autres affichent leur lot de livraison. */
-const DELIVERED = ['dashboard', 'backlog'];
+const DELIVERED = ['dashboard', 'backlog', 'tests'];
 
 export const routerFuture = {
   v7_relativeSplatPath: true,
@@ -51,6 +51,14 @@ export const appRoutes: RouteObject[] = [
             path: 'requirements/:rk',
             lazy: () => import('../features/requirements/RequirementPage').then((m) => ({ Component: m.RequirementPage })),
           },
+          {
+            path: 'tests',
+            lazy: () => import('../features/tests/TestsPage').then((m) => ({ Component: m.TestsPage })),
+          },
+          {
+            path: 'tests/:tk',
+            lazy: () => import('../features/tests/TestCasePage').then((m) => ({ Component: m.TestCasePage })),
+          },
           // Écrans des lots suivants : emplacement réservé indiquant le lot de livraison.
           ...PROJECT_SCREENS.filter((s) => !DELIVERED.includes(s.id)).map((screen) => ({
             path: `${screen.path}/*`,
@@ -74,6 +82,10 @@ export const appRoutes: RouteObject[] = [
           {
             path: 'checklists',
             lazy: () => import('../features/admin/AdminChecklistsPage').then((m) => ({ Component: m.AdminChecklistsPage })),
+          },
+          {
+            path: 'references',
+            lazy: () => import('../features/admin/AdminReferencesPage').then((m) => ({ Component: m.AdminReferencesPage })),
           },
         ],
       },

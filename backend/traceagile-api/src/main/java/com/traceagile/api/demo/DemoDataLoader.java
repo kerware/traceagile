@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  * §15.1 Jeu de démonstration, chargé avec le profil {@code demo} ; idempotent.
  * Lot 0 : utilisateurs (mot de passe {@code demo}) et projet {@code SHOP} avec ses membres.
  * Lot 1 : backlog de SHOP décrit dans {@code demo/shop-requirements.json}.
+ * Lot 2 : référentiel de tests ({@link DemoTestsLoader}, {@code demo/shop-tests.json}).
  */
 @Component
 @Profile("demo")
@@ -75,10 +76,12 @@ public class DemoDataLoader implements ApplicationRunner {
     private final RequirementService requirements;
     private final RequirementRepository requirementRepository;
     private final ObjectMapper json;
+    private final DemoTestsLoader testsLoader;
 
     public DemoDataLoader(UserAdministrationService userService, ProjectService projectService, UserRepository users,
                           ProjectRepository projects, RequirementService requirements,
-                          RequirementRepository requirementRepository, ObjectMapper json) {
+                          RequirementRepository requirementRepository, ObjectMapper json, DemoTestsLoader testsLoader) {
+        this.testsLoader = testsLoader;
         this.userService = userService;
         this.projectService = projectService;
         this.users = users;
@@ -111,6 +114,7 @@ public class DemoDataLoader implements ApplicationRunner {
                 }
             }
         }
+        testsLoader.load(SHOP);
         LOG.info("Jeu de démonstration prêt (utilisateurs {}, mot de passe « {} »)",
                 USERS.stream().map(DemoUser::login).toList(), PASSWORD);
     }

@@ -1,7 +1,7 @@
 import { ActionIcon, Alert, Badge, Button, Group, List, Paper, SegmentedControl, Stack, Text, Textarea, Tooltip } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { IconArrowDown, IconArrowUp, IconCheck, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconCheck, IconFlask, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../../api/client';
@@ -16,6 +16,8 @@ import {
   type CriterionFormat,
   type RequirementDetail,
 } from '../../api/requirements';
+import { useGenerateTest } from '../../api/testcases';
+import { useTestWriteKinds } from '../tests/permissions';
 import { GherkinView } from './GherkinView';
 
 type Validation = Schemas['GherkinValidationResponse'];
@@ -37,6 +39,8 @@ export function CriteriaPanel({
   const update = useUpdateCriterion(project);
   const remove = useDeleteCriterion(project);
   const reorder = useReorderCriteria(project, requirement.key);
+  const generate = useGenerateTest(project);
+  const canGenerate = useTestWriteKinds(project).includes('AUTOMATED');
   const editable = canContribute && requirement.status !== 'OBSOLETE';
   const notifyError = (e: unknown) => notifications.show({ color: 'red', message: errorMessage(e, t('errors.generic')) });
 
@@ -77,6 +81,26 @@ export function CriteriaPanel({
                   </Badge>
                 </Group>
                 {criterion.format === 'GHERKIN' ? <GherkinView source={criterion.content} /> : <Text style={{ whiteSpace: 'pre-wrap' }}>{criterion.content}</Text>}
+                {criterion.format === 'GHERKIN' && canGenerate && (
+                  <Group>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      leftSection={<IconFlask size={14} />}
+                      loading={generate.isPending && generate.variables === criterion.id}
+                      onClick={() =>
+                        generate.mutate(criterion.id, {
+                          onSuccess: (tests) =>
+                            notifications.show({ color: 'green', message: t('generate.done', { keys: tests.map((test) => test.key).join(', ') }) }),
+                          onError: notifyError,
+                        })
+                      }
+                      data-testid={`criterion-generate-${criterion.position}`}
+                    >
+                      {t('generate.button')}
+                    </Button>
+                  </Group>
+                )}
               </Stack>
               {editable && (
                 <Group gap={2} wrap="nowrap">

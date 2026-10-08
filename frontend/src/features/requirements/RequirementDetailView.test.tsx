@@ -198,3 +198,43 @@ describe('F-REQ-21 / F-REQ-22 versions et historique', () => {
     expect(within(history).getByText('MUST')).toBeInTheDocument();
   });
 });
+
+describe('Lot 2 — F-REQ-11 génération d’un test BDD et tests liés', () => {
+  it('génère un test BDD depuis un critère Gherkin', async () => {
+    useAuthStore.getState().setSession('jwt', ADMIN);
+    serve(detail('REQ-3', {
+      criteria: [{ id: 'c1', position: 1, format: 'GHERKIN', content: 'Scénario: seuil\n  Soit un panier', status: 'TO_VERIFY', version: 0 }],
+    }));
+    let called = false;
+    server.use(
+      http.post('/api/v1/projects/SHOP/acceptance-criteria/c1/generate-test', () => {
+        called = true;
+        return HttpResponse.json([{ key: 'TC-7' }], { status: 201 });
+      }),
+    );
+    view();
+
+    await userEvent.click(await screen.findByRole('tab', { name: /Critères/ }));
+    await userEvent.click(screen.getByTestId('criterion-generate-1'));
+
+    expect(await screen.findByText('Test BDD généré : TC-7')).toBeInTheDocument();
+    expect(called).toBe(true);
+  });
+
+  it('le testeur voit les tests liés à l’exigence', async () => {
+    useAuthStore.getState().setSession('jwt', ADMIN);
+    serve(detail('REQ-3'));
+    server.use(
+      http.get(`${URL}/test-cases`, () =>
+        HttpResponse.json([{ key: 'TC-7', kind: 'AUTOMATED', title: 'Seuil', status: 'DRAFT', technique: 'BDD', linkType: 'VERIFIES', origin: 'GENERATED', criterionPositions: [1] }]),
+      ),
+    );
+    view();
+
+    await userEvent.click(await screen.findByRole('tab', { name: 'Tests liés' }));
+
+    const row = await screen.findByTestId('linked-test-TC-7');
+    expect(within(row).getByText('critères #1')).toBeInTheDocument();
+    expect(within(row).getByText('BDD (Gherkin)')).toBeInTheDocument();
+  });
+});

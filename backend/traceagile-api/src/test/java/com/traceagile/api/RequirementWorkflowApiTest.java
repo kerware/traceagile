@@ -134,7 +134,9 @@ class RequirementWorkflowApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.dor[0].outcome", is("SATISFIED")))
                 .andExpect(jsonPath("$.dor[2].automatic", is(false)))
                 .andExpect(jsonPath("$.dor[2].outcome", is("UNSATISFIED")))
-                .andExpect(jsonPath("$.dod[0].outcome", is("NOT_EVALUATED")))
+                // Lot 2 : « au moins un test lié » est évalué ; « tests passés » attend les exécutions (lot 5).
+                .andExpect(jsonPath("$.dod[0].outcome", is("UNSATISFIED")))
+                .andExpect(jsonPath("$.dod[1].outcome", is("NOT_EVALUATED")))
                 .andReturn().getResponse().getContentAsString();
         String manualId = readJson(checklists).get("dor").get(2).get("id").asText();
 

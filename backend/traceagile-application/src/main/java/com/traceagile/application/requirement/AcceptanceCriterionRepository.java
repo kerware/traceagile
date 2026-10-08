@@ -8,4 +8,6 @@ import java.util.UUID;
 public interface AcceptanceCriterionRepository {
 
     Optional<AcceptanceCriterion> findById(UUID id);
+
+    java.util.List<AcceptanceCriterion> findByIdIn(java.util.Collection<UUID> ids);
 }

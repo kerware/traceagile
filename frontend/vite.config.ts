@@ -12,8 +12,9 @@ export default defineConfig({
     },
   },
   build: {
-    // L'éditeur Markdown (coloration de code incluse) pèse ~1 Mo mais n'est chargé que sur la fiche exigence.
-    chunkSizeWarningLimit: 1200,
+    // Chargés à la demande seulement : éditeur Markdown (~1 Mo, fiche exigence) et cœur de Monaco
+    // (~2,3 Mo, éditeurs Gherkin / JSON). Le point d'entrée reste léger.
+    chunkSizeWarningLimit: 2500,
     rollupOptions: {
       output: {
         manualChunks: {

@@ -54,6 +54,7 @@ public abstract class AbstractApiTest {
     @BeforeEach
     void cleanDatabase() {
         jdbc.execute("truncate table audit_events, refresh_tokens, project_members, projects, users cascade");
+        jdbc.execute("delete from automation_frameworks where created_by <> 'system'");
     }
 
     protected void user(String login, boolean systemAdmin) {

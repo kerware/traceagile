@@ -10,7 +10,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | --- | --- | --- |
 | 0. Socle | Multi-modules, Docker Compose, Flyway, JWT, utilisateurs, projets, membres, squelette React, CI | **Fait** (branche `lot-0-socle`) |
 | 1. Exigences | Backlog, fiche, critères, ENF, rang, DoR/DoD, versions, audit, CSV | **Fait** (branche `lot-1-exigences`) |
-| 2. Tests | Référentiel, manuels, automatisés, Gherkin Monaco, génération BDD, tags `@REQ-` | À faire |
+| 2. Tests | Référentiel, manuels, automatisés, Gherkin Monaco, génération BDD, tags `@REQ-` | **Fait** (branche `lot-2-tests`) |
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | À faire |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | À faire |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | À faire |
@@ -21,9 +21,14 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 
 Reporté (à reprendre dans le lot indiqué) :
 - Parcours §15.3 étape 1 : ajout de la story à `SPR-2` → lot 4 (sprints). Le reste est automatisé.
-- F-REQ-11 « Générer un test BDD » et éditeur Monaco Gherkin (F-AUT-04) → lot 2.
-- F-REQ-12 état calculé des critères, items DoD sur les tests (aujourd'hui « non évalués ») et
-  `NEEDS_UPDATE` des tests liés sur `RequirementChanged` (§3.3-7) → lot 3.
+- Parcours §15.3 étape 2 : sélection du test BDD et de la charte dans une campagne → lot 5.
+- F-REQ-12 état calculé des critères, item DoD « tous les tests liés passés » et `NEEDS_UPDATE`
+  des tests liés sur `RequirementChanged` (§3.3-7 ; `TestCase.markNeedsUpdate()` existe) → lot 3.
+- Liens créés depuis la fiche exigence et la matrice (F-TRA-01), orphelins (F-TRA-06) → lot 3 ;
+  `TraceLink` et le filtre `orphan` des tests existent déjà (ADR-0012).
+- F-MAN-02 tri des candidats par fréquence d'exécution → lot 5 (aujourd'hui : par priorité).
+- Heuristiques extensibles par projet (F-EXP-02), sessions et génération de chartes → lot 6.
+- F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
 - §3.3-6 « suppression interdite si exécutée » et item DoD « aucune anomalie bloquante » → lot 5.
 - F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes, Example Mapping → lot 9.
 - `docs/execution-server-api.yaml` (contrat §10) → lot 7.
@@ -124,6 +129,11 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - PATCH : merge-patch, `If-Match` → `Versions.parseIfMatch`, réponse avec `ETag` (ADR-0005). Quand
   un champ peut être effacé, lire le corps en `JsonNode` avec `MergePatch` (absent = inchangé,
   `null` = effacé) et documenter le schéma avec un DTO validé (ADR-0009).
+- Droits dépendant de l'objet (ex. nature d'un test, §2.2) : `@PreAuthorize` sur la règle la plus
+  large, puis vérification fine dans le contrôleur (`TestPermissions.checkWrite`) → 403.
+- `POST` dont le corps mêle des champs communs et des champs optionnels d'un merge-patch : lire le
+  corps en `JsonNode` et le valider avec deux DTO via `MergePatch.of` (cf. `TestCaseController`).
+- Ne jamais nommer une méthode de test `status()` (elle masque `MockMvcResultMatchers.status()`).
 - Tests : unitaires purs (domaine), Mockito (application), `AbstractApiTest` (MockMvc +
   PostgreSQL Testcontainers partagé, base vidée avant chaque test : `truncate … cascade` depuis
   `projects`/`users`, plus les tables sans clé étrangère comme `audit_events`). Chaque contrôleur :
@@ -137,6 +147,11 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `ApiError` (`code`, `fieldErrors`, `problem` pour les détails comme `unmetItems`).
 - Un fichier de composant n'exporte que des composants (ESLint react-refresh) : helpers dans
   `model.ts`, `filters.ts`, `permissions.ts`…
+- Formulaires à sous-éditeurs (fiche test) : brouillon local + `toPatch()` champ à champ
+  (`features/tests/draft.ts`) plutôt que React Hook Form.
+- Éditeurs de code : `components/code/CodeEditor` (Monaco local, chargé à la demande ; grammaire
+  Gherkin et autocomplétion dans `monacoSetup.ts`). En test (jsdom), il devient une zone de texte.
+- user-event : « {{ » saisit une accolade littérale (`'${{nom}'` pour taper `${nom}`).
 - Filtres de liste dans l'URL (`useSearchParams`) ; glisser-déposer avec dnd-kit, ordre calculé par
   `reorder()` et mise à jour optimiste annulée en cas d'erreur (§11.4).
 - Droits côté interface (`useCanWriteRequirements`, `useCanContribute`) : confort uniquement, l'API
@@ -160,7 +175,12 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Lot 1 : backlog de SHOP décrit dans `traceagile-api/src/main/resources/demo/shop-requirements.json`
   (3 épics, 8 features, 25 stories toutes avec critères dont 16 en Gherkin, 4 règles métier, 4 ENF ;
   12 stories « Prête »).
-- À compléter à chaque lot (tests, sprints, campagnes…).
+- Lot 2 : `demo/shop-tests.json` chargé par `DemoTestsLoader` : 20 tests manuels (dont jeux de
+  données et candidats à l'automatisation), 8 chartes, 14 tests automatisés (UI Playwright, API
+  REST Assured, JUnit 5, data-driven, Gatling ; identifiants `@fail` / `@flaky` pour le simulateur
+  du lot 7) et 16 tests BDD générés depuis les critères Gherkin ; 2 tests orphelins ; plusieurs
+  stories non couvertes. Tous `READY`.
+- À compléter à chaque lot (sprints, campagnes…).
 
 ### Bout en bout (§15.3)
 Un fichier `e2e/tests/parcours-N-*.spec.ts` par parcours, étapes en `test.step` lisibles par un

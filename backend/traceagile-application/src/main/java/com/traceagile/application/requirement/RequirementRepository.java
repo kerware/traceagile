@@ -23,6 +23,8 @@ public interface RequirementRepository {
 
     boolean existsByProject_Key(String projectKey);
 
+    List<Requirement> findByIdIn(java.util.Collection<java.util.UUID> ids);
+
     /** F-REQ-01 / F-REQ-04 liste filtrée, paginée et triée. */
     Page<Requirement> search(String projectKey, RequirementFilter filter, Pageable pageable);
 

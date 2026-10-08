@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/api/v1/reference/frameworks/{technique}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["requirements"];
+        put: operations["replaceRequirements"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}/invest": {
         parameters: {
             query?: never;
@@ -60,7 +92,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["replace"];
+        put: operations["replace_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -116,7 +148,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/projects/{projectKey}/requirements": {
+    "/api/v1/projects/{projectKey}/test-cases": {
         parameters: {
             query?: never;
             header?: never;
@@ -126,6 +158,70 @@ export interface paths {
         get: operations["list_2"];
         put?: never;
         post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["changeStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/import-feature": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["importFeatures"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/discovery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["discovery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_3"];
+        put?: never;
+        post: operations["create_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -157,7 +253,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["changeStatus"];
+        post: operations["changeStatus_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -203,7 +299,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
         post: operations["add"];
         delete?: never;
@@ -222,6 +318,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["importCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/acceptance-criteria/{id}/generate-test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["generateTest"];
         delete?: never;
         options?: never;
         head?: never;
@@ -308,7 +420,7 @@ export interface paths {
         patch: operations["update"];
         trace?: never;
     };
-    "/api/v1/projects/{projectKey}/requirements/{key}": {
+    "/api/v1/projects/{projectKey}/test-cases/{key}": {
         parameters: {
             query?: never;
             header?: never;
@@ -324,6 +436,22 @@ export interface paths {
         patch: operations["update_1"];
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/requirements/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_2"];
+        put?: never;
+        post?: never;
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch: operations["update_2"];
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}": {
         parameters: {
             query?: never;
@@ -334,10 +462,106 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
-        patch: operations["update_2"];
+        patch: operations["update_3"];
+        trace?: never;
+    };
+    "/api/v1/reference/frameworks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["versions_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/versions/{from}/diff/{to}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["diff"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["tree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/export-feature": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exportFeatures"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}": {
@@ -363,7 +587,23 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["diff"];
+        get: operations["diff_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/test-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["linkedTests"];
         put?: never;
         post?: never;
         delete?: never;
@@ -379,7 +619,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["history"];
+        get: operations["history_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -411,7 +651,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["tree"];
+        get: operations["tree_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -436,6 +676,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/gherkin/steps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["steps"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/checklists": {
         parameters: {
             query?: never;
@@ -443,7 +699,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_2"];
+        get: operations["get_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -459,7 +715,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_3"];
+        get: operations["get_4"];
         put?: never;
         post?: never;
         delete?: never;
@@ -488,6 +744,32 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        FrameworkResponse: {
+            /** @enum {string} */
+            technique: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            name: string;
+            /** Format: int32 */
+            position: number;
+        };
+        LinkRequest: {
+            requirementKey: string;
+            /** @enum {string} */
+            linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
+            criterionPositions?: number[];
+        };
+        RequirementLinkResponse: {
+            requirementKey: string;
+            requirementTitle: string;
+            /** @enum {string} */
+            requirementType: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            /** @enum {string} */
+            requirementStatus: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+            /** @enum {string} */
+            linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
+            /** @enum {string} */
+            origin: "MANUAL" | "GHERKIN_TAG" | "GENERATED" | "DISCOVERY";
+            criterionPositions: number[];
+        };
         InvestDto: {
             independent: boolean;
             negotiable: boolean;
@@ -675,6 +957,186 @@ export interface components {
             createdAt: string;
             createdBy?: string;
         };
+        CreateTestCaseRequest: WithRequired<components["schemas"]["TestCaseFieldsRequest"], "title"> & {
+            /** @enum {string} */
+            kind: "MANUAL" | "EXPLORATORY" | "AUTOMATED";
+            title: string;
+            /** @enum {string} */
+            technique?: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            framework?: string;
+            links?: components["schemas"]["LinkRequest"][];
+            steps?: components["schemas"]["StepRequest"][];
+        };
+        StepRequest: {
+            action: string;
+            expectedResult?: string;
+            testData?: string;
+        };
+        TestCaseFieldsRequest: {
+            title?: string;
+            description?: string;
+            objective?: string;
+            /** @enum {string} */
+            priority?: "MUST" | "SHOULD" | "COULD" | "WONT";
+            tags?: string[];
+            /** Format: int32 */
+            estimatedDurationMin?: number;
+            folder?: string;
+            automationCandidate?: boolean;
+            automationJustification?: string;
+            steps?: components["schemas"]["StepRequest"][];
+            manualDataSet?: {
+                [key: string]: string;
+            }[];
+            explore?: string;
+            with?: string;
+            toDiscover?: string;
+            areas?: string[];
+            heuristics?: string[];
+            /** Format: int32 */
+            timeboxMin?: number;
+            setupNotes?: string;
+            targetedRisk?: string;
+            /** @enum {string} */
+            technique?: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            framework?: string;
+            language?: string;
+            repositoryUrl?: string;
+            branch?: string;
+            path?: string;
+            testIdentifier?: string;
+            gherkinSource?: string;
+            dataSet?: {
+                [key: string]: unknown;
+            }[];
+            parameters?: {
+                [key: string]: unknown;
+            };
+            executionTags?: string[];
+            environmentRequirements?: {
+                [key: string]: string;
+            };
+        };
+        AutomationResponse: {
+            /** @enum {string} */
+            technique: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            framework: string;
+            language?: string;
+            repositoryUrl?: string;
+            branch?: string;
+            path?: string;
+            testIdentifier?: string;
+            featureName?: string;
+            gherkinSource?: string;
+            dataSet: {
+                [key: string]: unknown;
+            }[];
+            parameters: {
+                [key: string]: unknown;
+            };
+            executionTags: string[];
+            environmentRequirements: {
+                [key: string]: string;
+            };
+            keywords: string[];
+            missingInRepository: boolean;
+        };
+        CharterResponse: {
+            explore?: string;
+            with?: string;
+            toDiscover?: string;
+            /** @description F-EXP-01 */
+            missionSentence: string;
+            areas: string[];
+            heuristics: string[];
+            /** Format: int32 */
+            timeboxMin: number;
+            setupNotes?: string;
+            targetedRisk?: string;
+        };
+        StepResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            position: number;
+            action: string;
+            expectedResult?: string;
+            testData?: string;
+        };
+        TestCaseDetail: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** @enum {string} */
+            kind: "MANUAL" | "EXPLORATORY" | "AUTOMATED";
+            title: string;
+            description?: string;
+            objective?: string;
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** @enum {string} */
+            status: "DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE";
+            allowedTransitions: ("DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE")[];
+            tags: string[];
+            /** Format: int32 */
+            estimatedDurationMin?: number;
+            folder?: string;
+            /** Format: int32 */
+            currentVersion: number;
+            automationCandidate: boolean;
+            automationJustification?: string;
+            steps: components["schemas"]["StepResponse"][];
+            manualDataSet: {
+                [key: string]: string;
+            }[];
+            /** @description F-MAN-01 variables ${nom} des pas */
+            variables: string[];
+            charter?: components["schemas"]["CharterResponse"];
+            automation?: components["schemas"]["AutomationResponse"];
+            requirements: components["schemas"]["RequirementLinkResponse"][];
+            /** @description F-AUT-06 tags Gherkin inconnus… */
+            warnings: string[];
+            /** Format: int64 */
+            version: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            updatedBy?: string;
+        };
+        TestStatusRequest: {
+            /** @enum {string} */
+            status: "DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE";
+        };
+        FeatureImportResponse: {
+            created: string[];
+            updated: string[];
+            warnings: string[];
+        };
+        DiscoveredTest: {
+            /** @enum {string} */
+            technique?: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            framework?: string;
+            language?: string;
+            path?: string;
+            testIdentifier?: string;
+            title?: string;
+            tags?: string[];
+            requirements?: string[];
+            keywords?: string[];
+        };
+        DiscoveryReport: {
+            repositoryUrl?: string;
+            branch?: string;
+            tests?: components["schemas"]["DiscoveredTest"][];
+        };
+        DiscoveryResponse: {
+            created: string[];
+            updated: string[];
+            disappeared: string[];
+            warnings: string[];
+        };
         CreateCriterionRequest: {
             /** @enum {string} */
             format: "TEXT" | "GHERKIN";
@@ -839,6 +1301,73 @@ export interface components {
             /** Format: int64 */
             totalElements: number;
         };
+        PageResponseTestCaseSummary: {
+            content: components["schemas"]["TestCaseSummary"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalElements: number;
+        };
+        TestCaseSummary: {
+            key: string;
+            /** @enum {string} */
+            kind: "MANUAL" | "EXPLORATORY" | "AUTOMATED";
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE";
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** @enum {string} */
+            technique?: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            framework?: string;
+            folder?: string;
+            featureName?: string;
+            tags: string[];
+            /** Format: int32 */
+            estimatedDurationMin?: number;
+            /** Format: int32 */
+            currentVersion: number;
+            automationCandidate: boolean;
+            missingInRepository: boolean;
+        };
+        TestVersionResponse: {
+            /** Format: int32 */
+            versionNumber: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            snapshot: {
+                [key: string]: string;
+            };
+        };
+        FieldChangeResponse: {
+            field: string;
+            before?: string;
+            after?: string;
+        };
+        AuditEventResponse: {
+            action: string;
+            actor?: string;
+            /** Format: date-time */
+            timestamp: string;
+            changes: components["schemas"]["FieldChangeResponse"][];
+        };
+        PageResponseAuditEventResponse: {
+            content: components["schemas"]["AuditEventResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalElements: number;
+        };
+        TestCaseGroup: {
+            /** @description Dossier ou fonctionnalité ; vide = non classé */
+            name: string;
+            tests: components["schemas"]["TestCaseSummary"][];
+        };
         PageResponseRequirementSummary: {
             content: components["schemas"]["RequirementSummary"][];
             /** Format: int32 */
@@ -872,26 +1401,20 @@ export interface components {
             /** Format: int64 */
             version: number;
         };
-        FieldChangeResponse: {
-            field: string;
-            before?: string;
-            after?: string;
-        };
-        AuditEventResponse: {
-            action: string;
-            actor?: string;
-            /** Format: date-time */
-            timestamp: string;
-            changes: components["schemas"]["FieldChangeResponse"][];
-        };
-        PageResponseAuditEventResponse: {
-            content: components["schemas"]["AuditEventResponse"][];
-            /** Format: int32 */
-            page: number;
-            /** Format: int32 */
-            size: number;
-            /** Format: int64 */
-            totalElements: number;
+        LinkedTestResponse: {
+            key: string;
+            /** @enum {string} */
+            kind: "MANUAL" | "EXPLORATORY" | "AUTOMATED";
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE";
+            /** @enum {string} */
+            technique?: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            /** @enum {string} */
+            linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
+            /** @enum {string} */
+            origin: "MANUAL" | "GHERKIN_TAG" | "GENERATED" | "DISCOVERY";
+            criterionPositions: number[];
         };
         RequirementTreeNode: {
             key: string;
@@ -913,6 +1436,11 @@ export interface components {
             needsSplitting: boolean;
             children: components["schemas"]["RequirementTreeNode"][];
         };
+        StepUsageResponse: {
+            text: string;
+            /** Format: int64 */
+            count: number;
+        };
         ProjectChecklistsResponse: {
             dor: components["schemas"]["ChecklistItemResponse"][];
             dod: components["schemas"]["ChecklistItemResponse"][];
@@ -926,6 +1454,82 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    replace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                technique: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string[];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrameworkResponse"][];
+                };
+            };
+        };
+    };
+    requirements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementLinkResponse"][];
+                };
+            };
+        };
+    };
+    replaceRequirements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkRequest"][];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementLinkResponse"][];
+                };
+            };
+        };
+    };
     invest: {
         parameters: {
             query?: never;
@@ -1008,7 +1612,7 @@ export interface operations {
             };
         };
     };
-    replace: {
+    replace_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1188,6 +1792,153 @@ export interface operations {
     list_2: {
         parameters: {
             query?: {
+                kind?: ("MANUAL" | "EXPLORATORY" | "AUTOMATED")[];
+                technique?: ("BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT")[];
+                status?: ("DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE")[];
+                tag?: string;
+                requirement?: string;
+                orphan?: boolean;
+                automationCandidate?: boolean;
+                folder?: string;
+                q?: string;
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResponseTestCaseSummary"];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTestCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCaseDetail"];
+                };
+            };
+        };
+    };
+    changeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCaseDetail"];
+                };
+            };
+        };
+    };
+    importFeatures: {
+        parameters: {
+            query?: {
+                framework?: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    files: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeatureImportResponse"];
+                };
+            };
+        };
+    };
+    discovery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscoveryReport"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryResponse"];
+                };
+            };
+        };
+    };
+    list_3: {
+        parameters: {
+            query?: {
                 type?: ("EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER")[];
                 status?: ("DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE")[];
                 priority?: ("MUST" | "SHOULD" | "COULD" | "WONT")[];
@@ -1220,7 +1971,7 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1296,7 +2047,7 @@ export interface operations {
             };
         };
     };
-    changeStatus: {
+    changeStatus_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1373,7 +2124,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1448,6 +2199,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportResponse"];
+                };
+            };
+        };
+    };
+    generateTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCaseDetail"][];
                 };
             };
         };
@@ -1611,7 +2385,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequirementDetail"];
+                    "application/json": components["schemas"]["TestCaseDetail"];
                 };
             };
         };
@@ -1651,6 +2425,80 @@ export interface operations {
         };
         requestBody: {
             content: {
+                "application/merge-patch+json": components["schemas"]["TestCaseFieldsRequest"];
+                "application/json": components["schemas"]["TestCaseFieldsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCaseDetail"];
+                };
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
                 "application/merge-patch+json": components["schemas"]["RequirementFieldsRequest"];
                 "application/json": components["schemas"]["RequirementFieldsRequest"];
             };
@@ -1667,7 +2515,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1688,7 +2536,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: {
@@ -1718,14 +2566,33 @@ export interface operations {
             };
         };
     };
-    version: {
+    list_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrameworkResponse"][];
+                };
+            };
+        };
+    };
+    versions_1: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 projectKey: string;
                 key: string;
-                number: number;
             };
             cookie?: never;
         };
@@ -1737,7 +2604,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VersionResponse"];
+                    "application/json": components["schemas"]["TestVersionResponse"][];
                 };
             };
         };
@@ -1797,6 +2664,156 @@ export interface operations {
             };
         };
     };
+    tree: {
+        parameters: {
+            query?: {
+                groupBy?: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCaseGroup"][];
+                };
+            };
+        };
+    };
+    exportFeatures: {
+        parameters: {
+            query?: {
+                keys?: string[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": string;
+                };
+            };
+        };
+    };
+    version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    diff_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+                from: number;
+                to: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldChangeResponse"][];
+                };
+            };
+        };
+    };
+    linkedTests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkedTestResponse"][];
+                };
+            };
+        };
+    };
+    history_1: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResponseAuditEventResponse"];
+                };
+            };
+        };
+    };
     checklists: {
         parameters: {
             query?: never;
@@ -1820,7 +2837,7 @@ export interface operations {
             };
         };
     };
-    tree: {
+    tree_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1871,7 +2888,31 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    steps: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StepUsageResponse"][];
+                };
+            };
+        };
+    };
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1893,7 +2934,7 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    get_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1936,3 +2977,6 @@ export interface operations {
         };
     };
 }
+type WithRequired<T, K extends keyof T> = T & {
+    [P in K]-?: T[P];
+};

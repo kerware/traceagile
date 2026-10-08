@@ -1,12 +1,18 @@
 import { Loader, Text, Timeline } from '@mantine/core';
 import { IconHistory } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import type { Schemas } from '../../api/client';
 import { useHistory } from '../../api/requirements';
 
 /** F-REQ-22 historique : AuditEvent de l'exigence (NF-16 qui, quand, quoi). */
 export function HistoryPanel({ project, requirementKey }: { project: string; requirementKey: string }) {
-  const { t, i18n } = useTranslation();
   const { data, isLoading } = useHistory(project, requirementKey);
+  return <HistoryTimeline data={data} isLoading={isLoading} />;
+}
+
+/** Frise des AuditEvent d'une entité (exigence, test…). */
+export function HistoryTimeline({ data, isLoading }: { data?: Schemas['PageResponseAuditEventResponse']; isLoading: boolean }) {
+  const { t, i18n } = useTranslation();
   if (isLoading) return <Loader />;
   if (!data || data.content.length === 0) return <Text c="dimmed">{t('history.empty')}</Text>;
   return (

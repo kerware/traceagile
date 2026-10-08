@@ -3,6 +3,7 @@ package com.traceagile.application.requirement;
 import com.traceagile.application.administration.ProjectRepository;
 import com.traceagile.application.audit.AuditService;
 import com.traceagile.application.common.KeyGenerator;
+import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.common.UnprocessableException;
 import com.traceagile.application.common.VersionConflictException;
@@ -19,6 +20,7 @@ import com.traceagile.domain.requirement.Requirement;
 import com.traceagile.domain.requirement.RequirementStatus;
 import com.traceagile.domain.requirement.RequirementType;
 import com.traceagile.domain.requirement.RequirementVersion;
+import com.traceagile.domain.traceability.TraceEntityType;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -60,11 +62,14 @@ public class RequirementService {
     private final AuditService audit;
     private final ApplicationEventPublisher events;
     private final GherkinValidator gherkin;
+    private final TraceLinkService links;
 
     public RequirementService(RequirementRepository requirements, RequirementVersionRepository versions,
                               ProjectRepository projects, KeyGenerator keys, ChecklistService checklists,
-                              AuditService audit, ApplicationEventPublisher events, GherkinValidator gherkin) {
+                              AuditService audit, ApplicationEventPublisher events, GherkinValidator gherkin,
+                              TraceLinkService links) {
         this.gherkin = gherkin;
+        this.links = links;
         this.requirements = requirements;
         this.versions = versions;
         this.projects = projects;
@@ -208,6 +213,8 @@ public class RequirementService {
         }
         audit.record(requirement.getProject().getId(), AuditService.REQUIREMENT, requirement.getId(), key,
                 AuditAction.DELETED, before, Map.of());
+        links.deleteLinksTo(TraceEntityType.REQUIREMENT, requirement.getId());
+        requirement.getCriteria().forEach(c -> links.deleteLinksTo(TraceEntityType.ACCEPTANCE_CRITERION, c.getId()));
         requirements.delete(requirement);
     }
 

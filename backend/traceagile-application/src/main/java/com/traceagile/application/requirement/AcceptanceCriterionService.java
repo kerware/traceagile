@@ -1,12 +1,14 @@
 package com.traceagile.application.requirement;
 
 import com.traceagile.application.common.NotFoundException;
+import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.application.common.VersionConflictException;
 import com.traceagile.domain.audit.AuditAction;
 import com.traceagile.domain.common.BusinessRuleException;
 import com.traceagile.domain.requirement.AcceptanceCriterion;
 import com.traceagile.domain.requirement.CriterionFormat;
 import com.traceagile.domain.requirement.Requirement;
+import com.traceagile.domain.traceability.TraceEntityType;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,10 +22,13 @@ public class AcceptanceCriterionService {
 
     private final RequirementService requirements;
     private final AcceptanceCriterionRepository criteria;
+    private final TraceLinkService links;
 
-    public AcceptanceCriterionService(RequirementService requirements, AcceptanceCriterionRepository criteria) {
+    public AcceptanceCriterionService(RequirementService requirements, AcceptanceCriterionRepository criteria,
+                                      TraceLinkService links) {
         this.requirements = requirements;
         this.criteria = criteria;
+        this.links = links;
     }
 
     public AcceptanceCriterion add(String projectKey, String requirementKey, CriterionFormat format, String content) {
@@ -52,6 +57,7 @@ public class AcceptanceCriterionService {
         AcceptanceCriterion criterion = get(projectKey, id);
         Requirement requirement = criterion.getRequirement();
         Map<String, Object> before = requirement.snapshot();
+        links.deleteLinksTo(TraceEntityType.ACCEPTANCE_CRITERION, criterion.getId());
         requirement.removeCriterion(criterion);
         requirements.changed(requirement, AuditAction.UPDATED, before);
     }

@@ -83,7 +83,8 @@
     "chooseProject": "Select a project to manage its members.",
     "emailInvalid": "Invalid e-mail address",
     "loginInvalid": "2 to 32 characters among a-z, 0-9, . _ -",
-    "checklists": "DoR / DoD"
+    "checklists": "DoR / DoD",
+    "references": "Reference data"
   },
   "comingSoon": {
     "title": "{{screen}}",
@@ -367,5 +368,233 @@
     "externalRef": "External reference",
     "criteria": "Criteria",
     "version": "Version"
+  },
+  "testKind": {
+    "MANUAL": "Manual",
+    "EXPLORATORY": "Exploratory",
+    "AUTOMATED": "Automated"
+  },
+  "testStatus": {
+    "DRAFT": "Draft",
+    "READY": "Ready",
+    "NEEDS_UPDATE": "Needs update",
+    "OBSOLETE": "Obsolete"
+  },
+  "technique": {
+    "BDD": "BDD (Gherkin)",
+    "UNIT": "Unit",
+    "UI": "User interface (UI)",
+    "API": "API",
+    "KEYWORD": "Keyword-driven",
+    "DATA_DRIVEN": "Data-driven",
+    "PERFORMANCE": "Performance",
+    "CONTRACT": "Contract"
+  },
+  "techniqueHint": {
+    "BDD": ".feature path + scenario name; the Gherkin source is stored and versioned in TraceAgile.",
+    "UNIT": "class#method or module::function",
+    "UI": "file + test title",
+    "API": "collection or file + name",
+    "KEYWORD": "suite + test name",
+    "DATA_DRIVEN": "identifier + data set (one execution per row)",
+    "PERFORMANCE": "scenario",
+    "CONTRACT": "consumer / provider contract"
+  },
+  "linkType": {
+    "VERIFIES": "Verifies",
+    "PARTIALLY_VERIFIES": "Partially verifies",
+    "RELATES_TO": "Relates to"
+  },
+  "linkOrigin": {
+    "MANUAL": "manual",
+    "GHERKIN_TAG": "Gherkin tag",
+    "GENERATED": "generated",
+    "DISCOVERY": "discovery"
+  },
+  "tests": {
+    "title": "Test repository",
+    "byFolder": "By folder",
+    "byFeature": "By feature",
+    "list": "List",
+    "new": "New test",
+    "importFeature": "Import .feature",
+    "exportFeature": "Export .feature",
+    "discovery": "Discovery report",
+    "search": "Search (key, title)",
+    "filterKind": "Kind",
+    "filterTechnique": "Technique",
+    "filterStatus": "Status",
+    "filterTag": "Tag",
+    "filterRequirement": "Requirement (key)",
+    "orphans": "Orphans",
+    "candidates": "Automation candidates",
+    "resetFilters": "Clear filters",
+    "empty": "No matching test.",
+    "emptyRepository": "No test yet. Create one, import .feature files or a discovery report.",
+    "unclassified": "(unclassified)",
+    "columns": {
+      "key": "Key",
+      "title": "Title",
+      "kind": "Kind",
+      "technique": "Technique",
+      "status": "Status",
+      "priority": "Priority",
+      "version": "Version",
+      "duration": "Duration"
+    },
+    "total": "{{count}} test(s)",
+    "openFull": "Open full page",
+    "missing": "Missing from repository",
+    "candidate": "Candidate"
+  },
+  "test": {
+    "kind": "Kind",
+    "title": "Title",
+    "technique": "Technique",
+    "framework": "Framework",
+    "folder": "Folder",
+    "folderHint": "Path separated by “/”, e.g. Cart/Payment",
+    "requirement": "Verified requirement",
+    "create": "Create test",
+    "created": "{{key}} created",
+    "saved": "Test saved",
+    "save": "Save",
+    "cancel": "Cancel",
+    "objective": "Objective",
+    "description": "Description",
+    "priority": "Priority",
+    "tags": "Tags",
+    "duration": "Estimated duration (min)",
+    "automationCandidate": "Automation candidate",
+    "automationJustification": "Justification",
+    "tabs": {
+      "definition": "Definition",
+      "requirements": "Linked requirements",
+      "executions": "Executions",
+      "versions": "Versions",
+      "history": "History"
+    },
+    "laterLot": "Available in batch {{lot}}.",
+    "changeStatus": "Change status",
+    "statusChanged": "{{key}}: {{status}}",
+    "delete": "Delete",
+    "deleteConfirm": "Permanently delete {{key}}?",
+    "deleted": "{{key}} deleted",
+    "version": "v{{number}}",
+    "versionBumped": "Significant change: version {{number}} (F-AUT-10)",
+    "warnings": "Warnings",
+    "notFound": "Test not found.",
+    "readOnly": "Read only: your permissions on this project do not allow editing this test."
+  },
+  "steps": {
+    "title": "Test steps",
+    "action": "Action",
+    "expected": "Expected result",
+    "data": "Data",
+    "add": "Add a step",
+    "duplicate": "Duplicate",
+    "remove": "Remove",
+    "up": "Move up",
+    "down": "Move down",
+    "empty": "No step. A ready manual test has at least one step.",
+    "variables": "Detected variables",
+    "variablesHint": "Use ${name} in steps; each data set row provides one value per variable.",
+    "dataSet": "Data set"
+  },
+  "grid": {
+    "addRow": "Add a row",
+    "addColumn": "Add a column",
+    "column": "Column name",
+    "removeRow": "Remove row",
+    "removeColumn": "Remove column",
+    "empty": "No row."
+  },
+  "charter": {
+    "mission": "Mission",
+    "explore": "Explore",
+    "with": "with",
+    "toDiscover": "to discover",
+    "preview": "Preview",
+    "timebox": "Timebox",
+    "areas": "Functional areas",
+    "heuristics": "Heuristics",
+    "heuristicsHint": "Suggestions: SFDIPOT, FEW HICCUPPS, CRUD, Goldilocks, Whittaker tours",
+    "setupNotes": "Setup notes",
+    "targetedRisk": "Targeted risk",
+    "minutes": "{{count}} min"
+  },
+  "automation": {
+    "identification": "Identification",
+    "language": "Language",
+    "repositoryUrl": "Git repository",
+    "branch": "Branch",
+    "path": "Path",
+    "testIdentifier": "Test identifier",
+    "executionTags": "Execution tags",
+    "executionTagsHint": "e.g. smoke, regression, nightly (campaign selection, F-AUT-02)",
+    "environment": "Environment requirements",
+    "environmentHint": "Key / value pairs sent to the execution server (F-AUT-03)",
+    "key": "Key",
+    "value": "Value",
+    "addPair": "Add a requirement",
+    "gherkin": "Gherkin source",
+    "gherkinHint": "Tags @REQ-12 / @AC-12-3 create traceability links on save (F-AUT-06). Ctrl+Space: known steps.",
+    "dataSet": "Data set (one execution per row)",
+    "parameters": "Parameters (JSON)",
+    "parametersInvalid": "Invalid JSON",
+    "browsers": "Browsers",
+    "resolution": "Resolution",
+    "baseUrl": "Base URL",
+    "authRequired": "Authentication required",
+    "expectedMetrics": "Expected metrics (linked to NFRs)",
+    "p95Ms": "p95 (ms)",
+    "throughputRps": "Throughput (req/s)",
+    "errorRatePct": "Error rate (%)",
+    "keywords": "Keywords used (read only)",
+    "missing": "This test is missing from the latest repository discovery report (F-AUT-08)."
+  },
+  "links": {
+    "title": "Verified requirements",
+    "requirement": "Requirement",
+    "type": "Link type",
+    "criteria": "Verified criteria",
+    "add": "Add a requirement",
+    "save": "Save links",
+    "saved": "Links saved",
+    "empty": "No linked requirement: this test is an orphan (F-TRA-06).",
+    "origin": "Origin"
+  },
+  "linkedTests": {
+    "title": "Linked tests",
+    "empty": "No test verifies this requirement.",
+    "criteria": "criteria {{list}}"
+  },
+  "generate": {
+    "button": "Generate a BDD test",
+    "done": "BDD test generated: {{keys}}"
+  },
+  "featureImport": {
+    "title": "Import .feature files",
+    "help": "One BDD test per scenario (F-AUT-05). A scenario already imported (same file, same name) is updated. .feature files or a .zip archive.",
+    "files": "Files",
+    "framework": "Framework",
+    "submit": "Import",
+    "done": "{{created}} created, {{updated}} updated",
+    "fileErrors": "Invalid files"
+  },
+  "discovery": {
+    "title": "Import a discovery report",
+    "help": "JSON produced by the execution server or a build plugin (F-AUT-08): { repositoryUrl, branch, tests: [{ technique, framework, path, testIdentifier, tags, requirements }] }.",
+    "file": "JSON report",
+    "submit": "Import",
+    "invalidJson": "The file is not valid JSON.",
+    "done": "{{created}} created, {{updated}} updated, {{disappeared}} missing"
+  },
+  "references": {
+    "title": "Reference data",
+    "frameworks": "Frameworks per technique (F-AUT-01)",
+    "add": "Add",
+    "save": "Save",
+    "saved": "List saved"
   }
 }

@@ -83,7 +83,8 @@
     "chooseProject": "Choisissez un projet pour gérer ses membres.",
     "emailInvalid": "Adresse e-mail invalide",
     "loginInvalid": "2 à 32 caractères parmi a-z, 0-9, . _ -",
-    "checklists": "DoR / DoD"
+    "checklists": "DoR / DoD",
+    "references": "Référentiels"
   },
   "comingSoon": {
     "title": "{{screen}}",
@@ -367,5 +368,233 @@
     "externalRef": "Référence externe",
     "criteria": "Critères",
     "version": "Version"
+  },
+  "testKind": {
+    "MANUAL": "Manuel",
+    "EXPLORATORY": "Exploratoire",
+    "AUTOMATED": "Automatisé"
+  },
+  "testStatus": {
+    "DRAFT": "Brouillon",
+    "READY": "Prêt",
+    "NEEDS_UPDATE": "À mettre à jour",
+    "OBSOLETE": "Obsolète"
+  },
+  "technique": {
+    "BDD": "BDD (Gherkin)",
+    "UNIT": "Unitaire",
+    "UI": "Interface (UI)",
+    "API": "API",
+    "KEYWORD": "Mots-clés",
+    "DATA_DRIVEN": "Piloté par les données",
+    "PERFORMANCE": "Performance",
+    "CONTRACT": "Contrat"
+  },
+  "techniqueHint": {
+    "BDD": "Chemin du .feature + nom du scénario ; la source Gherkin est stockée et versionnée dans TraceAgile.",
+    "UNIT": "classe#méthode ou module::fonction",
+    "UI": "fichier + titre du test",
+    "API": "collection ou fichier + nom",
+    "KEYWORD": "suite + nom du test",
+    "DATA_DRIVEN": "identifiant + jeu de données (une exécution par ligne)",
+    "PERFORMANCE": "scénario",
+    "CONTRACT": "contrat consommateur / fournisseur"
+  },
+  "linkType": {
+    "VERIFIES": "Vérifie",
+    "PARTIALLY_VERIFIES": "Vérifie partiellement",
+    "RELATES_TO": "En relation"
+  },
+  "linkOrigin": {
+    "MANUAL": "saisi",
+    "GHERKIN_TAG": "tag Gherkin",
+    "GENERATED": "généré",
+    "DISCOVERY": "découverte"
+  },
+  "tests": {
+    "title": "Référentiel de tests",
+    "byFolder": "Par dossier",
+    "byFeature": "Par feature",
+    "list": "Liste",
+    "new": "Nouveau test",
+    "importFeature": "Importer .feature",
+    "exportFeature": "Exporter .feature",
+    "discovery": "Rapport de découverte",
+    "search": "Rechercher (clé, titre)",
+    "filterKind": "Nature",
+    "filterTechnique": "Technique",
+    "filterStatus": "Statut",
+    "filterTag": "Tag",
+    "filterRequirement": "Exigence (clé)",
+    "orphans": "Orphelins",
+    "candidates": "Candidats à l'automatisation",
+    "resetFilters": "Effacer les filtres",
+    "empty": "Aucun test ne correspond.",
+    "emptyRepository": "Aucun test. Créez-en un, importez des .feature ou un rapport de découverte.",
+    "unclassified": "(non classé)",
+    "columns": {
+      "key": "Clé",
+      "title": "Titre",
+      "kind": "Nature",
+      "technique": "Technique",
+      "status": "Statut",
+      "priority": "Priorité",
+      "version": "Version",
+      "duration": "Durée"
+    },
+    "total": "{{count}} test(s)",
+    "openFull": "Ouvrir en pleine page",
+    "missing": "Absent du dépôt",
+    "candidate": "Candidat"
+  },
+  "test": {
+    "kind": "Nature",
+    "title": "Titre",
+    "technique": "Technique",
+    "framework": "Framework",
+    "folder": "Dossier",
+    "folderHint": "Chemin séparé par « / », ex. Panier/Paiement",
+    "requirement": "Exigence vérifiée",
+    "create": "Créer le test",
+    "created": "{{key}} créé",
+    "saved": "Test enregistré",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "objective": "Objectif",
+    "description": "Description",
+    "priority": "Priorité",
+    "tags": "Tags",
+    "duration": "Durée estimée (min)",
+    "automationCandidate": "Candidat à l'automatisation",
+    "automationJustification": "Justification",
+    "tabs": {
+      "definition": "Définition",
+      "requirements": "Exigences liées",
+      "executions": "Exécutions",
+      "versions": "Versions",
+      "history": "Historique"
+    },
+    "laterLot": "Disponible au lot {{lot}}.",
+    "changeStatus": "Changer le statut",
+    "statusChanged": "{{key}} : {{status}}",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer définitivement {{key}} ?",
+    "deleted": "{{key}} supprimé",
+    "version": "v{{number}}",
+    "versionBumped": "Modification significative : version {{number}} (F-AUT-10)",
+    "warnings": "Avertissements",
+    "notFound": "Test introuvable.",
+    "readOnly": "Lecture seule : vos droits sur ce projet ne permettent pas de modifier ce test."
+  },
+  "steps": {
+    "title": "Pas du test",
+    "action": "Action",
+    "expected": "Résultat attendu",
+    "data": "Données",
+    "add": "Ajouter un pas",
+    "duplicate": "Dupliquer",
+    "remove": "Supprimer",
+    "up": "Monter",
+    "down": "Descendre",
+    "empty": "Aucun pas. Un test manuel prêt comporte au moins un pas.",
+    "variables": "Variables détectées",
+    "variablesHint": "Utilisez ${nom} dans les pas ; chaque ligne du jeu de données fournit une valeur par variable.",
+    "dataSet": "Jeu de données"
+  },
+  "grid": {
+    "addRow": "Ajouter une ligne",
+    "addColumn": "Ajouter une colonne",
+    "column": "Nom de colonne",
+    "removeRow": "Supprimer la ligne",
+    "removeColumn": "Supprimer la colonne",
+    "empty": "Aucune ligne."
+  },
+  "charter": {
+    "mission": "Mission",
+    "explore": "Explorer",
+    "with": "avec",
+    "toDiscover": "pour découvrir",
+    "preview": "Aperçu",
+    "timebox": "Durée cible",
+    "areas": "Zones fonctionnelles",
+    "heuristics": "Heuristiques",
+    "heuristicsHint": "Suggestions : SFDIPOT, FEW HICCUPPS, CRUD, Goldilocks, tours de Whittaker",
+    "setupNotes": "Notes de préparation",
+    "targetedRisk": "Risque visé",
+    "minutes": "{{count}} min"
+  },
+  "automation": {
+    "identification": "Identification",
+    "language": "Langage",
+    "repositoryUrl": "Dépôt Git",
+    "branch": "Branche",
+    "path": "Chemin",
+    "testIdentifier": "Identifiant du test",
+    "executionTags": "Tags d'exécution",
+    "executionTagsHint": "ex. smoke, regression, nightly (sélection en campagne, F-AUT-02)",
+    "environment": "Prérequis d'environnement",
+    "environmentHint": "Paires clé / valeur transmises au serveur d'exécution (F-AUT-03)",
+    "key": "Clé",
+    "value": "Valeur",
+    "addPair": "Ajouter un prérequis",
+    "gherkin": "Source Gherkin",
+    "gherkinHint": "Tags @REQ-12 / @AC-12-3 : liens de traçabilité créés à l'enregistrement (F-AUT-06). Ctrl+Espace : étapes déjà utilisées.",
+    "dataSet": "Jeu de données (une exécution par ligne)",
+    "parameters": "Paramètres (JSON)",
+    "parametersInvalid": "JSON invalide",
+    "browsers": "Navigateurs",
+    "resolution": "Résolution",
+    "baseUrl": "URL de base",
+    "authRequired": "Authentification requise",
+    "expectedMetrics": "Métriques attendues (liées aux ENF)",
+    "p95Ms": "p95 (ms)",
+    "throughputRps": "Débit (req/s)",
+    "errorRatePct": "Taux d'erreur (%)",
+    "keywords": "Mots-clés utilisés (lecture seule)",
+    "missing": "Ce test n'apparaît plus dans le dernier rapport de découverte du dépôt (F-AUT-08)."
+  },
+  "links": {
+    "title": "Exigences vérifiées",
+    "requirement": "Exigence",
+    "type": "Type de lien",
+    "criteria": "Critères vérifiés",
+    "add": "Ajouter une exigence",
+    "save": "Enregistrer les liens",
+    "saved": "Liens enregistrés",
+    "empty": "Aucune exigence liée : ce test est orphelin (F-TRA-06).",
+    "origin": "Origine"
+  },
+  "linkedTests": {
+    "title": "Tests liés",
+    "empty": "Aucun test ne vérifie cette exigence.",
+    "criteria": "critères {{list}}"
+  },
+  "generate": {
+    "button": "Générer un test BDD",
+    "done": "Test BDD généré : {{keys}}"
+  },
+  "featureImport": {
+    "title": "Importer des fichiers .feature",
+    "help": "Un test BDD par scénario (F-AUT-05). Un scénario déjà importé (même fichier, même nom) est mis à jour. Fichiers .feature ou archive .zip.",
+    "files": "Fichiers",
+    "framework": "Framework",
+    "submit": "Importer",
+    "done": "{{created}} créé(s), {{updated}} mis à jour",
+    "fileErrors": "Fichiers invalides"
+  },
+  "discovery": {
+    "title": "Importer un rapport de découverte",
+    "help": "JSON produit par le serveur d'exécution ou un plugin de build (F-AUT-08) : { repositoryUrl, branch, tests: [{ technique, framework, path, testIdentifier, tags, requirements }] }.",
+    "file": "Rapport JSON",
+    "submit": "Importer",
+    "invalidJson": "Le fichier n'est pas un JSON valide.",
+    "done": "{{created}} créé(s), {{updated}} mis à jour, {{disappeared}} disparu(s)"
+  },
+  "references": {
+    "title": "Référentiels",
+    "frameworks": "Frameworks par technique (F-AUT-01)",
+    "add": "Ajouter",
+    "save": "Enregistrer",
+    "saved": "Liste enregistrée"
   }
 }

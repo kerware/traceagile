@@ -1,20 +1,27 @@
-package com.traceagile.application.requirement;
+package com.traceagile.application.traceability;
 
 import com.traceagile.domain.requirement.Requirement;
 import com.traceagile.domain.requirement.VerificationFacts;
 import java.util.Optional;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Lot 1 : les tests (lot 2-3) et les anomalies (lot 5) n'existent pas encore ; les items de DoR /
- * DoD qui en dépendent sont « non évalués ». Remplacé par une implémentation réelle au lot 3.
+ * F-REQ-19 faits de DoR / DoD. Lot 2 : « au moins un test lié » est évalué ; les résultats
+ * d'exécution (lot 5) et les anomalies (lot 5) restent « non évalués ».
  */
 @Component
-public class UnavailableVerificationFacts implements VerificationFacts {
+public class TraceVerificationFacts implements VerificationFacts {
+
+    private final TraceLinkService links;
+
+    public TraceVerificationFacts(@Lazy TraceLinkService links) {
+        this.links = links;
+    }
 
     @Override
     public Optional<Boolean> hasLinkedTest(Requirement requirement) {
-        return Optional.empty();
+        return Optional.of(links.hasCoveringTest(requirement));
     }
 
     @Override

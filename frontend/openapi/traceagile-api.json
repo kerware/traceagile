@@ -13,6 +13,132 @@
     "bearerAuth" : [ ]
   } ],
   "paths" : {
+    "/api/v1/reference/frameworks/{technique}" : {
+      "put" : {
+        "tags" : [ "Administration" ],
+        "operationId" : "replace",
+        "parameters" : [ {
+          "name" : "technique",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FrameworkResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/{key}/requirements" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "requirements",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RequirementLinkResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "replaceRequirements",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/LinkRequest"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RequirementLinkResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/invest" : {
       "put" : {
         "tags" : [ "Exigences" ],
@@ -156,7 +282,7 @@
     "/api/v1/projects/{projectKey}/checklists/{kind}" : {
       "put" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "replace",
+        "operationId" : "replace_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -424,10 +550,310 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/test-cases" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "list_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "kind",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "technique",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "tag",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "requirement",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "orphan",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "automationCandidate",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "folder",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Zero-based page index (0..N)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "The size of the page to be returned",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 50,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseTestCaseSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "create_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateTestCaseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TestCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/{key}/status" : {
+      "post" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "changeStatus",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TestStatusRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TestCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/import-feature" : {
+      "post" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "importFeatures",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "framework",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "files" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string",
+                      "format" : "binary"
+                    }
+                  }
+                },
+                "required" : [ "files" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FeatureImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/discovery" : {
+      "post" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "discovery",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DiscoveryReport"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DiscoveryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -544,7 +970,7 @@
       },
       "post" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "create_2",
+        "operationId" : "create_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -656,7 +1082,7 @@
     "/api/v1/projects/{projectKey}/requirements/{key}/status" : {
       "post" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "changeStatus",
+        "operationId" : "changeStatus_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -775,7 +1201,7 @@
     "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "list_3",
+        "operationId" : "list_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -884,6 +1310,43 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/acceptance-criteria/{id}/generate-test" : {
+      "post" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "generateTest",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TestCaseDetail"
+                  }
                 }
               }
             }
@@ -1069,10 +1532,120 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/test-cases/{key}" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "get_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TestCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "update_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TestCaseFieldsRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TestCaseFieldsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TestCaseDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_1",
+        "operationId" : "get_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1103,7 +1676,7 @@
       },
       "delete" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1127,7 +1700,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_1",
+        "operationId" : "update_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1182,7 +1755,7 @@
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}" : {
       "delete" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "delete_1",
+        "operationId" : "delete_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1207,7 +1780,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1260,10 +1833,31 @@
         }
       }
     },
-    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}" : {
+    "/api/v1/reference/frameworks" : {
       "get" : {
-        "tags" : [ "Exigences" ],
-        "operationId" : "version",
+        "tags" : [ "Administration" ],
+        "operationId" : "list_5",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FrameworkResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/{key}/versions" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "versions_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1278,14 +1872,6 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "name" : "number",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
         } ],
         "responses" : {
           "200" : {
@@ -1293,7 +1879,10 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VersionResponse"
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TestVersionResponse"
+                  }
                 }
               }
             }
@@ -1301,9 +1890,9 @@
         }
       }
     },
-    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{from}/diff/{to}" : {
+    "/api/v1/projects/{projectKey}/test-cases/{key}/versions/{from}/diff/{to}" : {
       "get" : {
-        "tags" : [ "Exigences" ],
+        "tags" : [ "Tests" ],
         "operationId" : "diff",
         "parameters" : [ {
           "name" : "projectKey",
@@ -1353,10 +1942,277 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/test-cases/{key}/history" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "history",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Zero-based page index (0..N)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "The size of the page to be returned",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 50,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseAuditEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/tree" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "tree",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "groupBy",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "folder"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TestCaseGroup"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-cases/export-feature" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "exportFeatures",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "keys",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/zip" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "version",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "number",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VersionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{from}/diff/{to}" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "diff_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "from",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "to",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FieldChangeResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/test-cases" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "linkedTests",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LinkedTestResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/history" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "history",
+        "operationId" : "history_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1453,7 +2309,7 @@
     "/api/v1/projects/{projectKey}/requirements/tree" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "tree",
+        "operationId" : "tree_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1567,10 +2423,46 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/gherkin/steps" : {
+      "get" : {
+        "tags" : [ "Tests" ],
+        "operationId" : "steps",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/StepUsageResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_2",
+        "operationId" : "get_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1596,7 +2488,7 @@
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "get_3",
+        "operationId" : "get_4",
         "parameters" : [ {
           "name" : "key",
           "in" : "path",
@@ -1640,6 +2532,79 @@
   },
   "components" : {
     "schemas" : {
+      "FrameworkResponse" : {
+        "type" : "object",
+        "properties" : {
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "name", "position", "technique" ]
+      },
+      "LinkRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requirementKey" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "criterionPositions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        },
+        "required" : [ "linkType", "requirementKey" ]
+      },
+      "RequirementLinkResponse" : {
+        "type" : "object",
+        "properties" : {
+          "requirementKey" : {
+            "type" : "string"
+          },
+          "requirementTitle" : {
+            "type" : "string"
+          },
+          "requirementType" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "requirementStatus" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "GHERKIN_TAG", "GENERATED", "DISCOVERY" ]
+          },
+          "criterionPositions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        },
+        "required" : [ "criterionPositions", "linkType", "origin", "requirementKey", "requirementStatus", "requirementTitle", "requirementType" ]
+      },
       "InvestDto" : {
         "type" : "object",
         "properties" : {
@@ -2143,6 +3108,600 @@
         },
         "required" : [ "archived", "createdAt", "id", "key", "memberCount", "name", "version" ]
       },
+      "CreateTestCaseRequest" : {
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/TestCaseFieldsRequest"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "kind" : {
+              "type" : "string",
+              "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+            },
+            "title" : {
+              "type" : "string",
+              "maxLength" : 200,
+              "minLength" : 0
+            },
+            "technique" : {
+              "type" : "string",
+              "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+            },
+            "framework" : {
+              "type" : "string",
+              "maxLength" : 60,
+              "minLength" : 0
+            },
+            "links" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/LinkRequest"
+              }
+            },
+            "steps" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/StepRequest"
+              }
+            }
+          }
+        } ],
+        "required" : [ "kind", "title" ]
+      },
+      "StepRequest" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "expectedResult" : {
+            "type" : "string"
+          },
+          "testData" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "action" ]
+      },
+      "TestCaseFieldsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "objective" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 50,
+              "minLength" : 0
+            }
+          },
+          "estimatedDurationMin" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 10000,
+            "minimum" : 1
+          },
+          "folder" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          },
+          "automationCandidate" : {
+            "type" : "boolean"
+          },
+          "automationJustification" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "steps" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StepRequest"
+            }
+          },
+          "manualDataSet" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "string"
+              }
+            }
+          },
+          "explore" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "with" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "toDiscover" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "areas" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "heuristics" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "timeboxMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "setupNotes" : {
+            "type" : "string"
+          },
+          "targetedRisk" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "framework" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "language" : {
+            "type" : "string",
+            "maxLength" : 40,
+            "minLength" : 0
+          },
+          "repositoryUrl" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "branch" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "path" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "testIdentifier" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "gherkinSource" : {
+            "type" : "string"
+          },
+          "dataSet" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "additionalProperties" : { }
+            }
+          },
+          "parameters" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "executionTags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "environmentRequirements" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "AutomationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "framework" : {
+            "type" : "string"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "repositoryUrl" : {
+            "type" : "string"
+          },
+          "branch" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          },
+          "testIdentifier" : {
+            "type" : "string"
+          },
+          "featureName" : {
+            "type" : "string"
+          },
+          "gherkinSource" : {
+            "type" : "string"
+          },
+          "dataSet" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "additionalProperties" : { }
+            }
+          },
+          "parameters" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "executionTags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "environmentRequirements" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "keywords" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "missingInRepository" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "dataSet", "environmentRequirements", "executionTags", "framework", "keywords", "missingInRepository", "parameters", "technique" ]
+      },
+      "CharterResponse" : {
+        "type" : "object",
+        "properties" : {
+          "explore" : {
+            "type" : "string"
+          },
+          "with" : {
+            "type" : "string"
+          },
+          "toDiscover" : {
+            "type" : "string"
+          },
+          "missionSentence" : {
+            "type" : "string",
+            "description" : "F-EXP-01"
+          },
+          "areas" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "heuristics" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "timeboxMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "setupNotes" : {
+            "type" : "string"
+          },
+          "targetedRisk" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "areas", "heuristics", "missionSentence", "timeboxMin" ]
+      },
+      "StepResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "action" : {
+            "type" : "string"
+          },
+          "expectedResult" : {
+            "type" : "string"
+          },
+          "testData" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "action", "id", "position" ]
+      },
+      "TestCaseDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "objective" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+          },
+          "allowedTransitions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+            }
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "estimatedDurationMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "folder" : {
+            "type" : "string"
+          },
+          "currentVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "automationCandidate" : {
+            "type" : "boolean"
+          },
+          "automationJustification" : {
+            "type" : "string"
+          },
+          "steps" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StepResponse"
+            }
+          },
+          "manualDataSet" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "string"
+              }
+            }
+          },
+          "variables" : {
+            "type" : "array",
+            "description" : "F-MAN-01 variables ${nom} des pas",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "charter" : {
+            "$ref" : "#/components/schemas/CharterResponse"
+          },
+          "automation" : {
+            "$ref" : "#/components/schemas/AutomationResponse"
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementLinkResponse"
+            }
+          },
+          "warnings" : {
+            "type" : "array",
+            "description" : "F-AUT-06 tags Gherkin inconnus…",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "allowedTransitions", "automationCandidate", "createdAt", "currentVersion", "id", "key", "kind", "manualDataSet", "priority", "requirements", "status", "steps", "tags", "title", "updatedAt", "variables", "version", "warnings" ]
+      },
+      "TestStatusRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "FeatureImportResponse" : {
+        "type" : "object",
+        "properties" : {
+          "created" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "updated" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "warnings" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "created", "updated", "warnings" ]
+      },
+      "DiscoveredTest" : {
+        "type" : "object",
+        "properties" : {
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "framework" : {
+            "type" : "string"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          },
+          "testIdentifier" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "keywords" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "DiscoveryReport" : {
+        "type" : "object",
+        "properties" : {
+          "repositoryUrl" : {
+            "type" : "string"
+          },
+          "branch" : {
+            "type" : "string"
+          },
+          "tests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DiscoveredTest"
+            }
+          }
+        }
+      },
+      "DiscoveryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "created" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "updated" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "disappeared" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "warnings" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "created", "disappeared", "updated", "warnings" ]
+      },
       "CreateCriterionRequest" : {
         "type" : "object",
         "properties" : {
@@ -2623,6 +4182,187 @@
         },
         "required" : [ "content", "page", "size", "totalElements" ]
       },
+      "PageResponseTestCaseSummary" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestCaseSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "TestCaseSummary" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "framework" : {
+            "type" : "string"
+          },
+          "folder" : {
+            "type" : "string"
+          },
+          "featureName" : {
+            "type" : "string"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "estimatedDurationMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "currentVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "automationCandidate" : {
+            "type" : "boolean"
+          },
+          "missingInRepository" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "automationCandidate", "currentVersion", "key", "kind", "missingInRepository", "priority", "status", "tags", "title" ]
+      },
+      "TestVersionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "versionNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          },
+          "snapshot" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "createdAt", "snapshot", "versionNumber" ]
+      },
+      "FieldChangeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "before" : {
+            "type" : "string"
+          },
+          "after" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "field" ]
+      },
+      "AuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actor" : {
+            "type" : "string"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "changes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FieldChangeResponse"
+            }
+          }
+        },
+        "required" : [ "action", "changes", "timestamp" ]
+      },
+      "PageResponseAuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditEventResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "TestCaseGroup" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "Dossier ou fonctionnalité ; vide = non classé"
+          },
+          "tests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestCaseSummary"
+            }
+          }
+        },
+        "required" : [ "name", "tests" ]
+      },
       "PageResponseRequirementSummary" : {
         "type" : "object",
         "properties" : {
@@ -2706,66 +4446,44 @@
         },
         "required" : [ "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "tags", "title", "type", "version" ]
       },
-      "FieldChangeResponse" : {
+      "LinkedTestResponse" : {
         "type" : "object",
         "properties" : {
-          "field" : {
+          "key" : {
             "type" : "string"
           },
-          "before" : {
-            "type" : "string"
-          },
-          "after" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "field" ]
-      },
-      "AuditEventResponse" : {
-        "type" : "object",
-        "properties" : {
-          "action" : {
-            "type" : "string"
-          },
-          "actor" : {
-            "type" : "string"
-          },
-          "timestamp" : {
+          "kind" : {
             "type" : "string",
-            "format" : "date-time"
+            "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
           },
-          "changes" : {
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+          },
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "GHERKIN_TAG", "GENERATED", "DISCOVERY" ]
+          },
+          "criterionPositions" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/FieldChangeResponse"
+              "type" : "integer",
+              "format" : "int32"
             }
           }
         },
-        "required" : [ "action", "changes", "timestamp" ]
-      },
-      "PageResponseAuditEventResponse" : {
-        "type" : "object",
-        "properties" : {
-          "content" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/AuditEventResponse"
-            }
-          },
-          "page" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "size" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "totalElements" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        },
-        "required" : [ "content", "page", "size", "totalElements" ]
+        "required" : [ "criterionPositions", "key", "kind", "linkType", "origin", "status", "title" ]
       },
       "RequirementTreeNode" : {
         "type" : "object",
@@ -2817,6 +4535,19 @@
           }
         },
         "required" : [ "children", "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "title", "type" ]
+      },
+      "StepUsageResponse" : {
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : "string"
+          },
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "count", "text" ]
       },
       "ProjectChecklistsResponse" : {
         "type" : "object",

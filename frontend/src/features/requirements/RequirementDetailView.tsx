@@ -12,6 +12,7 @@ import { TypeBadge } from './Badges';
 import { CriteriaPanel } from './CriteriaPanel';
 import { DetailTab } from './DetailTab';
 import { HistoryPanel } from './HistoryPanel';
+import { LinkedTestsPanel } from './LinkedTestsPanel';
 import { MoveModal } from './MoveModal';
 import { StatusMenu } from './StatusMenu';
 import { VersionsPanel } from './VersionsPanel';
@@ -19,7 +20,6 @@ import { VersionsPanel } from './VersionsPanel';
 /** Onglets des lots suivants (§13.2) : emplacement réservé avec le lot de livraison. */
 const LATER_TABS = [
   { value: 'exampleMapping', lot: 9 },
-  { value: 'tests', lot: 3 },
   { value: 'executions', lot: 5 },
   { value: 'defects', lot: 5 },
   { value: 'comments', lot: 9 },
@@ -114,6 +114,9 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
           <Tabs.Tab value="criteria" data-testid="tab-criteria">
             {t('requirement.tabs.criteria')} ({requirement.criteria.length})
           </Tabs.Tab>
+          <Tabs.Tab value="tests" data-testid="tab-tests">
+            {t('requirement.tabs.tests')}
+          </Tabs.Tab>
           {LATER_TABS.map((tab) => (
             <Tabs.Tab key={tab.value} value={tab.value} c="dimmed">
               {t(`requirement.tabs.${tab.value}`)}
@@ -127,6 +130,9 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
         </Tabs.Panel>
         <Tabs.Panel value="criteria" pt="md">
           <CriteriaPanel project={project} requirement={requirement} canContribute={canContribute} />
+        </Tabs.Panel>
+        <Tabs.Panel value="tests" pt="md">
+          <LinkedTestsPanel project={project} requirementKey={requirement.key} />
         </Tabs.Panel>
         {LATER_TABS.map((tab) => (
           <Tabs.Panel key={tab.value} value={tab.value} pt="md">
