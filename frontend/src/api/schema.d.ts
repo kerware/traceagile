@@ -4,6 +4,70 @@
  */
 
 export interface paths {
+    "/api/v1/projects/{projectKey}/requirements/{key}/invest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["invest"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/checklists/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["check"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["reorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/checklists/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{key}/members": {
         parameters: {
             query?: never;
@@ -46,6 +110,134 @@ export interface paths {
         get: operations["list_1"];
         put?: never;
         post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
+        put?: never;
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["versions"];
+        put?: never;
+        post: operations["freeze"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["changeStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["duplicate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_3"];
+        put?: never;
+        post: operations["add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["importCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gherkin/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["validate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -116,7 +308,7 @@ export interface paths {
         patch: operations["update"];
         trace?: never;
     };
-    "/api/v1/projects/{key}": {
+    "/api/v1/projects/{projectKey}/requirements/{key}": {
         parameters: {
             query?: never;
             header?: never;
@@ -124,6 +316,150 @@ export interface paths {
             cookie?: never;
         };
         get: operations["get_1"];
+        put?: never;
+        post?: never;
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch: operations["update_1"];
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/acceptance-criteria/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch: operations["update_2"];
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["version"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{from}/diff/{to}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["diff"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/checklists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["checklists"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["tree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exportCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/checklists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -152,6 +488,134 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        InvestDto: {
+            independent: boolean;
+            negotiable: boolean;
+            valuable: boolean;
+            estimable: boolean;
+            small: boolean;
+            testable: boolean;
+        };
+        CriterionResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            position: number;
+            /** @enum {string} */
+            format: "TEXT" | "GHERKIN";
+            content: string;
+            /** @enum {string} */
+            status: "TO_VERIFY" | "VERIFIED" | "FAILED";
+            /** Format: int64 */
+            version: number;
+        };
+        PlanguageResponse: {
+            scale?: string;
+            measurementMethod?: string;
+            minimumThreshold?: string;
+            target?: string;
+            unit?: string;
+        };
+        RequirementDetail: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** @enum {string} */
+            type: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            title: string;
+            description?: string;
+            userStory: components["schemas"]["UserStoryResponse"];
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** Format: int32 */
+            businessValue?: number;
+            /** Format: int32 */
+            storyPoints?: number;
+            /** @description F-REQ-07 alerte « Story à découper » (13 points ou plus) */
+            needsSplitting: boolean;
+            /** @enum {string} */
+            status: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+            /** @description §3.2 statuts accessibles depuis le statut courant */
+            allowedTransitions: ("DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE")[];
+            /** @enum {string} */
+            riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+            /** @enum {string} */
+            category?: "PERFORMANCE" | "SECURITY" | "USABILITY" | "RELIABILITY" | "COMPATIBILITY" | "MAINTAINABILITY" | "PORTABILITY" | "ACCESSIBILITY";
+            planguage: components["schemas"]["PlanguageResponse"];
+            transverse: boolean;
+            tags: string[];
+            externalRef?: string;
+            /** Format: int32 */
+            currentVersion: number;
+            parent?: components["schemas"]["RequirementRef"];
+            children: components["schemas"]["RequirementRef"][];
+            invest: components["schemas"]["InvestDto"];
+            criteria: components["schemas"]["CriterionResponse"][];
+            /** @description F-REQ-17 ENF transverses applicables */
+            applicableTransverseNfrs: components["schemas"]["RequirementRef"][];
+            /** Format: int64 */
+            version: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            updatedBy?: string;
+        };
+        RequirementRef: {
+            key: string;
+            /** @enum {string} */
+            type: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+        };
+        UserStoryResponse: {
+            asA?: string;
+            iWant?: string;
+            soThat?: string;
+            /** @description F-REQ-05 phrase complète */
+            sentence: string;
+        };
+        CheckRequest: {
+            checked?: boolean;
+        };
+        ChecklistResultResponse: {
+            /** Format: uuid */
+            id: string;
+            label: string;
+            /** @enum {string} */
+            rule?: "HAS_ACCEPTANCE_CRITERION" | "ESTIMATED" | "HAS_LINKED_TEST" | "ALL_LINKED_TESTS_PASSED" | "NO_BLOCKING_DEFECT_OPEN";
+            automatic: boolean;
+            /** @enum {string} */
+            outcome: "SATISFIED" | "UNSATISFIED" | "NOT_EVALUATED";
+        };
+        RequirementChecklistsResponse: {
+            dor: components["schemas"]["ChecklistResultResponse"][];
+            dod: components["schemas"]["ChecklistResultResponse"][];
+        };
+        ReorderCriteriaRequest: {
+            ids: string[];
+        };
+        ChecklistItemRequest: {
+            /** Format: uuid */
+            id?: string;
+            label: string;
+            /** @enum {string} */
+            rule?: "HAS_ACCEPTANCE_CRITERION" | "ESTIMATED" | "HAS_LINKED_TEST" | "ALL_LINKED_TESTS_PASSED" | "NO_BLOCKING_DEFECT_OPEN";
+        };
+        ChecklistItemResponse: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "DOR" | "DOD";
+            /** Format: int32 */
+            position: number;
+            label: string;
+            /** @enum {string} */
+            rule?: "HAS_ACCEPTANCE_CRITERION" | "ESTIMATED" | "HAS_LINKED_TEST" | "ALL_LINKED_TESTS_PASSED" | "NO_BLOCKING_DEFECT_OPEN";
+            automatic: boolean;
+        };
         MemberRequest: {
             login: string;
             /** @enum {string} */
@@ -211,6 +675,86 @@ export interface components {
             createdAt: string;
             createdBy?: string;
         };
+        CreateCriterionRequest: {
+            /** @enum {string} */
+            format: "TEXT" | "GHERKIN";
+            content: string;
+        };
+        CreateRequirementRequest: {
+            /** @enum {string} */
+            type: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            title: string;
+            parentKey?: string;
+            description?: string;
+            asA?: string;
+            iWant?: string;
+            soThat?: string;
+            /** @enum {string} */
+            priority?: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** Format: int32 */
+            businessValue?: number;
+            /** Format: int32 */
+            storyPoints?: number;
+            /** @enum {string} */
+            riskLevel?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+            /** @enum {string} */
+            category?: "PERFORMANCE" | "SECURITY" | "USABILITY" | "RELIABILITY" | "COMPATIBILITY" | "MAINTAINABILITY" | "PORTABILITY" | "ACCESSIBILITY";
+            scale?: string;
+            measurementMethod?: string;
+            minimumThreshold?: string;
+            target?: string;
+            unit?: string;
+            transverse?: boolean;
+            tags?: string[];
+            externalRef?: string;
+            criteria?: components["schemas"]["CreateCriterionRequest"][];
+        };
+        CreateVersionRequest: {
+            comment?: string;
+        };
+        VersionResponse: {
+            /** Format: int32 */
+            versionNumber: number;
+            changeComment?: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            snapshot: {
+                [key: string]: string;
+            };
+        };
+        StatusChangeRequest: {
+            /** @enum {string} */
+            status: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+            /** @description F-REQ-20 confirme le passage malgré des items manuels non cochés */
+            acknowledgeUnmet?: boolean;
+        };
+        MoveRequest: {
+            /** @description Nouveau parent ; absent ou null : racine */
+            parentKey?: string;
+            /** @description Exigence devant laquelle insérer (suivante) */
+            beforeKey?: string;
+            /** @description Exigence après laquelle insérer (précédente) */
+            afterKey?: string;
+        };
+        ImportResponse: {
+            created: string[];
+        };
+        GherkinValidateRequest: {
+            source: string;
+        };
+        GherkinErrorResponse: {
+            /** Format: int32 */
+            line: number;
+            /** Format: int32 */
+            column: number;
+            message: string;
+        };
+        GherkinValidationResponse: {
+            valid: boolean;
+            language: string;
+            errors: components["schemas"]["GherkinErrorResponse"][];
+        };
         MeResponse: {
             /** Format: uuid */
             id: string;
@@ -245,6 +789,38 @@ export interface components {
             active?: boolean;
             systemAdmin?: boolean;
         };
+        RequirementFieldsRequest: {
+            /** @enum {string|null} */
+            type?: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER" | null;
+            title?: string | null;
+            description?: string | null;
+            asA?: string | null;
+            iWant?: string | null;
+            soThat?: string | null;
+            /** @enum {string|null} */
+            priority?: "MUST" | "SHOULD" | "COULD" | "WONT" | null;
+            /** Format: int32 */
+            businessValue?: number | null;
+            /** Format: int32 */
+            storyPoints?: number | null;
+            /** @enum {string|null} */
+            riskLevel?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | null;
+            /** @enum {string|null} */
+            category?: "PERFORMANCE" | "SECURITY" | "USABILITY" | "RELIABILITY" | "COMPATIBILITY" | "MAINTAINABILITY" | "PORTABILITY" | "ACCESSIBILITY" | null;
+            scale?: string | null;
+            measurementMethod?: string | null;
+            minimumThreshold?: string | null;
+            target?: string | null;
+            unit?: string | null;
+            transverse?: boolean | null;
+            tags?: string[] | null;
+            externalRef?: string | null;
+        };
+        UpdateCriterionRequest: {
+            /** @enum {string} */
+            format?: "TEXT" | "GHERKIN";
+            content?: string;
+        };
         PageResponseUserResponse: {
             content: components["schemas"]["UserResponse"][];
             /** Format: int32 */
@@ -263,6 +839,84 @@ export interface components {
             /** Format: int64 */
             totalElements: number;
         };
+        PageResponseRequirementSummary: {
+            content: components["schemas"]["RequirementSummary"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalElements: number;
+        };
+        RequirementSummary: {
+            key: string;
+            /** @enum {string} */
+            type: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** @enum {string} */
+            riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+            /** Format: int32 */
+            storyPoints?: number;
+            /** Format: int32 */
+            businessValue?: number;
+            tags: string[];
+            parentKey?: string;
+            rank: string;
+            /** Format: int32 */
+            criteriaCount: number;
+            needsSplitting: boolean;
+            /** Format: int64 */
+            version: number;
+        };
+        FieldChangeResponse: {
+            field: string;
+            before?: string;
+            after?: string;
+        };
+        AuditEventResponse: {
+            action: string;
+            actor?: string;
+            /** Format: date-time */
+            timestamp: string;
+            changes: components["schemas"]["FieldChangeResponse"][];
+        };
+        PageResponseAuditEventResponse: {
+            content: components["schemas"]["AuditEventResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalElements: number;
+        };
+        RequirementTreeNode: {
+            key: string;
+            /** @enum {string} */
+            type: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** @enum {string} */
+            riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+            /** Format: int32 */
+            storyPoints?: number;
+            parentKey?: string;
+            rank: string;
+            /** Format: int32 */
+            criteriaCount: number;
+            needsSplitting: boolean;
+            children: components["schemas"]["RequirementTreeNode"][];
+        };
+        ProjectChecklistsResponse: {
+            dor: components["schemas"]["ChecklistItemResponse"][];
+            dod: components["schemas"]["ChecklistItemResponse"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -272,6 +926,115 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    invest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementChecklistsResponse"];
+                };
+            };
+        };
+    };
+    reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderCriteriaRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriterionResponse"][];
+                };
+            };
+        };
+    };
+    replace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                kind: "DOR" | "DOD";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChecklistItemRequest"][];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistItemResponse"][];
+                };
+            };
+        };
+    };
     members: {
         parameters: {
             query?: never;
@@ -422,6 +1185,297 @@ export interface operations {
             };
         };
     };
+    list_2: {
+        parameters: {
+            query?: {
+                type?: ("EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER")[];
+                status?: ("DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE")[];
+                priority?: ("MUST" | "SHOULD" | "COULD" | "WONT")[];
+                risk?: ("LOW" | "MEDIUM" | "HIGH" | "CRITICAL")[];
+                tag?: string;
+                q?: string;
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResponseRequirementSummary"];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRequirementRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    versions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionResponse"][];
+                };
+            };
+        };
+    };
+    freeze: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateVersionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    changeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    duplicate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    list_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriterionResponse"][];
+                };
+            };
+        };
+    };
+    add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCriterionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriterionResponse"];
+                };
+            };
+        };
+    };
+    importCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportResponse"];
+                };
+            };
+        };
+    };
+    validate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GherkinValidateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GherkinValidationResponse"];
+                };
+            };
+        };
+    };
     refresh: {
         parameters: {
             query?: never;
@@ -540,6 +1594,306 @@ export interface operations {
         };
     };
     get_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["RequirementFieldsRequest"];
+                "application/json": components["schemas"]["RequirementFieldsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["UpdateCriterionRequest"];
+                "application/json": components["schemas"]["UpdateCriterionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriterionResponse"];
+                };
+            };
+        };
+    };
+    version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    diff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+                from: number;
+                to: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FieldChangeResponse"][];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (0..N) */
+                page?: number;
+                /** @description The size of the page to be returned */
+                size?: number;
+                /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+                sort?: string[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageResponseAuditEventResponse"];
+                };
+            };
+        };
+    };
+    checklists: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementChecklistsResponse"];
+                };
+            };
+        };
+    };
+    tree: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementTreeNode"][];
+                };
+            };
+        };
+    };
+    exportCsv: {
+        parameters: {
+            query?: {
+                type?: ("EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER")[];
+                status?: ("DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE")[];
+                priority?: ("MUST" | "SHOULD" | "COULD" | "WONT")[];
+                risk?: ("LOW" | "MEDIUM" | "HIGH" | "CRITICAL")[];
+                tag?: string;
+                q?: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectChecklistsResponse"];
+                };
+            };
+        };
+    };
+    get_3: {
         parameters: {
             query?: never;
             header?: never;

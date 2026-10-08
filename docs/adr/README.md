@@ -13,3 +13,6 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0006](0006-format-des-erreurs.md) | Format des erreurs et codes HTTP | 0 |
 | [0007](0007-client-front-genere-depuis-openapi.md) | Client front généré depuis l'OpenAPI exporté par un test | 0 |
 | [0008](0008-versions-ports-et-routes.md) | Versions, ports et routes du front | 0 |
+| [0009](0009-regles-metier-des-exigences.md) | Précisions sur les règles métier des exigences | 1 |
+| [0010](0010-audit-par-instantanes.md) | Audit par instantanés applicatifs plutôt que listener JPA | 1 |
+| [0011](0011-formats-csv-gherkin-recherche.md) | Formats : CSV, Gherkin, recherche et rang | 1 |

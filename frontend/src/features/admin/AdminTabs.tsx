@@ -2,8 +2,8 @@ import { Tabs, Title } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-/** §13.2 /admin/* — onglets de l'administration (lot 0 : utilisateurs, projets et membres). */
-export function AdminTabs({ value }: { value: 'users' | 'projects' }) {
+/** §13.2 /admin/* — onglets de l'administration : utilisateurs, projets et membres, DoR / DoD. */
+export function AdminTabs({ value }: { value: 'users' | 'projects' | 'checklists' }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
@@ -16,6 +16,9 @@ export function AdminTabs({ value }: { value: 'users' | 'projects' }) {
           </Tabs.Tab>
           <Tabs.Tab value="projects" data-testid="admin-tab-projects">
             {t('admin.projects')}
+          </Tabs.Tab>
+          <Tabs.Tab value="checklists" data-testid="admin-tab-checklists">
+            {t('admin.checklists')}
           </Tabs.Tab>
         </Tabs.List>
       </Tabs>

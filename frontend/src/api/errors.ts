@@ -10,6 +10,8 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: string | undefined;
   readonly fieldErrors: Record<string, string>;
+  /** Corps RFC 9457 complet : détails propres au code (unmetItems, gherkinErrors, lineErrors…). */
+  readonly problem: Problem & Record<string, unknown>;
 
   constructor(status: number, problem: Problem | undefined) {
     super(problem?.detail ?? `HTTP ${status}`);
@@ -17,6 +19,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = problem?.code;
     this.fieldErrors = problem?.errors ?? {};
+    this.problem = (problem ?? {}) as Problem & Record<string, unknown>;
   }
 }
 

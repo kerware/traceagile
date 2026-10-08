@@ -20,4 +20,5 @@ docker compose up --build
 ```bash
 cd backend && mvn verify                      # nécessite Docker (Testcontainers)
 cd frontend && npm ci && npm run lint && npm run typecheck && npm test
+cd e2e && npm ci && npx playwright install chromium && npx playwright test   # pile démarrée
 ```

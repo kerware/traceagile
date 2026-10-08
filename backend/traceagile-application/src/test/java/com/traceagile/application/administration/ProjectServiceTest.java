@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
@@ -32,6 +33,8 @@ class ProjectServiceTest {
     ProjectRepository projects;
     @Mock
     UserRepository users;
+    @Mock
+    ApplicationEventPublisher events;
 
     ProjectService service;
 
@@ -40,11 +43,11 @@ class ProjectServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ProjectService(projects, users);
+        service = new ProjectService(projects, users, events);
     }
 
     @Test
-    @DisplayName("§12 POST /projects : création d'un projet")
+    @DisplayName("§12 POST /projects : création d'un projet, qui reçoit sa DoR / DoD par défaut (F-REQ-19)")
     void create() {
         when(projects.existsByKey("SHOP")).thenReturn(false);
         when(projects.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -53,6 +56,7 @@ class ProjectServiceTest {
 
         assertThat(project.getKey()).isEqualTo("SHOP");
         assertThat(project.isArchived()).isFalse();
+        verify(events).publishEvent(new ProjectCreated("SHOP"));
     }
 
     @Test

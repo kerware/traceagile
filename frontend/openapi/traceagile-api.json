@@ -13,6 +13,196 @@
     "bearerAuth" : [ ]
   } ],
   "paths" : {
+    "/api/v1/projects/{projectKey}/requirements/{key}/invest" : {
+      "put" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "invest",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InvestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/checklists/{itemId}" : {
+      "put" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "check",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "itemId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CheckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementChecklistsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria/order" : {
+      "put" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "reorder",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReorderCriteriaRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CriterionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/checklists/{kind}" : {
+      "put" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "replace",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "kind",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "DOR", "DOD" ]
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/ChecklistItemRequest"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ChecklistItemResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{key}/members" : {
       "get" : {
         "tags" : [ "Administration" ],
@@ -234,6 +424,501 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/requirements" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "list_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "priority",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "risk",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "tag",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Zero-based page index (0..N)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "The size of the page to be returned",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 50,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseRequirementSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "create_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateRequirementRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "versions",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/VersionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "freeze",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateVersionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VersionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/status" : {
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "changeStatus",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/move" : {
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "move",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/duplicate" : {
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "duplicate",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "list_3",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CriterionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "add",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateCriterionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CriterionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/import" : {
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "importCsv",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gherkin/validate" : {
+      "post" : {
+        "tags" : [ "Gherkin" ],
+        "operationId" : "validate",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GherkinValidateRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GherkinValidationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/refresh" : {
       "post" : {
         "tags" : [ "Authentification" ],
@@ -384,10 +1069,534 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/requirements/{key}" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "get_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "update_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RequirementFieldsRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RequirementFieldsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/acceptance-criteria/{id}" : {
+      "delete" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "delete_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "update_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCriterionRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCriterionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CriterionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "version",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "number",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VersionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/versions/{from}/diff/{to}" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "diff",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "from",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "to",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FieldChangeResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/history" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "history",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Zero-based page index (0..N)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "The size of the page to be returned",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "default" : 50,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseAuditEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/checklists" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "checklists",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RequirementChecklistsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/tree" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "tree",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RequirementTreeNode"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/export" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "exportCsv",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "priority",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "risk",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "tag",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/csv" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/checklists" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "get_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectChecklistsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "get_1",
+        "operationId" : "get_3",
         "parameters" : [ {
           "name" : "key",
           "in" : "path",
@@ -431,6 +1640,352 @@
   },
   "components" : {
     "schemas" : {
+      "InvestDto" : {
+        "type" : "object",
+        "properties" : {
+          "independent" : {
+            "type" : "boolean"
+          },
+          "negotiable" : {
+            "type" : "boolean"
+          },
+          "valuable" : {
+            "type" : "boolean"
+          },
+          "estimable" : {
+            "type" : "boolean"
+          },
+          "small" : {
+            "type" : "boolean"
+          },
+          "testable" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "estimable", "independent", "negotiable", "small", "testable", "valuable" ]
+      },
+      "CriterionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "format" : {
+            "type" : "string",
+            "enum" : [ "TEXT", "GHERKIN" ]
+          },
+          "content" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "TO_VERIFY", "VERIFIED", "FAILED" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "format", "id", "position", "status", "version" ]
+      },
+      "PlanguageResponse" : {
+        "type" : "object",
+        "properties" : {
+          "scale" : {
+            "type" : "string"
+          },
+          "measurementMethod" : {
+            "type" : "string"
+          },
+          "minimumThreshold" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : "string"
+          },
+          "unit" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RequirementDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "userStory" : {
+            "$ref" : "#/components/schemas/UserStoryResponse"
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "businessValue" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "storyPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "needsSplitting" : {
+            "type" : "boolean",
+            "description" : "F-REQ-07 alerte « Story à découper » (13 points ou plus)"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "allowedTransitions" : {
+            "type" : "array",
+            "description" : "§3.2 statuts accessibles depuis le statut courant",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+            }
+          },
+          "riskLevel" : {
+            "type" : "string",
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          },
+          "category" : {
+            "type" : "string",
+            "enum" : [ "PERFORMANCE", "SECURITY", "USABILITY", "RELIABILITY", "COMPATIBILITY", "MAINTAINABILITY", "PORTABILITY", "ACCESSIBILITY" ]
+          },
+          "planguage" : {
+            "$ref" : "#/components/schemas/PlanguageResponse"
+          },
+          "transverse" : {
+            "type" : "boolean"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "currentVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "parent" : {
+            "$ref" : "#/components/schemas/RequirementRef"
+          },
+          "children" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementRef"
+            }
+          },
+          "invest" : {
+            "$ref" : "#/components/schemas/InvestDto"
+          },
+          "criteria" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CriterionResponse"
+            }
+          },
+          "applicableTransverseNfrs" : {
+            "type" : "array",
+            "description" : "F-REQ-17 ENF transverses applicables",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementRef"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "allowedTransitions", "applicableTransverseNfrs", "children", "createdAt", "criteria", "currentVersion", "id", "invest", "key", "needsSplitting", "planguage", "priority", "riskLevel", "status", "tags", "title", "transverse", "type", "updatedAt", "userStory", "version" ]
+      },
+      "RequirementRef" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          }
+        },
+        "required" : [ "key", "status", "title", "type" ]
+      },
+      "UserStoryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "asA" : {
+            "type" : "string"
+          },
+          "iWant" : {
+            "type" : "string"
+          },
+          "soThat" : {
+            "type" : "string"
+          },
+          "sentence" : {
+            "type" : "string",
+            "description" : "F-REQ-05 phrase complète"
+          }
+        },
+        "required" : [ "sentence" ]
+      },
+      "CheckRequest" : {
+        "type" : "object",
+        "properties" : {
+          "checked" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "ChecklistResultResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "rule" : {
+            "type" : "string",
+            "enum" : [ "HAS_ACCEPTANCE_CRITERION", "ESTIMATED", "HAS_LINKED_TEST", "ALL_LINKED_TESTS_PASSED", "NO_BLOCKING_DEFECT_OPEN" ]
+          },
+          "automatic" : {
+            "type" : "boolean"
+          },
+          "outcome" : {
+            "type" : "string",
+            "enum" : [ "SATISFIED", "UNSATISFIED", "NOT_EVALUATED" ]
+          }
+        },
+        "required" : [ "automatic", "id", "label", "outcome" ]
+      },
+      "RequirementChecklistsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "dor" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChecklistResultResponse"
+            }
+          },
+          "dod" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChecklistResultResponse"
+            }
+          }
+        },
+        "required" : [ "dod", "dor" ]
+      },
+      "ReorderCriteriaRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        },
+        "required" : [ "ids" ]
+      },
+      "ChecklistItemRequest" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "label" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "rule" : {
+            "type" : "string",
+            "enum" : [ "HAS_ACCEPTANCE_CRITERION", "ESTIMATED", "HAS_LINKED_TEST", "ALL_LINKED_TESTS_PASSED", "NO_BLOCKING_DEFECT_OPEN" ]
+          }
+        },
+        "required" : [ "label" ]
+      },
+      "ChecklistItemResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "DOR", "DOD" ]
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "rule" : {
+            "type" : "string",
+            "enum" : [ "HAS_ACCEPTANCE_CRITERION", "ESTIMATED", "HAS_LINKED_TEST", "ALL_LINKED_TESTS_PASSED", "NO_BLOCKING_DEFECT_OPEN" ]
+          },
+          "automatic" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "automatic", "id", "kind", "label", "position" ]
+      },
       "MemberRequest" : {
         "type" : "object",
         "properties" : {
@@ -588,6 +2143,229 @@
         },
         "required" : [ "archived", "createdAt", "id", "key", "memberCount", "name", "version" ]
       },
+      "CreateCriterionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "type" : "string",
+            "enum" : [ "TEXT", "GHERKIN" ]
+          },
+          "content" : {
+            "type" : "string",
+            "maxLength" : 10000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "content", "format" ]
+      },
+      "CreateRequirementRequest" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "title" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "parentKey" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "asA" : {
+            "type" : "string"
+          },
+          "iWant" : {
+            "type" : "string"
+          },
+          "soThat" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "businessValue" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "storyPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "riskLevel" : {
+            "type" : "string",
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          },
+          "category" : {
+            "type" : "string",
+            "enum" : [ "PERFORMANCE", "SECURITY", "USABILITY", "RELIABILITY", "COMPATIBILITY", "MAINTAINABILITY", "PORTABILITY", "ACCESSIBILITY" ]
+          },
+          "scale" : {
+            "type" : "string"
+          },
+          "measurementMethod" : {
+            "type" : "string"
+          },
+          "minimumThreshold" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : "string"
+          },
+          "unit" : {
+            "type" : "string"
+          },
+          "transverse" : {
+            "type" : "boolean"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "criteria" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CreateCriterionRequest"
+            }
+          }
+        },
+        "required" : [ "title", "type" ]
+      },
+      "CreateVersionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "comment" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        }
+      },
+      "VersionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "versionNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "changeComment" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          },
+          "snapshot" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "createdAt", "snapshot", "versionNumber" ]
+      },
+      "StatusChangeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "acknowledgeUnmet" : {
+            "type" : "boolean",
+            "description" : "F-REQ-20 confirme le passage malgré des items manuels non cochés"
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "MoveRequest" : {
+        "type" : "object",
+        "properties" : {
+          "parentKey" : {
+            "type" : "string",
+            "description" : "Nouveau parent ; absent ou null : racine"
+          },
+          "beforeKey" : {
+            "type" : "string",
+            "description" : "Exigence devant laquelle insérer (suivante)"
+          },
+          "afterKey" : {
+            "type" : "string",
+            "description" : "Exigence après laquelle insérer (précédente)"
+          }
+        }
+      },
+      "ImportResponse" : {
+        "type" : "object",
+        "properties" : {
+          "created" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "created" ]
+      },
+      "GherkinValidateRequest" : {
+        "type" : "object",
+        "properties" : {
+          "source" : {
+            "type" : "string",
+            "maxLength" : 100000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "source" ]
+      },
+      "GherkinErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "line" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "column" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "column", "line", "message" ]
+      },
+      "GherkinValidationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "valid" : {
+            "type" : "boolean"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GherkinErrorResponse"
+            }
+          }
+        },
+        "required" : [ "errors", "language", "valid" ]
+      },
       "MeResponse" : {
         "type" : "object",
         "properties" : {
@@ -690,6 +2468,113 @@
           }
         }
       },
+      "RequirementFieldsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : [ "string", "null" ],
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "title" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "asA" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "iWant" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "soThat" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "priority" : {
+            "type" : [ "string", "null" ],
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "businessValue" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "storyPoints" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "riskLevel" : {
+            "type" : [ "string", "null" ],
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          },
+          "category" : {
+            "type" : [ "string", "null" ],
+            "enum" : [ "PERFORMANCE", "SECURITY", "USABILITY", "RELIABILITY", "COMPATIBILITY", "MAINTAINABILITY", "PORTABILITY", "ACCESSIBILITY" ]
+          },
+          "scale" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "measurementMethod" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "minimumThreshold" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "target" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "unit" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 50,
+            "minLength" : 0
+          },
+          "transverse" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "tags" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "maxLength" : 50,
+              "minLength" : 0
+            }
+          },
+          "externalRef" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 100,
+            "minLength" : 0
+          }
+        }
+      },
+      "UpdateCriterionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "format" : {
+            "type" : "string",
+            "enum" : [ "TEXT", "GHERKIN" ]
+          },
+          "content" : {
+            "type" : "string",
+            "maxLength" : 10000,
+            "minLength" : 0
+          }
+        }
+      },
       "PageResponseUserResponse" : {
         "type" : "object",
         "properties" : {
@@ -737,6 +2622,219 @@
           }
         },
         "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "PageResponseRequirementSummary" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "RequirementSummary" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "riskLevel" : {
+            "type" : "string",
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          },
+          "storyPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "businessValue" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "parentKey" : {
+            "type" : "string"
+          },
+          "rank" : {
+            "type" : "string"
+          },
+          "criteriaCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "needsSplitting" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "tags", "title", "type", "version" ]
+      },
+      "FieldChangeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "before" : {
+            "type" : "string"
+          },
+          "after" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "field" ]
+      },
+      "AuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actor" : {
+            "type" : "string"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "changes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FieldChangeResponse"
+            }
+          }
+        },
+        "required" : [ "action", "changes", "timestamp" ]
+      },
+      "PageResponseAuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditEventResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "RequirementTreeNode" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "riskLevel" : {
+            "type" : "string",
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          },
+          "storyPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "parentKey" : {
+            "type" : "string"
+          },
+          "rank" : {
+            "type" : "string"
+          },
+          "criteriaCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "needsSplitting" : {
+            "type" : "boolean"
+          },
+          "children" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementTreeNode"
+            }
+          }
+        },
+        "required" : [ "children", "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "title", "type" ]
+      },
+      "ProjectChecklistsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "dor" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChecklistItemResponse"
+            }
+          },
+          "dod" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChecklistItemResponse"
+            }
+          }
+        },
+        "required" : [ "dod", "dor" ]
       }
     },
     "securitySchemes" : {

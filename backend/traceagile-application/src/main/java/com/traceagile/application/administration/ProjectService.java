@@ -9,6 +9,7 @@ import com.traceagile.domain.common.BusinessRuleException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,16 +23,21 @@ public class ProjectService {
     private final ProjectRepository projects;
     private final UserRepository users;
 
-    public ProjectService(ProjectRepository projects, UserRepository users) {
+    private final ApplicationEventPublisher events;
+
+    public ProjectService(ProjectRepository projects, UserRepository users, ApplicationEventPublisher events) {
         this.projects = projects;
         this.users = users;
+        this.events = events;
     }
 
     public Project create(CreateProjectCommand command) {
         if (projects.existsByKey(command.key())) {
             throw new ConflictException("PROJECT_KEY_TAKEN", "La clé « " + command.key() + " » est déjà utilisée.");
         }
-        return projects.save(new Project(command.key(), command.name(), command.description()));
+        Project project = projects.save(new Project(command.key(), command.name(), command.description()));
+        events.publishEvent(new ProjectCreated(project.getKey()));
+        return project;
     }
 
     @Transactional(readOnly = true)

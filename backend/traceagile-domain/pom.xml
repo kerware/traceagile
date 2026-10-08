@@ -19,7 +19,12 @@
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
-        <!-- Annotations d'audit (@CreatedBy…) uniquement ; voir ADR-0003 -->
+        <!-- Types JSON (jsonb) des instantanés et de l'audit -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <!-- Annotations d'audit (@CreatedBy…) uniquement ; voir ADR-0002 -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>

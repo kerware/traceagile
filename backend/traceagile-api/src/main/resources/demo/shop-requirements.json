@@ -1,0 +1,288 @@
+[
+  {
+    "type": "EPIC", "title": "Catalogue", "priority": "MUST", "risk": "MEDIUM",
+    "description": "Permettre aux clients de **trouver** et **choisir** les produits.",
+    "criteria": [{ "text": "Le catalogue présente l'ensemble des produits actifs." }],
+    "children": [
+      {
+        "type": "FEATURE", "title": "Recherche de produits", "priority": "MUST", "risk": "HIGH",
+        "criteria": [{ "text": "Un client trouve un produit par son nom ou sa référence." }],
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Rechercher un produit par mot-clé", "priority": "MUST", "risk": "HIGH", "points": 5, "value": 90,
+            "asA": "client", "iWant": "rechercher un produit par mot-clé", "soThat": "le trouver rapidement",
+            "tags": ["recherche"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: résultats triés par pertinence\n  Étant donné un catalogue contenant « Stylo bleu » et « Stylo rouge »\n  Quand je recherche « stylo »\n  Alors 2 résultats sont affichés\n  Et le premier contient le mot recherché dans son titre" },
+              { "gherkin": "Scénario: aucune correspondance\n  Quand je recherche « parapluie »\n  Alors le message « Aucun produit trouvé » est affiché" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Filtrer les résultats par prix", "priority": "SHOULD", "risk": "MEDIUM", "points": 3, "value": 60,
+            "asA": "client", "iWant": "filtrer les résultats par tranche de prix", "soThat": "respecter mon budget",
+            "tags": ["recherche"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: filtre sur un prix maximum\n  Étant donné des résultats de 5 € à 80 €\n  Quand je filtre jusqu'à 20 €\n  Alors seuls les produits à 20 € ou moins sont affichés" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Suggestions pendant la saisie", "priority": "COULD", "risk": "LOW", "points": 8, "value": 30,
+            "asA": "client", "iWant": "des suggestions dès 3 caractères saisis", "soThat": "gagner du temps",
+            "tags": ["recherche", "ux"], "status": "TO_REFINE",
+            "criteria": [{ "text": "Au plus 8 suggestions apparaissent en moins de 300 ms." }]
+          }
+        ]
+      },
+      {
+        "type": "FEATURE", "title": "Fiche produit", "priority": "MUST", "risk": "MEDIUM",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Consulter la fiche d'un produit", "priority": "MUST", "risk": "MEDIUM", "points": 3, "value": 80,
+            "asA": "client", "iWant": "voir photos, description, prix et disponibilité", "soThat": "décider de mon achat",
+            "tags": ["fiche"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: produit disponible\n  Étant donné un produit en stock\n  Quand j'ouvre sa fiche\n  Alors je vois son prix TTC et le bouton « Ajouter au panier »" },
+              { "text": "Les photos s'affichent en plein écran au clic." }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Afficher les avis clients", "priority": "SHOULD", "risk": "LOW", "points": 5, "value": 50,
+            "asA": "client", "iWant": "lire les avis des autres acheteurs", "soThat": "être rassuré sur la qualité",
+            "tags": ["fiche", "avis"], "status": "DRAFT",
+            "criteria": [{ "text": "La note moyenne et le nombre d'avis sont affichés sous le titre." }]
+          },
+          {
+            "type": "USER_STORY", "title": "Être prévenu du retour en stock", "priority": "COULD", "risk": "LOW", "points": 5, "value": 40,
+            "asA": "client", "iWant": "être alerté par e-mail quand un produit revient en stock", "soThat": "ne pas rater l'occasion",
+            "tags": ["fiche", "stock"], "status": "DRAFT",
+            "criteria": [{ "text": "Un seul e-mail est envoyé par retour en stock." }]
+          }
+        ]
+      },
+      {
+        "type": "FEATURE", "title": "Navigation par catégories", "priority": "SHOULD", "risk": "LOW",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Parcourir l'arbre des catégories", "priority": "SHOULD", "risk": "LOW", "points": 3, "value": 50,
+            "asA": "client", "iWant": "parcourir les catégories et sous-catégories", "soThat": "découvrir l'offre",
+            "tags": ["navigation"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: ouverture d'une catégorie\n  Quand j'ouvre la catégorie « Papeterie »\n  Alors ses sous-catégories et ses 20 premiers produits sont affichés" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Fil d'Ariane", "priority": "COULD", "risk": "LOW", "points": 1, "value": 20,
+            "asA": "client", "iWant": "voir où je me trouve dans le catalogue", "soThat": "revenir en arrière facilement",
+            "tags": ["navigation", "ux"], "status": "DRAFT",
+            "criteria": [{ "text": "Chaque niveau du fil d'Ariane est cliquable." }]
+          },
+          {
+            "type": "USER_STORY", "title": "Trier une catégorie par popularité", "priority": "COULD", "risk": "LOW", "points": 2, "value": 25,
+            "asA": "client", "iWant": "trier les produits d'une catégorie par popularité", "soThat": "voir les meilleures ventes",
+            "tags": ["navigation"], "status": "TO_REFINE",
+            "criteria": [{ "text": "La popularité se calcule sur les ventes des 30 derniers jours." }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "EPIC", "title": "Panier et commande", "priority": "MUST", "risk": "CRITICAL",
+    "description": "Du panier au paiement : le cœur du chiffre d'affaires.",
+    "criteria": [{ "text": "Un client peut commander et payer en ligne sans assistance." }],
+    "children": [
+      {
+        "type": "FEATURE", "title": "Panier", "priority": "MUST", "risk": "HIGH",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Ajouter un produit au panier", "priority": "MUST", "risk": "HIGH", "points": 3, "value": 100,
+            "asA": "client", "iWant": "ajouter un produit au panier", "soThat": "le commander plus tard",
+            "tags": ["panier"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: ajout d'un produit disponible\n  Étant donné un panier vide\n  Quand j'ajoute « Stylo bleu » au panier\n  Alors le panier contient 1 article\n  Et le total est de 2,50 €" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Modifier les quantités", "priority": "MUST", "risk": "MEDIUM", "points": 2, "value": 70,
+            "asA": "client", "iWant": "changer la quantité d'un article", "soThat": "ajuster ma commande",
+            "tags": ["panier"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: augmenter la quantité\n  Étant donné un panier avec 1 « Stylo bleu »\n  Quand je passe la quantité à 3\n  Alors le total est de 7,50 €" },
+              { "text": "Une quantité à 0 retire l'article du panier." }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Conserver le panier entre deux visites", "priority": "SHOULD", "risk": "MEDIUM", "points": 5, "value": 60,
+            "asA": "client connecté", "iWant": "retrouver mon panier lors de ma prochaine visite", "soThat": "ne pas tout recommencer",
+            "tags": ["panier", "compte"], "status": "TO_REFINE",
+            "criteria": [{ "text": "Le panier est conservé 30 jours pour un client connecté." }]
+          },
+          {
+            "type": "USER_STORY", "title": "Vider le panier", "priority": "COULD", "risk": "LOW", "points": 1, "value": 20,
+            "asA": "client", "iWant": "vider mon panier en un clic", "soThat": "recommencer ma sélection",
+            "tags": ["panier"], "status": "DRAFT",
+            "criteria": [{ "text": "Une confirmation est demandée avant de vider le panier." }]
+          },
+          {
+            "type": "BUSINESS_RULE", "title": "Article en rupture : ajout au panier impossible", "priority": "MUST", "risk": "HIGH",
+            "description": "Un article dont le stock est nul ne peut pas être ajouté ; le bouton est remplacé par « Me prévenir ».",
+            "criteria": [
+              { "gherkin": "Scénario: produit en rupture\n  Étant donné un produit dont le stock est nul\n  Quand j'ouvre sa fiche\n  Alors le bouton « Ajouter au panier » est désactivé" }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "FEATURE", "title": "Paiement", "priority": "MUST", "risk": "CRITICAL",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Payer par carte bancaire", "priority": "MUST", "risk": "CRITICAL", "points": 8, "value": 100,
+            "asA": "client", "iWant": "payer ma commande par carte bancaire", "soThat": "finaliser mon achat",
+            "tags": ["paiement"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: paiement accepté\n  Étant donné un panier de 42 €\n  Quand je paie avec une carte valide\n  Alors la commande passe au statut « Payée »\n  Et je reçois un e-mail de confirmation" },
+              { "gherkin": "Scénario: paiement refusé\n  Quand je paie avec une carte refusée\n  Alors un message m'invite à utiliser un autre moyen de paiement\n  Et le panier est conservé" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Appliquer un code promo", "priority": "SHOULD", "risk": "MEDIUM", "points": 3, "value": 50,
+            "asA": "client", "iWant": "saisir un code promo", "soThat": "bénéficier d'une réduction",
+            "tags": ["paiement", "promo"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: code valide\n  Étant donné un panier de 60 €\n  Quand j'applique le code « BIENVENUE10 »\n  Alors une remise de 10 % est appliquée" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Payer en plusieurs fois", "priority": "COULD", "risk": "HIGH", "points": 13, "value": 40,
+            "asA": "client", "iWant": "payer en trois fois sans frais", "soThat": "étaler une grosse dépense",
+            "tags": ["paiement"], "status": "TO_REFINE",
+            "criteria": [{ "text": "Le paiement en 3 fois est proposé à partir de 150 €." }]
+          },
+          {
+            "type": "BUSINESS_RULE", "title": "Un seul code promo par commande", "priority": "MUST", "risk": "MEDIUM",
+            "criteria": [{ "text": "Saisir un second code remplace le premier, avec un message d'information." }]
+          }
+        ]
+      },
+      {
+        "type": "FEATURE", "title": "Livraison", "priority": "MUST", "risk": "HIGH",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Choisir le mode de livraison", "priority": "MUST", "risk": "MEDIUM", "points": 5, "value": 80,
+            "asA": "client", "iWant": "choisir entre livraison à domicile et point relais", "soThat": "être livré où je veux",
+            "tags": ["livraison"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: point relais\n  Quand je choisis la livraison en point relais\n  Alors la carte des points relais proches de mon adresse s'affiche" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Afficher les frais de livraison avant paiement", "priority": "MUST", "risk": "HIGH", "points": 2, "value": 70,
+            "asA": "client", "iWant": "connaître les frais de livraison avant de payer", "soThat": "ne pas avoir de surprise",
+            "tags": ["livraison", "panier"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: livraison gratuite au seuil\n  Étant donné un panier de 50 €\n  Quand j'affiche le récapitulatif\n  Alors les frais de livraison sont de 0 €" },
+              { "gherkin": "Scénario: livraison payante sous le seuil\n  Étant donné un panier de 49,99 €\n  Quand j'affiche le récapitulatif\n  Alors les frais de livraison sont de 4,90 €" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Suivre ma livraison", "priority": "SHOULD", "risk": "LOW", "points": 5, "value": 50,
+            "asA": "client", "iWant": "suivre l'acheminement de mon colis", "soThat": "m'organiser pour le recevoir",
+            "tags": ["livraison", "compte"], "status": "DRAFT",
+            "criteria": [{ "text": "Le numéro de suivi du transporteur est cliquable." }]
+          },
+          {
+            "type": "BUSINESS_RULE", "title": "Livraison gratuite dès 50 € d'achat", "priority": "MUST", "risk": "HIGH",
+            "description": "Le seuil s'applique au montant TTC après remises, hors frais de livraison.",
+            "criteria": [{ "text": "Le seuil de 50 € est paramétrable par l'administrateur de la boutique." }]
+          }
+        ]
+      },
+      {
+        "type": "NON_FUNCTIONAL", "title": "Disponibilité du tunnel de commande", "category": "RELIABILITY", "priority": "MUST", "risk": "CRITICAL",
+        "scale": "Disponibilité mensuelle du tunnel de commande", "method": "Sonde synthétique toutes les minutes",
+        "threshold": "99,5", "target": "99,9", "unit": "%",
+        "criteria": [{ "text": "La disponibilité mesurée sur le mois écoulé atteint au moins le seuil." }]
+      }
+    ]
+  },
+  {
+    "type": "EPIC", "title": "Compte client", "priority": "SHOULD", "risk": "HIGH",
+    "children": [
+      {
+        "type": "FEATURE", "title": "Inscription et connexion", "priority": "MUST", "risk": "HIGH",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Créer un compte", "priority": "MUST", "risk": "HIGH", "points": 3, "value": 70,
+            "asA": "visiteur", "iWant": "créer un compte avec mon e-mail", "soThat": "suivre mes commandes",
+            "tags": ["compte"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: inscription réussie\n  Étant donné une adresse e-mail jamais utilisée\n  Quand je m'inscris avec un mot de passe conforme\n  Alors mon compte est créé\n  Et je reçois un e-mail de bienvenue" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Se connecter", "priority": "MUST", "risk": "HIGH", "points": 2, "value": 70,
+            "asA": "client", "iWant": "me connecter avec mon e-mail et mon mot de passe", "soThat": "accéder à mon compte",
+            "tags": ["compte", "sécurité"], "status": "TO_REFINE",
+            "criteria": [{ "text": "Après 5 échecs, le compte est verrouillé 15 minutes." }]
+          },
+          {
+            "type": "USER_STORY", "title": "Réinitialiser mon mot de passe", "priority": "SHOULD", "risk": "MEDIUM", "points": 3, "value": 40,
+            "asA": "client", "iWant": "réinitialiser mon mot de passe oublié", "soThat": "retrouver l'accès à mon compte",
+            "tags": ["compte", "sécurité"], "status": "DRAFT",
+            "criteria": [{ "text": "Le lien de réinitialisation expire après 1 heure." }]
+          },
+          {
+            "type": "BUSINESS_RULE", "title": "Mot de passe de 12 caractères minimum", "priority": "MUST", "risk": "HIGH",
+            "criteria": [{ "text": "Un mot de passe de moins de 12 caractères est refusé avec un message explicite." }]
+          },
+          {
+            "type": "NON_FUNCTIONAL", "title": "Sécurité des mots de passe", "category": "SECURITY", "priority": "MUST", "risk": "CRITICAL",
+            "transverse": true,
+            "scale": "Résistance des empreintes stockées", "method": "Revue de code et test d'intrusion annuel",
+            "threshold": "BCrypt coût 10", "target": "BCrypt coût 12", "unit": "algorithme",
+            "criteria": [{ "text": "Aucun mot de passe n'est stocké ni journalisé en clair." }]
+          }
+        ]
+      },
+      {
+        "type": "FEATURE", "title": "Historique des commandes", "priority": "SHOULD", "risk": "MEDIUM",
+        "children": [
+          {
+            "type": "USER_STORY", "title": "Consulter mes commandes passées", "priority": "SHOULD", "risk": "MEDIUM", "points": 3, "value": 60,
+            "asA": "client", "iWant": "voir la liste de mes commandes", "soThat": "retrouver un achat",
+            "tags": ["compte", "commande"], "status": "READY",
+            "criteria": [
+              { "gherkin": "Scénario: liste des commandes\n  Étant donné un client ayant passé 3 commandes\n  Quand il ouvre son historique\n  Alors les 3 commandes sont listées de la plus récente à la plus ancienne" }
+            ]
+          },
+          {
+            "type": "USER_STORY", "title": "Télécharger une facture", "priority": "SHOULD", "risk": "LOW", "points": 2, "value": 40,
+            "asA": "client", "iWant": "télécharger la facture d'une commande", "soThat": "la transmettre à ma comptabilité",
+            "tags": ["compte", "commande"], "status": "DRAFT",
+            "criteria": [{ "text": "La facture est un PDF conforme aux mentions légales." }]
+          },
+          {
+            "type": "USER_STORY", "title": "Recommander en un clic", "priority": "COULD", "risk": "LOW", "points": 3, "value": 30,
+            "asA": "client", "iWant": "recommander une commande précédente", "soThat": "gagner du temps sur mes achats récurrents",
+            "tags": ["compte", "commande", "panier"], "status": "DRAFT",
+            "criteria": [{ "text": "Les articles indisponibles sont signalés et non ajoutés." }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "NON_FUNCTIONAL", "title": "Temps de réponse des pages", "category": "PERFORMANCE", "priority": "MUST", "risk": "HIGH",
+    "transverse": true,
+    "scale": "Temps de réponse au 95e percentile des pages du site", "method": "Test Gatling, 200 utilisateurs simultanés",
+    "threshold": "1500", "target": "800", "unit": "ms",
+    "criteria": [{ "text": "Le p95 mesuré sous charge nominale ne dépasse pas le seuil." }]
+  },
+  {
+    "type": "NON_FUNCTIONAL", "title": "Accessibilité RGAA", "category": "ACCESSIBILITY", "priority": "SHOULD", "risk": "MEDIUM",
+    "transverse": true,
+    "scale": "Critères RGAA 4.1 conformes", "method": "Audit axe-core et revue manuelle",
+    "threshold": "75", "target": "100", "unit": "%",
+    "criteria": [{ "text": "Aucune violation critique n'est relevée par axe-core sur les pages clés." }]
+  }
+]

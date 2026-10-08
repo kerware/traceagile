@@ -53,7 +53,7 @@ public abstract class AbstractApiTest {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.execute("truncate table refresh_tokens, project_members, projects, users cascade");
+        jdbc.execute("truncate table audit_events, refresh_tokens, project_members, projects, users cascade");
     }
 
     protected void user(String login, boolean systemAdmin) {

@@ -3,6 +3,7 @@ package com.traceagile.api.web;
 import com.traceagile.application.common.AuthenticationFailedException;
 import com.traceagile.application.common.ConflictException;
 import com.traceagile.application.common.NotFoundException;
+import com.traceagile.application.common.UnprocessableException;
 import com.traceagile.application.common.VersionConflictException;
 import com.traceagile.domain.common.BusinessRuleException;
 import java.util.LinkedHashMap;
@@ -39,6 +40,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return Problems.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getCode(), e.getMessage());
     }
 
+    /** 422 avec détails exploitables par l'interface (items de DoR, erreurs Gherkin, lignes CSV). */
+    @ExceptionHandler(UnprocessableException.class)
+    ProblemDetail unprocessable(UnprocessableException e) {
+        ProblemDetail problem = Problems.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getCode(), e.getMessage());
+        e.getDetails().forEach(problem::setProperty);
+        return problem;
+    }
+
     @ExceptionHandler(NotFoundException.class)
     ProblemDetail notFound(NotFoundException e) {
         return Problems.of(HttpStatus.NOT_FOUND, e.getCode(), e.getMessage());
@@ -73,6 +82,18 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail integrity(DataIntegrityViolationException e) {
         return Problems.of(HttpStatus.CONFLICT, "DATA_CONFLICT", "L'opération entre en conflit avec des données existantes.");
+    }
+
+    @ExceptionHandler(MergePatch.MalformedRequestException.class)
+    ProblemDetail malformed(MergePatch.MalformedRequestException e) {
+        return Problems.of(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", e.getMessage());
+    }
+
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    ProblemDetail constraintViolation(jakarta.validation.ConstraintViolationException e) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        e.getConstraintViolations().forEach(v -> errors.putIfAbsent(v.getPropertyPath().toString(), v.getMessage()));
+        return validationProblem(errors);
     }
 
     @ExceptionHandler(PropertyReferenceException.class)
