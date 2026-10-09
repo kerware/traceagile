@@ -13,6 +13,7 @@ import { requirementKeys, useMoveRequirement, useRequirementTree, type Requireme
 import { DIVIDER, type NodeMenuItem } from '../../components/tree/menuItems';
 import { NodeMenuRow } from '../../components/tree/NodeMenu';
 import { PriorityBadge, StatusBadge, TypeBadge } from './Badges';
+import { VerificationBadge } from '../traceability/VerificationBadge';
 import { childTypes } from './model';
 import { reorder } from './reorder';
 
@@ -154,6 +155,7 @@ function TreeNode({ node, parentKey, depth, collapsed, toggle, onSelect, canWrit
           </Group>
         </UnstyledButton>
         <StatusBadge status={node.status} />
+        <VerificationBadge status={node.verificationStatus} compact testId={`tree-verification-${node.key}`} />
         <PriorityBadge priority={node.priority} />
         {node.storyPoints != null && (
           <Badge variant="default" size="sm">

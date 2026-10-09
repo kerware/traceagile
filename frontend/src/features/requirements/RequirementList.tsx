@@ -17,6 +17,7 @@ import {
 } from '../../api/requirements';
 import { hasFilters } from './filters';
 import { PriorityBadge, RiskBadge, StatusBadge, TypeBadge } from './Badges';
+import { VerificationBadge } from '../traceability/VerificationBadge';
 import { reorder } from './reorder';
 
 type Page = Schemas['PageResponseRequirementSummary'];
@@ -190,7 +191,10 @@ function Row({
         <TypeBadge type={requirement.type} />
       </Table.Td>
       <Table.Td>
-        <StatusBadge status={requirement.status} />
+        <Group gap={6} wrap="nowrap">
+          <StatusBadge status={requirement.status} />
+          <VerificationBadge status={requirement.verificationStatus} compact testId={`verification-${requirement.key}`} />
+        </Group>
       </Table.Td>
       <Table.Td>
         <PriorityBadge priority={requirement.priority} />

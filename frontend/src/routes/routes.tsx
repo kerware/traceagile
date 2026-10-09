@@ -7,7 +7,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { PROJECT_SCREENS } from '../layouts/navigation';
 
 /** Écrans déjà livrés ; les autres affichent leur lot de livraison. */
-const DELIVERED = ['dashboard', 'backlog', 'tests'];
+const DELIVERED = ['dashboard', 'backlog', 'tests', 'traceability'];
 
 export const routerFuture = {
   v7_relativeSplatPath: true,
@@ -58,6 +58,10 @@ export const appRoutes: RouteObject[] = [
           {
             path: 'tests/:tk',
             lazy: () => import('../features/tests/TestCasePage').then((m) => ({ Component: m.TestCasePage })),
+          },
+          {
+            path: 'traceability',
+            lazy: () => import('../features/traceability/TraceabilityPage').then((m) => ({ Component: m.TraceabilityPage })),
           },
           // Écrans des lots suivants : emplacement réservé indiquant le lot de livraison.
           ...PROJECT_SCREENS.filter((s) => !DELIVERED.includes(s.id)).map((screen) => ({

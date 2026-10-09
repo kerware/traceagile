@@ -104,13 +104,15 @@ public interface TestCaseDtos {
     }
 
     record RequirementLinkResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID linkId,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String requirementKey,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String requirementTitle,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RequirementType requirementType,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RequirementStatus requirementStatus,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LinkType linkType,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LinkOrigin origin,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Integer> criterionPositions) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Integer> criterionPositions,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "§3.3-7 exigence modifiée depuis la revue du test") boolean suspect) {
     }
 
     record TestCaseDetail(
@@ -145,6 +147,7 @@ public interface TestCaseDtos {
 
     /** Onglet « Tests liés » d'une exigence. */
     record LinkedTestResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID linkId,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String key,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TestKind kind,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String title,
@@ -152,7 +155,8 @@ public interface TestCaseDtos {
             TestTechnique technique,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LinkType linkType,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LinkOrigin origin,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Integer> criterionPositions) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Integer> criterionPositions,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "§3.3-7 exigence modifiée depuis la revue du test") boolean suspect) {
     }
 
     record TestVersionResponse(

@@ -12,6 +12,8 @@ import { TypeBadge } from './Badges';
 import { CriteriaPanel } from './CriteriaPanel';
 import { DetailTab } from './DetailTab';
 import { HistoryPanel } from './HistoryPanel';
+import { TraceTreePanel } from '../traceability/TraceTreePanel';
+import { VerificationBadge } from '../traceability/VerificationBadge';
 import { LinkedTestsPanel } from './LinkedTestsPanel';
 import { MoveModal } from './MoveModal';
 import { StatusMenu } from './StatusMenu';
@@ -72,6 +74,7 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
               {requirement.key}
             </Badge>
             <TypeBadge type={requirement.type} />
+            <VerificationBadge status={requirement.verificationStatus} testId="requirement-verification" />
             {requirement.currentVersion > 0 && (
               <Badge variant="default">{t('versions.version', { number: requirement.currentVersion })}</Badge>
             )}
@@ -117,6 +120,9 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
           <Tabs.Tab value="tests" data-testid="tab-tests">
             {t('requirement.tabs.tests')}
           </Tabs.Tab>
+          <Tabs.Tab value="traceability" data-testid="tab-traceability">
+            {t('requirement.tabs.traceability')}
+          </Tabs.Tab>
           {LATER_TABS.map((tab) => (
             <Tabs.Tab key={tab.value} value={tab.value} c="dimmed">
               {t(`requirement.tabs.${tab.value}`)}
@@ -132,7 +138,10 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
           <CriteriaPanel project={project} requirement={requirement} canContribute={canContribute} />
         </Tabs.Panel>
         <Tabs.Panel value="tests" pt="md">
-          <LinkedTestsPanel project={project} requirementKey={requirement.key} />
+          <LinkedTestsPanel project={project} requirement={requirement} />
+        </Tabs.Panel>
+        <Tabs.Panel value="traceability" pt="md">
+          <TraceTreePanel project={project} requirementKey={requirement.key} />
         </Tabs.Panel>
         {LATER_TABS.map((tab) => (
           <Tabs.Panel key={tab.value} value={tab.value} pt="md">

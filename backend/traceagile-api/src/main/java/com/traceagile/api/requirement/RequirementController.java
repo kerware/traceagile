@@ -28,6 +28,9 @@ import com.traceagile.application.requirement.RequirementCsvService;
 import com.traceagile.application.requirement.RequirementFilter;
 import com.traceagile.application.requirement.RequirementPatch;
 import com.traceagile.application.requirement.RequirementService;
+import com.traceagile.application.traceability.TraceabilityService;
+import com.traceagile.api.requirement.RequirementMapper.CriterionStatuses;
+import com.traceagile.domain.traceability.VerificationStatus;
 import com.traceagile.application.requirement.RequirementService.CreateRequirementCommand;
 import com.traceagile.application.requirement.RequirementService.CriterionDraft;
 import com.traceagile.application.requirement.RequirementService.MoveCommand;
@@ -49,6 +52,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
@@ -91,10 +95,12 @@ public class RequirementController {
     private final RequirementMapper mapper;
     private final ObjectMapper json;
     private final Validator validator;
+    private final TraceabilityService traceability;
 
     public RequirementController(RequirementService requirements, RequirementVersionService versions, RequirementCsvService csv,
                                  ChecklistService checklists, AuditService audit, RequirementMapper mapper,
-                                 ObjectMapper json, Validator validator) {
+                                 ObjectMapper json, Validator validator, TraceabilityService traceability) {
+        this.traceability = traceability;
         this.json = json;
         this.validator = validator;
         this.requirements = requirements;
@@ -119,14 +125,16 @@ public class RequirementController {
                                                  @RequestParam(required = false) String q,
                                                  @ParameterObject Pageable pageable) {
         RequirementFilter filter = new RequirementFilter(type, status, priority, risk, tag, q);
-        return PageResponse.of(requirements.search(projectKey, filter, pageable), mapper::toSummary);
+        Map<UUID, VerificationStatus> statuses = traceability.statuses(projectKey);
+        return PageResponse.of(requirements.search(projectKey, filter, pageable),
+                r -> mapper.toSummary(r, statuses.getOrDefault(r.getId(), VerificationStatus.NOT_COVERED)));
     }
 
     /** F-REQ-01 vue arbre. */
     @GetMapping("/tree")
     @PreAuthorize(READ)
     public List<RequirementTreeNode> tree(@PathVariable String projectKey) {
-        return mapper.toTree(requirements.backlog(projectKey));
+        return mapper.toTree(requirements.backlog(projectKey), traceability.statuses(projectKey));
     }
 
     @PostMapping
@@ -324,6 +332,9 @@ public class RequirementController {
     }
 
     private RequirementDetail detail(Requirement requirement) {
-        return mapper.toDetail(requirement, requirements.applicableTransverseNfrs(requirement));
+        String projectKey = requirement.getProject().getKey();
+        return mapper.toDetail(requirement, requirements.applicableTransverseNfrs(requirement),
+                traceability.statuses(projectKey).getOrDefault(requirement.getId(), VerificationStatus.NOT_COVERED),
+                new CriterionStatuses(traceability.criterionStatuses(projectKey, requirement)));
     }
 }

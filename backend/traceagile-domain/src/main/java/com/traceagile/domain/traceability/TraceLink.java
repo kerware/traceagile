@@ -10,12 +10,14 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * §3.1 TraceLink : lien générique de traçabilité. Au lot 2 : test → exigence et test → critère
- * d'acceptation (F-TRA-03), créés à la main, par tag Gherkin, par génération ou par découverte.
+ * §3.1 TraceLink : lien générique de traçabilité : test → exigence et test → critère d'acceptation
+ * (F-TRA-03), créés à la main, par tag Gherkin, par génération ou par découverte. Porte l'alerte de
+ * suspicion (§3.3-7, lot 3).
  */
 @Entity
 @Table(name = "trace_links")
@@ -47,6 +49,10 @@ public class TraceLink extends AuditableEntity {
     @Column(nullable = false, length = 15)
     private LinkOrigin origin;
 
+    /** §3.3-7 alerte de suspicion : l'exigence a changé depuis la dernière revue du test. */
+    @Column(name = "suspect_since")
+    private Instant suspectSince;
+
     protected TraceLink() {
     }
 
@@ -71,6 +77,25 @@ public class TraceLink extends AuditableEntity {
 
     public void setLinkType(LinkType linkType) {
         this.linkType = Objects.requireNonNull(linkType);
+    }
+
+    /** §3.3-7 la première modification non revue fait foi. */
+    public void markSuspect(Instant since) {
+        if (suspectSince == null) {
+            suspectSince = Objects.requireNonNull(since);
+        }
+    }
+
+    public void clearSuspicion() {
+        suspectSince = null;
+    }
+
+    public boolean isSuspect() {
+        return suspectSince != null;
+    }
+
+    public Instant getSuspectSince() {
+        return suspectSince;
     }
 
     public Project getProject() {

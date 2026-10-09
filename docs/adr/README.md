@@ -18,3 +18,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0011](0011-formats-csv-gherkin-recherche.md) | Formats : CSV, Gherkin, recherche et rang | 1 |
 | [0012](0012-referentiel-de-tests.md) | Référentiel de tests : natures, versions, BDD, découverte | 2 |
 | [0013](0013-parametres-jeux-de-donnees-dossiers.md) | Paramètres, jeux de données nommés, dossiers de tests, menus contextuels | 0-2 |
+| [0014](0014-tracabilite-et-couverture.md) | Traçabilité et couverture avant les exécutions | 3 |

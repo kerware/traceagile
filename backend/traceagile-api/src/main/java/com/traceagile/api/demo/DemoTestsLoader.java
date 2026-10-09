@@ -2,6 +2,7 @@ package com.traceagile.api.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.application.requirement.RequirementService;
+import com.traceagile.application.requirement.RequirementPatch;
 import com.traceagile.application.testcase.BddService;
 import com.traceagile.application.testcase.TestCasePatch;
 import com.traceagile.application.testcase.TestCasePatch.StepDraft;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -53,6 +55,8 @@ public class DemoTestsLoader {
 
     static final String REPOSITORY = "https://git.example.com/shop/tests.git";
     static final String DATASET = "Recette";
+    /** Story modifiée après la rédaction de ses tests (alerte de suspicion de la démonstration). */
+    static final String SUSPECT_STORY = "Appliquer un code promo";
 
     private final TestCaseService tests;
     private final TestCaseRepository repository;
@@ -117,6 +121,10 @@ public class DemoTestsLoader {
                 }
             }
         }
+        // Lot 3 (§3.3-7) : une story précisée après la rédaction de ses tests → tests à revoir, liens suspects.
+        Requirement promo = backlog.stream().filter(r -> r.getTitle().equals(SUSPECT_STORY)).findFirst().orElseThrow();
+        requirements.update(project, promo.getKey(), RequirementPatch.builder()
+                .description(Objects.toString(promo.getDescription(), "") + "\n\nPrécision : un seul code promo par commande.").build(), null);
     }
 
     private void ready(TestCase test) {

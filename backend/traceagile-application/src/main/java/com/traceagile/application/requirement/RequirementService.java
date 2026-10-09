@@ -243,7 +243,8 @@ public class RequirementService {
         List<FieldChange> diff = audit.record(requirement.getProject().getId(), AuditService.REQUIREMENT, requirement.getId(),
                 requirement.getKey(), action, before, requirement.snapshot());
         if (!diff.isEmpty()) {
-            events.publishEvent(new RequirementChanged(requirement.getProject().getKey(), requirement.getKey()));
+            events.publishEvent(new RequirementChanged(requirement.getProject().getKey(), requirement.getKey(),
+                    diff.stream().map(FieldChange::field).collect(java.util.stream.Collectors.toSet())));
         }
     }
 

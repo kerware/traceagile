@@ -159,6 +159,10 @@ public class TestCaseService {
         TestCase test = get(projectKey, key);
         Map<String, Object> before = test.snapshot();
         test.changeStatus(target);
+        if (target == TestCaseStatus.READY) {
+            // §3.3-7 le test a été revu : ses liens ne sont plus suspects.
+            links.clearSuspicionOf(test);
+        }
         audit.record(test.getProject().getId(), AUDIT_TYPE, test.getId(), key, AuditAction.STATUS_CHANGED, before, test.snapshot());
         return test;
     }

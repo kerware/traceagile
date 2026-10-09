@@ -237,4 +237,87 @@ describe('Lot 2 — F-REQ-11 génération d’un test BDD et tests liés', () =>
     expect(within(row).getByText('critères #1')).toBeInTheDocument();
     expect(within(row).getByText('BDD (Gherkin)')).toBeInTheDocument();
   });
+
+  it('F-TRA-01 lier un test depuis la fiche exigence, avec type et critères', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serve(detail('REQ-3'));
+    let body: unknown;
+    server.use(
+      http.get(`${URL}/test-cases`, () => HttpResponse.json([])),
+      http.get('/api/v1/projects/SHOP/test-cases', () =>
+        HttpResponse.json(page([{ key: 'TC-4', kind: 'MANUAL', title: 'Ajouter un produit', status: 'READY', priority: 'SHOULD', tags: [], currentVersion: 1, automationCandidate: false, missingInRepository: false }])),
+      ),
+      http.post('/api/v1/projects/SHOP/trace-links', async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ id: 'l9', testKey: 'TC-4', requirementKey: 'REQ-3', linkType: 'PARTIALLY_VERIFIES', origin: 'MANUAL', criterionPositions: [], suspect: false, version: 0 }, { status: 201 });
+      }),
+    );
+    view();
+
+    await userEvent.click(await screen.findByRole('tab', { name: 'Tests liés' }));
+    await userEvent.click(await screen.findByTestId('link-test-select'));
+    await userEvent.click(await screen.findByRole('option', { name: 'TC-4 — Ajouter un produit' }));
+    await userEvent.click(screen.getByTestId('link-type-select'));
+    await userEvent.click(await screen.findByRole('option', { name: 'Vérifie partiellement' }));
+    await userEvent.click(screen.getByTestId('link-test-submit'));
+
+    await waitFor(() => expect(body).toEqual({ testKey: 'TC-4', requirementKey: 'REQ-3', linkType: 'PARTIALLY_VERIFIES', criterionPositions: [] }));
+  });
+
+  it('§3.3-7 test lié suspect : alerte, revue et suppression du lien', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serve(detail('REQ-3', { verificationStatus: 'SUSPECT' }));
+    const calls: string[] = [];
+    server.use(
+      http.get(`${URL}/test-cases`, () =>
+        HttpResponse.json([{ linkId: 'l7', key: 'TC-7', kind: 'MANUAL', title: 'Seuil', status: 'NEEDS_UPDATE', linkType: 'VERIFIES', origin: 'MANUAL', criterionPositions: [], suspect: true }]),
+      ),
+      http.post('/api/v1/projects/SHOP/trace-links/l7/review', () => {
+        calls.push('review');
+        return HttpResponse.json({ id: 'l7', testKey: 'TC-7', requirementKey: 'REQ-3', linkType: 'VERIFIES', origin: 'MANUAL', criterionPositions: [], suspect: false, version: 1 });
+      }),
+      http.delete('/api/v1/projects/SHOP/trace-links/l7', () => {
+        calls.push('delete');
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    view();
+
+    expect(await screen.findByTestId('requirement-verification')).toHaveAttribute('data-status', 'SUSPECT');
+    await userEvent.click(screen.getByRole('tab', { name: 'Tests liés' }));
+    expect(await screen.findByTestId('linked-suspect-TC-7')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('linked-review-TC-7'));
+    await userEvent.click(screen.getByTestId('linked-unlink-TC-7'));
+
+    await waitFor(() => expect(calls).toEqual(['review', 'delete']));
+  });
+
+  it('F-TRA-05 onglet Traçabilité : parents, critères et leur état, tests liés, impact', async () => {
+    useAuthStore.getState().setSession('jwt', ADMIN);
+    serve(detail('REQ-3'));
+    server.use(
+      http.get(`${URL}/trace-tree`, () =>
+        HttpResponse.json({
+          requirement: { key: 'REQ-3', title: 'Ajouter', type: 'USER_STORY', status: 'READY', verificationStatus: 'NOT_RUN', children: [] },
+          ancestors: [{ key: 'REQ-1', title: 'Panier', type: 'EPIC', status: 'DRAFT', verificationStatus: 'NOT_RUN', children: [] }],
+          criteria: [{ position: 1, format: 'TEXT', content: 'Le produit est ajouté', status: 'TO_VERIFY', testKeys: ['TC-1'] },
+            { position: 2, format: 'TEXT', content: 'Le total change', status: 'TO_VERIFY', testKeys: [] }],
+          tests: [{ test: { key: 'TC-1', title: 'Ajouter', kind: 'MANUAL', status: 'READY' }, linkId: 'l1', linkType: 'VERIFIES', origin: 'MANUAL', suspect: false, criterionPositions: [1] }],
+          defects: [],
+        }),
+      ),
+      http.get(`${URL}/impact`, () =>
+        HttpResponse.json({ requirement: { key: 'REQ-3', title: 'Ajouter', type: 'USER_STORY', status: 'READY', riskLevel: 'MEDIUM' }, tests: [], campaigns: [] }),
+      ),
+    );
+    view();
+
+    await userEvent.click(await screen.findByTestId('tab-traceability'));
+
+    expect(await screen.findByText('REQ-1')).toBeInTheDocument();
+    expect(within(screen.getByTestId('trace-criterion-1')).getByText('TC-1')).toBeInTheDocument();
+    expect(within(screen.getByTestId('trace-criterion-2')).getByText('aucun test')).toBeInTheDocument();
+    expect(within(screen.getByTestId('trace-tests')).getByText('jamais exécuté')).toBeInTheDocument();
+    expect(await within(screen.getByTestId('trace-impact')).findByTestId('impact-summary')).toHaveTextContent('0 test à revoir');
+  });
 });

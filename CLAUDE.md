@@ -12,7 +12,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 1. Exigences | Backlog, fiche, critères, ENF, rang, DoR/DoD, versions, audit, CSV | **Fait** (branche `lot-1-exigences`) |
 | 2. Tests | Référentiel, manuels, automatisés, Gherkin Monaco, génération BDD, tags `@REQ-` | **Fait** (branche `lot-2-tests`) |
 | Corrections 0-2 | Défilement après panneau latéral, paramètres `${nom}` et jeux de données nommés, dossiers de tests et menus contextuels des arbres (ADR-0013) | **Fait** (branche `lot-2-corrections`) |
-| 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | À faire |
+| 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | **Fait** (branche `lot-3-tracabilite`) |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | À faire |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | À faire |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | À faire |
@@ -23,10 +23,9 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 Reporté (à reprendre dans le lot indiqué) :
 - Parcours §15.3 étape 1 : ajout de la story à `SPR-2` → lot 4 (sprints). Le reste est automatisé.
 - Parcours §15.3 étape 2 : sélection du test BDD et de la charte dans une campagne → lot 5.
-- F-REQ-12 état calculé des critères, item DoD « tous les tests liés passés » et `NEEDS_UPDATE`
-  des tests liés sur `RequirementChanged` (§3.3-7 ; `TestCase.markNeedsUpdate()` existe) → lot 3.
-- Liens créés depuis la fiche exigence et la matrice (F-TRA-01), orphelins (F-TRA-06) → lot 3 ;
-  `TraceLink` et le filtre `orphan` des tests existent déjà (ADR-0012).
+- Traçabilité (ADR-0014) : périmètres `release:` / `sprint:` → lot 4 ; derniers résultats, anomalies
+  bloquantes, campagnes en cours et suspicion « modifiée après la dernière exécution » → lot 5
+  (remplacer `NoExecutionResults` par l'adaptateur des exécutions) ; cache des statuts si §14 l'exige.
 - F-MAN-02 tri des candidats par fréquence d'exécution → lot 5 (aujourd'hui : par priorité).
 - Heuristiques extensibles par projet (F-EXP-02), sessions et génération de chartes → lot 6.
 - F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
@@ -141,6 +140,10 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `projects`/`users`, plus les tables sans clé étrangère comme `audit_events`). Chaque contrôleur :
   nominal, 400, 403, 412 si PATCH, 422 pour les règles métier.
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
+- Traçabilité (ADR-0014) : statuts et couverture calculés par `TraceabilityService` sur une
+  `ProjectTrace` chargée une fois par requête (jamais exigence par exigence) ; règles pures dans
+  `VerificationRules` / `CoverageCalculator` (domaine). Les faits d'exécution passent par le port
+  `ExecutionResults`. La suspicion (§3.3-7) est un écouteur de `RequirementChanged` (champs de contenu).
 
 ### Front-end
 - TypeScript strict, ESLint sans avertissement. Mantine 7, TanStack Query, Zustand, RHF + Zod.
@@ -156,6 +159,9 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   (`PromptModal`, `ConfirmModal`, testids `prompt-input`, `prompt-submit`, `confirm-submit`).
 - Éditeur Markdown (`MarkdownField`) : garder `overflow={false}` (sinon le `body` reste bloqué
   après un panneau latéral, ADR-0013).
+- Statut de vérification : `features/traceability/VerificationBadge` (pastille, `data-status`) ;
+  hooks dans `src/api/traceability.ts`, qui invalident traçabilité, tests et exigences.
+- Pluriels i18next : en français, 0 est au singulier (`_one`).
 - Éditeurs de code : `components/code/CodeEditor` (Monaco local, chargé à la demande ; grammaire
   Gherkin et autocomplétion dans `monacoSetup.ts`). En test (jsdom), il devient une zone de texte.
 - user-event : « {{ » saisit une accolade littérale (`'${{nom}'` pour taper `${nom}`).
@@ -187,6 +193,9 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   8 chartes, 14 tests automatisés (UI Playwright, API REST Assured, JUnit 5, data-driven, Gatling ;
   identifiants `@fail` / `@flaky` pour le simulateur du lot 7) et 16 tests BDD générés depuis les critères Gherkin ; 2 tests orphelins ; plusieurs
   stories non couvertes. Tous `READY`.
+- Lot 3 : la story « Appliquer un code promo » est précisée après coup → ses tests sont
+  `NEEDS_UPDATE` et leurs liens suspects (§3.3-7). Sur une base déjà chargée, la démo n'est pas
+  rejouée : `docker compose down -v` pour repartir de zéro.
 - À compléter à chaque lot (sprints, campagnes…).
 
 ### Bout en bout (§15.3)

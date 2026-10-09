@@ -69,16 +69,16 @@ public interface TestCaseMapper {
     TestCaseDetail toDetail(TestCase test, List<RequirementLink> links, List<String> warnings);
 
     default RequirementLinkResponse toResponse(RequirementLink link) {
-        return new RequirementLinkResponse(link.requirement().getKey(), link.requirement().getTitle(), link.requirement().getType(),
-                link.requirement().getStatus(), link.linkType(), link.origin(),
-                link.criteria().stream().map(AcceptanceCriterion::getPosition).toList());
+        return new RequirementLinkResponse(link.linkId(), link.requirement().getKey(), link.requirement().getTitle(),
+                link.requirement().getType(), link.requirement().getStatus(), link.linkType(), link.origin(),
+                link.criteria().stream().map(AcceptanceCriterion::getPosition).toList(), link.suspect());
     }
 
     default LinkedTestResponse toResponse(TestLink link) {
         TestCase test = link.testCase();
-        return new LinkedTestResponse(test.getKey(), test.getKind(), test.getTitle(), test.getStatus(),
+        return new LinkedTestResponse(link.linkId(), test.getKey(), test.getKind(), test.getTitle(), test.getStatus(),
                 test.getAutomation() == null ? null : test.getAutomation().getTechnique(), link.linkType(), link.origin(),
-                link.criterionPositions());
+                link.criterionPositions(), link.suspect());
     }
 
     default TestVersionResponse toResponse(TestCaseVersion version) {

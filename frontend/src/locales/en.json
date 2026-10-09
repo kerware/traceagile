@@ -206,7 +206,8 @@
       "defects": "Defects",
       "versions": "Versions",
       "history": "History",
-      "comments": "Comments"
+      "comments": "Comments",
+      "traceability": "Traceability"
     },
     "laterLot": "Available in batch {{lot}}.",
     "userStory": "User story",
@@ -480,6 +481,110 @@
     "addTest": "Add linked test",
     "testLinked": "{{key}} created and linked to {{requirement}}"
   },
+  "verification": {
+    "NOT_COVERED": "Not covered",
+    "NOT_RUN": "Not run",
+    "IN_PROGRESS": "In progress",
+    "VALIDATED": "Validated",
+    "FAILED": "Failed",
+    "BLOCKED": "Blocked",
+    "SUSPECT": "Suspect",
+    "hint": {
+      "NOT_COVERED": "No linked test (verifies or partially verifies).",
+      "NOT_RUN": "Linked tests, no execution.",
+      "IN_PROGRESS": "At least one execution, other tests not run yet.",
+      "VALIDATED": "The last execution of every linked test passed.",
+      "FAILED": "A linked test failed or a blocking defect is open.",
+      "BLOCKED": "A linked test is blocked, none failed.",
+      "SUSPECT": "The requirement changed since a linked test was reviewed."
+    }
+  },
+  "executionStatus": {
+    "NOT_RUN": "Not run",
+    "RUNNING": "Running",
+    "PASSED": "Passed",
+    "FAILED": "Failed",
+    "BLOCKED": "Blocked",
+    "SKIPPED": "Skipped",
+    "ERROR": "Technical error"
+  },
+  "traceability": {
+    "title": "Traceability",
+    "tabs": {
+      "matrix": "Matrix",
+      "coverage": "Coverage",
+      "orphans": "Orphans",
+      "impact": "Impact analysis"
+    },
+    "scope": "Scope",
+    "scopeHint": "Project, epic or feature (releases and sprints in lot 4)",
+    "wholeProject": "Whole project",
+    "kinds": "Test kinds",
+    "allTests": "Show all tests",
+    "allTestsHint": "To link a test not yet linked in one click",
+    "cellLegend": "V: verifies · PV: partially verifies · R: informative · ⚠: suspect · click an empty cell: link",
+    "noTests": "No linked test in this scope. Turn on “Show all tests” to create links.",
+    "requirement": "Requirement",
+    "verification": "Verification",
+    "cellLabel": "Link between {{requirement}} and {{test}}",
+    "createLink": "Link {{test}} to {{requirement}} (verifies)",
+    "linked": "{{test}} linked to {{requirement}}",
+    "linkTitle": "{{test}} → {{requirement}}",
+    "suspectHint": "The requirement changed since this test was last reviewed: check it is still up to date.",
+    "origin": "Origin",
+    "lastResult": "Last result",
+    "deleteLink": "Delete link",
+    "markReviewed": "Mark as reviewed",
+    "coveringTests": "Covering tests",
+    "executedTests": "Run",
+    "passedTests": "Passed",
+    "linkType": "Link type",
+    "suspect": "Suspect"
+  },
+  "coverage": {
+    "design": "Design coverage",
+    "criteria": "Criteria coverage",
+    "execution": "Execution coverage",
+    "validation": "Validation rate",
+    "riskWeighted": "Risk-weighted coverage",
+    "formula": {
+      "design": "Leaf requirements linked to at least one test (verifies or partially verifies) ÷ leaf requirements in scope.",
+      "criteria": "Acceptance criteria linked to at least one test ÷ criteria in scope.",
+      "execution": "Requirements whose linked tests have all been run ÷ covered requirements.",
+      "validation": "Requirements whose linked tests all passed on their last run ÷ covered requirements.",
+      "riskWeighted": "Design coverage where each requirement weighs 1, 2, 4 or 8 by risk."
+    }
+  },
+  "orphans": {
+    "requirements": "Requirements without tests",
+    "tests": "Tests without requirement",
+    "neverExecuted": "Automated tests never run",
+    "defects": "Defects without requirement",
+    "defectsLater": "Defects come with campaigns (lot 5).",
+    "none": "None."
+  },
+  "impact": {
+    "title": "Impact analysis",
+    "requirement": "Changed requirement",
+    "pick": "Pick a requirement",
+    "summary_one": "{{count}} test to review if this requirement changes ({{suspect}} already flagged suspect).",
+    "summary_other": "{{count}} tests to review if this requirement changes ({{suspect}} already flagged suspect).",
+    "test": "Test",
+    "via": "Linked through",
+    "status": "State",
+    "campaigns": "Running campaigns concerned",
+    "noCampaigns": "No running campaign (campaigns come in lot 5)."
+  },
+  "traceTree": {
+    "children": "Child requirements",
+    "criteria": "Acceptance criteria",
+    "noCriteria": "No criteria.",
+    "noTest": "no test",
+    "tests": "Linked tests and last executions",
+    "neverExecuted": "never run",
+    "defects": "Defects",
+    "noDefects": "No defect (defects come in lot 5)."
+  },
   "test": {
     "kind": "Kind",
     "title": "Title",
@@ -624,7 +729,12 @@
   "linkedTests": {
     "title": "Linked tests",
     "empty": "No test verifies this requirement.",
-    "criteria": "criteria {{list}}"
+    "criteria": "criteria {{list}}",
+    "addTest": "Link a test",
+    "searchTest": "Search (key, title)",
+    "noCandidate": "No test to link",
+    "criteriaLabel": "Verified criteria",
+    "link": "Link"
   },
   "generate": {
     "button": "Generate a BDD test",

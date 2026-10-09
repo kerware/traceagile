@@ -550,6 +550,76 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/trace-links" : {
+      "post" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "create_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateLinkRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TraceLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/trace-links/{id}/review" : {
+      "post" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "review",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TraceLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/test-folders" : {
       "get" : {
         "tags" : [ "Dossiers de tests" ],
@@ -580,7 +650,7 @@
       },
       "post" : {
         "tags" : [ "Dossiers de tests" ],
-        "operationId" : "create_2",
+        "operationId" : "create_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -809,7 +879,7 @@
       },
       "post" : {
         "tags" : [ "Tests" ],
-        "operationId" : "create_3",
+        "operationId" : "create_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1093,7 +1163,7 @@
       },
       "post" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "create_4",
+        "operationId" : "create_5",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1655,6 +1725,87 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/trace-links/{id}" : {
+      "delete" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "delete_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "update_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateLinkRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateLinkRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TraceLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/test-cases/{key}" : {
       "get" : {
         "tags" : [ "Tests" ],
@@ -1689,7 +1840,7 @@
       },
       "delete" : {
         "tags" : [ "Tests" ],
-        "operationId" : "delete_1",
+        "operationId" : "delete_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1713,7 +1864,7 @@
       },
       "patch" : {
         "tags" : [ "Tests" ],
-        "operationId" : "update_1",
+        "operationId" : "update_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1799,7 +1950,7 @@
       },
       "delete" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "delete_2",
+        "operationId" : "delete_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1823,7 +1974,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_2",
+        "operationId" : "update_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1878,7 +2029,7 @@
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}" : {
       "delete" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "delete_3",
+        "operationId" : "delete_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1903,7 +2054,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_3",
+        "operationId" : "update_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1970,6 +2121,153 @@
                   "items" : {
                     "$ref" : "#/components/schemas/FrameworkResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/traceability/orphans" : {
+      "get" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "orphans",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrphansResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/traceability/matrix" : {
+      "get" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "matrix",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "scope",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "tests",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "linked"
+          }
+        }, {
+          "name" : "kind",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+            },
+            "uniqueItems" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MatrixResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/traceability/matrix/export" : {
+      "get" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "export",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "format",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "csv"
+          }
+        }, {
+          "name" : "scope",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "tests",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "linked"
+          }
+        }, {
+          "name" : "kind",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+            },
+            "uniqueItems" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/csv" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
                 }
               }
             }
@@ -2296,6 +2594,39 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/requirements/{key}/trace-tree" : {
+      "get" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "traceTree",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TraceTreeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/test-cases" : {
       "get" : {
         "tags" : [ "Tests" ],
@@ -2325,6 +2656,39 @@
                   "items" : {
                     "$ref" : "#/components/schemas/LinkedTestResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/impact" : {
+      "get" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "impact",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ImpactResponse"
                 }
               }
             }
@@ -2582,6 +2946,39 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/coverage" : {
+      "get" : {
+        "tags" : [ "Traçabilité" ],
+        "operationId" : "coverage",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "scope",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CoverageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -2696,6 +3093,10 @@
       "RequirementLinkResponse" : {
         "type" : "object",
         "properties" : {
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
           "requirementKey" : {
             "type" : "string"
           },
@@ -2724,9 +3125,13 @@
               "type" : "integer",
               "format" : "int32"
             }
+          },
+          "suspect" : {
+            "type" : "boolean",
+            "description" : "§3.3-7 exigence modifiée depuis la revue du test"
           }
         },
-        "required" : [ "criterionPositions", "linkType", "origin", "requirementKey", "requirementStatus", "requirementTitle", "requirementType" ]
+        "required" : [ "criterionPositions", "linkId", "linkType", "origin", "requirementKey", "requirementStatus", "requirementTitle", "requirementType", "suspect" ]
       },
       "InvestDto" : {
         "type" : "object",
@@ -2772,6 +3177,7 @@
           },
           "status" : {
             "type" : "string",
+            "description" : "F-REQ-12 calculé d'après les tests liés",
             "enum" : [ "TO_VERIFY", "VERIFIED", "FAILED" ]
           },
           "version" : {
@@ -2852,6 +3258,11 @@
               "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
             }
           },
+          "verificationStatus" : {
+            "type" : "string",
+            "description" : "§7.3 statut de vérification",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          },
           "riskLevel" : {
             "type" : "string",
             "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
@@ -2923,7 +3334,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "allowedTransitions", "applicableTransverseNfrs", "children", "createdAt", "criteria", "currentVersion", "id", "invest", "key", "needsSplitting", "planguage", "priority", "riskLevel", "status", "tags", "title", "transverse", "type", "updatedAt", "userStory", "version" ]
+        "required" : [ "allowedTransitions", "applicableTransverseNfrs", "children", "createdAt", "criteria", "currentVersion", "id", "invest", "key", "needsSplitting", "planguage", "priority", "riskLevel", "status", "tags", "title", "transverse", "type", "updatedAt", "userStory", "verificationStatus", "version" ]
       },
       "RequirementRef" : {
         "type" : "object",
@@ -3230,6 +3641,73 @@
           }
         },
         "required" : [ "archived", "createdAt", "id", "key", "memberCount", "name", "version" ]
+      },
+      "CreateLinkRequest" : {
+        "type" : "object",
+        "properties" : {
+          "testKey" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "requirementKey" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "criterionPositions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        },
+        "required" : [ "linkType", "requirementKey", "testKey" ]
+      },
+      "TraceLinkResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "testKey" : {
+            "type" : "string"
+          },
+          "requirementKey" : {
+            "type" : "string"
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "GHERKIN_TAG", "GENERATED", "DISCOVERY" ]
+          },
+          "criterionPositions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "suspect" : {
+            "type" : "boolean"
+          },
+          "suspectSince" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "criterionPositions", "id", "linkType", "origin", "requirementKey", "suspect", "testKey", "version" ]
       },
       "FolderRequest" : {
         "type" : "object",
@@ -4244,6 +4722,16 @@
           }
         }
       },
+      "UpdateLinkRequest" : {
+        "type" : "object",
+        "properties" : {
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          }
+        },
+        "required" : [ "linkType" ]
+      },
       "RequirementFieldsRequest" : {
         "type" : "object",
         "properties" : {
@@ -4398,6 +4886,210 @@
           }
         },
         "required" : [ "content", "page", "size", "totalElements" ]
+      },
+      "DefectItem" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "key", "severity", "status", "title" ]
+      },
+      "OrphansResponse" : {
+        "type" : "object",
+        "properties" : {
+          "requirementsWithoutTests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementItem"
+            }
+          },
+          "testsWithoutRequirement" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestItem"
+            }
+          },
+          "defectsWithoutRequirement" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectItem"
+            }
+          },
+          "automatedNeverExecuted" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestItem"
+            }
+          }
+        },
+        "required" : [ "automatedNeverExecuted", "defectsWithoutRequirement", "requirementsWithoutTests", "testsWithoutRequirement" ]
+      },
+      "RequirementItem" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "riskLevel" : {
+            "type" : "string",
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          }
+        },
+        "required" : [ "key", "riskLevel", "status", "title", "type" ]
+      },
+      "TestItem" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+          },
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+          },
+          "lastResult" : {
+            "type" : "string",
+            "description" : "Dernier résultat ; absent = jamais exécuté",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          }
+        },
+        "required" : [ "key", "kind", "status", "title" ]
+      },
+      "MatrixCell" : {
+        "type" : "object",
+        "properties" : {
+          "requirementKey" : {
+            "type" : "string"
+          },
+          "testKey" : {
+            "type" : "string"
+          },
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "GHERKIN_TAG", "GENERATED", "DISCOVERY" ]
+          },
+          "criterionPositions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "suspect" : {
+            "type" : "boolean"
+          },
+          "lastResult" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "criterionPositions", "linkId", "linkType", "origin", "requirementKey", "suspect", "testKey", "version" ]
+      },
+      "MatrixRequirement" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "parentKey" : {
+            "type" : "string"
+          },
+          "depth" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "leaf" : {
+            "type" : "boolean"
+          },
+          "verificationStatus" : {
+            "type" : "string",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          }
+        },
+        "required" : [ "depth", "key", "leaf", "status", "title", "type", "verificationStatus" ]
+      },
+      "MatrixResponse" : {
+        "type" : "object",
+        "properties" : {
+          "scope" : {
+            "type" : "string"
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MatrixRequirement"
+            }
+          },
+          "tests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestItem"
+            }
+          },
+          "cells" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MatrixCell"
+            }
+          }
+        },
+        "required" : [ "cells", "requirements", "scope", "tests" ]
       },
       "PageResponseTestCaseSummary" : {
         "type" : "object",
@@ -4656,16 +5348,150 @@
           "needsSplitting" : {
             "type" : "boolean"
           },
+          "verificationStatus" : {
+            "type" : "string",
+            "description" : "§7.3 statut de vérification",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          },
           "version" : {
             "type" : "integer",
             "format" : "int64"
           }
         },
-        "required" : [ "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "tags", "title", "type", "version" ]
+        "required" : [ "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "tags", "title", "type", "verificationStatus", "version" ]
+      },
+      "CriterionTraceResponse" : {
+        "type" : "object",
+        "properties" : {
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "format" : {
+            "type" : "string",
+            "enum" : [ "TEXT", "GHERKIN" ]
+          },
+          "content" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "TO_VERIFY", "VERIFIED", "FAILED" ]
+          },
+          "testKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "content", "format", "position", "status", "testKeys" ]
+      },
+      "TestTraceResponse" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "$ref" : "#/components/schemas/TestItem"
+          },
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "GHERKIN_TAG", "GENERATED", "DISCOVERY" ]
+          },
+          "suspect" : {
+            "type" : "boolean"
+          },
+          "criterionPositions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "lastExecutedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "required" : [ "criterionPositions", "linkId", "linkType", "origin", "suspect", "test" ]
+      },
+      "TraceNodeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "verificationStatus" : {
+            "type" : "string",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          },
+          "children" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TraceNodeResponse"
+            }
+          }
+        },
+        "required" : [ "children", "key", "status", "title", "type", "verificationStatus" ]
+      },
+      "TraceTreeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "requirement" : {
+            "$ref" : "#/components/schemas/TraceNodeResponse"
+          },
+          "ancestors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TraceNodeResponse"
+            }
+          },
+          "criteria" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CriterionTraceResponse"
+            }
+          },
+          "tests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestTraceResponse"
+            }
+          },
+          "defects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectItem"
+            }
+          }
+        },
+        "required" : [ "ancestors", "criteria", "defects", "requirement", "tests" ]
       },
       "LinkedTestResponse" : {
         "type" : "object",
         "properties" : {
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
           "key" : {
             "type" : "string"
           },
@@ -4698,9 +5524,74 @@
               "type" : "integer",
               "format" : "int32"
             }
+          },
+          "suspect" : {
+            "type" : "boolean",
+            "description" : "§3.3-7 exigence modifiée depuis la revue du test"
           }
         },
-        "required" : [ "criterionPositions", "key", "kind", "linkType", "origin", "status", "title" ]
+        "required" : [ "criterionPositions", "key", "kind", "linkId", "linkType", "origin", "status", "suspect", "title" ]
+      },
+      "CampaignItem" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "key", "name", "status" ]
+      },
+      "ImpactResponse" : {
+        "type" : "object",
+        "properties" : {
+          "requirement" : {
+            "$ref" : "#/components/schemas/RequirementItem"
+          },
+          "tests" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ImpactedTestResponse"
+            }
+          },
+          "campaigns" : {
+            "type" : "array",
+            "description" : "Campagnes en cours concernées (lot 5)",
+            "items" : {
+              "$ref" : "#/components/schemas/CampaignItem"
+            }
+          }
+        },
+        "required" : [ "campaigns", "requirement", "tests" ]
+      },
+      "ImpactedTestResponse" : {
+        "type" : "object",
+        "properties" : {
+          "test" : {
+            "$ref" : "#/components/schemas/TestItem"
+          },
+          "via" : {
+            "$ref" : "#/components/schemas/RequirementItem",
+            "description" : "Exigence par laquelle le test est lié"
+          },
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "linkType" : {
+            "type" : "string",
+            "enum" : [ "VERIFIES", "PARTIALLY_VERIFIES", "RELATES_TO" ]
+          },
+          "suspect" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "linkId", "linkType", "suspect", "test", "via" ]
       },
       "RequirementTreeNode" : {
         "type" : "object",
@@ -4744,6 +5635,11 @@
           "needsSplitting" : {
             "type" : "boolean"
           },
+          "verificationStatus" : {
+            "type" : "string",
+            "description" : "§7.3 statut de vérification",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          },
           "children" : {
             "type" : "array",
             "items" : {
@@ -4751,7 +5647,7 @@
             }
           }
         },
-        "required" : [ "children", "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "title", "type" ]
+        "required" : [ "children", "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "title", "type", "verificationStatus" ]
       },
       "StepUsageResponse" : {
         "type" : "object",
@@ -4765,6 +5661,103 @@
           }
         },
         "required" : [ "count", "text" ]
+      },
+      "CoverageResponse" : {
+        "type" : "object",
+        "properties" : {
+          "scope" : {
+            "type" : "string"
+          },
+          "design" : {
+            "$ref" : "#/components/schemas/IndicatorResponse",
+            "description" : "Couverture de conception"
+          },
+          "criteria" : {
+            "$ref" : "#/components/schemas/IndicatorResponse",
+            "description" : "Couverture des critères"
+          },
+          "execution" : {
+            "$ref" : "#/components/schemas/IndicatorResponse",
+            "description" : "Couverture d'exécution"
+          },
+          "validation" : {
+            "$ref" : "#/components/schemas/IndicatorResponse",
+            "description" : "Taux de validation"
+          },
+          "riskWeighted" : {
+            "$ref" : "#/components/schemas/IndicatorResponse",
+            "description" : "Couverture pondérée par le risque"
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementCoverageResponse"
+            }
+          }
+        },
+        "required" : [ "criteria", "design", "execution", "requirements", "riskWeighted", "scope", "validation" ]
+      },
+      "IndicatorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "numerator" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "denominator" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "percent" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "Pourcentage ; absent si le périmètre est vide"
+          }
+        },
+        "required" : [ "denominator", "numerator" ]
+      },
+      "RequirementCoverageResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "depth" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "leaf" : {
+            "type" : "boolean"
+          },
+          "riskLevel" : {
+            "type" : "string",
+            "enum" : [ "LOW", "MEDIUM", "HIGH", "CRITICAL" ]
+          },
+          "verificationStatus" : {
+            "type" : "string",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          },
+          "coveringTests" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "executedTests" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passedTests" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "coveringTests", "depth", "executedTests", "key", "leaf", "passedTests", "riskLevel", "title", "type", "verificationStatus" ]
       },
       "ProjectChecklistsResponse" : {
         "type" : "object",

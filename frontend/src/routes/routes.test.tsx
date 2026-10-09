@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { Schemas } from '../api/client';
@@ -43,6 +43,7 @@ describe("§13 routage et garde d'authentification", () => {
     const { router } = renderRoutes(appRoutes, '/p/SHOP');
 
     expect(await screen.findByTestId('nav-dashboard')).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe('/p/SHOP/dashboard');
+    // La barre latérale peut s'afficher avant la redirection de l'index (routes paresseuses).
+    await waitFor(() => expect(router.state.location.pathname).toBe('/p/SHOP/dashboard'));
   });
 });

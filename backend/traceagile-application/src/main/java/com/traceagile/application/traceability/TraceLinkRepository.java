@@ -18,6 +18,11 @@ public interface TraceLinkRepository {
 
     Optional<TraceLink> findBySourceIdAndTargetId(UUID sourceId, UUID targetId);
 
+    /** Tous les liens d'un projet (matrice, couverture). */
+    List<TraceLink> findByProject_Key(String projectKey);
+
+    Optional<TraceLink> findById(UUID id);
+
     TraceLink save(TraceLink link);
 
     void delete(TraceLink link);

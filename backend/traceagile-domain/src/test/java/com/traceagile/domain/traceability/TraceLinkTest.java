@@ -32,4 +32,23 @@ class TraceLinkTest {
         assertThat(link.getTargetId()).isEqualTo(requirement);
         assertThat(link.getOrigin()).isEqualTo(LinkOrigin.GHERKIN_TAG);
     }
+
+    @Test
+    @DisplayName("§3.3-7 une modification de l'exigence rend le lien suspect jusqu'à sa revue")
+    void suspicion() {
+        TraceLink link = TraceLink.testToRequirement(new Project("SHOP", "Boutique", null), UUID.randomUUID(), UUID.randomUUID(),
+                LinkType.VERIFIES, LinkOrigin.MANUAL);
+        assertThat(link.isSuspect()).isFalse();
+
+        link.markSuspect(java.time.Instant.parse("2026-10-09T10:00:00Z"));
+        assertThat(link.isSuspect()).isTrue();
+        assertThat(link.getSuspectSince()).isEqualTo(java.time.Instant.parse("2026-10-09T10:00:00Z"));
+
+        link.markSuspect(java.time.Instant.parse("2026-10-10T10:00:00Z"));
+        assertThat(link.getSuspectSince()).as("la première modification fait foi").isEqualTo(java.time.Instant.parse("2026-10-09T10:00:00Z"));
+
+        link.clearSuspicion();
+        assertThat(link.isSuspect()).isFalse();
+        assertThat(link.getSuspectSince()).isNull();
+    }
 }

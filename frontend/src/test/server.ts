@@ -48,6 +48,7 @@ export const handlers = [
   // Données de référence lues par des fenêtres toujours montées (création de test, arbre des dossiers).
   http.get('/api/v1/reference/frameworks', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/test-folders', () => HttpResponse.json([])),
+  http.get('/api/v1/projects/:key/test-cases', () => HttpResponse.json(page([]))),
 ];
 
 export const server = setupServer(...handlers);

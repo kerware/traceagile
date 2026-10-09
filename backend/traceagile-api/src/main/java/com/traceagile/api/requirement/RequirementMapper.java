@@ -18,17 +18,20 @@ import com.traceagile.domain.common.FieldChange;
 import com.traceagile.domain.requirement.AcceptanceCriterion;
 import com.traceagile.domain.requirement.ChecklistItem;
 import com.traceagile.domain.requirement.ChecklistItemResult;
+import com.traceagile.domain.requirement.CriterionStatus;
 import com.traceagile.domain.requirement.Invest;
 import com.traceagile.domain.requirement.Planguage;
 import com.traceagile.domain.requirement.Requirement;
 import com.traceagile.domain.requirement.RequirementVersion;
 import com.traceagile.domain.requirement.UserStory;
+import com.traceagile.domain.traceability.VerificationStatus;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -36,25 +39,42 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface RequirementMapper {
 
-    @Mapping(target = "parentKey", source = "parent.key")
+    @Mapping(target = "parentKey", source = "requirement.parent.key")
     @Mapping(target = "tags", expression = "java(java.util.List.copyOf(requirement.getTags()))")
     @Mapping(target = "criteriaCount", expression = "java(requirement.getCriteria().size())")
     @Mapping(target = "needsSplitting", expression = "java(requirement.needsSplitting())")
-    RequirementSummary toSummary(Requirement requirement);
+    @Mapping(target = "verificationStatus", source = "verificationStatus")
+    RequirementSummary toSummary(Requirement requirement, VerificationStatus verificationStatus);
+
+    /** F-REQ-12 états calculés des critères d'une exigence (paramètre de mapping). */
+    record CriterionStatuses(Map<UUID, CriterionStatus> byCriterion) {
+
+        CriterionStatus of(AcceptanceCriterion criterion) {
+            return byCriterion.getOrDefault(criterion.getId(), CriterionStatus.TO_VERIFY);
+        }
+    }
 
     @Mapping(target = "needsSplitting", expression = "java(requirement.needsSplitting())")
     @Mapping(target = "allowedTransitions", expression = "java(java.util.List.copyOf(requirement.getStatus().nextStatuses()))")
     @Mapping(target = "tags", expression = "java(java.util.List.copyOf(requirement.getTags()))")
     @Mapping(target = "applicableTransverseNfrs", source = "transverseNfrs")
-    RequirementDetail toDetail(Requirement requirement, List<Requirement> transverseNfrs);
+    @Mapping(target = "verificationStatus", source = "verificationStatus")
+    @Mapping(target = "criteria", expression = "java(toCriteria(requirement.getCriteria(), criterionStatuses))")
+    RequirementDetail toDetail(Requirement requirement, List<Requirement> transverseNfrs, VerificationStatus verificationStatus,
+                               CriterionStatuses criterionStatuses);
 
     RequirementRef toRef(Requirement requirement);
 
     List<RequirementRef> toRefs(List<Requirement> requirements);
 
-    CriterionResponse toResponse(AcceptanceCriterion criterion);
+    default CriterionResponse toResponse(AcceptanceCriterion criterion, CriterionStatus status) {
+        return new CriterionResponse(criterion.getId(), criterion.getPosition(), criterion.getFormat(), criterion.getContent(), status,
+                criterion.getVersion());
+    }
 
-    List<CriterionResponse> toCriteria(List<AcceptanceCriterion> criteria);
+    default List<CriterionResponse> toCriteria(List<AcceptanceCriterion> criteria, CriterionStatuses statuses) {
+        return criteria.stream().map(c -> toResponse(c, statuses.of(c))).toList();
+    }
 
     InvestDto toDto(Invest invest);
 
@@ -101,7 +121,7 @@ public interface RequirementMapper {
     }
 
     /** F-REQ-01 arbre : nœuds racines triés par rang, enfants triés par rang. */
-    default List<RequirementTreeNode> toTree(List<Requirement> backlogByRank) {
+    default List<RequirementTreeNode> toTree(List<Requirement> backlogByRank, Map<UUID, VerificationStatus> statuses) {
         Map<String, List<Requirement>> byParent = new HashMap<>();
         List<Requirement> roots = new ArrayList<>();
         for (Requirement r : backlogByRank) {
@@ -111,15 +131,15 @@ public interface RequirementMapper {
                 byParent.computeIfAbsent(r.getParent().getKey(), k -> new ArrayList<>()).add(r);
             }
         }
-        return roots.stream().map(r -> node(r, byParent)).toList();
+        return roots.stream().map(r -> node(r, byParent, statuses)).toList();
     }
 
-    private RequirementTreeNode node(Requirement r, Map<String, List<Requirement>> byParent) {
+    private RequirementTreeNode node(Requirement r, Map<String, List<Requirement>> byParent, Map<UUID, VerificationStatus> statuses) {
         List<RequirementTreeNode> children = byParent.getOrDefault(r.getKey(), List.of()).stream()
-                .map(child -> node(child, byParent)).toList();
+                .map(child -> node(child, byParent, statuses)).toList();
         return new RequirementTreeNode(r.getKey(), r.getType(), r.getTitle(), r.getStatus(), r.getPriority(), r.getRiskLevel(),
                 r.getStoryPoints(), r.getParent() == null ? null : r.getParent().getKey(), r.getRank(), r.getCriteria().size(),
-                r.needsSplitting(), children);
+                r.needsSplitting(), statuses.getOrDefault(r.getId(), VerificationStatus.NOT_COVERED), children);
     }
 
     /** Valeur d'instantané lisible : listes sur plusieurs lignes, nombres et booléens en texte. */

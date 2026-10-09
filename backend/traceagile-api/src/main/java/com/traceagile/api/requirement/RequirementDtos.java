@@ -10,6 +10,7 @@ import com.traceagile.domain.requirement.Priority;
 import com.traceagile.domain.requirement.RequirementStatus;
 import com.traceagile.domain.requirement.RequirementType;
 import com.traceagile.domain.requirement.RiskLevel;
+import com.traceagile.domain.traceability.VerificationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -41,6 +42,7 @@ public interface RequirementDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String rank,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int criteriaCount,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean needsSplitting,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "§7.3 statut de vérification") VerificationStatus verificationStatus,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) long version) {
     }
 
@@ -56,6 +58,7 @@ public interface RequirementDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String rank,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int criteriaCount,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean needsSplitting,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "§7.3 statut de vérification") VerificationStatus verificationStatus,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<RequirementTreeNode> children) {
     }
 
@@ -87,7 +90,7 @@ public interface RequirementDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int position,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CriterionFormat format,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String content,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CriterionStatus status,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-REQ-12 calculé d'après les tests liés") CriterionStatus status,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) long version) {
     }
 
@@ -104,6 +107,7 @@ public interface RequirementDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-REQ-07 alerte « Story à découper » (13 points ou plus)") boolean needsSplitting,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RequirementStatus status,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "§3.2 statuts accessibles depuis le statut courant") List<RequirementStatus> allowedTransitions,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "§7.3 statut de vérification") VerificationStatus verificationStatus,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RiskLevel riskLevel,
             NfrCategory category,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PlanguageResponse planguage,

@@ -16,6 +16,7 @@ export function summary(key: string, overrides: Partial<RequirementSummary> = {}
     rank: key,
     criteriaCount: 1,
     needsSplitting: false,
+    verificationStatus: 'NOT_COVERED',
     version: 0,
     ...overrides,
   };
@@ -32,6 +33,7 @@ export function node(key: string, overrides: Partial<RequirementTreeNode> = {}):
     rank: key,
     criteriaCount: 0,
     needsSplitting: false,
+    verificationStatus: 'NOT_COVERED',
     children: [],
     ...overrides,
   };
@@ -48,6 +50,7 @@ export function detail(key: string, overrides: Partial<RequirementDetail> = {}):
     priority: 'SHOULD',
     storyPoints: 5,
     needsSplitting: false,
+    verificationStatus: 'NOT_COVERED',
     status: 'DRAFT',
     allowedTransitions: ['TO_REFINE', 'READY', 'REJECTED', 'OBSOLETE'],
     riskLevel: 'MEDIUM',

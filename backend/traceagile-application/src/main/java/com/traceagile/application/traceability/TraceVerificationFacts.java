@@ -7,16 +7,19 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * F-REQ-19 faits de DoR / DoD. Lot 2 : « au moins un test lié » est évalué ; les résultats
- * d'exécution (lot 5) et les anomalies (lot 5) restent « non évalués ».
+ * F-REQ-19 faits de DoR / DoD. « Au moins un test lié » (lot 2) et « tous les tests liés passés »
+ * (lot 3, d'après {@link ExecutionResults}) sont évalués ; les anomalies bloquantes restent « non
+ * évaluées » jusqu'au lot 5.
  */
 @Component
 public class TraceVerificationFacts implements VerificationFacts {
 
     private final TraceLinkService links;
+    private final TraceabilityService traceability;
 
-    public TraceVerificationFacts(@Lazy TraceLinkService links) {
+    public TraceVerificationFacts(@Lazy TraceLinkService links, @Lazy TraceabilityService traceability) {
         this.links = links;
+        this.traceability = traceability;
     }
 
     @Override
@@ -26,7 +29,7 @@ public class TraceVerificationFacts implements VerificationFacts {
 
     @Override
     public Optional<Boolean> allLinkedTestsPassed(Requirement requirement) {
-        return Optional.empty();
+        return Optional.of(traceability.allCoveringTestsPassed(requirement));
     }
 
     @Override

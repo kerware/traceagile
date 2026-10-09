@@ -206,7 +206,8 @@
       "defects": "Anomalies",
       "versions": "Versions",
       "history": "Historique",
-      "comments": "Commentaires"
+      "comments": "Commentaires",
+      "traceability": "Traçabilité"
     },
     "laterLot": "Disponible au lot {{lot}}.",
     "userStory": "User story",
@@ -480,6 +481,110 @@
     "addTest": "Ajouter un test lié",
     "testLinked": "{{key}} créé et lié à {{requirement}}"
   },
+  "verification": {
+    "NOT_COVERED": "Non couverte",
+    "NOT_RUN": "Non exécutée",
+    "IN_PROGRESS": "En cours",
+    "VALIDATED": "Validée",
+    "FAILED": "En échec",
+    "BLOCKED": "Bloquée",
+    "SUSPECT": "Suspecte",
+    "hint": {
+      "NOT_COVERED": "Aucun test lié (vérifie ou vérifie partiellement).",
+      "NOT_RUN": "Tests liés, aucune exécution.",
+      "IN_PROGRESS": "Au moins une exécution, d'autres tests pas encore exécutés.",
+      "VALIDATED": "La dernière exécution de chaque test lié a réussi.",
+      "FAILED": "Un test lié a échoué ou une anomalie bloquante est ouverte.",
+      "BLOCKED": "Un test lié est bloqué, aucun en échec.",
+      "SUSPECT": "L'exigence a changé depuis la revue d'un test lié."
+    }
+  },
+  "executionStatus": {
+    "NOT_RUN": "Non exécuté",
+    "RUNNING": "En cours",
+    "PASSED": "Réussi",
+    "FAILED": "Échoué",
+    "BLOCKED": "Bloqué",
+    "SKIPPED": "Ignoré",
+    "ERROR": "Erreur technique"
+  },
+  "traceability": {
+    "title": "Traçabilité",
+    "tabs": {
+      "matrix": "Matrice",
+      "coverage": "Couverture",
+      "orphans": "Orphelins",
+      "impact": "Analyse d'impact"
+    },
+    "scope": "Périmètre",
+    "scopeHint": "Projet, épic ou feature (releases et sprints au lot 4)",
+    "wholeProject": "Tout le projet",
+    "kinds": "Natures de test",
+    "allTests": "Afficher tous les tests",
+    "allTestsHint": "Pour lier d'un clic un test pas encore lié",
+    "cellLegend": "V : vérifie · PV : vérifie partiellement · R : informatif · ⚠ : suspect · clic sur une case vide : lier",
+    "noTests": "Aucun test lié dans ce périmètre. Activez « Afficher tous les tests » pour créer des liens.",
+    "requirement": "Exigence",
+    "verification": "Vérification",
+    "cellLabel": "Lien entre {{requirement}} et {{test}}",
+    "createLink": "Lier {{test}} à {{requirement}} (vérifie)",
+    "linked": "{{test}} lié à {{requirement}}",
+    "linkTitle": "{{test}} → {{requirement}}",
+    "suspectHint": "L'exigence a été modifiée depuis la dernière revue de ce test : vérifiez qu'il est toujours à jour.",
+    "origin": "Origine",
+    "lastResult": "Dernier résultat",
+    "deleteLink": "Supprimer le lien",
+    "markReviewed": "Marquer comme revu",
+    "coveringTests": "Tests couvrants",
+    "executedTests": "Exécutés",
+    "passedTests": "Réussis",
+    "linkType": "Type de lien",
+    "suspect": "Suspect"
+  },
+  "coverage": {
+    "design": "Couverture de conception",
+    "criteria": "Couverture des critères",
+    "execution": "Couverture d'exécution",
+    "validation": "Taux de validation",
+    "riskWeighted": "Couverture pondérée par le risque",
+    "formula": {
+      "design": "Exigences feuilles liées à au moins un test (vérifie ou vérifie partiellement) ÷ exigences feuilles du périmètre.",
+      "criteria": "Critères d'acceptation liés à au moins un test ÷ critères du périmètre.",
+      "execution": "Exigences dont tous les tests liés ont été exécutés ÷ exigences couvertes.",
+      "validation": "Exigences dont la dernière exécution de chaque test lié a réussi ÷ exigences couvertes.",
+      "riskWeighted": "Couverture de conception où chaque exigence pèse 1, 2, 4 ou 8 selon son risque."
+    }
+  },
+  "orphans": {
+    "requirements": "Exigences sans test",
+    "tests": "Tests sans exigence",
+    "neverExecuted": "Tests automatisés jamais exécutés",
+    "defects": "Anomalies sans exigence",
+    "defectsLater": "Les anomalies arrivent avec les campagnes (lot 5).",
+    "none": "Aucun."
+  },
+  "impact": {
+    "title": "Analyse d'impact",
+    "requirement": "Exigence modifiée",
+    "pick": "Choisissez une exigence",
+    "summary_one": "{{count}} test à revoir si cette exigence change ({{suspect}} déjà signalé suspect).",
+    "summary_other": "{{count}} tests à revoir si cette exigence change ({{suspect}} déjà signalés suspects).",
+    "test": "Test",
+    "via": "Lié par",
+    "status": "État",
+    "campaigns": "Campagnes en cours concernées",
+    "noCampaigns": "Aucune campagne en cours (les campagnes arrivent au lot 5)."
+  },
+  "traceTree": {
+    "children": "Exigences enfants",
+    "criteria": "Critères d'acceptation",
+    "noCriteria": "Aucun critère.",
+    "noTest": "aucun test",
+    "tests": "Tests liés et dernières exécutions",
+    "neverExecuted": "jamais exécuté",
+    "defects": "Anomalies",
+    "noDefects": "Aucune anomalie (les anomalies arrivent au lot 5)."
+  },
   "test": {
     "kind": "Nature",
     "title": "Titre",
@@ -624,7 +729,12 @@
   "linkedTests": {
     "title": "Tests liés",
     "empty": "Aucun test ne vérifie cette exigence.",
-    "criteria": "critères {{list}}"
+    "criteria": "critères {{list}}",
+    "addTest": "Lier un test",
+    "searchTest": "Rechercher (clé, titre)",
+    "noCandidate": "Aucun test à lier",
+    "criteriaLabel": "Critères vérifiés",
+    "link": "Lier"
   },
   "generate": {
     "button": "Générer un test BDD",

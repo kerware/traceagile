@@ -7,6 +7,9 @@ import com.traceagile.api.requirement.RequirementDtos.UpdateCriterionRequest;
 import com.traceagile.api.web.Versions;
 import com.traceagile.application.requirement.AcceptanceCriterionService;
 import com.traceagile.application.requirement.RequirementService;
+import com.traceagile.application.traceability.TraceabilityService;
+import com.traceagile.api.requirement.RequirementMapper.CriterionStatuses;
+import com.traceagile.domain.requirement.Requirement;
 import com.traceagile.domain.requirement.AcceptanceCriterion;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,8 +40,11 @@ public class AcceptanceCriterionController {
     private final RequirementService requirements;
     private final RequirementMapper mapper;
 
+    private final TraceabilityService traceability;
+
     public AcceptanceCriterionController(AcceptanceCriterionService criteria, RequirementService requirements,
-                                         RequirementMapper mapper) {
+                                         RequirementMapper mapper, TraceabilityService traceability) {
+        this.traceability = traceability;
         this.criteria = criteria;
         this.requirements = requirements;
         this.mapper = mapper;
@@ -47,7 +53,7 @@ public class AcceptanceCriterionController {
     @GetMapping("/requirements/{key}/acceptance-criteria")
     @PreAuthorize(RequirementController.READ)
     public List<CriterionResponse> list(@PathVariable String projectKey, @PathVariable String key) {
-        return mapper.toCriteria(requirements.get(projectKey, key).getCriteria());
+        return criteriaOf(projectKey, requirements.get(projectKey, key));
     }
 
     @PostMapping("/requirements/{key}/acceptance-criteria")
@@ -56,14 +62,14 @@ public class AcceptanceCriterionController {
                                                  @Valid @RequestBody CreateCriterionRequest request) {
         AcceptanceCriterion criterion = criteria.add(projectKey, key, request.format(), request.content());
         return ResponseEntity.created(URI.create("/api/v1/projects/" + projectKey + "/acceptance-criteria/" + criterion.getId()))
-                .body(mapper.toResponse(criterion));
+                .body(response(projectKey, criterion));
     }
 
     @PutMapping("/requirements/{key}/acceptance-criteria/order")
     @PreAuthorize(RequirementController.CONTRIBUTE)
     public List<CriterionResponse> reorder(@PathVariable String projectKey, @PathVariable String key,
                                            @Valid @RequestBody ReorderCriteriaRequest request) {
-        return mapper.toCriteria(criteria.reorder(projectKey, key, request.ids()).getCriteria());
+        return criteriaOf(projectKey, criteria.reorder(projectKey, key, request.ids()));
     }
 
     @PatchMapping(path = "/acceptance-criteria/{id}", consumes = {"application/merge-patch+json", "application/json"})
@@ -73,7 +79,7 @@ public class AcceptanceCriterionController {
                                                     @Valid @RequestBody UpdateCriterionRequest request) {
         AcceptanceCriterion criterion = criteria.update(projectKey, id, request.format(), request.content(),
                 Versions.parseIfMatch(ifMatch));
-        return ResponseEntity.ok().eTag(Versions.etag(criterion)).body(mapper.toResponse(criterion));
+        return ResponseEntity.ok().eTag(Versions.etag(criterion)).body(response(projectKey, criterion));
     }
 
     @DeleteMapping("/acceptance-criteria/{id}")
@@ -81,5 +87,15 @@ public class AcceptanceCriterionController {
     public ResponseEntity<Void> delete(@PathVariable String projectKey, @PathVariable UUID id) {
         criteria.delete(projectKey, id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** F-REQ-12 états calculés d'après les tests liés. */
+    private List<CriterionResponse> criteriaOf(String projectKey, Requirement requirement) {
+        return mapper.toCriteria(requirement.getCriteria(), new CriterionStatuses(traceability.criterionStatuses(projectKey, requirement)));
+    }
+
+    private CriterionResponse response(String projectKey, AcceptanceCriterion criterion) {
+        Requirement requirement = criterion.getRequirement();
+        return mapper.toResponse(criterion, new CriterionStatuses(traceability.criterionStatuses(projectKey, requirement)).of(criterion));
     }
 }

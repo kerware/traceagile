@@ -18,6 +18,9 @@ import com.traceagile.application.requirement.RequirementService;
 import com.traceagile.domain.requirement.Requirement;
 import com.traceagile.domain.requirement.RequirementStatus;
 import com.traceagile.domain.requirement.RequirementType;
+import com.traceagile.application.traceability.TraceabilityService;
+import com.traceagile.application.traceability.TraceabilityService.Matrix;
+import com.traceagile.domain.traceability.VerificationStatus;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -46,6 +49,8 @@ class DemoDataTest extends AbstractApiTest {
     TestCaseService testCases;
     @Autowired
     TraceLinkService links;
+    @Autowired
+    TraceabilityService traceability;
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
@@ -84,8 +89,26 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(byTechnique).containsKeys(TestTechnique.BDD, TestTechnique.UI, TestTechnique.API, TestTechnique.UNIT,
                 TestTechnique.DATA_DRIVEN, TestTechnique.PERFORMANCE);
         assertThat(byTechnique.get(TestTechnique.BDD)).isEqualTo(16L);
-        assertThat(all).allSatisfy(t -> assertThat(t.getStatus()).isEqualTo(TestCaseStatus.READY));
+        // Lot 3 (§3.3-7) : les tests de la story modifiée après coup sont à revoir, tous les autres READY.
+        Requirement promo = byTitle.get("Appliquer un code promo");
+        List<TestCase> promoTests = links.testsOf(promo).stream().map(l -> l.testCase()).toList();
+        assertThat(promoTests).isNotEmpty().allSatisfy(t -> assertThat(t.getStatus()).isEqualTo(TestCaseStatus.NEEDS_UPDATE));
+        assertThat(all.stream().filter(t -> !promoTests.contains(t)))
+                .allSatisfy(t -> assertThat(t.getStatus()).isEqualTo(TestCaseStatus.READY));
+        assertThat(links.testsOf(promo)).allSatisfy(l -> assertThat(l.suspect()).isTrue());
         assertThat(all.stream().filter(t -> links.requirementsOf(t).isEmpty())).hasSize(2);
         assertThat(stories.stream().filter(s -> links.testsOf(s).isEmpty())).hasSizeGreaterThanOrEqualTo(3);
+
+        // Lot 3 — critère de fin : matrice correcte sur le jeu de démonstration.
+        Matrix matrix = traceability.matrix("SHOP", null, false, null);
+        assertThat(matrix.rows()).hasSize(backlog.size());
+        long requirementLinks = backlog.stream().mapToLong(r -> links.testsOf(r).size()).sum();
+        assertThat(matrix.cells()).hasSize((int) requirementLinks);
+        assertThat(matrix.columns()).hasSize((int) all.stream().filter(t -> !links.requirementsOf(t).isEmpty()).count());
+        assertThat(matrix.cells().stream().filter(c -> c.link().isSuspect()).map(c -> c.requirement().getTitle()))
+                .isNotEmpty().allMatch("Appliquer un code promo"::equals);
+        assertThat(matrix.rows().stream().filter(r -> r.requirement().equals(promo)).findFirst().orElseThrow().status())
+                .isEqualTo(VerificationStatus.SUSPECT);
+        assertThat(traceability.orphans("SHOP").testsWithoutRequirement()).hasSize(2);
     }
 }

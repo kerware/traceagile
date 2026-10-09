@@ -1,0 +1,11 @@
+/* F-TRA-04 cellule vide de la matrice : visible au survol, clic = création du lien. */
+.empty {
+  display: block;
+  margin: auto;
+}
+
+.empty:hover,
+.empty:focus-visible {
+  background-color: var(--mantine-color-teal-1);
+  outline: 1px dashed var(--mantine-color-teal-6);
+}
