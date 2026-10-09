@@ -1,7 +1,8 @@
 package com.traceagile.application.traceability;
 
 import com.traceagile.application.common.NotFoundException;
-import com.traceagile.application.common.UnprocessableException;
+import com.traceagile.application.planning.ReleaseRepository;
+import com.traceagile.application.planning.SprintRepository;
 import com.traceagile.application.requirement.RequirementRepository;
 import com.traceagile.application.testcase.TestCaseRepository;
 import com.traceagile.application.traceability.ExecutionResults.CampaignRef;
@@ -10,6 +11,7 @@ import com.traceagile.application.traceability.ExecutionResults.LastExecution;
 import com.traceagile.application.traceability.ProjectTrace.Row;
 import com.traceagile.domain.common.BusinessRuleException;
 import com.traceagile.domain.execution.ExecutionStatus;
+import com.traceagile.domain.planning.Sprint;
 import com.traceagile.domain.requirement.AcceptanceCriterion;
 import com.traceagile.domain.requirement.CriterionStatus;
 import com.traceagile.domain.requirement.Requirement;
@@ -88,9 +90,13 @@ public class TraceabilityService {
     private final TestCaseRepository tests;
     private final TraceLinkRepository links;
     private final ExecutionResults executions;
+    private final SprintRepository sprints;
+    private final ReleaseRepository releases;
 
     public TraceabilityService(RequirementRepository requirements, TestCaseRepository tests, TraceLinkRepository links,
-                               ExecutionResults executions) {
+                               ExecutionResults executions, SprintRepository sprints, ReleaseRepository releases) {
+        this.sprints = sprints;
+        this.releases = releases;
         this.requirements = requirements;
         this.tests = tests;
         this.links = links;
@@ -108,31 +114,51 @@ public class TraceabilityService {
     }
 
     /**
-     * Périmètre (§7.2) : {@code project} (défaut) ou {@code requirement:REQ-1} (exigence et
-     * descendants, épic ou feature). Releases et sprints arrivent au lot 4.
+     * Périmètre (§7.2) : {@code project} (défaut), {@code requirement:REQ-n} (exigence et
+     * descendants : épic, feature), {@code sprint:SPR-n} ou {@code release:REL-n} (exigences de leur
+     * périmètre, à plat).
      */
-    public Requirement scopeRoot(String projectKey, String scope) {
+    public List<Row> scoped(ProjectTrace trace, String projectKey, String scope) {
         if (scope == null || scope.isBlank() || scope.equals("project")) {
-            return null;
+            return trace.rows();
         }
         int colon = scope.indexOf(':');
         String kind = colon < 0 ? scope : scope.substring(0, colon);
         String value = colon < 0 ? "" : scope.substring(colon + 1);
         return switch (kind) {
-            case "requirement", "epic", "feature" -> requirements.findByProject_KeyAndKey(projectKey, value)
-                    .orElseThrow(() -> new NotFoundException("REQ_NOT_FOUND", "Exigence « " + value + " » introuvable."));
-            case "release", "sprint" -> throw new UnprocessableException("SCOPE_NOT_AVAILABLE",
-                    "Le périmètre par release ou sprint sera disponible avec la planification (lot 4).", Map.of());
+            case "requirement", "epic", "feature" -> trace.scope(requirements.findByProject_KeyAndKey(projectKey, value)
+                    .orElseThrow(() -> new NotFoundException("REQ_NOT_FOUND", "Exigence « " + value + " » introuvable.")));
+            case "sprint" -> trace.only(scopeIds(List.of(sprints.findByProject_KeyAndKey(projectKey, value)
+                    .orElseThrow(() -> new NotFoundException("SPRINT_NOT_FOUND", "Sprint « " + value + " » introuvable.")))));
+            case "release" -> trace.only(scopeIds(releases.findByProject_KeyAndKey(projectKey, value)
+                    .orElseThrow(() -> new NotFoundException("RELEASE_NOT_FOUND", "Release « " + value + " » introuvable."))
+                    .getSprints()));
             default -> throw new BusinessRuleException("SCOPE_INVALID",
-                    "Périmètre inconnu : « " + scope + " » (project, requirement:REQ-n).");
+                    "Périmètre inconnu : « " + scope + " » (project, requirement:REQ-n, sprint:SPR-n, release:REL-n).");
         };
+    }
+
+    private static Set<UUID> scopeIds(List<Sprint> sprints) {
+        Set<UUID> ids = new LinkedHashSet<>();
+        sprints.forEach(s -> s.requirements().forEach(r -> ids.add(r.getId())));
+        return ids;
+    }
+
+    /** F-PLN-02 couverture de chaque sprint du projet (taux de validation de la feuille de route). */
+    public Map<String, Coverage> coverageBySprint(String projectKey) {
+        ProjectTrace trace = load(projectKey);
+        Map<String, Coverage> bySprint = new LinkedHashMap<>();
+        for (Sprint sprint : sprints.findByProject_KeyOrderByStartDateAsc(projectKey)) {
+            bySprint.put(sprint.getKey(), trace.coverage(trace.only(scopeIds(List.of(sprint)))));
+        }
+        return bySprint;
     }
 
     // ---------------------------------------------------------------- F-TRA-04 matrice
 
     public Matrix matrix(String projectKey, String scope, boolean allTests, Set<TestKind> kinds) {
         ProjectTrace trace = load(projectKey);
-        List<Row> scoped = trace.scope(scopeRoot(projectKey, scope));
+        List<Row> scoped = scoped(trace, projectKey, scope);
         List<MatrixRow> rows = scoped.stream()
                 .map(r -> new MatrixRow(r.requirement(), r.depth(), trace.isLeaf(r.requirement()), trace.status(r.requirement())))
                 .toList();
@@ -160,7 +186,7 @@ public class TraceabilityService {
 
     public CoverageReport coverage(String projectKey, String scope) {
         ProjectTrace trace = load(projectKey);
-        List<Row> scoped = trace.scope(scopeRoot(projectKey, scope));
+        List<Row> scoped = scoped(trace, projectKey, scope);
         List<RequirementCoverage> details = scoped.stream().map(row -> {
             Requirement r = row.requirement();
             List<TraceLink> covering = trace.coveringLinks(r);

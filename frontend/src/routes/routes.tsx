@@ -7,7 +7,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { PROJECT_SCREENS } from '../layouts/navigation';
 
 /** Écrans déjà livrés ; les autres affichent leur lot de livraison. */
-const DELIVERED = ['dashboard', 'backlog', 'tests', 'traceability'];
+const DELIVERED = ['dashboard', 'backlog', 'tests', 'planning', 'traceability'];
 
 export const routerFuture = {
   v7_relativeSplatPath: true,
@@ -58,6 +58,10 @@ export const appRoutes: RouteObject[] = [
           {
             path: 'tests/:tk',
             lazy: () => import('../features/tests/TestCasePage').then((m) => ({ Component: m.TestCasePage })),
+          },
+          {
+            path: 'planning',
+            lazy: () => import('../features/planning/PlanningPage').then((m) => ({ Component: m.PlanningPage })),
           },
           {
             path: 'traceability',

@@ -13,7 +13,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 2. Tests | Référentiel, manuels, automatisés, Gherkin Monaco, génération BDD, tags `@REQ-` | **Fait** (branche `lot-2-tests`) |
 | Corrections 0-2 | Défilement après panneau latéral, paramètres `${nom}` et jeux de données nommés, dossiers de tests et menus contextuels des arbres (ADR-0013) | **Fait** (branche `lot-2-corrections`) |
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | **Fait** (branche `lot-3-tracabilite`) |
-| 4. Planification | Releases, sprints, planification, démarrage / clôture | À faire |
+| 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | À faire |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | À faire |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | À faire |
@@ -21,9 +21,8 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
 
 Reporté (à reprendre dans le lot indiqué) :
-- Parcours §15.3 étape 1 : ajout de la story à `SPR-2` → lot 4 (sprints). Le reste est automatisé.
 - Parcours §15.3 étape 2 : sélection du test BDD et de la charte dans une campagne → lot 5.
-- Traçabilité (ADR-0014) : périmètres `release:` / `sprint:` → lot 4 ; derniers résultats, anomalies
+- Traçabilité (ADR-0014) : derniers résultats, anomalies
   bloquantes, campagnes en cours et suspicion « modifiée après la dernière exécution » → lot 5
   (remplacer `NoExecutionResults` par l'adaptateur des exécutions) ; cache des statuts si §14 l'exige.
 - F-MAN-02 tri des candidats par fréquence d'exécution → lot 5 (aujourd'hui : par priorité).
@@ -31,6 +30,8 @@ Reporté (à reprendre dans le lot indiqué) :
 - F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
 - §3.3-6 « suppression interdite si exécutée » et item DoD « aucune anomalie bloquante » → lot 5.
 - Choix du jeu de données (ADR-0013) à l'exécution : campagne → lot 5, `dataSet` du job → lot 7.
+- Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
+- Démo : stories de SPR-1 passées DONE sans exécution (ADR-0015) → exécutions de SPR-1 au lot 5.
 - F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes, Example Mapping → lot 9.
 - `docs/execution-server-api.yaml` (contrat §10) → lot 7.
 - Seuil JaCoCo bloquant (NF-12), SpotBugs (NF-13), axe-core (NF-10) → lot 9 ; le rapport JaCoCo est
@@ -140,6 +141,9 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `projects`/`users`, plus les tables sans clé étrangère comme `audit_events`). Chaque contrôleur :
   nominal, 400, 403, 412 si PATCH, 422 pour les règles métier.
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
+- Planification (ADR-0015) : règles de dates et de cycle de vie dans `Release` / `Sprint` /
+  `SprintSchedule` (domaine) ; transitions d'exigences décidées par la planification via
+  `RequirementService.applyPlanningStatus` (sans DoR, auditée).
 - Traçabilité (ADR-0014) : statuts et couverture calculés par `TraceabilityService` sur une
   `ProjectTrace` chargée une fois par requête (jamais exigence par exigence) ; règles pures dans
   `VerificationRules` / `CoverageCalculator` (domaine). Les faits d'exécution passent par le port
@@ -162,6 +166,10 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Statut de vérification : `features/traceability/VerificationBadge` (pastille, `data-status`) ;
   hooks dans `src/api/traceability.ts`, qui invalident traçabilité, tests et exigences.
 - Pluriels i18next : en français, 0 est au singulier (`_one`).
+- Glisser-déposer entre colonnes (planification) : `useDraggable` / `useDroppable` de dnd-kit, avec
+  toujours un bouton équivalent (clavier, tests) ; en Playwright, `glisser()` de `e2e/tests/support.ts`.
+- Mutation optimiste suivie d'une navigation : dans un test bout en bout, attendre la réponse
+  (`page.waitForResponse`) avant de quitter la page.
 - Éditeurs de code : `components/code/CodeEditor` (Monaco local, chargé à la demande ; grammaire
   Gherkin et autocomplétion dans `monacoSetup.ts`). En test (jsdom), il devient une zone de texte.
 - user-event : « {{ » saisit une accolade littérale (`'${{nom}'` pour taper `${nom}`).
@@ -193,6 +201,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   8 chartes, 14 tests automatisés (UI Playwright, API REST Assured, JUnit 5, data-driven, Gatling ;
   identifiants `@fail` / `@flaky` pour le simulateur du lot 7) et 16 tests BDD générés depuis les critères Gherkin ; 2 tests orphelins ; plusieurs
   stories non couvertes. Tous `READY`.
+- Lot 4 : `REL-1` « Version 2.0 », 3 sprints de 2 semaines calés sur la date du jour — `SPR-1` clos
+  (une story reportée), `SPR-2` actif, `SPR-3` planifié (`DemoPlanningLoader`, rejoué si aucune release).
 - Lot 3 : la story « Appliquer un code promo » est précisée après coup → ses tests sont
   `NEEDS_UPDATE` et leurs liens suspects (§3.3-7). Sur une base déjà chargée, la démo n'est pas
   rejouée : `docker compose down -v` pour repartir de zéro.

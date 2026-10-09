@@ -168,7 +168,7 @@ class TraceabilityApiTest extends AbstractApiTest {
     }
 
     @Test
-    @DisplayName("F-TRA-04 matrice : ordre de l'arbre, colonnes liées ou toutes, périmètre ; release / sprint au lot 4 (422)")
+    @DisplayName("F-TRA-04 matrice : ordre de l'arbre, colonnes liées ou toutes, périmètre ; release inconnue (404)")
     void matrix() throws Exception {
         link("TC-1", "REQ-3", "VERIFIES", List.of(1));
         link("TC-2", "REQ-4", "RELATES_TO", List.of());
@@ -186,8 +186,8 @@ class TraceabilityApiTest extends AbstractApiTest {
         mvc.perform(get(P + "/traceability/matrix").param("scope", "requirement:REQ-4").header("Authorization", qa))
                 .andExpect(jsonPath("$.requirements[*].key", contains("REQ-4")));
         mvc.perform(get(P + "/traceability/matrix").param("scope", "release:REL-1").header("Authorization", qa))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.code", is("SCOPE_NOT_AVAILABLE")));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code", is("RELEASE_NOT_FOUND")));
         mvc.perform(get(P + "/traceability/matrix").param("scope", "n'importe").header("Authorization", qa))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.code", is("SCOPE_INVALID")));

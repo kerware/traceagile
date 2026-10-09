@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { connexion } from './support';
+import { connexion, glisser } from './support';
 
 /**
  * Parcours §15.3 étape 1 — « Le PO crée une story avec deux critères Gherkin, la passe à READY,
- * l'ajoute à SPR-2. » L'ajout au sprint SPR-2 sera automatisé au lot 4 (planification, ADR-0009).
+ * l'ajoute à SPR-2. »
  */
-test('Parcours 1 : le PO crée une story avec deux critères Gherkin et la passe à « Prête »', async ({ page }) => {
+test('Parcours 1 : le PO crée une story avec deux critères Gherkin, la passe à « Prête » et l’ajoute à SPR-2', async ({ page }) => {
   const titre = `Retrait en magasin ${Date.now()}`;
+  let cle = '';
 
   await test.step('Le PO se connecte et ouvre le backlog du projet SHOP', async () => {
     await connexion(page, 'po');
@@ -27,6 +28,7 @@ test('Parcours 1 : le PO crée une story avec deux critères Gherkin et la passe
     );
     await page.getByTestId('requirement-create-submit').click();
     await expect(page.getByTestId('requirement-title')).toHaveText(titre);
+    cle = (await page.getByTestId('requirement-key').textContent())!.trim();
   });
 
   await test.step('Il l’estime à 5 points', async () => {
@@ -69,7 +71,21 @@ test('Parcours 1 : le PO crée une story avec deux critères Gherkin et la passe
     await expect(page.getByTestId('versions-table')).toContainText('Passage à READY');
   });
 
-  test.info().annotations.push({ type: 'lot 4', description: 'Ajout de la story au sprint SPR-2 (planification).' });
+  await test.step('Il ouvre la planification de SPR-2 (sprint actif) et y glisse la story', async () => {
+    await page.goto('/p/SHOP/planning?tab=sprint&sprint=SPR-2');
+    await expect(page.getByTestId('sprint-status')).toHaveText('Actif');
+    await page.getByTestId('ready-search').fill(titre);
+    const enregistrement = page.waitForResponse((r) => r.url().endsWith('/sprints/SPR-2/scope') && r.request().method() === 'PUT');
+    await glisser(page, page.getByTestId(`drag-${cle}`), page.getByTestId('column-sprint'));
+    const reponse = await enregistrement;
+    expect(reponse.status(), await reponse.text()).toBe(200);
+    await expect(page.getByTestId(`sprint-item-${cle}`)).toBeVisible();
+  });
+
+  await test.step('Le sprint étant actif, la story passe « En sprint »', async () => {
+    await page.goto(`/p/SHOP/requirements/${cle}`);
+    await expect(page.getByTestId('status-menu')).toContainText('En sprint');
+  });
 });
 
 async function ajouterCritereGherkin(page: import('@playwright/test').Page, lignes: string[]) {

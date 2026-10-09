@@ -36,6 +36,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/sprints/{key}/scope": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["scope"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}/invest": {
         parameters: {
             query?: never;
@@ -276,6 +292,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/sprints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sprints"];
+        put?: never;
+        post: operations["createSprint"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/sprints/{key}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/sprints/{key}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements": {
         parameters: {
             query?: never;
@@ -382,6 +446,54 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["importCsv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/releases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["releases"];
+        put?: never;
+        post: operations["createRelease"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/releases/{key}/generate-sprints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["generateSprints"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/releases/{key}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["closeRelease"];
         delete?: never;
         options?: never;
         head?: never;
@@ -516,6 +628,22 @@ export interface paths {
         patch: operations["update_2"];
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/sprints/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sprint"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateSprint"];
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}": {
         parameters: {
             query?: never;
@@ -530,6 +658,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["update_3"];
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/releases/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["release"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateRelease"];
         trace?: never;
     };
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}": {
@@ -949,6 +1093,72 @@ export interface components {
             criterionPositions: number[];
             /** @description §3.3-7 exigence modifiée depuis la revue du test */
             suspect: boolean;
+        };
+        ScopeRequest: {
+            requirementKeys: string[];
+        };
+        ScopeItemResponse: {
+            key: string;
+            title: string;
+            /** @enum {string} */
+            type: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER";
+            /** @enum {string} */
+            status: "DRAFT" | "TO_REFINE" | "READY" | "IN_SPRINT" | "DONE" | "ACCEPTED" | "REJECTED" | "OBSOLETE";
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** Format: int32 */
+            storyPoints?: number;
+            /** @enum {string} */
+            outcome: "PLANNED" | "DONE" | "RETURNED" | "CARRIED_OVER" | "DROPPED";
+            /** @enum {string} */
+            verificationStatus: "NOT_COVERED" | "NOT_RUN" | "IN_PROGRESS" | "VALIDATED" | "FAILED" | "BLOCKED" | "SUSPECT";
+        };
+        SprintDetail: {
+            sprint: components["schemas"]["SprintSummary"];
+            scope: components["schemas"]["ScopeItemResponse"][];
+            /** @description F-PLN-06 sprint qui recevrait les stories reportées */
+            nextSprintKey?: string;
+        };
+        SprintSummary: {
+            key: string;
+            name: string;
+            goal?: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** @enum {string} */
+            status: "PLANNED" | "ACTIVE" | "CLOSED";
+            /** Format: int32 */
+            capacityPoints?: number;
+            releaseKey?: string;
+            /**
+             * Format: int32
+             * @description F-PLN-05 charge en points du périmètre
+             */
+            loadPoints: number;
+            /**
+             * Format: int32
+             * @description Charge / capacité en % ; absent sans capacité
+             */
+            loadPercent?: number;
+            overCapacity: boolean;
+            /**
+             * Format: int32
+             * @description Points des stories terminées (sprint clos)
+             */
+            donePoints: number;
+            /** Format: int32 */
+            requirementCount: number;
+            /** @description Clés des exigences du périmètre (ordre) */
+            requirementKeys: string[];
+            /**
+             * Format: double
+             * @description F-PLN-02 taux de validation du périmètre (%), absent si rien n'est couvert
+             */
+            validationRate?: number;
+            /** Format: int64 */
+            version: number;
         };
         InvestDto: {
             independent: boolean;
@@ -1375,6 +1585,25 @@ export interface components {
             disappeared: string[];
             warnings: string[];
         };
+        CreateSprintRequest: {
+            name: string;
+            goal?: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** Format: int32 */
+            capacityPoints?: number;
+            releaseKey?: string;
+        };
+        CloseDecisionRequest: {
+            requirementKey: string;
+            /** @enum {string} */
+            action: "BACKLOG" | "NEXT_SPRINT";
+        };
+        CloseSprintRequest: {
+            decisions?: components["schemas"]["CloseDecisionRequest"][];
+        };
         CreateCriterionRequest: {
             /** @enum {string} */
             format: "TEXT" | "GHERKIN";
@@ -1440,6 +1669,47 @@ export interface components {
         ImportResponse: {
             created: string[];
         };
+        CreateReleaseRequest: {
+            name: string;
+            goal?: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+        };
+        ReleaseResponse: {
+            key: string;
+            name: string;
+            goal?: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** @enum {string} */
+            status: "PLANNED" | "ACTIVE" | "CLOSED";
+            /** Format: date-time */
+            closedAt?: string;
+            /** @description F-PLN-03 bilan figé à la clôture */
+            closingReport?: {
+                [key: string]: unknown;
+            };
+            sprints: components["schemas"]["SprintSummary"][];
+            /** Format: int64 */
+            version: number;
+        };
+        GenerateSprintsRequest: {
+            /** Format: int32 */
+            count: number;
+            /** Format: int32 */
+            durationWeeks: number;
+            /**
+             * Format: date
+             * @description Défaut : lendemain du dernier sprint de la release, sinon son début
+             */
+            startDate?: string;
+            /** Format: int32 */
+            capacityPoints?: number;
+        };
         GherkinValidateRequest: {
             source: string;
         };
@@ -1493,6 +1763,17 @@ export interface components {
             /** @enum {string} */
             linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
         };
+        UpdateSprintRequest: {
+            name?: string;
+            goal?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
+            /** Format: int32 */
+            capacityPoints?: number;
+            releaseKey?: string;
+        };
         RequirementFieldsRequest: {
             /** @enum {string|null} */
             type?: "EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER" | null;
@@ -1519,6 +1800,14 @@ export interface components {
             transverse?: boolean | null;
             tags?: string[] | null;
             externalRef?: string | null;
+        };
+        UpdateReleaseRequest: {
+            name?: string;
+            goal?: string;
+            /** Format: date */
+            startDate?: string;
+            /** Format: date */
+            endDate?: string;
         };
         UpdateCriterionRequest: {
             /** @enum {string} */
@@ -1961,6 +2250,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RequirementLinkResponse"][];
+                };
+            };
+        };
+    };
+    scope: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScopeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintDetail"];
                 };
             };
         };
@@ -2516,6 +2832,107 @@ export interface operations {
             };
         };
     };
+    sprints: {
+        parameters: {
+            query?: {
+                status?: ("PLANNED" | "ACTIVE" | "CLOSED")[];
+                release?: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintSummary"][];
+                };
+            };
+        };
+    };
+    createSprint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSprintRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintDetail"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintDetail"];
+                };
+            };
+        };
+    };
+    close: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CloseSprintRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintDetail"];
+                };
+            };
+        };
+    };
     list_4: {
         parameters: {
             query?: {
@@ -2525,6 +2942,7 @@ export interface operations {
                 risk?: ("LOW" | "MEDIUM" | "HIGH" | "CRITICAL")[];
                 tag?: string;
                 q?: string;
+                sprint?: string;
                 /** @description Zero-based page index (0..N) */
                 page?: number;
                 /** @description The size of the page to be returned */
@@ -2779,6 +3197,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportResponse"];
+                };
+            };
+        };
+    };
+    releases: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseResponse"][];
+                };
+            };
+        };
+    };
+    createRelease: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReleaseRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseResponse"];
+                };
+            };
+        };
+    };
+    generateSprints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateSprintsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseResponse"];
+                };
+            };
+        };
+    };
+    closeRelease: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseResponse"];
                 };
             };
         };
@@ -3072,6 +3588,59 @@ export interface operations {
             };
         };
     };
+    sprint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintDetail"];
+                };
+            };
+        };
+    };
+    updateSprint: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["UpdateSprintRequest"];
+                "application/json": components["schemas"]["UpdateSprintRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SprintDetail"];
+                };
+            };
+        };
+    };
     get_2: {
         parameters: {
             query?: never;
@@ -3142,6 +3711,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RequirementDetail"];
+                };
+            };
+        };
+    };
+    release: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseResponse"];
+                };
+            };
+        };
+    };
+    updateRelease: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["UpdateReleaseRequest"];
+                "application/json": components["schemas"]["UpdateReleaseRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReleaseResponse"];
                 };
             };
         };

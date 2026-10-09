@@ -1,6 +1,7 @@
 package com.traceagile.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.api.demo.DemoDataLoader;
@@ -21,7 +22,15 @@ import com.traceagile.domain.requirement.RequirementType;
 import com.traceagile.application.traceability.TraceabilityService;
 import com.traceagile.application.traceability.TraceabilityService.Matrix;
 import com.traceagile.domain.traceability.VerificationStatus;
+import com.traceagile.application.planning.PlanningService;
+import com.traceagile.domain.planning.PlanningStatus;
+import com.traceagile.domain.planning.Release;
+import com.traceagile.domain.planning.ScopeOutcome;
+import com.traceagile.domain.planning.Sprint;
+import com.traceagile.domain.planning.SprintScopeItem;
+import com.traceagile.api.demo.DemoPlanningLoader;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,6 +55,10 @@ class DemoDataTest extends AbstractApiTest {
     @Autowired
     DemoTestsLoader testsLoader;
     @Autowired
+    DemoPlanningLoader planningLoader;
+    @Autowired
+    PlanningService planning;
+    @Autowired
     TestCaseService testCases;
     @Autowired
     TraceLinkService links;
@@ -54,7 +67,7 @@ class DemoDataTest extends AbstractApiTest {
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
-                testsLoader);
+                testsLoader, planningLoader);
     }
 
     @Test
@@ -74,7 +87,9 @@ class DemoDataTest extends AbstractApiTest {
         long gherkinCriteria = backlog.stream().flatMap(r -> r.getCriteria().stream())
                 .filter(c -> c.getFormat().name().equals("GHERKIN")).count();
         assertThat(gherkinCriteria).isGreaterThanOrEqualTo(15);
-        assertThat(stories.stream().filter(s -> s.getStatus() == RequirementStatus.READY)).hasSizeGreaterThanOrEqualTo(10);
+        // 12 stories prêtes au lot 1, dont une partie planifiée au lot 4 (IN_SPRINT, DONE).
+        assertThat(stories.stream().filter(s -> Set.of(RequirementStatus.READY, RequirementStatus.IN_SPRINT, RequirementStatus.DONE)
+                .contains(s.getStatus()))).hasSizeGreaterThanOrEqualTo(12);
         Map<String, Requirement> byTitle = backlog.stream().collect(Collectors.toMap(Requirement::getTitle, Function.identity()));
         assertThat(byTitle.get("Livraison gratuite dès 50 € d'achat").getType()).isEqualTo(RequirementType.BUSINESS_RULE);
         assertThat(byTitle.get("Temps de réponse des pages").isTransverse()).isTrue();
@@ -110,5 +125,23 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(matrix.rows().stream().filter(r -> r.requirement().equals(promo)).findFirst().orElseThrow().status())
                 .isEqualTo(VerificationStatus.SUSPECT);
         assertThat(traceability.orphans("SHOP").testsWithoutRequirement()).hasSize(2);
+
+        // Lot 4 : REL-1 « Version 2.0 », 3 sprints de 2 semaines — SPR-1 clos, SPR-2 actif, SPR-3 planifié.
+        Release release = planning.release("SHOP", "REL-1");
+        assertThat(release.getName()).isEqualTo("Version 2.0");
+        assertThat(release.getSprints()).extracting(Sprint::getKey, Sprint::getStatus).containsExactly(
+                tuple("SPR-1", PlanningStatus.CLOSED), tuple("SPR-2", PlanningStatus.ACTIVE), tuple("SPR-3", PlanningStatus.PLANNED));
+        assertThat(release.getSprints()).allSatisfy(s ->
+                assertThat(s.getEndDate()).isEqualTo(s.getStartDate().plusWeeks(2).minusDays(1)));
+        Sprint spr2 = planning.sprint("SHOP", "SPR-2");
+        assertThat(spr2.getStartDate()).isBeforeOrEqualTo(java.time.LocalDate.now()).isAfter(java.time.LocalDate.now().minusWeeks(2));
+        assertThat(spr2.requirements()).isNotEmpty().allSatisfy(r -> assertThat(r.getStatus()).isEqualTo(RequirementStatus.IN_SPRINT));
+        Sprint spr1 = planning.sprint("SHOP", "SPR-1");
+        assertThat(spr1.getScope()).extracting(SprintScopeItem::getOutcome).contains(ScopeOutcome.DONE, ScopeOutcome.CARRIED_OVER);
+        assertThat(spr2.requirements().getFirst().getKey())
+                .isEqualTo(spr1.getScope().stream().filter(i -> i.getOutcome() == ScopeOutcome.CARRIED_OVER).findFirst().orElseThrow()
+                        .getRequirement().getKey());
+        assertThat(planning.sprint("SHOP", "SPR-3").requirements()).isNotEmpty()
+                .allSatisfy(r -> assertThat(r.getStatus()).isEqualTo(RequirementStatus.READY));
     }
 }

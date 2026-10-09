@@ -203,6 +203,19 @@ public class RequirementService {
         return requirement;
     }
 
+    /**
+     * F-PLN-06 transition décidée par la planification (READY ⇄ IN_SPRINT) : sans liste de contrôle
+     * (la DoR a été vérifiée au passage à READY) ni version figée ; auditée comme un changement de statut.
+     */
+    public void applyPlanningStatus(Requirement requirement, RequirementStatus target) {
+        if (requirement.getStatus() == target) {
+            return;
+        }
+        Map<String, Object> before = requirement.snapshot();
+        requirement.changeStatus(target);
+        changed(requirement, AuditAction.STATUS_CHANGED, before);
+    }
+
     /** §3.3-6 suppression d'une exigence sans enfant (jamais exécutée, vérifié à partir du lot 5). */
     public void delete(String projectKey, String key) {
         Requirement requirement = get(projectKey, key);

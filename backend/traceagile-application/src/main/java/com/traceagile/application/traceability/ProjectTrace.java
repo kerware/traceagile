@@ -109,6 +109,11 @@ public final class ProjectTrace {
         return scoped;
     }
 
+    /** Périmètre d'un sprint ou d'une release : ces exigences, dans l'ordre de l'arbre, à plat. */
+    public List<Row> only(java.util.Collection<UUID> ids) {
+        return rows.stream().filter(r -> ids.contains(r.requirement().getId())).map(r -> new Row(r.requirement(), 0)).toList();
+    }
+
     public List<Requirement> children(Requirement requirement) {
         return childrenById.getOrDefault(requirement.getId(), List.of());
     }

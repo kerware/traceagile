@@ -139,6 +139,49 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/sprints/{key}/scope" : {
+      "put" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "scope",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ScopeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/invest" : {
       "put" : {
         "tags" : [ "Exigences" ],
@@ -1043,6 +1086,163 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/sprints" : {
+      "get" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "sprints",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "PLANNED", "ACTIVE", "CLOSED" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "release",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SprintSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "createSprint",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateSprintRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sprints/{key}/start" : {
+      "post" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "start",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sprints/{key}/close" : {
+      "post" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "close",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CloseSprintRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -1111,6 +1311,13 @@
           }
         }, {
           "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sprint",
           "in" : "query",
           "required" : false,
           "schema" : {
@@ -1503,6 +1710,145 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/releases" : {
+      "get" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "releases",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ReleaseResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "createRelease",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateReleaseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReleaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/releases/{key}/generate-sprints" : {
+      "post" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "generateSprints",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GenerateSprintsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReleaseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/releases/{key}/close" : {
+      "post" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "closeRelease",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReleaseResponse"
                 }
               }
             }
@@ -1916,6 +2262,92 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/sprints/{key}" : {
+      "get" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "sprint",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "updateSprint",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateSprintRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateSprintRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -2019,6 +2451,92 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/RequirementDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/releases/{key}" : {
+      "get" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "release",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReleaseResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Planification" ],
+        "operationId" : "updateRelease",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateReleaseRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateReleaseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReleaseResponse"
                 }
               }
             }
@@ -3132,6 +3650,146 @@
           }
         },
         "required" : [ "criterionPositions", "linkId", "linkType", "origin", "requirementKey", "requirementStatus", "requirementTitle", "requirementType", "suspect" ]
+      },
+      "ScopeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "minLength" : 1
+            }
+          }
+        },
+        "required" : [ "requirementKeys" ]
+      },
+      "ScopeItemResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "EPIC", "FEATURE", "USER_STORY", "BUSINESS_RULE", "NON_FUNCTIONAL", "TECHNICAL_ENABLER" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "TO_REFINE", "READY", "IN_SPRINT", "DONE", "ACCEPTED", "REJECTED", "OBSOLETE" ]
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "storyPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "outcome" : {
+            "type" : "string",
+            "enum" : [ "PLANNED", "DONE", "RETURNED", "CARRIED_OVER", "DROPPED" ]
+          },
+          "verificationStatus" : {
+            "type" : "string",
+            "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+          }
+        },
+        "required" : [ "key", "outcome", "priority", "status", "title", "type", "verificationStatus" ]
+      },
+      "SprintDetail" : {
+        "type" : "object",
+        "properties" : {
+          "sprint" : {
+            "$ref" : "#/components/schemas/SprintSummary"
+          },
+          "scope" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ScopeItemResponse"
+            }
+          },
+          "nextSprintKey" : {
+            "type" : "string",
+            "description" : "F-PLN-06 sprint qui recevrait les stories reportées"
+          }
+        },
+        "required" : [ "scope", "sprint" ]
+      },
+      "SprintSummary" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "goal" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PLANNED", "ACTIVE", "CLOSED" ]
+          },
+          "capacityPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "releaseKey" : {
+            "type" : "string"
+          },
+          "loadPoints" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "F-PLN-05 charge en points du périmètre"
+          },
+          "loadPercent" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Charge / capacité en % ; absent sans capacité"
+          },
+          "overCapacity" : {
+            "type" : "boolean"
+          },
+          "donePoints" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Points des stories terminées (sprint clos)"
+          },
+          "requirementCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "description" : "Clés des exigences du périmètre (ordre)",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "validationRate" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "F-PLN-02 taux de validation du périmètre (%), absent si rien n'est couvert"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "donePoints", "endDate", "key", "loadPoints", "name", "overCapacity", "requirementCount", "requirementKeys", "startDate", "status", "version" ]
       },
       "InvestDto" : {
         "type" : "object",
@@ -4397,6 +5055,64 @@
         },
         "required" : [ "created", "disappeared", "updated", "warnings" ]
       },
+      "CreateSprintRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "goal" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "capacityPoints" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 0
+          },
+          "releaseKey" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "endDate", "name", "startDate" ]
+      },
+      "CloseDecisionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "requirementKey" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "action" : {
+            "type" : "string",
+            "enum" : [ "BACKLOG", "NEXT_SPRINT" ]
+          }
+        },
+        "required" : [ "action", "requirementKey" ]
+      },
+      "CloseSprintRequest" : {
+        "type" : "object",
+        "properties" : {
+          "decisions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CloseDecisionRequest"
+            }
+          }
+        }
+      },
       "CreateCriterionRequest" : {
         "type" : "object",
         "properties" : {
@@ -4574,6 +5290,105 @@
         },
         "required" : [ "created" ]
       },
+      "CreateReleaseRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "goal" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "endDate", "name", "startDate" ]
+      },
+      "ReleaseResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "goal" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PLANNED", "ACTIVE", "CLOSED" ]
+          },
+          "closedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "closingReport" : {
+            "type" : "object",
+            "additionalProperties" : { },
+            "description" : "F-PLN-03 bilan figé à la clôture"
+          },
+          "sprints" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SprintSummary"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "endDate", "key", "name", "sprints", "startDate", "status", "version" ]
+      },
+      "GenerateSprintsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 26,
+            "minimum" : 1
+          },
+          "durationWeeks" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 4,
+            "minimum" : 1
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date",
+            "description" : "Défaut : lendemain du dernier sprint de la release, sinon son début"
+          },
+          "capacityPoints" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 0
+          }
+        },
+        "required" : [ "count", "durationWeeks" ]
+      },
       "GherkinValidateRequest" : {
         "type" : "object",
         "properties" : {
@@ -4732,6 +5547,38 @@
         },
         "required" : [ "linkType" ]
       },
+      "UpdateSprintRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "goal" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "capacityPoints" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 0
+          },
+          "releaseKey" : {
+            "type" : "string"
+          }
+        }
+      },
       "RequirementFieldsRequest" : {
         "type" : "object",
         "properties" : {
@@ -4822,6 +5669,29 @@
             "type" : [ "string", "null" ],
             "maxLength" : 100,
             "minLength" : 0
+          }
+        }
+      },
+      "UpdateReleaseRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "goal" : {
+            "type" : "string",
+            "maxLength" : 1000,
+            "minLength" : 0
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "endDate" : {
+            "type" : "string",
+            "format" : "date"
           }
         }
       },

@@ -4,6 +4,9 @@ import com.traceagile.application.requirement.RequirementFilter;
 import com.traceagile.domain.requirement.Requirement;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import com.traceagile.domain.planning.SprintScopeItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -67,6 +70,15 @@ class RequirementSearchFragmentImpl implements RequirementSearchFragment {
             }
             if (ids != null) {
                 predicates.add(root.get("id").in(ids));
+            }
+            if (filter.sprint() != null) {
+                // §12 filtre sprint : exigences au périmètre de ce sprint (lot 4)
+                Subquery<UUID> inSprint = query.subquery(UUID.class);
+                Root<SprintScopeItem> item = inSprint.from(SprintScopeItem.class);
+                inSprint.select(item.get("requirement").get("id")).where(
+                        cb.equal(item.get("sprint").get("key"), filter.sprint()),
+                        cb.equal(item.get("sprint").get("project").get("key"), projectKey));
+                predicates.add(root.get("id").in(inSprint));
             }
             return cb.and(predicates.toArray(Predicate[]::new));
         };

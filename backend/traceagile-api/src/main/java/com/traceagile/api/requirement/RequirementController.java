@@ -123,8 +123,9 @@ public class RequirementController {
                                                  @RequestParam(required = false) Set<RiskLevel> risk,
                                                  @RequestParam(required = false) String tag,
                                                  @RequestParam(required = false) String q,
+                                                 @RequestParam(required = false) String sprint,
                                                  @ParameterObject Pageable pageable) {
-        RequirementFilter filter = new RequirementFilter(type, status, priority, risk, tag, q);
+        RequirementFilter filter = new RequirementFilter(type, status, priority, risk, tag, q, sprint);
         Map<UUID, VerificationStatus> statuses = traceability.statuses(projectKey);
         return PageResponse.of(requirements.search(projectKey, filter, pageable),
                 r -> mapper.toSummary(r, statuses.getOrDefault(r.getId(), VerificationStatus.NOT_COVERED)));
