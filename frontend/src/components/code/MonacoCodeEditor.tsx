@@ -54,6 +54,8 @@ export default function MonacoCodeEditor({ language, value, onChange, readOnly, 
         fontSize: 13,
         scrollBeyondLastLine: false,
         wordWrap: 'on',
+        // La molette fait défiler la page quand l'éditeur n'a plus rien à faire défiler.
+        scrollbar: { alwaysConsumeMouseWheel: false },
         tabSize: 2,
         ariaLabel,
         quickSuggestions: language === 'gherkin' ? { other: true, comments: false, strings: false } : undefined,

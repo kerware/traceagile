@@ -148,7 +148,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/projects/{projectKey}/test-cases": {
+    "/api/v1/projects/{projectKey}/test-folders": {
         parameters: {
             query?: never;
             header?: never;
@@ -158,6 +158,38 @@ export interface paths {
         get: operations["list_2"];
         put?: never;
         post: operations["create_2"];
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-folders/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_3"];
+        put?: never;
+        post: operations["create_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -219,9 +251,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_3"];
+        get: operations["list_4"];
         put?: never;
-        post: operations["create_3"];
+        post: operations["create_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -269,7 +301,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["move"];
+        post: operations["move_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -299,7 +331,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_4"];
+        get: operations["list_5"];
         put?: never;
         post: operations["add"];
         delete?: never;
@@ -430,7 +462,7 @@ export interface paths {
         get: operations["get_1"];
         put?: never;
         post?: never;
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         patch: operations["update_1"];
@@ -446,7 +478,7 @@ export interface paths {
         get: operations["get_2"];
         put?: never;
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch: operations["update_2"];
@@ -462,7 +494,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete_2"];
+        delete: operations["delete_3"];
         options?: never;
         head?: never;
         patch: operations["update_3"];
@@ -475,7 +507,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_5"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -957,6 +989,24 @@ export interface components {
             createdAt: string;
             createdBy?: string;
         };
+        FolderRequest: {
+            path: string;
+        };
+        FolderResponse: {
+            path: string;
+        };
+        MoveFolderRequest: {
+            from: string;
+            to: string;
+        };
+        MoveFolderResponse: {
+            path: string;
+            /**
+             * Format: int32
+             * @description Nombre de tests reclassés
+             */
+            movedTests: number;
+        };
         CreateTestCaseRequest: WithRequired<components["schemas"]["TestCaseFieldsRequest"], "title"> & {
             /** @enum {string} */
             kind: "MANUAL" | "EXPLORATORY" | "AUTOMATED";
@@ -966,6 +1016,17 @@ export interface components {
             framework?: string;
             links?: components["schemas"]["LinkRequest"][];
             steps?: components["schemas"]["StepRequest"][];
+        };
+        DataSetDto: {
+            name: string;
+            rows: {
+                [key: string]: unknown;
+            }[];
+        };
+        ParameterRequest: {
+            name: string;
+            defaultValue?: string;
+            description?: string;
         };
         StepRequest: {
             action: string;
@@ -985,9 +1046,8 @@ export interface components {
             automationCandidate?: boolean;
             automationJustification?: string;
             steps?: components["schemas"]["StepRequest"][];
-            manualDataSet?: {
-                [key: string]: string;
-            }[];
+            parameters?: components["schemas"]["ParameterRequest"][];
+            dataSets?: components["schemas"]["DataSetDto"][];
             explore?: string;
             with?: string;
             toDiscover?: string;
@@ -1006,10 +1066,7 @@ export interface components {
             path?: string;
             testIdentifier?: string;
             gherkinSource?: string;
-            dataSet?: {
-                [key: string]: unknown;
-            }[];
-            parameters?: {
+            configuration?: {
                 [key: string]: unknown;
             };
             executionTags?: string[];
@@ -1028,10 +1085,8 @@ export interface components {
             testIdentifier?: string;
             featureName?: string;
             gherkinSource?: string;
-            dataSet: {
-                [key: string]: unknown;
-            }[];
-            parameters: {
+            /** @description Configuration technique libre (JSON) */
+            configuration: {
                 [key: string]: unknown;
             };
             executionTags: string[];
@@ -1053,6 +1108,12 @@ export interface components {
             timeboxMin: number;
             setupNotes?: string;
             targetedRisk?: string;
+        };
+        ParameterResponse: {
+            name: string;
+            defaultValue?: string;
+            description?: string;
+            detected: boolean;
         };
         StepResponse: {
             /** Format: uuid */
@@ -1086,11 +1147,9 @@ export interface components {
             automationCandidate: boolean;
             automationJustification?: string;
             steps: components["schemas"]["StepResponse"][];
-            manualDataSet: {
-                [key: string]: string;
-            }[];
-            /** @description F-MAN-01 variables ${nom} des pas */
-            variables: string[];
+            /** @description ADR-0013 paramètres déclarés et détectés (${nom} des pas) */
+            parameters: components["schemas"]["ParameterResponse"][];
+            dataSets: components["schemas"]["DataSetDto"][];
             charter?: components["schemas"]["CharterResponse"];
             automation?: components["schemas"]["AutomationResponse"];
             requirements: components["schemas"]["RequirementLinkResponse"][];
@@ -1791,6 +1850,102 @@ export interface operations {
     };
     list_2: {
         parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FolderRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FolderResponse"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveFolderRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoveFolderResponse"];
+                };
+            };
+        };
+    };
+    list_3: {
+        parameters: {
             query?: {
                 kind?: ("MANUAL" | "EXPLORATORY" | "AUTOMATED")[];
                 technique?: ("BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT")[];
@@ -1827,7 +1982,7 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1936,7 +2091,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_4: {
         parameters: {
             query?: {
                 type?: ("EPIC" | "FEATURE" | "USER_STORY" | "BUSINESS_RULE" | "NON_FUNCTIONAL" | "TECHNICAL_ENABLER")[];
@@ -1971,7 +2126,7 @@ export interface operations {
             };
         };
     };
-    create_3: {
+    create_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -2074,7 +2229,7 @@ export interface operations {
             };
         };
     };
-    move: {
+    move_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2124,7 +2279,7 @@ export interface operations {
             };
         };
     };
-    list_4: {
+    list_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2390,7 +2545,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2464,7 +2619,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -2515,7 +2670,7 @@ export interface operations {
             };
         };
     };
-    delete_2: {
+    delete_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2566,7 +2721,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_6: {
         parameters: {
             query?: never;
             header?: never;

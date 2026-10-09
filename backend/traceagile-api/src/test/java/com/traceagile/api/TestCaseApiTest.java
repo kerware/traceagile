@@ -62,7 +62,7 @@ class TestCaseApiTest extends AbstractApiTest {
                                 "steps", List.of(
                                         Map.of("action", "Ouvrir la fiche de ${produit}", "expectedResult", "La fiche s'affiche"),
                                         Map.of("action", "Cliquer « Ajouter au panier »", "expectedResult", "Le panier contient 1 article")),
-                                "manualDataSet", List.of(Map.of("produit", "Stylo bleu"))))))
+                                "dataSets", List.of(Map.of("name", "Recette", "rows", List.of(Map.of("produit", "Stylo bleu"))))))))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", BASE + "/TC-1"))
                 .andExpect(jsonPath("$.key", is("TC-1")))
@@ -72,7 +72,9 @@ class TestCaseApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.folder", is("Panier/Ajout")))
                 .andExpect(jsonPath("$.tags", contains("smoke")))
                 .andExpect(jsonPath("$.steps[1].position", is(2)))
-                .andExpect(jsonPath("$.variables", contains("produit")));
+                .andExpect(jsonPath("$.parameters[0].name", is("produit")))
+                .andExpect(jsonPath("$.parameters[0].detected", is(true)))
+                .andExpect(jsonPath("$.dataSets[0].rows[0].produit", is("Stylo bleu")));
     }
 
     @Test
@@ -99,13 +101,13 @@ class TestCaseApiTest extends AbstractApiTest {
                                 "path", "src/test/java/shop/CartApiTest.java", "testIdentifier", "CartApiTest#addItem",
                                 "executionTags", List.of("Smoke", "regression"),
                                 "environmentRequirements", Map.of("base", "postgres"),
-                                "parameters", Map.of("baseUrl", "https://recette.shop.example", "authRequired", true)))))
+                                "configuration", Map.of("baseUrl", "https://recette.shop.example", "authRequired", true)))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.automation.technique", is("API")))
                 .andExpect(jsonPath("$.automation.framework", is("REST Assured")))
                 .andExpect(jsonPath("$.automation.executionTags", contains("smoke", "regression")))
                 .andExpect(jsonPath("$.automation.environmentRequirements.base", is("postgres")))
-                .andExpect(jsonPath("$.automation.parameters.authRequired", is(true)));
+                .andExpect(jsonPath("$.automation.configuration.authRequired", is(true)));
     }
 
     @Test

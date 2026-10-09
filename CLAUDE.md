@@ -11,6 +11,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 0. Socle | Multi-modules, Docker Compose, Flyway, JWT, utilisateurs, projets, membres, squelette React, CI | **Fait** (branche `lot-0-socle`) |
 | 1. Exigences | Backlog, fiche, critères, ENF, rang, DoR/DoD, versions, audit, CSV | **Fait** (branche `lot-1-exigences`) |
 | 2. Tests | Référentiel, manuels, automatisés, Gherkin Monaco, génération BDD, tags `@REQ-` | **Fait** (branche `lot-2-tests`) |
+| Corrections 0-2 | Défilement après panneau latéral, paramètres `${nom}` et jeux de données nommés, dossiers de tests et menus contextuels des arbres (ADR-0013) | **Fait** (branche `lot-2-corrections`) |
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | À faire |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | À faire |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | À faire |
@@ -30,6 +31,7 @@ Reporté (à reprendre dans le lot indiqué) :
 - Heuristiques extensibles par projet (F-EXP-02), sessions et génération de chartes → lot 6.
 - F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
 - §3.3-6 « suppression interdite si exécutée » et item DoD « aucune anomalie bloquante » → lot 5.
+- Choix du jeu de données (ADR-0013) à l'exécution : campagne → lot 5, `dataSet` du job → lot 7.
 - F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes, Example Mapping → lot 9.
 - `docs/execution-server-api.yaml` (contrat §10) → lot 7.
 - Seuil JaCoCo bloquant (NF-12), SpotBugs (NF-13), axe-core (NF-10) → lot 9 ; le rapport JaCoCo est
@@ -149,6 +151,11 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `model.ts`, `filters.ts`, `permissions.ts`…
 - Formulaires à sous-éditeurs (fiche test) : brouillon local + `toPatch()` champ à champ
   (`features/tests/draft.ts`) plutôt que React Hook Form.
+- Arbres : menu contextuel avec `components/tree/NodeMenu` (`NodeMenuRow` : clic droit + bouton
+  « ⋯ » `{testId}-menu`, entrées `menu-{clé}`) ; saisies et confirmations avec `components/Dialogs`
+  (`PromptModal`, `ConfirmModal`, testids `prompt-input`, `prompt-submit`, `confirm-submit`).
+- Éditeur Markdown (`MarkdownField`) : garder `overflow={false}` (sinon le `body` reste bloqué
+  après un panneau latéral, ADR-0013).
 - Éditeurs de code : `components/code/CodeEditor` (Monaco local, chargé à la demande ; grammaire
   Gherkin et autocomplétion dans `monacoSetup.ts`). En test (jsdom), il devient une zone de texte.
 - user-event : « {{ » saisit une accolade littérale (`'${{nom}'` pour taper `${nom}`).
@@ -176,9 +183,9 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   (3 épics, 8 features, 25 stories toutes avec critères dont 16 en Gherkin, 4 règles métier, 4 ENF ;
   12 stories « Prête »).
 - Lot 2 : `demo/shop-tests.json` chargé par `DemoTestsLoader` : 20 tests manuels (dont jeux de
-  données et candidats à l'automatisation), 8 chartes, 14 tests automatisés (UI Playwright, API
-  REST Assured, JUnit 5, data-driven, Gatling ; identifiants `@fail` / `@flaky` pour le simulateur
-  du lot 7) et 16 tests BDD générés depuis les critères Gherkin ; 2 tests orphelins ; plusieurs
+  données — clé `dataSet`, chargée comme jeu nommé « Recette » — et candidats à l'automatisation),
+  8 chartes, 14 tests automatisés (UI Playwright, API REST Assured, JUnit 5, data-driven, Gatling ;
+  identifiants `@fail` / `@flaky` pour le simulateur du lot 7) et 16 tests BDD générés depuis les critères Gherkin ; 2 tests orphelins ; plusieurs
   stories non couvertes. Tous `READY`.
 - À compléter à chaque lot (sprints, campagnes…).
 

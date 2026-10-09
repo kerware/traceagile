@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -100,5 +100,22 @@ describe('§13.2 /p/:key/backlog — Backlog (F-REQ-01)', () => {
 
     expect(await screen.findByText('Une user story doit avoir une feature ou une épic parente.')).toBeInTheDocument();
     expect(body).toBeUndefined();
+  });
+
+  it('menu contextuel de l’arbre : exigence enfant (type et parent pré-remplis) et test lié', async () => {
+    useAuthStore.getState().setSession('jwt', ADMIN);
+    withRequirements([]);
+    server.use(http.get('/api/v1/reference/frameworks', () => HttpResponse.json([])));
+    renderRoutes(routes, '/p/SHOP/backlog');
+
+    fireEvent.contextMenu(await screen.findByTestId('tree-node-REQ-1'));
+    await userEvent.click(await screen.findByTestId('menu-add-child'));
+    expect(await screen.findByTestId('requirement-type-input')).toHaveValue('Feature');
+    expect(screen.getByTestId('requirement-parent-input')).toHaveValue('REQ-1 — Catalogue');
+    await userEvent.keyboard('{Escape}');
+
+    await userEvent.click(screen.getByTestId('tree-node-REQ-2-menu'));
+    await userEvent.click(await screen.findByTestId('menu-add-test'));
+    expect(await screen.findByTestId('test-requirement-input')).toHaveValue('REQ-2 — Recherche');
   });
 });

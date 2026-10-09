@@ -14,12 +14,17 @@ export function CreateTestModal({
   opened,
   onClose,
   kinds,
+  initialFolder,
+  initialRequirement,
   onCreated,
 }: {
   project: string;
   opened: boolean;
   onClose: () => void;
   kinds: TestKind[];
+  /** Menu contextuel de l'arbre : dossier ou exigence pré-remplis. */
+  initialFolder?: string | null;
+  initialRequirement?: string | null;
   onCreated?: (key: string) => void;
 }) {
   const { t } = useTranslation();
@@ -37,6 +42,13 @@ export function CreateTestModal({
   useEffect(() => {
     if (kinds.length > 0 && !kinds.includes(kind)) setKind(kinds[0]!);
   }, [kinds, kind]);
+
+  useEffect(() => {
+    if (opened) {
+      setFolder(initialFolder ?? '');
+      setRequirement(initialRequirement ?? null);
+    }
+  }, [opened, initialFolder, initialRequirement]);
 
   const frameworkOptions = (frameworks ?? []).filter((f) => f.technique === technique).map((f) => f.name);
 

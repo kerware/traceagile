@@ -34,6 +34,9 @@ export function MarkdownField({
               onChange={(next) => onChange(next ?? '')}
               preview="live"
               height={240}
+              // Sinon l'éditeur fige le overflow du body (« hidden » quand il est monté dans un tiroir)
+              // et la page ne défile plus après fermeture ou navigation.
+              overflow={false}
               previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
               textareaProps={{ 'aria-label': label }}
             />

@@ -10,6 +10,17 @@ export interface StepDraft {
   testData: string;
 }
 
+export interface ParameterDraft {
+  name: string;
+  defaultValue: string;
+  description: string;
+}
+
+export interface DataSetDraft {
+  name: string;
+  rows: Record<string, unknown>[];
+}
+
 export interface TestDraft {
   title: string;
   objective: string;
@@ -21,7 +32,9 @@ export interface TestDraft {
   automationCandidate: boolean;
   automationJustification: string;
   steps: StepDraft[];
-  manualDataSet: Record<string, string>[];
+  /** ADR-0013 paramètres déclarés (les ${nom} des pas s'y ajoutent à l'affichage). */
+  parameters: ParameterDraft[];
+  dataSets: DataSetDraft[];
   explore: string;
   with: string;
   toDiscover: string;
@@ -38,18 +51,17 @@ export interface TestDraft {
   path: string;
   testIdentifier: string;
   gherkinSource: string;
-  dataSet: Record<string, unknown>[];
-  parameters: Record<string, unknown>;
+  configuration: Record<string, unknown>;
   executionTags: string[];
   environmentRequirements: Record<string, string>;
 }
 
-const COMMON: (keyof TestDraft)[] = ['title', 'objective', 'description', 'priority', 'tags', 'estimatedDurationMin', 'folder'];
+const COMMON: (keyof TestDraft)[] = ['title', 'objective', 'description', 'priority', 'tags', 'estimatedDurationMin', 'folder', 'parameters', 'dataSets'];
 const BY_KIND: Record<TestCaseDetail['kind'], (keyof TestDraft)[]> = {
-  MANUAL: ['automationCandidate', 'automationJustification', 'steps', 'manualDataSet'],
+  MANUAL: ['automationCandidate', 'automationJustification', 'steps'],
   EXPLORATORY: ['explore', 'with', 'toDiscover', 'areas', 'heuristics', 'timeboxMin', 'setupNotes', 'targetedRisk'],
-  AUTOMATED: ['technique', 'framework', 'language', 'repositoryUrl', 'branch', 'path', 'testIdentifier', 'gherkinSource', 'dataSet',
-    'parameters', 'executionTags', 'environmentRequirements'],
+  AUTOMATED: ['technique', 'framework', 'language', 'repositoryUrl', 'branch', 'path', 'testIdentifier', 'gherkinSource',
+    'configuration', 'executionTags', 'environmentRequirements'],
 };
 
 export function toDraft(test: TestCaseDetail): TestDraft {
@@ -66,7 +78,11 @@ export function toDraft(test: TestCaseDetail): TestDraft {
     automationCandidate: test.automationCandidate,
     automationJustification: test.automationJustification ?? '',
     steps: test.steps.map((s) => ({ action: s.action, expectedResult: s.expectedResult ?? '', testData: s.testData ?? '' })),
-    manualDataSet: test.manualDataSet,
+    // Un paramètre seulement détecté, sans détail, n'est pas « déclaré » : il disparaît avec son ${nom}.
+    parameters: test.parameters
+      .filter((p) => !p.detected || p.defaultValue || p.description)
+      .map((p) => ({ name: p.name, defaultValue: p.defaultValue ?? '', description: p.description ?? '' })),
+    dataSets: test.dataSets.map((d) => ({ name: d.name, rows: d.rows })),
     explore: c?.explore ?? '',
     with: c?.with ?? '',
     toDiscover: c?.toDiscover ?? '',
@@ -83,8 +99,7 @@ export function toDraft(test: TestCaseDetail): TestDraft {
     path: a?.path ?? '',
     testIdentifier: a?.testIdentifier ?? '',
     gherkinSource: a?.gherkinSource ?? '',
-    dataSet: a?.dataSet ?? [],
-    parameters: a?.parameters ?? {},
+    configuration: a?.configuration ?? {},
     executionTags: a?.executionTags ?? [],
     environmentRequirements: a?.environmentRequirements ?? {},
   };
@@ -98,6 +113,8 @@ export function toPatch(kind: TestCaseDetail['kind'], initial: TestDraft, draft:
     const value = draft[field];
     if (field === 'steps') {
       patch.steps = draft.steps.map((s) => ({ action: s.action, expectedResult: s.expectedResult.trim() || null, testData: s.testData.trim() || null }));
+    } else if (field === 'parameters') {
+      patch.parameters = draft.parameters.map((p) => ({ name: p.name, defaultValue: p.defaultValue || null, description: p.description.trim() || null }));
     } else if (field === 'estimatedDurationMin') {
       patch.estimatedDurationMin = value === '' ? null : value;
     } else if (typeof value === 'string') {

@@ -272,3 +272,63 @@ export async function downloadFeatures(project: string, keys?: string[]) {
   link.click();
   URL.revokeObjectURL(link.href);
 }
+
+// ---------------------------------------------------------------- dossiers (ADR-0013)
+
+export const folderKeys = {
+  all: (project: string) => ['tests', project, 'folders'] as const,
+};
+
+/** Tous les dossiers du référentiel (explicites et portés par les tests, avec leurs ancêtres). */
+export function useTestFolders(project: string) {
+  return useQuery({
+    queryKey: folderKeys.all(project),
+    queryFn: async () => unwrap(await api.GET('/api/v1/projects/{projectKey}/test-folders', { params: { path: { projectKey: project } } })),
+  });
+}
+
+export function useCreateFolder(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async (path: string) =>
+      unwrap(await api.POST('/api/v1/projects/{projectKey}/test-folders', { params: { path: { projectKey: project } }, body: { path } })),
+    onSuccess: invalidate,
+  });
+}
+
+/** Renommer ou déplacer un dossier : ses tests et sous-dossiers suivent. */
+export function useMoveFolder(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async ({ from, to }: { from: string; to: string }) =>
+      unwrap(await api.POST('/api/v1/projects/{projectKey}/test-folders/move', { params: { path: { projectKey: project } }, body: { from, to } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteFolder(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async (path: string) => {
+      const result = await api.DELETE('/api/v1/projects/{projectKey}/test-folders', { params: { path: { projectKey: project }, query: { path } } });
+      if (!result.response.ok) throw new ApiError(result.response.status, result.error as Problem | undefined);
+    },
+    onSuccess: invalidate,
+  });
+}
+
+/** Ranger un test dans un dossier depuis l'arbre (merge-patch sans If-Match : seul le dossier change). */
+export function useMoveTest(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async ({ key, folder }: { key: string; folder: string | null }) =>
+      unwrap(
+        await api.PATCH('/api/v1/projects/{projectKey}/test-cases/{key}', {
+          params: { path: { projectKey: project, key } },
+          body: { folder } as TestCasePatch, // null = retirer du dossier (merge-patch)
+          headers: { 'Content-Type': 'application/merge-patch+json' },
+        }),
+      ),
+    onSuccess: invalidate,
+  });
+}

@@ -32,12 +32,15 @@ import com.traceagile.application.testcase.TestCasePatch.StepDraft;
 import com.traceagile.application.testcase.TestCaseService;
 import com.traceagile.application.testcase.TestCaseService.CreateTestCaseCommand;
 import com.traceagile.application.testcase.TestCaseService.TestCaseResult;
+import com.traceagile.application.testcase.TestFolderService;
 import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.application.traceability.TraceLinkService.LinkDraft;
 import com.traceagile.domain.requirement.Priority;
+import com.traceagile.domain.testcase.DataSet;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestCaseStatus;
 import com.traceagile.domain.testcase.TestKind;
+import com.traceagile.domain.testcase.TestParameter;
 import com.traceagile.domain.testcase.TestTechnique;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -88,6 +91,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class TestCaseController {
 
     private final TestCaseService tests;
+    private final TestFolderService folders;
     private final BddService bdd;
     private final DiscoveryService discovery;
     private final TraceLinkService links;
@@ -98,10 +102,11 @@ public class TestCaseController {
     private final ObjectMapper json;
     private final Validator validator;
 
-    public TestCaseController(TestCaseService tests, BddService bdd, DiscoveryService discovery, TraceLinkService links,
+    public TestCaseController(TestCaseService tests, TestFolderService folders, BddService bdd, DiscoveryService discovery, TraceLinkService links,
                               AuditService audit, TestPermissions permissions, TestCaseMapper mapper,
                               RequirementMapper requirementMapper, ObjectMapper json, Validator validator) {
         this.tests = tests;
+        this.folders = folders;
         this.bdd = bdd;
         this.discovery = discovery;
         this.links = links;
@@ -142,6 +147,10 @@ public class TestCaseController {
                     ? test.getAutomation() == null ? null : test.getAutomation().getFeatureName()
                     : test.getFolder();
             groups.computeIfAbsent(Objects.toString(name, ""), n -> new ArrayList<>()).add(mapper.toSummary(test));
+        }
+        if (!"feature".equals(groupBy)) {
+            // ADR-0013 dossiers explicites encore vides
+            folders.explicit(projectKey).forEach(path -> groups.computeIfAbsent(path, n -> new ArrayList<>()));
         }
         return groups.entrySet().stream()
                 .sorted(Comparator.comparing((Map.Entry<String, List<TestCaseSummary>> e) -> e.getKey().isEmpty())
@@ -327,7 +336,9 @@ public class TestCaseController {
                 f.field("steps", new TypeReference<List<TestCaseDtos.StepRequest>>() { }) == null ? null
                         : f.field("steps", new TypeReference<List<TestCaseDtos.StepRequest>>() { })
                         .map(list -> list.stream().map(s -> new StepDraft(s.action(), s.expectedResult(), s.testData())).toList()),
-                f.field("manualDataSet", new TypeReference<List<Map<String, String>>>() { }),
+                f.field("parameters", new TypeReference<List<TestCaseDtos.ParameterRequest>>() { }) == null ? null
+                        : f.field("parameters", new TypeReference<List<TestCaseDtos.ParameterRequest>>() { })
+                        .map(list -> list.stream().map(p -> new TestParameter(p.name(), p.defaultValue(), p.description())).toList()),
                 f.field("explore", String.class), f.field("with", String.class), f.field("toDiscover", String.class),
                 f.field("areas", new TypeReference<List<String>>() { }), f.field("heuristics", new TypeReference<List<String>>() { }),
                 f.field("timeboxMin", Integer.class), f.field("setupNotes", String.class), f.field("targetedRisk", String.class),
@@ -335,8 +346,10 @@ public class TestCaseController {
                 includeTitle ? f.field("framework", String.class) : null,
                 f.field("language", String.class), f.field("repositoryUrl", String.class), f.field("branch", String.class),
                 f.field("path", String.class), f.field("testIdentifier", String.class), f.field("gherkinSource", String.class),
-                f.field("dataSet", new TypeReference<List<Map<String, Object>>>() { }),
-                f.field("parameters", new TypeReference<Map<String, Object>>() { }),
+                f.field("dataSets", new TypeReference<List<TestCaseDtos.DataSetDto>>() { }) == null ? null
+                        : f.field("dataSets", new TypeReference<List<TestCaseDtos.DataSetDto>>() { })
+                        .map(list -> list.stream().map(d -> new DataSet(d.name(), d.rows())).toList()),
+                f.field("configuration", new TypeReference<Map<String, Object>>() { }),
                 f.field("executionTags", new TypeReference<List<String>>() { }),
                 f.field("environmentRequirements", new TypeReference<Map<String, String>>() { }));
     }

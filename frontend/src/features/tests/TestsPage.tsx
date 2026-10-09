@@ -26,6 +26,7 @@ export function TestsPage() {
   const project = useParams().key!;
   const [params, setParams] = useSearchParams();
   const [creating, createModal] = useDisclosure(false);
+  const [createIn, setCreateIn] = useState<string | null>(null);
   const [importing, importModal] = useDisclosure(false);
   const [discovering, discoveryModal] = useDisclosure(false);
   const [search, setSearch] = useState(params.get('q') ?? '');
@@ -161,7 +162,16 @@ export function TestsPage() {
           onSelect={(key) => update({ selected: key, page: params.get('page') })}
         />
       ) : (
-        <TestTree project={project} groupBy={view} onSelect={(key) => update({ selected: key })} />
+        <TestTree
+          project={project}
+          groupBy={view}
+          writableKinds={writableKinds}
+          onSelect={(key) => update({ selected: key })}
+          onCreateTest={(folder) => {
+            setCreateIn(folder);
+            createModal.open();
+          }}
+        />
       )}
 
       <Drawer
@@ -180,7 +190,17 @@ export function TestsPage() {
         {selected && <TestCaseDetailView project={project} testKey={selected} />}
       </Drawer>
 
-      <CreateTestModal project={project} opened={creating} onClose={createModal.close} kinds={writableKinds} onCreated={(key) => update({ selected: key })} />
+      <CreateTestModal
+        project={project}
+        opened={creating}
+        onClose={() => {
+          createModal.close();
+          setCreateIn(null);
+        }}
+        kinds={writableKinds}
+        initialFolder={createIn}
+        onCreated={(key) => update({ selected: key })}
+      />
       <ImportFeatureModal project={project} opened={importing} onClose={importModal.close} />
       <DiscoveryModal project={project} opened={discovering} onClose={discoveryModal.close} />
     </Stack>

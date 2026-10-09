@@ -17,3 +17,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0010](0010-audit-par-instantanes.md) | Audit par instantanés applicatifs plutôt que listener JPA | 1 |
 | [0011](0011-formats-csv-gherkin-recherche.md) | Formats : CSV, Gherkin, recherche et rang | 1 |
 | [0012](0012-referentiel-de-tests.md) | Référentiel de tests : natures, versions, BDD, découverte | 2 |
+| [0013](0013-parametres-jeux-de-donnees-dossiers.md) | Paramètres, jeux de données nommés, dossiers de tests, menus contextuels | 0-2 |

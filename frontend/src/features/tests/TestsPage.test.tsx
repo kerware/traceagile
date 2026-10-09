@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -94,5 +94,84 @@ describe('§13.2 /p/:key/tests — référentiel de tests', () => {
 
     expect(screen.queryByRole('radio', { name: 'Manuel' })).not.toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Automatisé' })).toBeChecked();
+  });
+
+  it('ADR-0013 dossiers imbriqués, vides compris ; menu contextuel : sous-dossier et test rangé dans le dossier', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serveRepository();
+    let created: unknown;
+    server.use(
+      http.get('/api/v1/projects/SHOP/test-cases/tree', () =>
+        HttpResponse.json([{ name: 'Panier', tests: [testSummary('TC-1')] }, { name: 'Panier/Remises', tests: [] }]),
+      ),
+      http.get('/api/v1/projects/SHOP/test-folders', () => HttpResponse.json(['Panier', 'Panier/Remises'])),
+      http.post('/api/v1/projects/SHOP/test-folders', async ({ request }) => {
+        created = await request.json();
+        return HttpResponse.json({ path: 'Panier/Promotions' }, { status: 201 });
+      }),
+    );
+    renderRoutes(routes, '/p/SHOP/tests');
+
+    const panier = await screen.findByTestId('test-group-Panier');
+    expect(within(panier).getByTestId('test-group-Panier/Remises')).toHaveTextContent('Dossier vide');
+
+    // clic droit sur le dossier
+    fireEvent.contextMenu(screen.getByTestId('tree-folder-Panier'));
+    expect(await screen.findByTestId('menu-delete-folder')).toBeDisabled();
+    await userEvent.click(screen.getByTestId('menu-new-folder'));
+    await userEvent.type(await screen.findByTestId('prompt-input'), 'Promotions');
+    await userEvent.click(screen.getByTestId('prompt-submit'));
+    await waitFor(() => expect(created).toEqual({ path: 'Panier/Promotions' }));
+
+    // bouton « ⋯ » du sous-dossier
+    await userEvent.click(screen.getByTestId('tree-folder-Panier/Remises-menu'));
+    await userEvent.click(await screen.findByTestId('menu-new-test'));
+    expect(await screen.findByTestId('test-folder-input')).toHaveValue('Panier/Remises');
+  });
+
+  it('ADR-0013 renommer un dossier ; ranger un test ; le développeur ne range pas un test manuel', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serveRepository();
+    let moved: unknown;
+    let patched: unknown;
+    server.use(
+      http.get('/api/v1/projects/SHOP/test-folders', () => HttpResponse.json(['Panier'])),
+      http.post('/api/v1/projects/SHOP/test-folders/move', async ({ request }) => {
+        moved = await request.json();
+        return HttpResponse.json({ path: 'Commande/Panier', movedTests: 1 });
+      }),
+      http.patch('/api/v1/projects/SHOP/test-cases/TC-2', async ({ request }) => {
+        patched = await request.json();
+        return HttpResponse.json(testDetail('TC-2'));
+      }),
+    );
+    renderRoutes(routes, '/p/SHOP/tests');
+
+    await userEvent.click(await screen.findByTestId('tree-folder-Panier-menu'));
+    await userEvent.click(await screen.findByTestId('menu-rename-folder'));
+    const input = await screen.findByTestId('prompt-input');
+    expect(input).toHaveValue('Panier');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Commande/Panier');
+    await userEvent.click(screen.getByTestId('prompt-submit'));
+    await waitFor(() => expect(moved).toEqual({ from: 'Panier', to: 'Commande/Panier' }));
+
+    await userEvent.click(screen.getByTestId('tree-test-row-TC-2-menu'));
+    await userEvent.click(await screen.findByTestId('menu-move-test'));
+    await userEvent.type(await screen.findByTestId('prompt-input'), 'Panier');
+    await userEvent.click(screen.getByTestId('prompt-submit'));
+    await waitFor(() => expect(patched).toEqual({ folder: 'Panier' }));
+  });
+
+  it('§2.2 menu d’un test manuel pour le développeur : consultation seulement', async () => {
+    useAuthStore.getState().setSession('jwt', DEVELOPER);
+    serveRepository();
+    server.use(http.get('/api/v1/projects/SHOP/test-folders', () => HttpResponse.json(['Panier'])));
+    renderRoutes(routes, '/p/SHOP/tests');
+
+    await userEvent.click(await screen.findByTestId('tree-test-row-TC-1-menu'));
+    expect(await screen.findByTestId('menu-open-test')).toBeInTheDocument();
+    expect(screen.queryByTestId('menu-move-test')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('menu-delete-test')).not.toBeInTheDocument();
   });
 });

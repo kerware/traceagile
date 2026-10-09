@@ -49,3 +49,71 @@ export function parseCell(value: string): string | number | boolean {
   if (/^-?\d+(\.\d+)?$/.test(trimmed)) return Number(trimmed);
   return value;
 }
+
+/** ADR-0013 nom de paramètre : lettres sans accent, chiffres, « _ », « - », « . ». */
+export const PARAMETER_NAME = /^[A-Za-z0-9_.-]{1,60}$/;
+
+export interface ParameterRow {
+  name: string;
+  defaultValue: string;
+  description: string;
+  /** Présent dans les pas ({@code ${nom}}). */
+  detected: boolean;
+  /** Déclaré mais absent des pas d'un test manuel. */
+  unused: boolean;
+}
+
+/** Même règle que le back-end : d'abord les paramètres détectés dans les pas, puis les autres déclarés. */
+export function mergeParameters(declared: { name: string; defaultValue: string; description: string }[], detected: string[], manual: boolean): ParameterRow[] {
+  const byName = new Map(declared.map((p) => [p.name, p]));
+  const rows: ParameterRow[] = detected.map((name) => ({
+    name,
+    defaultValue: byName.get(name)?.defaultValue ?? '',
+    description: byName.get(name)?.description ?? '',
+    detected: true,
+    unused: false,
+  }));
+  declared
+    .filter((p) => !detected.includes(p.name))
+    .forEach((p) => rows.push({ ...p, detected: false, unused: manual }));
+  return rows;
+}
+
+export interface FolderNode<T> {
+  path: string;
+  name: string;
+  tests: T[];
+  children: FolderNode<T>[];
+  /** Nombre de tests du dossier et de ses sous-dossiers. */
+  total: number;
+}
+
+/** §13.2 / ADR-0013 arbre des dossiers « a/b/c » (les ancêtres sans test direct sont créés). */
+export function buildFolderTree<T>(groups: { name: string; tests: T[] }[]): { roots: FolderNode<T>[]; unclassified: T[] } {
+  const byPath = new Map<string, FolderNode<T>>();
+  const roots: FolderNode<T>[] = [];
+  const node = (path: string): FolderNode<T> => {
+    const existing = byPath.get(path);
+    if (existing) return existing;
+    const slash = path.lastIndexOf('/');
+    const created: FolderNode<T> = { path, name: path.slice(slash + 1), tests: [], children: [], total: 0 };
+    byPath.set(path, created);
+    if (slash < 0) roots.push(created);
+    else node(path.slice(0, slash)).children.push(created);
+    return created;
+  };
+  let unclassified: T[] = [];
+  groups.forEach((group) => {
+    if (!group.name) unclassified = group.tests;
+    else node(group.name).tests.push(...group.tests);
+  });
+  const finish = (nodes: FolderNode<T>[]): number => {
+    nodes.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    return nodes.reduce((sum, n) => {
+      n.total = n.tests.length + finish(n.children);
+      return sum + n.total;
+    }, 0);
+  };
+  finish(roots);
+  return { roots, unclassified };
+}

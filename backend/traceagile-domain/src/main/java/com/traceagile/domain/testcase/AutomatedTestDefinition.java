@@ -21,7 +21,8 @@ import org.hibernate.type.SqlTypes;
 
 /**
  * §3.1 AutomatedTestDefinition : TraceAgile référence le test (dépôt, chemin, identifiant) sans en
- * stocker le code, sauf le Gherkin et les jeux de données (§6). Les champs propres à une technique
+ * stocker le code, sauf le Gherkin (§6) ; jeux de données et paramètres déclarés sont portés par le
+ * {@link TestCase} (ADR-0013). Les champs propres à une technique
  * (navigateurs, URL de base, métriques attendues…) vont dans {@code parameters} (ADR-0012).
  */
 @Entity
@@ -62,10 +63,6 @@ public class AutomatedTestDefinition extends AuditableEntity {
     private String gherkinSource;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "data_set", columnDefinition = "jsonb")
-    private List<Map<String, Object>> dataSet;
-
-    @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     private Map<String, Object> parameters = new LinkedHashMap<>();
 
@@ -102,9 +99,6 @@ public class AutomatedTestDefinition extends AuditableEntity {
         }
         this.technique = Objects.requireNonNull(technique);
         setFrameworkValue(framework);
-        if (technique != TestTechnique.DATA_DRIVEN && technique != TestTechnique.BDD) {
-            dataSet = dataSet == null || dataSet.isEmpty() ? null : dataSet;
-        }
     }
 
     private void setFrameworkValue(String framework) {
@@ -139,19 +133,6 @@ public class AutomatedTestDefinition extends AuditableEntity {
 
     public void setFeatureName(String featureName) {
         this.featureName = blankToNull(featureName);
-    }
-
-    /** §6.1 DATA_DRIVEN : une exécution par ligne du jeu de données. */
-    public void setDataSet(List<Map<String, Object>> dataSet) {
-        testCase.ensureEditable();
-        if (dataSet != null) {
-            for (Map<String, Object> row : dataSet) {
-                if (row == null || row.isEmpty()) {
-                    throw new BusinessRuleException("TEST_DATASET_ROW_EMPTY", "Une ligne du jeu de données est vide.");
-                }
-            }
-        }
-        this.dataSet = dataSet == null || dataSet.isEmpty() ? null : new ArrayList<>(dataSet.stream().map(LinkedHashMap::new).toList());
     }
 
     public void setParameters(Map<String, Object> parameters) {
@@ -193,9 +174,9 @@ public class AutomatedTestDefinition extends AuditableEntity {
         return technique == TestTechnique.BDD ? identified && gherkinSource != null : identified;
     }
 
-    /** F-AUT-10 contenu significatif : technique, framework, chemin, identifiant, Gherkin, jeu de données. */
+    /** F-AUT-10 contenu significatif : technique, framework, chemin, identifiant, Gherkin (jeux de données : TestCase). */
     List<Object> content() {
-        return Arrays.asList(technique.name(), framework, path, testIdentifier, gherkinSource, dataSet);
+        return Arrays.asList(technique.name(), framework, path, testIdentifier, gherkinSource);
     }
 
     private static String blankToNull(String value) {
@@ -240,10 +221,6 @@ public class AutomatedTestDefinition extends AuditableEntity {
 
     public String getGherkinSource() {
         return gherkinSource;
-    }
-
-    public List<Map<String, Object>> getDataSet() {
-        return dataSet == null ? List.of() : List.copyOf(dataSet);
     }
 
     public Map<String, Object> getParameters() {

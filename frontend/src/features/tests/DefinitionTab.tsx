@@ -10,6 +10,7 @@ import { AutomationEditor } from './AutomationEditor';
 import { CharterEditor } from './CharterEditor';
 import { isDirty, toDraft, toPatch, type TestDraft } from './draft';
 import { ManualStepsEditor } from './ManualStepsEditor';
+import { ParametersPanel } from './ParametersPanel';
 
 /** Onglet Définition : champs communs puis éditeur propre à la nature (pas, charte ou automatisation). */
 export function DefinitionTab({ project, test, canWrite }: { project: string; test: TestCaseDetail; canWrite: boolean }) {
@@ -80,6 +81,7 @@ export function DefinitionTab({ project, test, canWrite }: { project: string; te
       )}
       {test.kind === 'EXPLORATORY' && <CharterEditor draft={draft} onChange={change} readOnly={readOnly} />}
       {test.kind === 'AUTOMATED' && <AutomationEditor project={project} test={test} draft={draft} onChange={change} readOnly={readOnly} />}
+      {test.kind !== 'EXPLORATORY' && <ParametersPanel manual={test.kind === 'MANUAL'} typed={test.kind === 'AUTOMATED'} draft={draft} onChange={change} readOnly={readOnly} />}
 
       {canWrite && (
         <Group justify="flex-end">

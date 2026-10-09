@@ -48,6 +48,18 @@ export function allowedParentTypes(type: RequirementType): RequirementType[] {
   }
 }
 
+/** Types qu'on peut créer sous un parent de ce type (menu contextuel de l'arbre). */
+export function childTypes(parent: RequirementType): RequirementType[] {
+  return REQUIREMENT_TYPES.filter((type) => allowedParentTypes(type).includes(parent));
+}
+
+/** Type proposé pour un enfant : épic → feature, feature → user story, sinon le premier autorisé. */
+export function defaultChildType(parent: RequirementType): RequirementType | null {
+  if (parent === 'EPIC') return 'FEATURE';
+  if (parent === 'FEATURE') return 'USER_STORY';
+  return childTypes(parent)[0] ?? null;
+}
+
 /** Liste à plat de l'arbre, dans l'ordre d'affichage. */
 export function flatten(nodes: RequirementTreeNode[]): RequirementTreeNode[] {
   return nodes.flatMap((n) => [n, ...flatten(n.children)]);

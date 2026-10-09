@@ -6,10 +6,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { errorMessage } from '../../api/errors';
-import { downloadCsv, type RequirementFilters } from '../../api/requirements';
+import { downloadCsv, type RequirementFilters, type RequirementTreeNode } from '../../api/requirements';
+import { CreateTestModal } from '../tests/CreateTestModal';
+import { useTestWriteKinds } from '../tests/permissions';
 import { BacklogFilters } from './BacklogFilters';
 import { CreateRequirementModal } from './CreateRequirementModal';
 import { filtersFromParams } from './filters';
+import { defaultChildType } from './model';
 import { ImportCsvModal } from './ImportCsvModal';
 import { useCanWriteRequirements } from './permissions';
 import { RequirementDetailView } from './RequirementDetailView';
@@ -25,6 +28,9 @@ export function BacklogPage() {
   const project = useParams().key!;
   const [params, setParams] = useSearchParams();
   const [creating, createModal] = useDisclosure(false);
+  const [childOf, setChildOf] = useState<RequirementTreeNode | null>(null);
+  const [testFor, setTestFor] = useState<string | null>(null);
+  const testKinds = useTestWriteKinds(project);
   const [importing, importModal] = useDisclosure(false);
   const [search, setSearch] = useState(params.get('q') ?? '');
   const canWrite = useCanWriteRequirements(project);
@@ -108,7 +114,17 @@ export function BacklogPage() {
           canWrite={canWrite}
         />
       ) : (
-        <RequirementTree project={project} onSelect={(key) => update({ selected: key })} canWrite={canWrite} />
+        <RequirementTree
+          project={project}
+          onSelect={(key) => update({ selected: key })}
+          canWrite={canWrite}
+          canAddTest={testKinds.length > 0}
+          onAddChild={(node) => {
+            setChildOf(node);
+            createModal.open();
+          }}
+          onAddTest={(node) => setTestFor(node.key)}
+        />
       )}
 
       <Drawer
@@ -130,10 +146,26 @@ export function BacklogPage() {
       <CreateRequirementModal
         project={project}
         opened={creating}
-        onClose={createModal.close}
+        onClose={() => {
+          createModal.close();
+          setChildOf(null);
+        }}
+        initialParent={childOf?.key ?? null}
+        initialType={childOf ? defaultChildType(childOf.type) : null}
         onCreated={(key) => update({ selected: key, page: params.get('page') })}
       />
       <ImportCsvModal project={project} opened={importing} onClose={importModal.close} />
+      <CreateTestModal
+        project={project}
+        opened={testFor !== null}
+        onClose={() => setTestFor(null)}
+        kinds={testKinds}
+        initialRequirement={testFor}
+        onCreated={(key) => {
+          notifications.show({ color: 'green', message: t('tree.testLinked', { key, requirement: testFor }) });
+          update({ selected: testFor });
+        }}
+      />
     </Stack>
   );
 }

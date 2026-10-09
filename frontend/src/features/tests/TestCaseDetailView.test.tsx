@@ -62,22 +62,51 @@ describe('F-MAN-01 test manuel', () => {
     expect(await screen.findByText(/version 2/)).toBeInTheDocument();
   });
 
-  it('détecte les variables ${nom} et propose le jeu de données correspondant', async () => {
+  it('F-MAN-01 détecte les ${nom} des pas comme paramètres ; jeux de données nommés (ADR-0013)', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
-    serve(testDetail('TC-1'));
+    serve(testDetail('TC-1', { parameters: [{ name: 'devise', defaultValue: 'EUR', detected: false }] }));
     const sent = capturePatch();
     view();
 
     const action = await screen.findByTestId('step-action-1');
     await userEvent.clear(action);
     // « {{ » saisit une accolade littérale avec user-event.
-    await userEvent.type(action, 'Ouvrir ${{produit}');
-    expect(await screen.findByTestId('variable-produit')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('grid-add-row'));
-    await userEvent.type(screen.getByTestId('grid-cell-0-produit'), 'Stylo');
+    await userEvent.type(action, 'Ouvrir ${{nom-produit}');
+    expect(await screen.findByTestId('param-detected-nom-produit')).toBeInTheDocument();
+    expect(screen.getByTestId('param-unused-devise')).toBeInTheDocument();
+    expect(screen.getByTestId('param-remove-nom-produit')).toBeDisabled();
+    await userEvent.type(screen.getByTestId('param-default-nom-produit'), 'Stylo');
+
+    await userEvent.click(screen.getByTestId('dataset-add'));
+    await userEvent.clear(screen.getByTestId('dataset-name-0'));
+    await userEvent.type(screen.getByTestId('dataset-name-0'), 'Recette');
+    await userEvent.click(screen.getByTestId('dataset-0-add-row'));
+    await userEvent.type(screen.getByTestId('dataset-0-cell-0-nom-produit'), 'Cahier');
     await userEvent.click(screen.getByTestId('test-save'));
 
-    await waitFor(() => expect(sent.body?.manualDataSet).toEqual([{ produit: 'Stylo' }]));
+    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Recette', rows: [{ 'nom-produit': 'Cahier', devise: '' }] }]));
+    expect(sent.body?.parameters).toEqual([
+      { name: 'devise', defaultValue: 'EUR', description: null },
+      { name: 'nom-produit', defaultValue: 'Stylo', description: null },
+    ]);
+  });
+
+  it('ADR-0013 supprimer un paramètre déclaré retire sa colonne ; nom invalide refusé', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serve(testDetail('TC-1', {
+      parameters: [{ name: 'a', detected: false }, { name: 'b', detected: false }],
+      dataSets: [{ name: 'Recette', rows: [{ a: '1', b: '2' }] }],
+    }));
+    const sent = capturePatch();
+    view();
+
+    await userEvent.type(await screen.findByTestId('param-new'), 'avec espace');
+    expect(screen.getByTestId('param-add')).toBeDisabled();
+    await userEvent.click(screen.getByTestId('param-remove-b'));
+    await userEvent.click(screen.getByTestId('test-save'));
+
+    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Recette', rows: [{ a: '1' }] }]));
+    expect(sent.body?.parameters).toEqual([{ name: 'a', defaultValue: null, description: null }]);
   });
 });
 
@@ -103,14 +132,14 @@ describe('§6 test automatisé', () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     serve(testDetail('TC-1', {
       kind: 'AUTOMATED', steps: [],
-      automation: { technique: 'BDD', framework: 'Cucumber-JVM', gherkinSource: 'Fonctionnalité: x', dataSet: [], parameters: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: false },
+      automation: { technique: 'BDD', framework: 'Cucumber-JVM', gherkinSource: 'Fonctionnalité: x', configuration: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: false },
     }));
     server.use(
       http.post('/api/v1/gherkin/validate', () => HttpResponse.json({ valid: true, language: 'fr', errors: [] })),
       http.patch(URL, () =>
         HttpResponse.json(testDetail('TC-1', {
           kind: 'AUTOMATED', steps: [], warnings: ['Tag @REQ-99 : exigence inconnue dans le projet SHOP.'],
-          automation: { technique: 'BDD', framework: 'Cucumber-JVM', gherkinSource: 'x', dataSet: [], parameters: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: false },
+          automation: { technique: 'BDD', framework: 'Cucumber-JVM', gherkinSource: 'x', configuration: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: false },
         })),
       ),
     );
@@ -123,11 +152,29 @@ describe('§6 test automatisé', () => {
     expect(await screen.findByText('Tag @REQ-99 : exigence inconnue dans le projet SHOP.')).toBeInTheDocument();
   });
 
+  it('§6.1 jeux de données d’un test automatisé : valeurs typées, configuration technique séparée', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serve(testDetail('TC-1', {
+      kind: 'AUTOMATED', steps: [], parameters: [{ name: 'montant', detected: false }],
+      automation: { technique: 'DATA_DRIVEN', framework: 'JUnit 5', configuration: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: false },
+    }));
+    const sent = capturePatch();
+    view();
+
+    await userEvent.click(await screen.findByTestId('dataset-add'));
+    expect(screen.getByText('Configuration technique (JSON)')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('dataset-0-add-row'));
+    await userEvent.type(screen.getByTestId('dataset-0-cell-0-montant'), '49.99');
+    await userEvent.click(screen.getByTestId('test-save'));
+
+    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Jeu 1', rows: [{ montant: 49.99 }] }]));
+  });
+
   it('F-AUT-08 signale un test absent du dépôt', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     serve(testDetail('TC-1', {
       kind: 'AUTOMATED', steps: [],
-      automation: { technique: 'UNIT', framework: 'JUnit 5', testIdentifier: 'CartTest#total', dataSet: [], parameters: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: true },
+      automation: { technique: 'UNIT', framework: 'JUnit 5', testIdentifier: 'CartTest#total', configuration: {}, executionTags: [], environmentRequirements: {}, keywords: [], missingInRepository: true },
     }));
     view();
 

@@ -3,28 +3,40 @@ import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalList
 import { CSS } from '@dnd-kit/utilities';
 import { ActionIcon, Badge, Box, Group, Loader, Stack, Text, Tooltip, UnstyledButton } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconAlertTriangle, IconChevronDown, IconChevronRight, IconGripVertical } from '@tabler/icons-react';
+import { IconAlertTriangle, IconChevronDown, IconChevronRight, IconExternalLink, IconEye, IconGripVertical, IconSubtask, IconTestPipe } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { errorMessage } from '../../api/errors';
 import { requirementKeys, useMoveRequirement, useRequirementTree, type RequirementTreeNode } from '../../api/requirements';
+import { DIVIDER, type NodeMenuItem } from '../../components/tree/menuItems';
+import { NodeMenuRow } from '../../components/tree/NodeMenu';
 import { PriorityBadge, StatusBadge, TypeBadge } from './Badges';
+import { childTypes } from './model';
 import { reorder } from './reorder';
 
 /**
  * F-REQ-01 vue arbre repliable (épic > feature > story) ; F-REQ-02 / F-REQ-03 glisser-déposer
- * entre frères. Le changement de parent passe par l'action « Déplacer… » de la fiche.
+ * entre frères. Le changement de parent passe par l'action « Déplacer… » de la fiche. Menu
+ * contextuel (clic droit ou « ⋯ ») : ouvrir, ajouter une exigence enfant ou un test lié.
  */
 export function RequirementTree({
   project,
   onSelect,
   canWrite,
+  canAddTest = false,
+  onAddChild,
+  onAddTest,
 }: {
   project: string;
   onSelect: (key: string) => void;
   canWrite: boolean;
+  canAddTest?: boolean;
+  onAddChild?: (node: RequirementTreeNode) => void;
+  onAddTest?: (node: RequirementTreeNode) => void;
 }) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const client = useQueryClient();
   const { data, isLoading } = useRequirementTree(project);
@@ -42,6 +54,16 @@ export function RequirementTree({
       else next.add(key);
       return next;
     });
+
+  const menu = (node: RequirementTreeNode): NodeMenuItem[] => [
+    { key: 'open-requirement', label: t('tree.open'), icon: <IconEye size={14} />, onClick: () => onSelect(node.key) },
+    { key: 'open-requirement-full', label: t('backlog.openFull'), icon: <IconExternalLink size={14} />, onClick: () => navigate(`/p/${project}/requirements/${node.key}`) },
+    ...(canWrite || canAddTest ? [DIVIDER('d1')] : []),
+    ...(canWrite && onAddChild && childTypes(node.type).length > 0
+      ? [{ key: 'add-child', label: t('tree.addChild'), icon: <IconSubtask size={14} />, onClick: () => onAddChild(node) }]
+      : []),
+    ...(canAddTest && onAddTest ? [{ key: 'add-test', label: t('tree.addTest'), icon: <IconTestPipe size={14} />, onClick: () => onAddTest(node) }] : []),
+  ];
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over) return;
@@ -68,7 +90,7 @@ export function RequirementTree({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       <Box data-testid="requirement-tree" role="tree" aria-label={t('backlog.tree')}>
-        <Siblings nodes={data} parentKey={null} depth={0} {...{ collapsed, toggle, onSelect, canWrite }} />
+        <Siblings nodes={data} parentKey={null} depth={0} {...{ collapsed, toggle, onSelect, canWrite, menu }} />
       </Box>
     </DndContext>
   );
@@ -79,6 +101,7 @@ interface NodeProps {
   toggle: (key: string) => void;
   onSelect: (key: string) => void;
   canWrite: boolean;
+  menu: (node: RequirementTreeNode) => NodeMenuItem[];
 }
 
 function Siblings({ nodes, parentKey, depth, ...props }: NodeProps & { nodes: RequirementTreeNode[]; parentKey: string | null; depth: number }) {
@@ -93,7 +116,7 @@ function Siblings({ nodes, parentKey, depth, ...props }: NodeProps & { nodes: Re
   );
 }
 
-function TreeNode({ node, parentKey, depth, collapsed, toggle, onSelect, canWrite }: NodeProps & { node: RequirementTreeNode; parentKey: string | null; depth: number }) {
+function TreeNode({ node, parentKey, depth, collapsed, toggle, onSelect, canWrite, menu }: NodeProps & { node: RequirementTreeNode; parentKey: string | null; depth: number }) {
   const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: node.key,
@@ -105,7 +128,7 @@ function TreeNode({ node, parentKey, depth, collapsed, toggle, onSelect, canWrit
 
   return (
     <Box ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.6 : 1 }}>
-      <Group gap={6} wrap="nowrap" pl={depth * 24} py={4} role="treeitem" aria-expanded={hasChildren ? open : undefined} data-testid={`tree-node-${node.key}`}>
+      <NodeMenuRow testId={`tree-node-${node.key}`} label={t('tree.actions', { name: node.key })} items={menu(node)} pl={depth * 24} py={4} role="treeitem" aria-expanded={hasChildren ? open : undefined}>
         {canWrite && (
           <ActionIcon variant="subtle" size="sm" aria-label={t('backlog.dragHandle')} {...attributes} {...listeners}>
             <IconGripVertical size={14} />
@@ -142,9 +165,9 @@ function TreeNode({ node, parentKey, depth, collapsed, toggle, onSelect, canWrit
             <IconAlertTriangle size={16} color="var(--mantine-color-orange-6)" aria-label={t('requirement.split')} />
           </Tooltip>
         )}
-      </Group>
+      </NodeMenuRow>
       {hasChildren && open && (
-        <Siblings nodes={node.children} parentKey={node.key} depth={depth + 1} {...{ collapsed, toggle, onSelect, canWrite }} />
+        <Siblings nodes={node.children} parentKey={node.key} depth={depth + 1} {...{ collapsed, toggle, onSelect, canWrite, menu }} />
       )}
     </Box>
   );

@@ -550,10 +550,133 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/test-folders" : {
+      "get" : {
+        "tags" : [ "Dossiers de tests" ],
+        "operationId" : "list_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Dossiers de tests" ],
+        "operationId" : "create_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FolderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FolderResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Dossiers de tests" ],
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "path",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/test-folders/move" : {
+      "post" : {
+        "tags" : [ "Dossiers de tests" ],
+        "operationId" : "move",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveFolderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MoveFolderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/test-cases" : {
       "get" : {
         "tags" : [ "Tests" ],
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -686,7 +809,7 @@
       },
       "post" : {
         "tags" : [ "Tests" ],
-        "operationId" : "create_2",
+        "operationId" : "create_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -853,7 +976,7 @@
     "/api/v1/projects/{projectKey}/requirements" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "list_3",
+        "operationId" : "list_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -970,7 +1093,7 @@
       },
       "post" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "create_3",
+        "operationId" : "create_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1125,7 +1248,7 @@
     "/api/v1/projects/{projectKey}/requirements/{key}/move" : {
       "post" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "move",
+        "operationId" : "move_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1201,7 +1324,7 @@
     "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "list_4",
+        "operationId" : "list_5",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1566,7 +1689,7 @@
       },
       "delete" : {
         "tags" : [ "Tests" ],
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1676,7 +1799,7 @@
       },
       "delete" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "delete_1",
+        "operationId" : "delete_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1755,7 +1878,7 @@
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}" : {
       "delete" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "delete_2",
+        "operationId" : "delete_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -1836,7 +1959,7 @@
     "/api/v1/reference/frameworks" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "list_5",
+        "operationId" : "list_6",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -3108,6 +3231,56 @@
         },
         "required" : [ "archived", "createdAt", "id", "key", "memberCount", "name", "version" ]
       },
+      "FolderRequest" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "path" ]
+      },
+      "FolderResponse" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "path" ]
+      },
+      "MoveFolderRequest" : {
+        "type" : "object",
+        "properties" : {
+          "from" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          },
+          "to" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "from", "to" ]
+      },
+      "MoveFolderResponse" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "string"
+          },
+          "movedTests" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Nombre de tests reclassés"
+          }
+        },
+        "required" : [ "movedTests", "path" ]
+      },
       "CreateTestCaseRequest" : {
         "type" : "object",
         "allOf" : [ {
@@ -3148,6 +3321,45 @@
           }
         } ],
         "required" : [ "kind", "title" ]
+      },
+      "DataSetDto" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "rows" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "additionalProperties" : { }
+            }
+          }
+        },
+        "required" : [ "name", "rows" ]
+      },
+      "ParameterRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "defaultValue" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "name" ]
       },
       "StepRequest" : {
         "type" : "object",
@@ -3216,13 +3428,16 @@
               "$ref" : "#/components/schemas/StepRequest"
             }
           },
-          "manualDataSet" : {
+          "parameters" : {
             "type" : "array",
             "items" : {
-              "type" : "object",
-              "additionalProperties" : {
-                "type" : "string"
-              }
+              "$ref" : "#/components/schemas/ParameterRequest"
+            }
+          },
+          "dataSets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DataSetDto"
             }
           },
           "explore" : {
@@ -3301,14 +3516,7 @@
           "gherkinSource" : {
             "type" : "string"
           },
-          "dataSet" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object",
-              "additionalProperties" : { }
-            }
-          },
-          "parameters" : {
+          "configuration" : {
             "type" : "object",
             "additionalProperties" : { }
           },
@@ -3357,16 +3565,10 @@
           "gherkinSource" : {
             "type" : "string"
           },
-          "dataSet" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object",
-              "additionalProperties" : { }
-            }
-          },
-          "parameters" : {
+          "configuration" : {
             "type" : "object",
-            "additionalProperties" : { }
+            "additionalProperties" : { },
+            "description" : "Configuration technique libre (JSON)"
           },
           "executionTags" : {
             "type" : "array",
@@ -3390,7 +3592,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "dataSet", "environmentRequirements", "executionTags", "framework", "keywords", "missingInRepository", "parameters", "technique" ]
+        "required" : [ "configuration", "environmentRequirements", "executionTags", "framework", "keywords", "missingInRepository", "technique" ]
       },
       "CharterResponse" : {
         "type" : "object",
@@ -3432,6 +3634,24 @@
           }
         },
         "required" : [ "areas", "heuristics", "missionSentence", "timeboxMin" ]
+      },
+      "ParameterResponse" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "defaultValue" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "detected" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "detected", "name" ]
       },
       "StepResponse" : {
         "type" : "object",
@@ -3523,20 +3743,17 @@
               "$ref" : "#/components/schemas/StepResponse"
             }
           },
-          "manualDataSet" : {
+          "parameters" : {
             "type" : "array",
+            "description" : "ADR-0013 paramètres déclarés et détectés (${nom} des pas)",
             "items" : {
-              "type" : "object",
-              "additionalProperties" : {
-                "type" : "string"
-              }
+              "$ref" : "#/components/schemas/ParameterResponse"
             }
           },
-          "variables" : {
+          "dataSets" : {
             "type" : "array",
-            "description" : "F-MAN-01 variables ${nom} des pas",
             "items" : {
-              "type" : "string"
+              "$ref" : "#/components/schemas/DataSetDto"
             }
           },
           "charter" : {
@@ -3577,7 +3794,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "allowedTransitions", "automationCandidate", "createdAt", "currentVersion", "id", "key", "kind", "manualDataSet", "priority", "requirements", "status", "steps", "tags", "title", "updatedAt", "variables", "version", "warnings" ]
+        "required" : [ "allowedTransitions", "automationCandidate", "createdAt", "currentVersion", "dataSets", "id", "key", "kind", "parameters", "priority", "requirements", "status", "steps", "tags", "title", "updatedAt", "version", "warnings" ]
       },
       "TestStatusRequest" : {
         "type" : "object",

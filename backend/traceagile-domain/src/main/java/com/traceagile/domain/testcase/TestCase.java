@@ -47,6 +47,7 @@ public class TestCase extends AuditableEntity {
 
     static final int TITLE_MAX = 200;
     private static final Pattern VARIABLE = Pattern.compile("\\$\\{([\\w.-]+)}");
+    private static final Pattern PARAMETER_NAME = Pattern.compile("[\\w.-]{1,60}");
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id")
@@ -105,10 +106,15 @@ public class TestCase extends AuditableEntity {
     @OrderBy("position")
     private List<ManualStep> steps = new ArrayList<>();
 
-    /** F-MAN-01 jeu de données alimentant les variables ${nom} des pas. */
+    /** ADR-0013 paramètres déclarés (les ${nom} des pas manuels s'y ajoutent à la lecture). */
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "manual_data_set", columnDefinition = "jsonb")
-    private List<Map<String, String>> manualDataSet;
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private List<TestParameter> parameters = new ArrayList<>();
+
+    /** ADR-0013 jeux de données nommés : une ligne par exécution. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "data_sets", nullable = false, columnDefinition = "jsonb")
+    private List<DataSet> dataSets = new ArrayList<>();
 
     @OneToOne(mappedBy = "testCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private ExploratoryCharter charter;
@@ -195,14 +201,16 @@ public class TestCase extends AuditableEntity {
 
     public void setFolder(String folder) {
         ensureEditable();
-        if (folder == null || folder.isBlank()) {
-            this.folder = null;
-            return;
+        relocate(folder);
+    }
+
+    /** ADR-0013 reclassement (renommage ou déplacement d'un dossier) : permis même sur un test OBSOLETE. */
+    public void relocate(String folder) {
+        String normalized = TestFolder.normalize(folder);
+        if (normalized != null && normalized.length() > TestFolder.MAX_LENGTH) {
+            throw new BusinessRuleException("TEST_FOLDER_PATH_TOO_LONG", "Le chemin du dossier dépasse " + TestFolder.MAX_LENGTH + " caractères.");
         }
-        this.folder = Stream.of(folder.split("/")).map(String::strip).filter(s -> !s.isEmpty()).collect(Collectors.joining("/"));
-        if (this.folder.isEmpty()) {
-            this.folder = null;
-        }
+        this.folder = normalized;
     }
 
     /** F-MAN-02 candidat à l'automatisation, avec justification. */
@@ -275,23 +283,92 @@ public class TestCase extends AuditableEntity {
         return List.copyOf(names);
     }
 
-    /** F-MAN-01 chaque ligne du jeu de données fournit toutes les variables des pas. */
-    public void setManualDataSet(List<Map<String, String>> dataSet) {
-        ensureManual();
-        if (dataSet == null || dataSet.isEmpty()) {
-            this.manualDataSet = null;
-            return;
+    // ---------------------------------------------------------------- paramètres et jeux de données (ADR-0013)
+
+    /** F-MAN-01 paramètres détectés dans les pas d'un test manuel ({@code ${nom}}). */
+    public List<String> detectedParameters() {
+        return kind == TestKind.MANUAL ? variables() : List.of();
+    }
+
+    /**
+     * Paramètres du test : d'abord ceux détectés dans les pas (avec la valeur par défaut et la
+     * description déclarées s'il y en a), puis les autres paramètres déclarés.
+     */
+    public List<TestParameter> getParameters() {
+        Map<String, TestParameter> declared = new LinkedHashMap<>();
+        parameters.forEach(p -> declared.put(p.name(), p));
+        List<TestParameter> result = new ArrayList<>();
+        for (String name : detectedParameters()) {
+            result.add(declared.containsKey(name) ? declared.remove(name) : TestParameter.named(name));
         }
-        List<String> variables = variables();
-        for (Map<String, String> row : dataSet) {
-            for (String variable : variables) {
-                if (row == null || !row.containsKey(variable)) {
-                    throw new BusinessRuleException("TEST_DATASET_VARIABLE_MISSING",
-                            "Chaque ligne du jeu de données doit renseigner la variable ${" + variable + "}.");
+        result.addAll(declared.values());
+        return List.copyOf(result);
+    }
+
+    /** Remplace les paramètres déclarés ; les colonnes des jeux de données sans paramètre disparaissent. */
+    public void setParameters(List<TestParameter> declared) {
+        ensureEditable();
+        Set<String> names = new HashSet<>();
+        List<TestParameter> cleaned = new ArrayList<>();
+        for (TestParameter parameter : declared == null ? List.<TestParameter>of() : declared) {
+            if (parameter.name() == null || !PARAMETER_NAME.matcher(parameter.name()).matches()) {
+                throw new BusinessRuleException("TEST_PARAMETER_NAME_INVALID",
+                        "Nom de paramètre invalide : « " + parameter.name() + " » (lettres sans accent, chiffres, « _ », « - », « . »).");
+            }
+            if (!names.add(parameter.name())) {
+                throw new BusinessRuleException("TEST_PARAMETER_DUPLICATED", "Le paramètre « " + parameter.name() + " » apparaît deux fois.");
+            }
+            cleaned.add(parameter);
+        }
+        this.parameters = cleaned;
+        Set<String> known = getParameters().stream().map(TestParameter::name).collect(Collectors.toSet());
+        this.dataSets = new ArrayList<>(dataSets.stream()
+                .map(d -> DataSet.of(d.name(), d.rows().stream()
+                        .map(row -> row.entrySet().stream().filter(e -> known.contains(e.getKey()))
+                                .collect(LinkedHashMap<String, Object>::new, (m, e) -> m.put(e.getKey(), e.getValue()), Map::putAll))
+                        .toList()))
+                .toList());
+    }
+
+    public List<DataSet> getDataSets() {
+        return List.copyOf(dataSets);
+    }
+
+    /** Jeux de données nommés ; une colonne qui n'est pas encore un paramètre en devient un. */
+    public void setDataSets(List<DataSet> sets) {
+        ensureEditable();
+        Set<String> names = new HashSet<>();
+        for (DataSet set : sets == null ? List.<DataSet>of() : sets) {
+            if (set.name() == null || set.name().isBlank()) {
+                throw new BusinessRuleException("TEST_DATASET_NAME_REQUIRED", "Chaque jeu de données a un nom.");
+            }
+            if (!names.add(set.name().toLowerCase(Locale.ROOT))) {
+                throw new BusinessRuleException("TEST_DATASET_DUPLICATED", "Le jeu de données « " + set.name() + " » existe déjà.");
+            }
+            for (Map<String, Object> row : set.rows()) {
+                if (row.isEmpty()) {
+                    throw new BusinessRuleException("TEST_DATASET_ROW_EMPTY", "Une ligne du jeu « " + set.name() + " » est vide.");
+                }
+                if (row.values().stream().anyMatch(v -> v != null && !(v instanceof String || v instanceof Number || v instanceof Boolean))) {
+                    throw new BusinessRuleException("TEST_DATASET_VALUE_INVALID",
+                            "Les valeurs du jeu « " + set.name() + " » sont du texte, des nombres ou des booléens.");
                 }
             }
         }
-        this.manualDataSet = new ArrayList<>(dataSet.stream().map(LinkedHashMap::new).toList());
+        // Une colonne devient un paramètre déclaré, même détecté : il survit au retrait du ${nom} des pas.
+        Set<String> known = parameters.stream().map(TestParameter::name).collect(Collectors.toCollection(HashSet::new));
+        List<TestParameter> declared = new ArrayList<>(parameters);
+        for (DataSet set : sets == null ? List.<DataSet>of() : sets) {
+            for (Map<String, Object> row : set.rows()) {
+                for (String column : row.keySet()) {
+                    if (known.add(column)) {
+                        declared.add(TestParameter.named(column));
+                    }
+                }
+            }
+        }
+        setParameters(declared);
+        this.dataSets = new ArrayList<>(sets == null ? List.of() : sets);
     }
 
     private void ensureManual() {
@@ -355,10 +432,9 @@ public class TestCase extends AuditableEntity {
     /** F-AUT-10 empreinte des modifications significatives (pas, Gherkin, jeu de données, identifiant). */
     public Object significantFingerprint() {
         return switch (kind) {
-            case MANUAL -> List.of(steps.stream().map(ManualStep::content).toList(),
-                    manualDataSet == null ? List.of() : manualDataSet);
-            case EXPLORATORY -> charter.content();
-            case AUTOMATED -> automation.content();
+            case MANUAL -> List.of(steps.stream().map(ManualStep::content).toList(), getParameters(), dataSets);
+            case EXPLORATORY -> List.of(charter.content(), getParameters(), dataSets);
+            case AUTOMATED -> List.of(automation.content(), getParameters(), dataSets);
         };
     }
 
@@ -382,10 +458,13 @@ public class TestCase extends AuditableEntity {
         snapshot.put("folder", folder);
         snapshot.put("automationCandidate", automationCandidate);
         snapshot.put("automationJustification", automationJustification);
+        snapshot.put("parameters", getParameters().isEmpty() ? null : getParameters().stream()
+                .map(p -> p.name() + (p.defaultValue() == null ? "" : " = " + p.defaultValue())).toList());
+        snapshot.put("dataSets", dataSets.isEmpty() ? null : dataSets.stream()
+                .map(d -> d.name() + " : " + d.rows()).toList());
         switch (kind) {
             case MANUAL -> {
                 snapshot.put("steps", steps.stream().map(ManualStep::describe).toList());
-                snapshot.put("dataSet", manualDataSet == null ? null : manualDataSet.toString());
             }
             case EXPLORATORY -> {
                 snapshot.put("mission", charter.missionSentence());
@@ -404,7 +483,6 @@ public class TestCase extends AuditableEntity {
                 snapshot.put("path", automation.getPath());
                 snapshot.put("testIdentifier", automation.getTestIdentifier());
                 snapshot.put("gherkinSource", automation.getGherkinSource());
-                snapshot.put("dataSet", automation.getDataSet().isEmpty() ? null : automation.getDataSet().toString());
                 snapshot.put("parameters", automation.getParameters().isEmpty() ? null : automation.getParameters().toString());
                 snapshot.put("executionTags", String.join(", ", automation.getExecutionTags()));
                 snapshot.put("environmentRequirements", automation.getEnvironmentRequirements().isEmpty() ? null
@@ -484,9 +562,6 @@ public class TestCase extends AuditableEntity {
         return Collections.unmodifiableList(steps);
     }
 
-    public List<Map<String, String>> getManualDataSet() {
-        return manualDataSet == null ? List.of() : List.copyOf(manualDataSet);
-    }
 
     public ExploratoryCharter getCharter() {
         return charter;

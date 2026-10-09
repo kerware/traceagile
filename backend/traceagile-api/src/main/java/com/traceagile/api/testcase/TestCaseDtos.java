@@ -78,12 +78,29 @@ public interface TestCaseDtos {
             String testIdentifier,
             String featureName,
             String gherkinSource,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Map<String, Object>> dataSet,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Map<String, Object> parameters,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Configuration technique libre (JSON)") Map<String, Object> configuration,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> executionTags,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Map<String, String> environmentRequirements,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> keywords,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean missingInRepository) {
+    }
+
+    /** ADR-0013 paramètre d'un test ; {@code detected} : présent dans les pas ({@code ${nom}}). */
+    record ParameterResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
+            String defaultValue,
+            String description,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean detected) {
+    }
+
+    /** ADR-0013 jeu de données nommé : une ligne par exécution, valeurs scalaires. */
+    record DataSetDto(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotBlank @Size(max = 100) String name,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotNull List<Map<String, Object>> rows) {
+    }
+
+    record ParameterRequest(@NotBlank @Size(max = 60) String name, @Size(max = 500) String defaultValue,
+                            @Size(max = 500) String description) {
     }
 
     record RequirementLinkResponse(
@@ -113,8 +130,8 @@ public interface TestCaseDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean automationCandidate,
             String automationJustification,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<StepResponse> steps,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Map<String, String>> manualDataSet,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-MAN-01 variables ${nom} des pas") List<String> variables,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0013 paramètres déclarés et détectés (${nom} des pas)") List<ParameterResponse> parameters,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetDto> dataSets,
             CharterResponse charter,
             AutomationResponse automation,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<RequirementLinkResponse> requirements,
@@ -168,7 +185,8 @@ public interface TestCaseDtos {
             Boolean automationCandidate,
             @Size(max = 1000) String automationJustification,
             List<@Valid StepRequest> steps,
-            List<Map<String, String>> manualDataSet,
+            List<@Valid ParameterRequest> parameters,
+            List<@Valid DataSetDto> dataSets,
             @Size(max = 500) String explore,
             @Size(max = 500) String with,
             @Size(max = 500) String toDiscover,
@@ -185,8 +203,7 @@ public interface TestCaseDtos {
             @Size(max = 500) String path,
             @Size(max = 500) String testIdentifier,
             String gherkinSource,
-            List<Map<String, Object>> dataSet,
-            Map<String, Object> parameters,
+            Map<String, Object> configuration,
             List<String> executionTags,
             Map<String, String> environmentRequirements) {
     }

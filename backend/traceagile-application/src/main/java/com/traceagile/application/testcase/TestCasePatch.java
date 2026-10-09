@@ -3,9 +3,11 @@ package com.traceagile.application.testcase;
 import com.traceagile.domain.common.BusinessRuleException;
 import com.traceagile.domain.requirement.Priority;
 import com.traceagile.domain.testcase.AutomatedTestDefinition;
+import com.traceagile.domain.testcase.DataSet;
 import com.traceagile.domain.testcase.ExploratoryCharter;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestKind;
+import com.traceagile.domain.testcase.TestParameter;
 import com.traceagile.domain.testcase.TestTechnique;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +32,8 @@ public record TestCasePatch(
         Optional<String> automationJustification,
         // MANUAL (F-MAN-01)
         Optional<List<StepDraft>> steps,
-        Optional<List<Map<String, String>>> manualDataSet,
+        // toutes natures (ADR-0013)
+        Optional<List<TestParameter>> parameters,
         // EXPLORATORY (F-EXP-01 / F-EXP-02)
         Optional<String> explore,
         Optional<String> with,
@@ -49,8 +52,8 @@ public record TestCasePatch(
         Optional<String> path,
         Optional<String> testIdentifier,
         Optional<String> gherkinSource,
-        Optional<List<Map<String, Object>>> dataSet,
-        Optional<Map<String, Object>> parameters,
+        Optional<List<DataSet>> dataSets,
+        Optional<Map<String, Object>> configuration,
         Optional<List<String>> executionTags,
         Optional<Map<String, String>> environmentRequirements) {
 
@@ -82,18 +85,14 @@ public record TestCasePatch(
             String justification = automationJustification == null ? test.getAutomationJustification() : automationJustification.orElse(null);
             test.markAutomationCandidate(candidate, justification);
         }
-        if (any(steps, manualDataSet)) {
-            require(test, TestKind.MANUAL, "steps / manualDataSet");
-            if (steps != null) {
-                test.replaceSteps(steps.orElse(List.of()).stream()
-                        .map(s -> Arrays.asList(s.action(), s.expectedResult(), s.testData())).toList());
-            }
-            if (manualDataSet != null) {
-                test.setManualDataSet(manualDataSet.orElse(null));
-            } else if (!test.getManualDataSet().isEmpty()) {
-                test.setManualDataSet(test.getManualDataSet());
-            }
+        if (steps != null) {
+            require(test, TestKind.MANUAL, "pas");
+            test.replaceSteps(steps.orElse(List.of()).stream()
+                    .map(s -> Arrays.asList(s.action(), s.expectedResult(), s.testData())).toList());
         }
+        // Après les pas (paramètres détectés), avant les jeux (dont les colonnes inconnues sont déclarées).
+        apply(parameters, test::setParameters);
+        apply(dataSets, test::setDataSets);
         if (any(explore, with, toDiscover, areas, heuristics, timeboxMin, setupNotes, targetedRisk)) {
             require(test, TestKind.EXPLORATORY, "champs de charte");
             ExploratoryCharter charter = test.getCharter();
@@ -109,8 +108,8 @@ public record TestCasePatch(
             apply(setupNotes, charter::setSetupNotes);
             apply(targetedRisk, charter::setTargetedRisk);
         }
-        if (any(technique, framework, language, repositoryUrl, branch, path, testIdentifier, gherkinSource, dataSet,
-                parameters, executionTags, environmentRequirements)) {
+        if (any(technique, framework, language, repositoryUrl, branch, path, testIdentifier, gherkinSource,
+                configuration, executionTags, environmentRequirements)) {
             require(test, TestKind.AUTOMATED, "champs de test automatisé");
             AutomatedTestDefinition automation = test.getAutomation();
             if (technique != null || framework != null) {
@@ -128,8 +127,7 @@ public record TestCasePatch(
             if (gherkinSource != null && (gherkinSource.isPresent() || automation.getTechnique() == TestTechnique.BDD)) {
                 automation.setGherkinSource(gherkinSource.orElse(null));
             }
-            apply(dataSet, automation::setDataSet);
-            apply(parameters, automation::setParameters);
+            apply(configuration, automation::setParameters);
             apply(executionTags, automation::setExecutionTags);
             apply(environmentRequirements, automation::setEnvironmentRequirements);
         }
@@ -178,7 +176,7 @@ public record TestCasePatch(
         public Builder folder(String v) { return set(6, v); }
         public Builder automationCandidate(boolean candidate, String justification) { set(7, candidate); return set(8, justification); }
         public Builder steps(List<StepDraft> v) { return set(9, v); }
-        public Builder manualDataSet(List<Map<String, String>> v) { return set(10, v); }
+        public Builder parameters(List<TestParameter> v) { return set(10, v); }
         public Builder mission(String explore, String with, String toDiscover) { set(11, explore); set(12, with); return set(13, toDiscover); }
         public Builder areas(List<String> v) { return set(14, v); }
         public Builder heuristics(List<String> v) { return set(15, v); }
@@ -190,8 +188,8 @@ public record TestCasePatch(
             set(22, repositoryUrl); set(23, branch); set(24, path); return set(25, testIdentifier);
         }
         public Builder gherkinSource(String v) { return set(26, v); }
-        public Builder dataSet(List<Map<String, Object>> v) { return set(27, v); }
-        public Builder parameters(Map<String, Object> v) { return set(28, v); }
+        public Builder dataSets(List<DataSet> v) { return set(27, v); }
+        public Builder configuration(Map<String, Object> v) { return set(28, v); }
         public Builder executionTags(List<String> v) { return set(29, v); }
         public Builder environmentRequirements(Map<String, String> v) { return set(30, v); }
 
@@ -201,13 +199,13 @@ public record TestCasePatch(
             return new TestCasePatch((Optional<String>) v.get(0), (Optional<String>) v.get(1), (Optional<String>) v.get(2),
                     (Optional<Priority>) v.get(3), (Optional<List<String>>) v.get(4), (Optional<Integer>) v.get(5),
                     (Optional<String>) v.get(6), (Optional<Boolean>) v.get(7), (Optional<String>) v.get(8),
-                    (Optional<List<StepDraft>>) v.get(9), (Optional<List<Map<String, String>>>) v.get(10),
+                    (Optional<List<StepDraft>>) v.get(9), (Optional<List<TestParameter>>) v.get(10),
                     (Optional<String>) v.get(11), (Optional<String>) v.get(12), (Optional<String>) v.get(13),
                     (Optional<List<String>>) v.get(14), (Optional<List<String>>) v.get(15), (Optional<Integer>) v.get(16),
                     (Optional<String>) v.get(17), (Optional<String>) v.get(18), (Optional<TestTechnique>) v.get(19),
                     (Optional<String>) v.get(20), (Optional<String>) v.get(21), (Optional<String>) v.get(22),
                     (Optional<String>) v.get(23), (Optional<String>) v.get(24), (Optional<String>) v.get(25),
-                    (Optional<String>) v.get(26), (Optional<List<Map<String, Object>>>) v.get(27),
+                    (Optional<String>) v.get(26), (Optional<List<DataSet>>) v.get(27),
                     (Optional<Map<String, Object>>) v.get(28), (Optional<List<String>>) v.get(29),
                     (Optional<Map<String, String>>) v.get(30));
         }

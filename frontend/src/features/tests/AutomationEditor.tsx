@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFrameworks, type TestCaseDetail } from '../../api/testcases';
 import { CodeEditor } from '../../components/code/CodeEditor';
-import { DataSetGrid } from './DataSetGrid';
 import type { TestDraft } from './draft';
 import { GherkinEditor } from './GherkinEditor';
 import { KeyValueEditor } from './KeyValueEditor';
@@ -29,22 +28,22 @@ export function AutomationEditor({
 }) {
   const { t } = useTranslation();
   const { data: frameworks } = useFrameworks();
-  const [parametersText, setParametersText] = useState(() => JSON.stringify(draft.parameters, null, 2));
-  const [parametersError, setParametersError] = useState(false);
+  const [configurationText, setConfigurationText] = useState(() => JSON.stringify(draft.configuration, null, 2));
+  const [configurationError, setConfigurationError] = useState(false);
   const technique = draft.technique;
-  const parameter = (name: string) => draft.parameters[name];
-  const expected = (draft.parameters.expected ?? {}) as Record<string, unknown>;
+  const parameter = (name: string) => draft.configuration[name];
+  const expected = (draft.configuration.expected ?? {}) as Record<string, unknown>;
 
-  const setParameters = (parameters: Record<string, unknown>) => {
-    onChange({ parameters });
-    setParametersText(JSON.stringify(parameters, null, 2));
-    setParametersError(false);
+  const setConfiguration = (configuration: Record<string, unknown>) => {
+    onChange({ configuration });
+    setConfigurationText(JSON.stringify(configuration, null, 2));
+    setConfigurationError(false);
   };
   const setParameter = (name: string, value: unknown) => {
-    const next = { ...draft.parameters };
+    const next = { ...draft.configuration };
     if (value === '' || value === undefined || (Array.isArray(value) && value.length === 0)) delete next[name];
     else next[name] = value;
-    setParameters(next);
+    setConfiguration(next);
   };
   const setExpected = (name: string, value: number | string) => {
     const next = { ...expected };
@@ -117,9 +116,6 @@ export function AutomationEditor({
       </Fieldset>
 
       {technique === 'BDD' && <GherkinEditor project={project} value={draft.gherkinSource} onChange={(gherkinSource) => onChange({ gherkinSource })} readOnly={readOnly} />}
-      {(technique === 'DATA_DRIVEN' || draft.dataSet.length > 0) && (
-        <DataSetGrid label={t('automation.dataSet')} rows={draft.dataSet} onChange={(dataSet) => onChange({ dataSet })} readOnly={readOnly} typed />
-      )}
       {technique === 'UI' && (
         <Group grow align="flex-start">
           <TagsInput
@@ -160,24 +156,24 @@ export function AutomationEditor({
         </Input.Wrapper>
       )}
 
-      <Input.Wrapper label={t('automation.parameters')} error={parametersError ? t('automation.parametersInvalid') : undefined}>
+      <Input.Wrapper label={t('automation.configuration')} description={t('automation.configurationHint')} error={configurationError ? t('automation.configurationInvalid') : undefined}>
         <CodeEditor
           language="json"
-          value={parametersText}
+          value={configurationText}
           height={160}
           readOnly={readOnly}
-          ariaLabel={t('automation.parameters')}
-          testId="automation-parameters"
+          ariaLabel={t('automation.configuration')}
+          testId="automation-configuration"
           onChange={(text) => {
-            setParametersText(text);
+            setConfigurationText(text);
             try {
               const parsed = JSON.parse(text || '{}') as unknown;
               if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                onChange({ parameters: parsed as Record<string, unknown> });
-                setParametersError(false);
-              } else setParametersError(true);
+                onChange({ configuration: parsed as Record<string, unknown> });
+                setConfigurationError(false);
+              } else setConfigurationError(true);
             } catch {
-              setParametersError(true);
+              setConfigurationError(true);
             }
           }}
         />

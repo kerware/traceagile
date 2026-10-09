@@ -45,6 +45,9 @@ export function page<T>(content: T[]) {
 export const handlers = [
   http.post('/api/v1/auth/refresh', () => problem(401, 'AUTH_REFRESH_INVALID', 'Session expirée')),
   http.get('/api/v1/projects', () => HttpResponse.json(page([SHOP]))),
+  // Données de référence lues par des fenêtres toujours montées (création de test, arbre des dossiers).
+  http.get('/api/v1/reference/frameworks', () => HttpResponse.json([])),
+  http.get('/api/v1/projects/:key/test-folders', () => HttpResponse.json([])),
 ];
 
 export const server = setupServer(...handlers);

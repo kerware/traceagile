@@ -13,6 +13,7 @@ import com.traceagile.domain.requirement.AcceptanceCriterion;
 import com.traceagile.domain.requirement.CriterionFormat;
 import com.traceagile.domain.requirement.Priority;
 import com.traceagile.domain.requirement.Requirement;
+import com.traceagile.domain.testcase.DataSet;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestCaseStatus;
 import com.traceagile.domain.testcase.TestKind;
@@ -51,6 +52,7 @@ public class DemoTestsLoader {
     }
 
     static final String REPOSITORY = "https://git.example.com/shop/tests.git";
+    static final String DATASET = "Recette";
 
     private final TestCaseService tests;
     private final TestCaseRepository repository;
@@ -84,7 +86,7 @@ public class DemoTestsLoader {
             TestCasePatch.Builder details = TestCasePatch.builder()
                     .folder(m.folder()).priority(m.priority()).estimatedDurationMin(m.duration())
                     .steps(m.steps().stream().map(s -> new StepDraft(s.get(0), s.size() > 1 ? s.get(1) : null, s.size() > 2 ? s.get(2) : null)).toList())
-                    .manualDataSet(m.dataSet());
+                    .dataSets(m.dataSet() == null ? null : List.of(DataSet.of(DATASET, m.dataSet())));
             if (m.candidate() != null) {
                 details.automationCandidate(true, m.candidate());
             }
@@ -101,7 +103,8 @@ public class DemoTestsLoader {
         for (AutomatedDemo a : demo.automated()) {
             TestCasePatch details = TestCasePatch.builder()
                     .location(REPOSITORY, "main", a.path(), a.identifier())
-                    .executionTags(a.tags()).parameters(a.parameters()).dataSet(a.dataSet()).environmentRequirements(a.env())
+                    .executionTags(a.tags()).configuration(a.parameters())
+                    .dataSets(a.dataSet() == null ? null : List.of(DataSet.of(DATASET, a.dataSet()))).environmentRequirements(a.env())
                     .folder("Automatisés/" + a.technique().name()).build();
             ready(tests.create(project, new CreateTestCaseCommand(TestKind.AUTOMATED, a.title(), a.technique(), a.framework(),
                     details, links.apply(a.requirement()))).testCase());

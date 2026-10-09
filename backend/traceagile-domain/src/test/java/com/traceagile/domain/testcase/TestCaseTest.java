@@ -71,16 +71,12 @@ class TestCaseTest {
     }
 
     @Test
-    @DisplayName("F-MAN-01 variables ${nom} des pas, alimentées par le jeu de données")
+    @DisplayName("F-MAN-01 variables ${nom} des pas")
     void variables() {
         TestCase test = manual();
         test.addStep("Saisir ${produit}", "Le prix ${prix} s'affiche", "${produit}");
 
         assertThat(test.variables()).containsExactly("produit", "prix");
-        test.setManualDataSet(List.of(Map.of("produit", "Stylo", "prix", "2,50 €")));
-        assertThat(test.getManualDataSet()).hasSize(1);
-        assertThatThrownBy(() -> test.setManualDataSet(List.of(Map.of("produit", "Stylo"))))
-                .extracting("code").isEqualTo("TEST_DATASET_VARIABLE_MISSING");
     }
 
     @Test
@@ -206,14 +202,13 @@ class TestCaseTest {
     }
 
     @Test
-    @DisplayName("§6.1 DATA_DRIVEN : jeu de données sous forme de tableau d'objets")
+    @DisplayName("§6.1 DATA_DRIVEN : jeux de données portés par le test, valeurs typées")
     void dataDriven() {
         TestCase test = TestCase.automated(shop, "TC-4", "Frais de port", TestTechnique.DATA_DRIVEN, "JUnit 5");
-        test.getAutomation().setDataSet(List.of(Map.of("montant", 49, "frais", 4.9), Map.of("montant", 50, "frais", 0)));
+        test.setDataSets(List.of(DataSet.of("Seuils", List.of(Map.of("montant", 49, "frais", 4.9), Map.of("montant", 50, "frais", 0)))));
 
-        assertThat(test.getAutomation().getDataSet()).hasSize(2);
-        assertThatThrownBy(() -> test.getAutomation().setDataSet(List.of(Map.of())))
-                .extracting("code").isEqualTo("TEST_DATASET_ROW_EMPTY");
+        assertThat(test.getDataSets().getFirst().rows()).hasSize(2);
+        assertThat(test.getParameters()).extracting(TestParameter::name).containsExactlyInAnyOrder("montant", "frais");
     }
 
     @Test

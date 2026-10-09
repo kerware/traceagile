@@ -1,6 +1,6 @@
 import { Alert, Button, Group, Modal, Select, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../../api/errors';
 import { useCreateRequirement, useRequirementTree, type RequirementType } from '../../api/requirements';
@@ -12,11 +12,16 @@ export function CreateRequirementModal({
   opened,
   onClose,
   onCreated,
+  initialParent,
+  initialType,
 }: {
   project: string;
   opened: boolean;
   onClose: () => void;
   onCreated?: (key: string) => void;
+  /** Menu contextuel de l'arbre : parent et type pré-remplis. */
+  initialParent?: string | null;
+  initialType?: RequirementType | null;
 }) {
   const { t } = useTranslation();
   const create = useCreateRequirement(project);
@@ -26,6 +31,13 @@ export function CreateRequirementModal({
   const [parentKey, setParentKey] = useState<string | null>(null);
   const [story, setStory] = useState({ asA: '', iWant: '', soThat: '' });
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (opened) {
+      if (initialType) setType(initialType);
+      setParentKey(initialParent ?? null);
+    }
+  }, [opened, initialParent, initialType]);
 
   const allowed = allowedParentTypes(type);
   const parents = flatten(tree ?? []).filter((n) => allowed.includes(n.type));
