@@ -13,6 +13,7 @@ export function testSummary(key: string, overrides: Partial<TestCaseSummary> = {
     currentVersion: 1,
     automationCandidate: false,
     missingInRepository: false,
+    executionCount: 0,
     ...overrides,
   };
 }

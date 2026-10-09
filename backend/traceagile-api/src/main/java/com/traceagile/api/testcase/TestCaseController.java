@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -134,7 +135,9 @@ public class TestCaseController {
                                               @RequestParam(required = false) String q,
                                               @ParameterObject Pageable pageable) {
         TestCaseFilter filter = new TestCaseFilter(kind, technique, status, tag, requirement, orphan, automationCandidate, folder, q);
-        return PageResponse.of(tests.search(projectKey, filter, pageable), mapper::toSummary);
+        var page = tests.search(projectKey, filter, pageable);
+        Map<UUID, Long> counts = tests.executionCounts(page.getContent());
+        return PageResponse.of(page, t -> mapper.toSummary(t, counts.getOrDefault(t.getId(), 0L)));
     }
 
     /** §13.2 référentiel par dossier ({@code folder}) ou par fonctionnalité Gherkin ({@code feature}). */
@@ -142,11 +145,13 @@ public class TestCaseController {
     @PreAuthorize(TestPermissions.READ)
     public List<TestCaseGroup> tree(@PathVariable String projectKey, @RequestParam(defaultValue = "folder") String groupBy) {
         Map<String, List<TestCaseSummary>> groups = new LinkedHashMap<>();
-        for (TestCase test : tests.all(projectKey)) {
+        List<TestCase> all = tests.all(projectKey);
+        Map<UUID, Long> counts = tests.executionCounts(all);
+        for (TestCase test : all) {
             String name = "feature".equals(groupBy)
                     ? test.getAutomation() == null ? null : test.getAutomation().getFeatureName()
                     : test.getFolder();
-            groups.computeIfAbsent(Objects.toString(name, ""), n -> new ArrayList<>()).add(mapper.toSummary(test));
+            groups.computeIfAbsent(Objects.toString(name, ""), n -> new ArrayList<>()).add(mapper.toSummary(test, counts.getOrDefault(test.getId(), 0L)));
         }
         if (!"feature".equals(groupBy)) {
             // ADR-0013 dossiers explicites encore vides

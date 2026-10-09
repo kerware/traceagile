@@ -2,6 +2,8 @@ package com.traceagile.application.testcase;
 
 import com.traceagile.application.administration.ProjectRepository;
 import com.traceagile.application.audit.AuditService;
+import com.traceagile.application.campaign.CampaignItemRepository;
+import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.application.common.KeyGenerator;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.common.UnprocessableException;
@@ -22,6 +24,12 @@ import com.traceagile.domain.testcase.TestKind;
 import com.traceagile.domain.testcase.TestTechnique;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.data.domain.Page;
@@ -36,6 +44,8 @@ public class TestCaseService {
 
     static final String KEY_PREFIX = "TC";
     public static final String AUDIT_TYPE = "TEST_CASE";
+    /** F-MAN-02 tri par fréquence d'exécution ({@code sort=executionCount,desc}). */
+    public static final String EXECUTION_COUNT = "executionCount";
 
     public record CreateTestCaseCommand(TestKind kind, String title, TestTechnique technique, String framework,
                                         TestCasePatch details, List<LinkDraft> links) {
@@ -54,10 +64,15 @@ public class TestCaseService {
     private final FeatureFileParser features;
     private final TraceLinkService links;
     private final AuditService audit;
+    private final ExecutionRepository executions;
+    private final CampaignItemRepository campaignItems;
 
     public TestCaseService(TestCaseRepository tests, TestCaseVersionRepository versions, ProjectRepository projects,
                            AutomationFrameworkRepository frameworks, KeyGenerator keys, GherkinValidator gherkin,
-                           FeatureFileParser features, TraceLinkService links, AuditService audit) {
+                           FeatureFileParser features, TraceLinkService links, AuditService audit, ExecutionRepository executions,
+                           CampaignItemRepository campaignItems) {
+        this.executions = executions;
+        this.campaignItems = campaignItems;
         this.tests = tests;
         this.versions = versions;
         this.projects = projects;
@@ -79,7 +94,28 @@ public class TestCaseService {
 
     @Transactional(readOnly = true)
     public Page<TestCase> search(String projectKey, TestCaseFilter filter, Pageable pageable) {
-        return tests.search(projectKey, filter, pageable);
+        Sort.Order byExecutions = pageable.getSort().getOrderFor(EXECUTION_COUNT);
+        if (byExecutions == null) {
+            return tests.search(projectKey, filter, pageable);
+        }
+        // F-MAN-02 candidats triés par fréquence d'exécution : tri en mémoire (propriété calculée).
+        List<TestCase> all = tests.search(projectKey, filter, Pageable.unpaged(Sort.by("keyNumber"))).getContent();
+        Map<UUID, Long> counts = executionCounts(all);
+        Comparator<TestCase> comparator = Comparator.comparingLong((TestCase t) -> counts.getOrDefault(t.getId(), 0L));
+        List<TestCase> sorted = all.stream().sorted(byExecutions.isDescending() ? comparator.reversed() : comparator).toList();
+        int from = (int) Math.min(pageable.getOffset(), sorted.size());
+        int to = Math.min(from + pageable.getPageSize(), sorted.size());
+        return new PageImpl<>(sorted.subList(from, to), pageable, sorted.size());
+    }
+
+    /** F-MAN-02 nombre d'exécutions de chaque test (toutes campagnes, toutes tentatives). */
+    @Transactional(readOnly = true)
+    public Map<UUID, Long> executionCounts(Collection<TestCase> list) {
+        if (list.isEmpty()) {
+            return Map.of();
+        }
+        return executions.findByTestCase_IdInOrderByStartedAtDesc(list.stream().map(TestCase::getId).toList()).stream()
+                .collect(Collectors.groupingBy(e -> e.getTestCase().getId(), Collectors.counting()));
     }
 
     /** §13.2 arbre par dossier ou par feature : tous les tests du projet. */
@@ -174,9 +210,15 @@ public class TestCaseService {
         return test;
     }
 
-    /** §3.3-6 : la suppression d'un test déjà exécuté sera refusée à partir du lot 5. */
+    /** §3.3-6 un test déjà exécuté ne se supprime pas (on le passe OBSOLETE) ; ni un test sélectionné dans une campagne. */
     public void delete(String projectKey, String key) {
         TestCase test = get(projectKey, key);
+        if (executions.existsByTestCase_IdIn(List.of(test.getId()))) {
+            throw new BusinessRuleException("TEST_ALREADY_EXECUTED", key + " a déjà été exécuté : passez-le à « Obsolète » plutôt que de le supprimer.");
+        }
+        if (campaignItems.existsByTestCase_Id(test.getId())) {
+            throw new BusinessRuleException("TEST_IN_CAMPAIGN", key + " est sélectionné dans une campagne : retirez-le d'abord de la campagne.");
+        }
         audit.record(test.getProject().getId(), AUDIT_TYPE, test.getId(), key, AuditAction.DELETED, test.snapshot(), Map.of());
         links.deleteLinksOf(test);
         tests.delete(test);

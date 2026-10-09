@@ -137,7 +137,7 @@ export function TestsPage() {
           <Checkbox
             label={t('tests.candidates')}
             checked={filters.automationCandidate ?? false}
-            onChange={(e) => update({ automationCandidate: e.currentTarget.checked ? 'true' : null, sort: e.currentTarget.checked ? 'priority,asc' : null, view: 'list' })}
+            onChange={(e) => update({ automationCandidate: e.currentTarget.checked ? 'true' : null, sort: e.currentTarget.checked ? 'executionCount,desc' : null, view: 'list' })}
             data-testid="filter-candidates"
           />
           {hasTestFilters(filters) && (

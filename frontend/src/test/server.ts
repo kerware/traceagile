@@ -49,6 +49,7 @@ export const handlers = [
   http.get('/api/v1/reference/frameworks', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/test-folders', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/test-cases', () => HttpResponse.json(page([]))),
+  http.get('/api/v1/projects/:key/requirements/tree', () => HttpResponse.json([])),
 ];
 
 export const server = setupServer(...handlers);

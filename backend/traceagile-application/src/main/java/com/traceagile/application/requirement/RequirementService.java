@@ -2,6 +2,7 @@ package com.traceagile.application.requirement;
 
 import com.traceagile.application.administration.ProjectRepository;
 import com.traceagile.application.audit.AuditService;
+import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.application.common.KeyGenerator;
 import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.application.common.NotFoundException;
@@ -63,11 +64,13 @@ public class RequirementService {
     private final ApplicationEventPublisher events;
     private final GherkinValidator gherkin;
     private final TraceLinkService links;
+    private final ExecutionRepository executions;
 
     public RequirementService(RequirementRepository requirements, RequirementVersionRepository versions,
                               ProjectRepository projects, KeyGenerator keys, ChecklistService checklists,
                               AuditService audit, ApplicationEventPublisher events, GherkinValidator gherkin,
-                              TraceLinkService links) {
+                              TraceLinkService links, ExecutionRepository executions) {
+        this.executions = executions;
         this.gherkin = gherkin;
         this.links = links;
         this.requirements = requirements;
@@ -220,6 +223,12 @@ public class RequirementService {
     public void delete(String projectKey, String key) {
         Requirement requirement = get(projectKey, key);
         requirement.ensureDeletable();
+        // §3.3-6 une exigence dont un test lié a été exécuté ne se supprime pas : on la passe OBSOLETE.
+        List<java.util.UUID> testIds = links.testsOf(requirement).stream().map(l -> l.testCase().getId()).toList();
+        if (!testIds.isEmpty() && executions.existsByTestCase_IdIn(testIds)) {
+            throw new BusinessRuleException("REQ_ALREADY_EXECUTED",
+                    key + " a des tests déjà exécutés : passez-la à « Obsolète » plutôt que de la supprimer.");
+        }
         Map<String, Object> before = requirement.snapshot();
         if (requirement.getParent() != null) {
             requirement.moveUnder(null);

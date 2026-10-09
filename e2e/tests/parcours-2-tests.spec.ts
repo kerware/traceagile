@@ -30,6 +30,7 @@ test('Parcours 2 : le testeur crée les trois types de test et génère un test 
     await expect(page.getByTestId('test-status-menu')).toContainText('Prêt');
   });
 
+  let cleCharte = '';
   await test.step('Il crée une charte exploratoire liée à la story « Choisir le mode de livraison »', async () => {
     await creerTest(page, 'Exploratoire', `Explorer le retrait en magasin ${suffixe}`, 'Choisir le mode de livraison');
     await page.getByTestId('charter-explore').fill('le retrait en magasin');
@@ -41,6 +42,10 @@ test('Parcours 2 : le testeur crée les trois types de test et génère un test 
     await page.getByTestId('test-save').click();
     await page.getByRole('tab', { name: /Exigences liées/ }).click();
     await expect(page.getByTestId('link-requirement-0')).toHaveValue(/REQ-\d+ — Choisir le mode de livraison/);
+    await page.getByTestId('test-status-menu').click();
+    await page.getByTestId('test-status-option-READY').click();
+    await expect(page.getByTestId('test-status-menu')).toContainText('Prêt');
+    cleCharte = (await page.getByTestId('test-key').textContent())!.trim();
   });
 
   await test.step('Il crée un test automatisé API', async () => {
@@ -71,7 +76,32 @@ test('Parcours 2 : le testeur crée les trois types de test et génère un test 
     await expect(page.getByTestId('gherkin-valid')).toBeVisible();
   });
 
-  test.info().annotations.push({ type: 'lot 5', description: 'Sélection du test BDD et de la charte dans une campagne.' });
+  await test.step('Il passe le test BDD à « Prêt »', async () => {
+    await page.goto(`/p/SHOP/tests/${cleTestBdd}`);
+    await page.getByTestId('test-status-menu').click();
+    await page.getByTestId('test-status-option-READY').click();
+    await expect(page.getByTestId('test-status-menu')).toContainText('Prêt');
+  });
+
+  await test.step('Il crée une campagne de régression et y sélectionne le test BDD et la charte (F-CMP-02)', async () => {
+    await page.goto('/p/SHOP/campaigns');
+    await page.getByTestId('campaign-new').click();
+    await page.getByTestId('campaign-name').fill(`Régression retrait ${suffixe}`);
+    await page.getByTestId('campaign-scope').click();
+    await page.getByRole('option', { name: 'Régression' }).click();
+    await page.getByTestId('campaign-submit').click();
+    await expect(page.getByTestId('campaign-page')).toBeVisible();
+    await page.getByTestId('selection-strategy').click();
+    await page.getByRole('option', { name: 'Sélection manuelle' }).click();
+    for (const cle of [cleTestBdd, cleCharte]) {
+      await page.getByTestId('selection-tests').fill(cle);
+      await page.getByRole('option', { name: new RegExp(`^${cle} —`) }).click();
+    }
+    await page.getByTestId('selection-submit').click();
+    await expect(page.getByTestId('selection-result')).toContainText('2 tests ajoutés');
+    await expect(page.getByTestId(`item-${cleTestBdd}`)).toContainText('Serveur d');
+    await expect(page.getByTestId(`item-${cleCharte}`)).toBeVisible();
+  });
 });
 
 async function creerTest(page: Page, nature: string, titre: string, exigence?: string, technique?: string) {

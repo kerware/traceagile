@@ -39,7 +39,8 @@ public interface TestCaseDtos {
             Integer estimatedDurationMin,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int currentVersion,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean automationCandidate,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean missingInRepository) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean missingInRepository,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-MAN-02 nombre d'exécutions (toutes tentatives)") long executionCount) {
     }
 
     /** §13.2 référentiel « par dossier » ou « par feature ». */

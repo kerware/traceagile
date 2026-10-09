@@ -14,25 +14,23 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | Corrections 0-2 | Défilement après panneau latéral, paramètres `${nom}` et jeux de données nommés, dossiers de tests et menus contextuels des arbres (ADR-0013) | **Fait** (branche `lot-2-corrections`) |
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | **Fait** (branche `lot-3-tracabilite`) |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
-| 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | À faire |
+| 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branche `lot-5-campagnes`) |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | À faire |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | À faire |
 | 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
 | 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
 
 Reporté (à reprendre dans le lot indiqué) :
-- Parcours §15.3 étape 2 : sélection du test BDD et de la charte dans une campagne → lot 5.
-- Traçabilité (ADR-0014) : derniers résultats, anomalies
-  bloquantes, campagnes en cours et suspicion « modifiée après la dernière exécution » → lot 5
-  (remplacer `NoExecutionResults` par l'adaptateur des exécutions) ; cache des statuts si §14 l'exige.
-- F-MAN-02 tri des candidats par fréquence d'exécution → lot 5 (aujourd'hui : par priorité).
+- Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
+  des tests à NEEDS_UPDATE (non sélectionnables) ; cache des statuts si §14 l'exige.
+- Sessions exploratoires (lot 6) : la démo enregistre un résultat global pour les chartes de CMP-1.
+- Runs automatisés et import (lot 7) : réutiliser `ExecutionService.record` / `Execution.recorded`.
 - Heuristiques extensibles par projet (F-EXP-02), sessions et génération de chartes → lot 6.
 - F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
-- §3.3-6 « suppression interdite si exécutée » et item DoD « aucune anomalie bloquante » → lot 5.
-- Choix du jeu de données (ADR-0013) à l'exécution : campagne → lot 5, `dataSet` du job → lot 7.
+- Choix du jeu de données (ADR-0013) : `dataSet` du job d'exécution → lot 7.
 - Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
-- Démo : stories de SPR-1 passées DONE sans exécution (ADR-0015) → exécutions de SPR-1 au lot 5.
-- F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes, Example Mapping → lot 9.
+- F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes (dont captures des
+  pas et des anomalies, F-EXE-01 / F-EXE-03), Example Mapping → lot 9.
 - `docs/execution-server-api.yaml` (contrat §10) → lot 7.
 - Seuil JaCoCo bloquant (NF-12), SpotBugs (NF-13), axe-core (NF-10) → lot 9 ; le rapport JaCoCo est
   déjà produit par `mvn verify`.
@@ -141,6 +139,12 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `projects`/`users`, plus les tables sans clé étrangère comme `audit_events`). Chaque contrôleur :
   nominal, 400, 403, 412 si PATCH, 422 pour les règles métier.
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
+- Campagnes et exécutions (ADR-0016) : règles dans `Campaign`, `CampaignItem`, `Execution`
+  (statut déduit : `ExecutionRules`), `Defect`, `DefectDraft` (domaine). Après avoir ajouté des
+  éléments à une collection en cascade, `flush()` avant de renvoyer leurs identifiants.
+- Exécutions dans un périmètre sprint / release : `TraceabilityService.executionScope` (§7.2).
+- DTO : noms simples uniques dans tout `com.traceagile.api` (springdoc nomme les schémas d'après
+  eux) ; `ArchitectureTest.dtoNamesAreUnique` le vérifie.
 - Planification (ADR-0015) : règles de dates et de cycle de vie dans `Release` / `Sprint` /
   `SprintSchedule` (domaine) ; transitions d'exigences décidées par la planification via
   `RequirementService.applyPlanningStatus` (sans DoR, auditée).
@@ -203,6 +207,9 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   stories non couvertes. Tous `READY`.
 - Lot 4 : `REL-1` « Version 2.0 », 3 sprints de 2 semaines calés sur la date du jour — `SPR-1` clos
   (une story reportée), `SPR-2` actif, `SPR-3` planifié (`DemoPlanningLoader`, rejoué si aucune release).
+- Lot 5 : `CMP-1` « Recette SPR-1 » terminée (SPR-1 validé à 75 %, une 2ᵉ tentative), `CMP-2`
+  « Recette SPR-2 » en cours (« Mes exécutions » de qa1 / qa2), `CMP-3` « Régression 2.0 »
+  planifiée ; DEF-1 à DEF-6 de sévérités variées (`DemoCampaignLoader`, rejoué si aucune campagne).
 - Lot 3 : la story « Appliquer un code promo » est précisée après coup → ses tests sont
   `NEEDS_UPDATE` et leurs liens suspects (§3.3-7). Sur une base déjà chargée, la démo n'est pas
   rejouée : `docker compose down -v` pour repartir de zéro.

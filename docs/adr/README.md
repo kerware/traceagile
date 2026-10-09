@@ -20,3 +20,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0013](0013-parametres-jeux-de-donnees-dossiers.md) | Paramètres, jeux de données nommés, dossiers de tests, menus contextuels | 0-2 |
 | [0014](0014-tracabilite-et-couverture.md) | Traçabilité et couverture avant les exécutions | 3 |
 | [0015](0015-planification.md) | Releases, sprints et planification | 4 |
+| [0016](0016-campagnes-execution-anomalies.md) | Campagnes, exécution manuelle et anomalies | 5 |

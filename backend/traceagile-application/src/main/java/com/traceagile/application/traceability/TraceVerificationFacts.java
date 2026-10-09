@@ -7,19 +7,20 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * F-REQ-19 faits de DoR / DoD. « Au moins un test lié » (lot 2) et « tous les tests liés passés »
- * (lot 3, d'après {@link ExecutionResults}) sont évalués ; les anomalies bloquantes restent « non
- * évaluées » jusqu'au lot 5.
+ * F-REQ-19 faits de DoR / DoD : « au moins un test lié » (lot 2), « tous les tests liés passés »
+ * (lot 3) et « aucune anomalie bloquante ouverte » (lot 5), d'après {@link ExecutionResults}.
  */
 @Component
 public class TraceVerificationFacts implements VerificationFacts {
 
     private final TraceLinkService links;
     private final TraceabilityService traceability;
+    private final ExecutionResults executions;
 
-    public TraceVerificationFacts(@Lazy TraceLinkService links, @Lazy TraceabilityService traceability) {
+    public TraceVerificationFacts(@Lazy TraceLinkService links, @Lazy TraceabilityService traceability, @Lazy ExecutionResults executions) {
         this.links = links;
         this.traceability = traceability;
+        this.executions = executions;
     }
 
     @Override
@@ -34,6 +35,6 @@ public class TraceVerificationFacts implements VerificationFacts {
 
     @Override
     public Optional<Boolean> hasOpenBlockingDefect(Requirement requirement) {
-        return Optional.empty();
+        return Optional.of(executions.requirementsWithOpenBlockingDefect(requirement.getProject().getKey()).contains(requirement.getId()));
     }
 }

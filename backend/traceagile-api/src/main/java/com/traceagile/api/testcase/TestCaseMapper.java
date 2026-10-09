@@ -31,12 +31,13 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface TestCaseMapper {
 
-    @Mapping(target = "technique", source = "automation.technique")
-    @Mapping(target = "framework", source = "automation.framework")
-    @Mapping(target = "featureName", source = "automation.featureName")
+    @Mapping(target = "technique", source = "test.automation.technique")
+    @Mapping(target = "framework", source = "test.automation.framework")
+    @Mapping(target = "featureName", source = "test.automation.featureName")
     @Mapping(target = "tags", expression = "java(java.util.List.copyOf(test.getTags()))")
     @Mapping(target = "missingInRepository", expression = "java(test.getAutomation() != null && test.getAutomation().isMissingInRepository())")
-    TestCaseSummary toSummary(TestCase test);
+    @Mapping(target = "executionCount", source = "executionCount")
+    TestCaseSummary toSummary(TestCase test, long executionCount);
 
     StepResponse toResponse(ManualStep step);
 

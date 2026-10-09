@@ -5,7 +5,7 @@ import { useTestList, type TestCaseSummary, type TestFilters } from '../../api/t
 import { PriorityBadge } from '../requirements/Badges';
 import { KindBadge, TechniqueBadge, TestStatusBadge } from './Badges';
 
-type SortableColumn = 'key' | 'title' | 'kind' | 'status' | 'priority';
+type SortableColumn = 'key' | 'title' | 'kind' | 'status' | 'priority' | 'executionCount';
 
 /** §12 liste paginée et triée côté serveur. */
 export function TestList({
@@ -62,6 +62,7 @@ export function TestList({
             {header('status', t('tests.columns.status'))}
             {header('priority', t('tests.columns.priority'))}
             <Table.Th>{t('tests.columns.version')}</Table.Th>
+            {header('executionCount', t('tests.columns.executions'))}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -112,6 +113,9 @@ function TestRow({ test, onSelect }: { test: TestCaseSummary; onSelect: (key: st
         <PriorityBadge priority={test.priority} />
       </Table.Td>
       <Table.Td>v{test.currentVersion}</Table.Td>
+      <Table.Td ta="right" data-testid={`test-executions-${test.key}`}>
+        {test.executionCount}
+      </Table.Td>
     </Table.Tr>
   );
 }

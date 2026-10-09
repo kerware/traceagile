@@ -7,7 +7,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { PROJECT_SCREENS } from '../layouts/navigation';
 
 /** Écrans déjà livrés ; les autres affichent leur lot de livraison. */
-const DELIVERED = ['dashboard', 'backlog', 'tests', 'planning', 'traceability'];
+const DELIVERED = ['dashboard', 'backlog', 'tests', 'planning', 'campaigns', 'myExecutions', 'traceability', 'defects'];
 
 export const routerFuture = {
   v7_relativeSplatPath: true,
@@ -62,6 +62,26 @@ export const appRoutes: RouteObject[] = [
           {
             path: 'planning',
             lazy: () => import('../features/planning/PlanningPage').then((m) => ({ Component: m.PlanningPage })),
+          },
+          {
+            path: 'campaigns',
+            lazy: () => import('../features/campaigns/CampaignsPage').then((m) => ({ Component: m.CampaignsPage })),
+          },
+          {
+            path: 'campaigns/:ck',
+            lazy: () => import('../features/campaigns/CampaignPage').then((m) => ({ Component: m.CampaignPage })),
+          },
+          {
+            path: 'my-executions',
+            lazy: () => import('../features/campaigns/MyExecutionsPage').then((m) => ({ Component: m.MyExecutionsPage })),
+          },
+          {
+            path: 'executions/:id',
+            lazy: () => import('../features/campaigns/ExecutionPage').then((m) => ({ Component: m.ExecutionPage })),
+          },
+          {
+            path: 'defects',
+            lazy: () => import('../features/campaigns/DefectsPage').then((m) => ({ Component: m.DefectsPage })),
           },
           {
             path: 'traceability',

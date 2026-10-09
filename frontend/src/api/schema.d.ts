@@ -100,6 +100,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/executions/{id}/steps/{position}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["step"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/checklists/{kind}": {
         parameters: {
             query?: never;
@@ -109,6 +125,22 @@ export interface paths {
         };
         get?: never;
         put: operations["replace_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/items/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["reorder_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -500,6 +532,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/executions/{id}/defects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createDefect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/defects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_6"];
+        put?: never;
+        post: operations["create_6"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_7"];
+        put?: never;
+        post: operations["create_7"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["start_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/items/sort-by-risk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["sortByRisk"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/items/select": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["select"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/abort": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["abort"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaign-items/{id}/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["attempts"];
+        put?: never;
+        post: operations["start_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}/generate-test": {
         parameters: {
             query?: never;
@@ -676,6 +852,70 @@ export interface paths {
         patch: operations["updateRelease"];
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/executions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["override"];
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/defects/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["update_4"];
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["update_5"];
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaign-items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["removeItem"];
+        options?: never;
+        head?: never;
+        patch: operations["updateItem"];
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}": {
         parameters: {
             query?: never;
@@ -689,7 +929,7 @@ export interface paths {
         delete: operations["delete_4"];
         options?: never;
         head?: never;
-        patch: operations["update_4"];
+        patch: operations["update_6"];
         trace?: never;
     };
     "/api/v1/reference/frameworks": {
@@ -699,7 +939,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_6"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -748,6 +988,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/testers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["testers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -932,6 +1188,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/requirements/{key}/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ofRequirement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/defects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ofRequirement_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}/checklists": {
         parameters: {
             query?: never;
@@ -980,6 +1268,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/my-executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/gherkin/steps": {
         parameters: {
             query?: never;
@@ -988,6 +1292,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["steps"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/executions/{id}/defect-draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["draft"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1019,7 +1339,23 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_3"];
+        get: operations["get_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["progress"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1035,7 +1371,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_4"];
+        get: operations["get_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1277,6 +1613,119 @@ export interface components {
         ReorderCriteriaRequest: {
             ids: string[];
         };
+        StepResultRequest: {
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            actualResult?: string;
+        };
+        AttemptResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            attempt: number;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            executedBy?: string;
+            /** @enum {string} */
+            origin: "MANUAL" | "AUTOMATED";
+        };
+        CampaignRef: {
+            key: string;
+            name: string;
+            environment?: string;
+            buildVersion?: string;
+            /** @enum {string} */
+            status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "ABORTED";
+        };
+        DataSetRef: {
+            name: string;
+            /** Format: int32 */
+            rows: number;
+        };
+        DefectRef: {
+            key: string;
+            title: string;
+            /** @enum {string} */
+            severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
+            /** @enum {string} */
+            status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED";
+        };
+        ExecutionDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: string;
+            test: components["schemas"]["TestRef"];
+            campaign: components["schemas"]["CampaignRef"];
+            /** Format: int32 */
+            attempt: number;
+            /** Format: int32 */
+            testCaseVersion: number;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /**
+             * @description F-EXE-02 statut déduit des pas
+             * @enum {string}
+             */
+            derivedStatus: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            statusOverridden: boolean;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            /** Format: int64 */
+            durationMs?: number;
+            comment?: string;
+            executedBy?: string;
+            /** @enum {string} */
+            origin: "MANUAL" | "AUTOMATED";
+            dataSetName?: string;
+            /** Format: int32 */
+            dataSetRow?: number;
+            parameterValues: {
+                [key: string]: string;
+            };
+            steps: components["schemas"]["StepResultResponse"][];
+            defects: components["schemas"]["DefectRef"][];
+            /** @description F-EXE-04 toutes les tentatives du test dans la campagne */
+            attempts: components["schemas"]["AttemptResponse"][];
+            /** @description Dernière tentative d'une campagne ouverte */
+            editable: boolean;
+            dataSets: components["schemas"]["DataSetRef"][];
+        };
+        StepResultResponse: {
+            /** Format: int32 */
+            position: number;
+            action: string;
+            expectedResult?: string;
+            testData?: string;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            actualResult?: string;
+        };
+        TestRef: {
+            key: string;
+            title: string;
+            /** @enum {string} */
+            kind: "MANUAL" | "EXPLORATORY" | "AUTOMATED";
+            /** @enum {string} */
+            technique?: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            /** @enum {string} */
+            status: "DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE";
+            /** @enum {string} */
+            priority: "MUST" | "SHOULD" | "COULD" | "WONT";
+            /** Format: int32 */
+            currentVersion: number;
+            /**
+             * Format: int32
+             * @description Durée estimée (manuel) ou timebox (charte), en minutes
+             */
+            durationMin?: number;
+        };
         ChecklistItemRequest: {
             /** Format: uuid */
             id?: string;
@@ -1295,6 +1744,97 @@ export interface components {
             /** @enum {string} */
             rule?: "HAS_ACCEPTANCE_CRITERION" | "ESTIMATED" | "HAS_LINKED_TEST" | "ALL_LINKED_TESTS_PASSED" | "NO_BLOCKING_DEFECT_OPEN";
             automatic: boolean;
+        };
+        OrderRequest: {
+            itemIds: string[];
+        };
+        CampaignDetail: {
+            campaign: components["schemas"]["CampaignSummary"];
+            items: components["schemas"]["ItemResponse"][];
+            /** @description F-CMP-05 */
+            workload: components["schemas"]["WorkloadResponse"][];
+        };
+        CampaignSummary: {
+            key: string;
+            name: string;
+            /** @enum {string} */
+            scopeType: "SPRINT" | "RELEASE" | "REGRESSION";
+            sprintKey?: string;
+            releaseKey?: string;
+            environment?: string;
+            buildVersion?: string;
+            /** @enum {string} */
+            status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "ABORTED";
+            /** Format: date */
+            plannedStart?: string;
+            /** Format: date */
+            plannedEnd?: string;
+            progress: components["schemas"]["ProgressResponse"];
+            /** Format: int64 */
+            version: number;
+        };
+        ItemResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            position: number;
+            test: components["schemas"]["TestRef"];
+            /**
+             * Format: int32
+             * @description Version du test à la sélection
+             */
+            testCaseVersion: number;
+            assignee?: components["schemas"]["UserRef"];
+            /** @description F-CMP-04 test automatisé : serveur d'exécution */
+            executedByServer: boolean;
+            /**
+             * Format: int32
+             * @description F-CMP-03 risque × priorité
+             */
+            riskScore: number;
+            /** @enum {string} */
+            lastStatus: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: int32 */
+            attempts: number;
+            /** Format: uuid */
+            latestExecutionId?: string;
+            /** Format: date-time */
+            lastExecutedAt?: string;
+        };
+        ProgressResponse: {
+            /** Format: int32 */
+            total: number;
+            /** @description Statut de la dernière tentative de chaque test */
+            byStatus: {
+                [key: string]: number;
+            };
+            /** Format: int32 */
+            executed: number;
+            /** Format: double */
+            executedPercent?: number;
+            /**
+             * Format: double
+             * @description Réussis / exécutés (%)
+             */
+            passRate?: number;
+        };
+        UserRef: {
+            login: string;
+            displayName: string;
+        };
+        WorkloadResponse: {
+            assignee?: components["schemas"]["UserRef"];
+            /** Format: int32 */
+            manualMinutes: number;
+            /** Format: int32 */
+            exploratoryMinutes: number;
+            /** Format: int32 */
+            tests: number;
+            /**
+             * Format: int32
+             * @description Tests manuels sans durée estimée
+             */
+            unestimated: number;
         };
         MemberRequest: {
             login: string;
@@ -1710,6 +2250,89 @@ export interface components {
             /** Format: int32 */
             capacityPoints?: number;
         };
+        CreateDefectRequest: {
+            title: string;
+            description?: string;
+            /** @enum {string} */
+            severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
+            externalRef?: string;
+            requirementKeys?: string[];
+        };
+        DefectDetail: {
+            defect: components["schemas"]["DefectSummary"];
+            description?: string;
+            allowedTransitions: ("OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED")[];
+            requirements: components["schemas"]["DefectRequirementRef"][];
+            executions: components["schemas"]["DefectExecutionRef"][];
+        };
+        DefectExecutionRef: {
+            /** Format: uuid */
+            id: string;
+            testKey: string;
+            campaignKey: string;
+            /** Format: int32 */
+            attempt: number;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+        };
+        DefectRequirementRef: {
+            key: string;
+            title: string;
+        };
+        DefectSummary: {
+            key: string;
+            title: string;
+            /** @enum {string} */
+            severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
+            /** @enum {string} */
+            status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED";
+            externalRef?: string;
+            requirementKeys: string[];
+            /** Format: int32 */
+            executionCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            /** Format: int64 */
+            version: number;
+        };
+        CreateCampaignRequest: {
+            name: string;
+            /** @enum {string} */
+            scopeType: "SPRINT" | "RELEASE" | "REGRESSION";
+            sprintKey?: string;
+            releaseKey?: string;
+            environment?: string;
+            buildVersion?: string;
+            /** Format: date */
+            plannedStart?: string;
+            /** Format: date */
+            plannedEnd?: string;
+        };
+        SelectRequest: {
+            /** @enum {string} */
+            strategy: "SPRINT_REQUIREMENTS" | "TAG" | "IMPACT" | "MANUAL" | "FAILED_IN_CAMPAIGN";
+            sprintKey?: string;
+            tag?: string;
+            testKeys?: string[];
+            requirementKeys?: string[];
+            campaignKey?: string;
+        };
+        SelectionResponse: {
+            added: string[];
+            skipped: components["schemas"]["SkippedResponse"][];
+            campaign: components["schemas"]["CampaignDetail"];
+        };
+        SkippedResponse: {
+            testKey: string;
+            /** @description ALREADY_SELECTED, NOT_READY_<statut> */
+            reason: string;
+        };
+        StartExecutionRequest: {
+            dataSetName?: string;
+            /** Format: int32 */
+            row?: number;
+        };
         GherkinValidateRequest: {
             source: string;
         };
@@ -1808,6 +2431,33 @@ export interface components {
             startDate?: string;
             /** Format: date */
             endDate?: string;
+        };
+        ExecutionPatchRequest: {
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            comment?: string;
+        };
+        UpdateDefectRequest: {
+            title?: string;
+            description?: string;
+            /** @enum {string} */
+            severity?: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
+            /** @enum {string} */
+            status?: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED";
+            externalRef?: string;
+            requirementKeys?: string[];
+        };
+        UpdateCampaignRequest: {
+            name?: string;
+            environment?: string;
+            buildVersion?: string;
+            /** Format: date */
+            plannedStart?: string;
+            /** Format: date */
+            plannedEnd?: string;
+        };
+        ItemPatchRequest: {
+            assignee?: string;
         };
         UpdateCriterionRequest: {
             /** @enum {string} */
@@ -1935,6 +2585,11 @@ export interface components {
             currentVersion: number;
             automationCandidate: boolean;
             missingInRepository: boolean;
+            /**
+             * Format: int64
+             * @description F-MAN-02 nombre d'exécutions (toutes tentatives)
+             */
+            executionCount: number;
         };
         TestVersionResponse: {
             /** Format: int32 */
@@ -2091,6 +2746,23 @@ export interface components {
             linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
             suspect: boolean;
         };
+        RequirementExecutionResponse: {
+            /** Format: uuid */
+            id: string;
+            test: components["schemas"]["TestRef"];
+            campaign: components["schemas"]["CampaignRef"];
+            /** Format: int32 */
+            attempt: number;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            executedBy?: string;
+            /** @enum {string} */
+            origin: "MANUAL" | "AUTOMATED";
+        };
         RequirementTreeNode: {
             key: string;
             /** @enum {string} */
@@ -2116,10 +2788,33 @@ export interface components {
             verificationStatus: "NOT_COVERED" | "NOT_RUN" | "IN_PROGRESS" | "VALIDATED" | "FAILED" | "BLOCKED" | "SUSPECT";
             children: components["schemas"]["RequirementTreeNode"][];
         };
+        MyExecutionResponse: {
+            /** Format: uuid */
+            itemId: string;
+            campaign: components["schemas"]["CampaignRef"];
+            test: components["schemas"]["TestRef"];
+            /** Format: int32 */
+            position: number;
+            /** @enum {string} */
+            lastStatus: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: int32 */
+            attempts: number;
+            /** Format: uuid */
+            latestExecutionId?: string;
+            dataSets: components["schemas"]["DataSetRef"][];
+        };
         StepUsageResponse: {
             text: string;
             /** Format: int64 */
             count: number;
+        };
+        DefectDraftResponse: {
+            title: string;
+            description: string;
+            /** @enum {string} */
+            severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
+            /** @description Exigences couvertes par le test (liées par défaut) */
+            requirementKeys: string[];
         };
         CoverageResponse: {
             scope: string;
@@ -2363,6 +3058,34 @@ export interface operations {
             };
         };
     };
+    step: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+                position: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StepResultRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
+        };
+    };
     replace_1: {
         parameters: {
             query?: never;
@@ -2386,6 +3109,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChecklistItemResponse"][];
+                };
+            };
+        };
+    };
+    reorder_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
                 };
             };
         };
@@ -3299,6 +4049,305 @@ export interface operations {
             };
         };
     };
+    createDefect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDefectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
+    list_6: {
+        parameters: {
+            query?: {
+                status?: ("OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED")[];
+                severity?: ("BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL")[];
+                requirement?: string;
+                q?: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectSummary"][];
+                };
+            };
+        };
+    };
+    create_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDefectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
+    list_7: {
+        parameters: {
+            query?: {
+                status?: ("PLANNED" | "IN_PROGRESS" | "COMPLETED" | "ABORTED")[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignSummary"][];
+                };
+            };
+        };
+    };
+    create_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCampaignRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    start_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    sortByRisk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    select: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectionResponse"];
+                };
+            };
+        };
+    };
+    complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    abort: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    attempts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptResponse"][];
+                };
+            };
+        };
+    };
+    start_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StartExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
+        };
+    };
     generateTest: {
         parameters: {
             query?: never;
@@ -3768,6 +4817,212 @@ export interface operations {
             };
         };
     };
+    get_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
+        };
+    };
+    override: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["ExecutionPatchRequest"];
+                "application/json": components["schemas"]["ExecutionPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
+        };
+    };
+    get_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
+    update_4: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["UpdateDefectRequest"];
+                "application/json": components["schemas"]["UpdateDefectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
+    get_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    update_5: {
+        parameters: {
+            query?: never;
+            header?: {
+                "If-Match"?: string;
+            };
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["UpdateCampaignRequest"];
+                "application/json": components["schemas"]["UpdateCampaignRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
+    removeItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["ItemPatchRequest"];
+                "application/json": components["schemas"]["ItemPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponse"];
+                };
+            };
+        };
+    };
     delete_4: {
         parameters: {
             query?: never;
@@ -3789,7 +5044,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_6: {
         parameters: {
             query?: never;
             header?: {
@@ -3819,7 +5074,7 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -3911,6 +5166,28 @@ export interface operations {
                 content: {
                     "text/csv": string;
                     "application/pdf": string;
+                };
+            };
+        };
+    };
+    testers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRef"][];
                 };
             };
         };
@@ -4189,6 +5466,52 @@ export interface operations {
             };
         };
     };
+    ofRequirement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementExecutionResponse"][];
+                };
+            };
+        };
+    };
+    ofRequirement_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectSummary"][];
+                };
+            };
+        };
+    };
     checklists: {
         parameters: {
             query?: never;
@@ -4263,6 +5586,30 @@ export interface operations {
             };
         };
     };
+    mine: {
+        parameters: {
+            query?: {
+                status?: ("NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR")[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyExecutionResponse"][];
+                };
+            };
+        };
+    };
     steps: {
         parameters: {
             query?: {
@@ -4283,6 +5630,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StepUsageResponse"][];
+                };
+            };
+        };
+    };
+    draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectDraftResponse"];
                 };
             };
         };
@@ -4311,7 +5681,7 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    get_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -4333,7 +5703,30 @@ export interface operations {
             };
         };
     };
-    get_4: {
+    progress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProgressResponse"];
+                };
+            };
+        };
+    };
+    get_7: {
         parameters: {
             query?: never;
             header?: never;

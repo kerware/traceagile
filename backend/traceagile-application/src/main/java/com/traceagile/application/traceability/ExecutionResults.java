@@ -7,15 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
+import com.traceagile.domain.campaign.Campaign;
 
 /**
  * Port des faits d'exécution utilisés par la traçabilité (§7.2, §7.3, F-TRA-05 à F-TRA-07). Les
- * exécutions, anomalies et campagnes arrivent aux lots 5 et 7 : d'ici là, {@link NoExecutionResults}.
+ * exécutions, anomalies et campagnes viennent du lot 5 (adaptateur {@code CampaignExecutionResults}).
  */
 public interface ExecutionResults {
 
     /** Dernière exécution de chaque test du projet ; un test absent n'a jamais été exécuté. */
     Map<UUID, LastExecution> latest(String projectKey);
+
+    /** §7.2 dernière exécution de chaque test dans les campagnes du périmètre (sprint, release). */
+    Map<UUID, LastExecution> latestIn(String projectKey, Predicate<Campaign> campaigns);
 
     /** Exigences liées à une anomalie BLOCKER ou CRITICAL ouverte. */
     Set<UUID> requirementsWithOpenBlockingDefect(String projectKey);

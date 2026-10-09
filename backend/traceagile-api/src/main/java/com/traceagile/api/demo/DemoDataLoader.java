@@ -38,7 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Lot 0 : utilisateurs (mot de passe {@code demo}) et projet {@code SHOP} avec ses membres.
  * Lot 1 : backlog de SHOP décrit dans {@code demo/shop-requirements.json}.
  * Lot 2 : référentiel de tests ({@link DemoTestsLoader}, {@code demo/shop-tests.json}).
- * Lot 4 : release et sprints ({@link DemoPlanningLoader}).
+ * Lot 4 : release et sprints ({@link DemoPlanningLoader}). Lot 5 : campagnes, exécutions, anomalies
+ * ({@link DemoCampaignLoader}).
  */
 @Component
 @Profile("demo")
@@ -79,12 +80,14 @@ public class DemoDataLoader implements ApplicationRunner {
     private final ObjectMapper json;
     private final DemoTestsLoader testsLoader;
     private final DemoPlanningLoader planningLoader;
+    private final DemoCampaignLoader campaignLoader;
 
     public DemoDataLoader(UserAdministrationService userService, ProjectService projectService, UserRepository users,
                           ProjectRepository projects, RequirementService requirements,
                           RequirementRepository requirementRepository, ObjectMapper json, DemoTestsLoader testsLoader,
-                          DemoPlanningLoader planningLoader) {
+                          DemoPlanningLoader planningLoader, DemoCampaignLoader campaignLoader) {
         this.planningLoader = planningLoader;
+        this.campaignLoader = campaignLoader;
         this.testsLoader = testsLoader;
         this.userService = userService;
         this.projectService = projectService;
@@ -120,6 +123,7 @@ public class DemoDataLoader implements ApplicationRunner {
         }
         testsLoader.load(SHOP);
         planningLoader.load(SHOP);
+        campaignLoader.load(SHOP);
         LOG.info("Jeu de démonstration prêt (utilisateurs {}, mot de passe « {} »)",
                 USERS.stream().map(DemoUser::login).toList(), PASSWORD);
     }

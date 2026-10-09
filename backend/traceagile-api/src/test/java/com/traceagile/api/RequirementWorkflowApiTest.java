@@ -134,11 +134,11 @@ class RequirementWorkflowApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.dor[0].outcome", is("SATISFIED")))
                 .andExpect(jsonPath("$.dor[2].automatic", is(false)))
                 .andExpect(jsonPath("$.dor[2].outcome", is("UNSATISFIED")))
-                // Lot 3 : « au moins un test lié » et « tests liés passés » (faux sans test) sont évalués ;
-                // « aucune anomalie bloquante » attend les anomalies (lot 5).
+                // Lots 3 et 5 : « au moins un test lié », « tests liés passés » (faux sans test) et « aucune
+                // anomalie bloquante ouverte » sont évalués.
                 .andExpect(jsonPath("$.dod[0].outcome", is("UNSATISFIED")))
                 .andExpect(jsonPath("$.dod[1].outcome", is("UNSATISFIED")))
-                .andExpect(jsonPath("$.dod[2].outcome", is("NOT_EVALUATED")))
+                .andExpect(jsonPath("$.dod[2].outcome", is("SATISFIED")))
                 .andReturn().getResponse().getContentAsString();
         String manualId = readJson(checklists).get("dor").get(2).get("id").asText();
 

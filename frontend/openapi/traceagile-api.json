@@ -322,6 +322,58 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/executions/{id}/steps/{position}" : {
+      "put" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "step",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "position",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StepResultRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExecutionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/checklists/{kind}" : {
       "put" : {
         "tags" : [ "Exigences" ],
@@ -365,6 +417,49 @@
                   "items" : {
                     "$ref" : "#/components/schemas/ChecklistItemResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/items/order" : {
+      "put" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "reorder_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
                 }
               }
             }
@@ -1856,6 +1951,479 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/executions/{id}/defects" : {
+      "post" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "createDefect",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateDefectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/defects" : {
+      "get" : {
+        "tags" : [ "Anomalies" ],
+        "operationId" : "list_6",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "severity",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
+          "name" : "requirement",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DefectSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Anomalies" ],
+        "operationId" : "create_6",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateDefectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns" : {
+      "get" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "list_7",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "PLANNED", "IN_PROGRESS", "COMPLETED", "ABORTED" ]
+            },
+            "uniqueItems" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CampaignSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "create_7",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateCampaignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/start" : {
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "start_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/items/sort-by-risk" : {
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "sortByRisk",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/items/select" : {
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "select",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SelectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SelectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/complete" : {
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "complete",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/abort" : {
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "abort",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaign-items/{id}/executions" : {
+      "get" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "attempts",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AttemptResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "start_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StartExecutionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExecutionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}/generate-test" : {
       "post" : {
         "tags" : [ "Tests" ],
@@ -2544,6 +3112,333 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/executions/{id}" : {
+      "get" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "get_3",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExecutionDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "override",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExecutionPatchRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExecutionPatchRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExecutionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/defects/{key}" : {
+      "get" : {
+        "tags" : [ "Anomalies" ],
+        "operationId" : "get_4",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Anomalies" ],
+        "operationId" : "update_4",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateDefectRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateDefectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{key}" : {
+      "get" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "get_5",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "update_5",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCampaignRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateCampaignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CampaignDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaign-items/{id}" : {
+      "delete" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "removeItem",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "updateItem",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ItemPatchRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ItemPatchRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}" : {
       "delete" : {
         "tags" : [ "Exigences" ],
@@ -2572,7 +3467,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_4",
+        "operationId" : "update_6",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -2628,7 +3523,7 @@
     "/api/v1/reference/frameworks" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "list_6",
+        "operationId" : "list_8",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -2786,6 +3681,35 @@
                 "schema" : {
                   "type" : "string",
                   "format" : "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/testers" : {
+      "get" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "testers",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserRef"
+                  }
                 }
               }
             }
@@ -3278,6 +4202,78 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/requirements/{key}/executions" : {
+      "get" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "ofRequirement",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RequirementExecutionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/defects" : {
+      "get" : {
+        "tags" : [ "Anomalies" ],
+        "operationId" : "ofRequirement_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DefectSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -3428,6 +4424,47 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/my-executions" : {
+      "get" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "mine",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+            },
+            "uniqueItems" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MyExecutionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/gherkin/steps" : {
       "get" : {
         "tags" : [ "Tests" ],
@@ -3457,6 +4494,40 @@
                   "items" : {
                     "$ref" : "#/components/schemas/StepUsageResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/executions/{id}/defect-draft" : {
+      "get" : {
+        "tags" : [ "Exécutions" ],
+        "operationId" : "draft",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDraftResponse"
                 }
               }
             }
@@ -3500,7 +4571,7 @@
     "/api/v1/projects/{projectKey}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_3",
+        "operationId" : "get_6",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3523,10 +4594,43 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/progress" : {
+      "get" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "progress",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "get_4",
+        "operationId" : "get_7",
         "parameters" : [ {
           "name" : "key",
           "in" : "path",
@@ -4096,6 +5200,276 @@
         },
         "required" : [ "ids" ]
       },
+      "StepResultRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "actualResult" : {
+            "type" : "string",
+            "maxLength" : 4000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "AttemptResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "endedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "executedBy" : {
+            "type" : "string"
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "AUTOMATED" ]
+          }
+        },
+        "required" : [ "attempt", "id", "origin", "startedAt", "status" ]
+      },
+      "CampaignRef" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "environment" : {
+            "type" : "string"
+          },
+          "buildVersion" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PLANNED", "IN_PROGRESS", "COMPLETED", "ABORTED" ]
+          }
+        },
+        "required" : [ "key", "name", "status" ]
+      },
+      "DataSetRef" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "rows" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "name", "rows" ]
+      },
+      "DefectRef" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+          }
+        },
+        "required" : [ "key", "severity", "status", "title" ]
+      },
+      "ExecutionDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "itemId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "test" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignRef"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "testCaseVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "derivedStatus" : {
+            "type" : "string",
+            "description" : "F-EXE-02 statut déduit des pas",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "statusOverridden" : {
+            "type" : "boolean"
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "endedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "durationMs" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "comment" : {
+            "type" : "string"
+          },
+          "executedBy" : {
+            "type" : "string"
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "AUTOMATED" ]
+          },
+          "dataSetName" : {
+            "type" : "string"
+          },
+          "dataSetRow" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "parameterValues" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "steps" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StepResultResponse"
+            }
+          },
+          "defects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectRef"
+            }
+          },
+          "attempts" : {
+            "type" : "array",
+            "description" : "F-EXE-04 toutes les tentatives du test dans la campagne",
+            "items" : {
+              "$ref" : "#/components/schemas/AttemptResponse"
+            }
+          },
+          "editable" : {
+            "type" : "boolean",
+            "description" : "Dernière tentative d'une campagne ouverte"
+          },
+          "dataSets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DataSetRef"
+            }
+          }
+        },
+        "required" : [ "attempt", "attempts", "campaign", "dataSets", "defects", "derivedStatus", "editable", "id", "itemId", "origin", "parameterValues", "startedAt", "status", "statusOverridden", "steps", "test", "testCaseVersion" ]
+      },
+      "StepResultResponse" : {
+        "type" : "object",
+        "properties" : {
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "action" : {
+            "type" : "string"
+          },
+          "expectedResult" : {
+            "type" : "string"
+          },
+          "testData" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "actualResult" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "action", "position", "status" ]
+      },
+      "TestRef" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "EXPLORATORY", "AUTOMATED" ]
+          },
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "READY", "NEEDS_UPDATE", "OBSOLETE" ]
+          },
+          "priority" : {
+            "type" : "string",
+            "enum" : [ "MUST", "SHOULD", "COULD", "WONT" ]
+          },
+          "currentVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "durationMin" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Durée estimée (manuel) ou timebox (charte), en minutes"
+          }
+        },
+        "required" : [ "currentVersion", "key", "kind", "priority", "status", "title" ]
+      },
       "ChecklistItemRequest" : {
         "type" : "object",
         "properties" : {
@@ -4142,6 +5516,207 @@
           }
         },
         "required" : [ "automatic", "id", "kind", "label", "position" ]
+      },
+      "OrderRequest" : {
+        "type" : "object",
+        "properties" : {
+          "itemIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        },
+        "required" : [ "itemIds" ]
+      },
+      "CampaignDetail" : {
+        "type" : "object",
+        "properties" : {
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignSummary"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemResponse"
+            }
+          },
+          "workload" : {
+            "type" : "array",
+            "description" : "F-CMP-05",
+            "items" : {
+              "$ref" : "#/components/schemas/WorkloadResponse"
+            }
+          }
+        },
+        "required" : [ "campaign", "items", "workload" ]
+      },
+      "CampaignSummary" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "scopeType" : {
+            "type" : "string",
+            "enum" : [ "SPRINT", "RELEASE", "REGRESSION" ]
+          },
+          "sprintKey" : {
+            "type" : "string"
+          },
+          "releaseKey" : {
+            "type" : "string"
+          },
+          "environment" : {
+            "type" : "string"
+          },
+          "buildVersion" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PLANNED", "IN_PROGRESS", "COMPLETED", "ABORTED" ]
+          },
+          "plannedStart" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "plannedEnd" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "progress" : {
+            "$ref" : "#/components/schemas/ProgressResponse"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "key", "name", "progress", "scopeType", "status", "version" ]
+      },
+      "ItemResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "test" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "testCaseVersion" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Version du test à la sélection"
+          },
+          "assignee" : {
+            "$ref" : "#/components/schemas/UserRef"
+          },
+          "executedByServer" : {
+            "type" : "boolean",
+            "description" : "F-CMP-04 test automatisé : serveur d'exécution"
+          },
+          "riskScore" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "F-CMP-03 risque × priorité"
+          },
+          "lastStatus" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "attempts" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "latestExecutionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "lastExecutedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "required" : [ "attempts", "executedByServer", "id", "lastStatus", "position", "riskScore", "test", "testCaseVersion" ]
+      },
+      "ProgressResponse" : {
+        "type" : "object",
+        "properties" : {
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "byStatus" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            },
+            "description" : "Statut de la dernière tentative de chaque test"
+          },
+          "executed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "executedPercent" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "passRate" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "Réussis / exécutés (%)"
+          }
+        },
+        "required" : [ "byStatus", "executed", "total" ]
+      },
+      "UserRef" : {
+        "type" : "object",
+        "properties" : {
+          "login" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "displayName", "login" ]
+      },
+      "WorkloadResponse" : {
+        "type" : "object",
+        "properties" : {
+          "assignee" : {
+            "$ref" : "#/components/schemas/UserRef"
+          },
+          "manualMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "exploratoryMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tests" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "unestimated" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Tests manuels sans durée estimée"
+          }
+        },
+        "required" : [ "exploratoryMinutes", "manualMinutes", "tests", "unestimated" ]
       },
       "MemberRequest" : {
         "type" : "object",
@@ -5389,6 +6964,265 @@
         },
         "required" : [ "count", "durationWeeks" ]
       },
+      "CreateDefectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "externalRef" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "severity", "title" ]
+      },
+      "DefectDetail" : {
+        "type" : "object",
+        "properties" : {
+          "defect" : {
+            "$ref" : "#/components/schemas/DefectSummary"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "allowedTransitions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+            }
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectRequirementRef"
+            }
+          },
+          "executions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectExecutionRef"
+            }
+          }
+        },
+        "required" : [ "allowedTransitions", "defect", "executions", "requirements" ]
+      },
+      "DefectExecutionRef" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "testKey" : {
+            "type" : "string"
+          },
+          "campaignKey" : {
+            "type" : "string"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          }
+        },
+        "required" : [ "attempt", "campaignKey", "id", "status", "testKey" ]
+      },
+      "DefectRequirementRef" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "key", "title" ]
+      },
+      "DefectSummary" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "executionCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "createdAt", "executionCount", "key", "requirementKeys", "severity", "status", "title", "version" ]
+      },
+      "CreateCampaignRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "scopeType" : {
+            "type" : "string",
+            "enum" : [ "SPRINT", "RELEASE", "REGRESSION" ]
+          },
+          "sprintKey" : {
+            "type" : "string"
+          },
+          "releaseKey" : {
+            "type" : "string"
+          },
+          "environment" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "buildVersion" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "plannedStart" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "plannedEnd" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "required" : [ "name", "scopeType" ]
+      },
+      "SelectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "strategy" : {
+            "type" : "string",
+            "enum" : [ "SPRINT_REQUIREMENTS", "TAG", "IMPACT", "MANUAL", "FAILED_IN_CAMPAIGN" ]
+          },
+          "sprintKey" : {
+            "type" : "string"
+          },
+          "tag" : {
+            "type" : "string"
+          },
+          "testKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "campaignKey" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "strategy" ]
+      },
+      "SelectionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "added" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "skipped" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SkippedResponse"
+            }
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignDetail"
+          }
+        },
+        "required" : [ "added", "campaign", "skipped" ]
+      },
+      "SkippedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "testKey" : {
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : "string",
+            "description" : "ALREADY_SELECTED, NOT_READY_<statut>"
+          }
+        },
+        "required" : [ "reason", "testKey" ]
+      },
+      "StartExecutionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "dataSetName" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "row" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }
+      },
       "GherkinValidateRequest" : {
         "type" : "object",
         "properties" : {
@@ -5692,6 +7526,89 @@
           "endDate" : {
             "type" : "string",
             "format" : "date"
+          }
+        }
+      },
+      "ExecutionPatchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "comment" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "UpdateDefectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+          },
+          "externalRef" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "UpdateCampaignRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "environment" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "buildVersion" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "plannedStart" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "plannedEnd" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "ItemPatchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "assignee" : {
+            "type" : "string"
           }
         }
       },
@@ -6038,9 +7955,14 @@
           },
           "missingInRepository" : {
             "type" : "boolean"
+          },
+          "executionCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "F-MAN-02 nombre d'exécutions (toutes tentatives)"
           }
         },
-        "required" : [ "automationCandidate", "currentVersion", "key", "kind", "missingInRepository", "priority", "status", "tags", "title" ]
+        "required" : [ "automationCandidate", "currentVersion", "executionCount", "key", "kind", "missingInRepository", "priority", "status", "tags", "title" ]
       },
       "TestVersionResponse" : {
         "type" : "object",
@@ -6463,6 +8385,45 @@
         },
         "required" : [ "linkId", "linkType", "suspect", "test", "via" ]
       },
+      "RequirementExecutionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "test" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignRef"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "endedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "executedBy" : {
+            "type" : "string"
+          },
+          "origin" : {
+            "type" : "string",
+            "enum" : [ "MANUAL", "AUTOMATED" ]
+          }
+        },
+        "required" : [ "attempt", "campaign", "id", "origin", "startedAt", "status", "test" ]
+      },
       "RequirementTreeNode" : {
         "type" : "object",
         "properties" : {
@@ -6519,6 +8480,44 @@
         },
         "required" : [ "children", "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "title", "type", "verificationStatus" ]
       },
+      "MyExecutionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "itemId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignRef"
+          },
+          "test" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "lastStatus" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "attempts" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "latestExecutionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "dataSets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DataSetRef"
+            }
+          }
+        },
+        "required" : [ "attempts", "campaign", "dataSets", "itemId", "lastStatus", "position", "test" ]
+      },
       "StepUsageResponse" : {
         "type" : "object",
         "properties" : {
@@ -6531,6 +8530,29 @@
           }
         },
         "required" : [ "count", "text" ]
+      },
+      "DefectDraftResponse" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "description" : "Exigences couvertes par le test (liées par défaut)",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "description", "requirementKeys", "severity", "title" ]
       },
       "CoverageResponse" : {
         "type" : "object",

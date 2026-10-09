@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
+import com.traceagile.domain.campaign.Campaign;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,8 +106,33 @@ public class TraceabilityService {
     }
 
     public ProjectTrace load(String projectKey) {
+        return load(projectKey, null);
+    }
+
+    /** {@code campaigns} : ne retenir que les exécutions de ces campagnes (périmètre sprint ou release, §7.2) ; {@code null} = toutes. */
+    ProjectTrace load(String projectKey, Predicate<Campaign> campaigns) {
         return new ProjectTrace(requirements.findByProject_KeyOrderByRankAsc(projectKey), tests.findByProject_KeyOrderByKeyNumberAsc(projectKey),
-                links.findByProject_Key(projectKey), executions.latest(projectKey), executions.requirementsWithOpenBlockingDefect(projectKey));
+                links.findByProject_Key(projectKey),
+                campaigns == null ? executions.latest(projectKey) : executions.latestIn(projectKey, campaigns),
+                executions.requirementsWithOpenBlockingDefect(projectKey));
+    }
+
+    /**
+     * §7.2 « dans le périmètre » (ADR-0016) : pour un sprint, les exécutions de ses campagnes ; pour une
+     * release, celles de ses campagnes et des campagnes de ses sprints ; sinon toutes.
+     */
+    static Predicate<Campaign> executionScope(String scope) {
+        if (scope == null || !scope.contains(":")) {
+            return null;
+        }
+        String kind = scope.substring(0, scope.indexOf(':'));
+        String value = scope.substring(scope.indexOf(':') + 1);
+        return switch (kind) {
+            case "sprint" -> c -> c.getSprint() != null && c.getSprint().getKey().equals(value);
+            case "release" -> c -> (c.getRelease() != null && c.getRelease().getKey().equals(value))
+                    || (c.getSprint() != null && c.getSprint().getRelease() != null && c.getSprint().getRelease().getKey().equals(value));
+            default -> null;
+        };
     }
 
     /** §7.3 statut de chaque exigence du projet (backlog, fiche). */
@@ -146,9 +173,9 @@ public class TraceabilityService {
 
     /** F-PLN-02 couverture de chaque sprint du projet (taux de validation de la feuille de route). */
     public Map<String, Coverage> coverageBySprint(String projectKey) {
-        ProjectTrace trace = load(projectKey);
         Map<String, Coverage> bySprint = new LinkedHashMap<>();
         for (Sprint sprint : sprints.findByProject_KeyOrderByStartDateAsc(projectKey)) {
+            ProjectTrace trace = load(projectKey, executionScope("sprint:" + sprint.getKey()));
             bySprint.put(sprint.getKey(), trace.coverage(trace.only(scopeIds(List.of(sprint)))));
         }
         return bySprint;
@@ -157,7 +184,7 @@ public class TraceabilityService {
     // ---------------------------------------------------------------- F-TRA-04 matrice
 
     public Matrix matrix(String projectKey, String scope, boolean allTests, Set<TestKind> kinds) {
-        ProjectTrace trace = load(projectKey);
+        ProjectTrace trace = load(projectKey, executionScope(scope));
         List<Row> scoped = scoped(trace, projectKey, scope);
         List<MatrixRow> rows = scoped.stream()
                 .map(r -> new MatrixRow(r.requirement(), r.depth(), trace.isLeaf(r.requirement()), trace.status(r.requirement())))
@@ -185,7 +212,7 @@ public class TraceabilityService {
     // ---------------------------------------------------------------- §7.2 couverture
 
     public CoverageReport coverage(String projectKey, String scope) {
-        ProjectTrace trace = load(projectKey);
+        ProjectTrace trace = load(projectKey, executionScope(scope));
         List<Row> scoped = scoped(trace, projectKey, scope);
         List<RequirementCoverage> details = scoped.stream().map(row -> {
             Requirement r = row.requirement();

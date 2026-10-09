@@ -29,6 +29,14 @@ import com.traceagile.domain.planning.ScopeOutcome;
 import com.traceagile.domain.planning.Sprint;
 import com.traceagile.domain.planning.SprintScopeItem;
 import com.traceagile.api.demo.DemoPlanningLoader;
+import com.traceagile.application.campaign.CampaignService;
+import com.traceagile.application.defect.DefectService;
+import com.traceagile.domain.campaign.Campaign;
+import com.traceagile.domain.campaign.CampaignStatus;
+import com.traceagile.domain.defect.Defect;
+import com.traceagile.domain.defect.DefectSeverity;
+import com.traceagile.domain.execution.ExecutionStatus;
+import com.traceagile.api.demo.DemoCampaignLoader;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -59,6 +67,12 @@ class DemoDataTest extends AbstractApiTest {
     @Autowired
     PlanningService planning;
     @Autowired
+    DemoCampaignLoader campaignLoader;
+    @Autowired
+    CampaignService campaigns;
+    @Autowired
+    DefectService defectService;
+    @Autowired
     TestCaseService testCases;
     @Autowired
     TraceLinkService links;
@@ -67,7 +81,7 @@ class DemoDataTest extends AbstractApiTest {
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
-                testsLoader, planningLoader);
+                testsLoader, planningLoader, campaignLoader);
     }
 
     @Test
@@ -143,5 +157,21 @@ class DemoDataTest extends AbstractApiTest {
                         .getRequirement().getKey());
         assertThat(planning.sprint("SHOP", "SPR-3").requirements()).isNotEmpty()
                 .allSatisfy(r -> assertThat(r.getStatus()).isEqualTo(RequirementStatus.READY));
+
+        // Lot 5 : CMP-1 terminée (tout exécuté, une 2ᵉ tentative), CMP-2 en cours, CMP-3 planifiée ; 6 anomalies.
+        Campaign cmp1 = campaigns.get("SHOP", "CMP-1");
+        assertThat(cmp1.getStatus()).isEqualTo(CampaignStatus.COMPLETED);
+        assertThat(cmp1.getItems()).isNotEmpty().allSatisfy(i -> assertThat(i.lastStatus()).isIn(ExecutionStatus.PASSED, ExecutionStatus.FAILED));
+        assertThat(cmp1.getItems()).anySatisfy(i -> assertThat(i.getExecutions()).hasSize(2));
+        assertThat(campaigns.get("SHOP", "CMP-2").getStatus()).isEqualTo(CampaignStatus.IN_PROGRESS);
+        assertThat(campaigns.get("SHOP", "CMP-2").getItems()).anySatisfy(i -> assertThat(i.lastStatus()).isEqualTo(ExecutionStatus.NOT_RUN));
+        assertThat(campaigns.get("SHOP", "CMP-3").getStatus()).isEqualTo(CampaignStatus.PLANNED);
+        List<Defect> allDefects = defectService.list("SHOP", new DefectService.DefectFilter(null, null, null, null));
+        assertThat(allDefects).hasSize(6);
+        assertThat(allDefects).extracting(Defect::getSeverity).contains(DefectSeverity.BLOCKER, DefectSeverity.CRITICAL,
+                DefectSeverity.MAJOR, DefectSeverity.MINOR, DefectSeverity.TRIVIAL);
+        assertThat(traceability.orphans("SHOP").defectsWithoutRequirement()).hasSize(1);
+        Double validation = traceability.coverage("SHOP", "sprint:SPR-1").coverage().validation().percent();
+        assertThat(validation).as("SPR-1 : une story en échec sur quatre").isEqualTo(75.0);
     }
 }
