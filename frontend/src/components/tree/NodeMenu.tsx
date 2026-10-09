@@ -2,6 +2,7 @@ import { ActionIcon, Group, Menu, type GroupProps } from '@mantine/core';
 import { IconDots } from '@tabler/icons-react';
 import { useState, type ReactNode } from 'react';
 import type { NodeMenuItem } from './menuItems';
+import classes from './NodeMenu.module.css';
 
 /**
  * Ligne d'un arbre avec menu contextuel : clic droit sur la ligne ou bouton « ⋯ » (accessible au
@@ -30,7 +31,7 @@ export function NodeMenuRow({
     >
       {children}
       {actionable.length > 0 && (
-        <Menu opened={opened} onChange={setOpened} position="bottom-start" shadow="md" withinPortal>
+        <Menu opened={opened} onChange={setOpened} position="bottom-start" shadow="lg" withinPortal classNames={{ dropdown: classes.dropdown, item: classes.item }}>
           <Menu.Target>
             <ActionIcon variant="subtle" color="gray" size="sm" aria-label={label} data-testid={`${testId}-menu`}>
               <IconDots size={14} />
