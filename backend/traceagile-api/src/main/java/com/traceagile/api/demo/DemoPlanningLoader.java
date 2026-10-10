@@ -54,7 +54,7 @@ public class DemoPlanningLoader {
         List<Requirement> ready = new ArrayList<>(requirements.backlog(project).stream()
                 .filter(r -> r.getType() == RequirementType.USER_STORY && r.getStatus() == RequirementStatus.READY).toList());
 
-        // SPR-1 : clos ; toutes ses stories terminées sauf la dernière, reportée sur SPR-2.
+        // SPR-1 : actif ; toutes ses stories terminées sauf la dernière (reportée sur SPR-2 à la clôture, après sa recette).
         Sprint first = sprints.get(0);
         List<String> firstScope = take(ready, 4);
         planning.replaceScope(project, first.getKey(), firstScope);
@@ -63,10 +63,24 @@ public class DemoPlanningLoader {
             // Lot 5 : les exécutions de SPR-1 satisferont la DoD ; d'ici là, la démo force DONE.
             requirements.applyPlanningStatus(requirements.get(project, key), RequirementStatus.DONE);
         }
-        String carried = firstScope.getLast();
-        planning.close(project, first.getKey(), List.of(new CloseDecision(carried, CloseAction.NEXT_SPRINT)));
+    }
 
-        // SPR-2 : actif (la story reportée en tête) ; SPR-3 : planifié.
+    /**
+     * Après la recette de SPR-1 (CMP-1) : clôture de SPR-1, qui fige son bilan (ADR-0023), la dernière
+     * story reportée sur SPR-2 ; SPR-2 actif (la story reportée en tête), SPR-3 planifié. Sans effet
+     * si SPR-1 est déjà clos.
+     */
+    public void closeFirstSprint(String project) {
+        List<Sprint> sprints = planning.sprints(project).stream().sorted(java.util.Comparator.comparing(Sprint::getStartDate)).toList();
+        if (sprints.size() < 3 || sprints.get(0).getStatus() != com.traceagile.domain.planning.PlanningStatus.ACTIVE) {
+            return;
+        }
+        Sprint first = sprints.get(0);
+        String carried = first.requirements().getLast().getKey();
+        planning.close(project, first.getKey(), List.of(new CloseDecision(carried, CloseAction.NEXT_SPRINT)));
+        List<Requirement> ready = new ArrayList<>(requirements.backlog(project).stream()
+                .filter(r -> r.getType() == RequirementType.USER_STORY && r.getStatus() == RequirementStatus.READY)
+                .filter(r -> !r.getKey().equals(carried)).toList());
         List<String> secondScope = new ArrayList<>(List.of(carried));
         secondScope.addAll(take(ready, 3));
         planning.replaceScope(project, sprints.get(1).getKey(), secondScope);

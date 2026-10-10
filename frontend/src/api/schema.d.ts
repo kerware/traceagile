@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/verdict-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["verdictRules"];
+        put: operations["updateVerdictRules"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/test-cases/{key}/requirements": {
         parameters: {
             query?: never;
@@ -95,6 +111,38 @@ export interface paths {
         put: operations["reorder"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/reports/{reportKey}/verdict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["verdict"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/report-definitions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateDefinition"];
+        post?: never;
+        delete: operations["deleteDefinition"];
         options?: never;
         head?: never;
         patch?: never;
@@ -644,6 +692,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_6"];
+        put?: never;
+        post: operations["generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/reports/{reportKey}/freeze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["freeze_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/report-definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["definitions"];
+        put?: never;
+        post: operations["createDefinition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/report-definitions/{id}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["duplicateDefinition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/releases": {
         parameters: {
             query?: never;
@@ -715,7 +827,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_6"];
+        get: operations["list_7"];
         put?: never;
         post: operations["create_6"];
         delete?: never;
@@ -731,7 +843,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_7"];
+        get: operations["list_8"];
         put?: never;
         post: operations["create_7"];
         delete?: never;
@@ -923,7 +1035,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_8"];
+        get: operations["list_9"];
         put?: never;
         post: operations["create_8"];
         delete: operations["delete_1"];
@@ -987,7 +1099,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_9"];
+        get: operations["list_10"];
         put?: never;
         post: operations["create_9"];
         delete?: never;
@@ -1324,7 +1436,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_10"];
+        get: operations["list_11"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1509,6 +1621,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/sprints/{sprintKey}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sprintReview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/sessions": {
         parameters: {
             query?: never;
@@ -1516,7 +1644,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_11"];
+        get: operations["list_12"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1829,6 +1957,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/reports/{reportKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_8"];
+        put?: never;
+        post?: never;
+        delete: operations["delete_7"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/reports/{reportKey}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exporter un rapport (HTML, PDF, Word, Excel, Markdown, CSV, JSON) */
+        get: operations["export_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/releases/{releaseKey}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["releaseReview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/my-executions": {
         parameters: {
             query?: never;
@@ -1909,6 +2086,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/coverage": {
         parameters: {
             query?: never;
@@ -1932,7 +2125,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_8"];
+        get: operations["get_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1980,7 +2173,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_9"];
+        get: operations["get_10"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2015,6 +2208,15 @@ export interface components {
             name: string;
             /** Format: int32 */
             position: number;
+        };
+        VerdictRulesDto: {
+            /** Format: double */
+            goMinValidation: number;
+            /** Format: double */
+            reservedMinValidation: number;
+            goForbidsCriticalDefects: boolean;
+            goRequiresCriticalRequirements: boolean;
+            reservedForbidsBlockerDefects: boolean;
         };
         LinkRequest: {
             requirementKey: string;
@@ -2221,6 +2423,344 @@ export interface components {
         };
         ReorderCriteriaRequest: {
             ids: string[];
+        };
+        VerdictRequest: {
+            /** @enum {string} */
+            verdict?: "GO" | "GO_WITH_RESERVATIONS" | "NO_GO";
+            comment?: string;
+        };
+        BlockingDefect: {
+            key?: string;
+            title?: string;
+            severity?: string;
+            status?: string;
+        };
+        BurnChart: {
+            kind?: string;
+            points?: components["schemas"]["BurnPoint"][];
+        };
+        BurnPoint: {
+            label?: string;
+            /** Format: double */
+            actual?: number;
+            /** Format: double */
+            reference?: number;
+        };
+        CoverageSection: {
+            design?: components["schemas"]["Indicator"];
+            criteria?: components["schemas"]["Indicator"];
+            execution?: components["schemas"]["Indicator"];
+            validation?: components["schemas"]["Indicator"];
+            riskWeighted?: components["schemas"]["Indicator"];
+            uncovered?: components["schemas"]["UnmetRequirement"][];
+            failing?: components["schemas"]["UnmetRequirement"][];
+        };
+        DayRow: {
+            date?: string;
+            /** Format: int32 */
+            attempts?: number;
+            /** Format: int32 */
+            passed?: number;
+            /** Format: int32 */
+            failed?: number;
+        };
+        DefectRow: {
+            key?: string;
+            title?: string;
+            severity?: string;
+            status?: string;
+            requirements?: string;
+            createdAt?: string;
+        };
+        DefectSection: {
+            /** Format: int32 */
+            created?: number;
+            /** Format: int32 */
+            resolved?: number;
+            /** Format: int32 */
+            open?: number;
+            openBySeverity?: {
+                [key: string]: number;
+            };
+            blocking?: components["schemas"]["BlockingDefect"][];
+        };
+        Delivery: {
+            /** Format: int32 */
+            committedStories?: number;
+            /** Format: int32 */
+            committedPoints?: number;
+            /** Format: int32 */
+            doneStories?: number;
+            /** Format: int32 */
+            donePoints?: number;
+            /** Format: int32 */
+            acceptedStories?: number;
+            /** Format: int32 */
+            carriedOverStories?: number;
+            /** Format: int32 */
+            returnedStories?: number;
+            /** Format: int32 */
+            droppedStories?: number;
+            stories?: components["schemas"]["StoryRow"][];
+        };
+        ExecutionSection: {
+            /** Format: int32 */
+            items?: number;
+            /** Format: int32 */
+            attempts?: number;
+            byStatus?: {
+                [key: string]: number;
+            };
+            byKind?: components["schemas"]["KindRow"][];
+            attemptsByDay?: components["schemas"]["DayRow"][];
+            flaky?: components["schemas"]["FlakyTest"][];
+        };
+        ExploratorySection: {
+            /** Format: int32 */
+            sessions?: number;
+            /** Format: int32 */
+            debriefed?: number;
+            /** Format: int64 */
+            totalMinutes?: number;
+            /** Format: double */
+            averageMinutes?: number;
+            /** Format: double */
+            testPct?: number;
+            /** Format: double */
+            bugPct?: number;
+            /** Format: double */
+            setupPct?: number;
+            /** Format: double */
+            defectsPerHour?: number;
+            /** Format: int32 */
+            chartersPlanned?: number;
+            /** Format: int32 */
+            chartersExecuted?: number;
+            /** Format: double */
+            averageConfidence?: number;
+            neverExploredAreas?: string[];
+            findings?: components["schemas"]["Finding"][];
+        };
+        Finding: {
+            charter?: string;
+            tester?: string;
+            results?: string;
+            obstacles?: string;
+        };
+        FlakyTest: {
+            key?: string;
+            title?: string;
+        };
+        Header: {
+            projectKey?: string;
+            projectName?: string;
+            scope?: string;
+            scopeLabel?: string;
+            goal?: string;
+            startDate?: string;
+            endDate?: string;
+            status?: string;
+            generatedAt?: string;
+            generatedBy?: string;
+        };
+        Indicator: {
+            /** Format: double */
+            numerator?: number;
+            /** Format: double */
+            denominator?: number;
+            /** Format: double */
+            percent?: number;
+        };
+        KindRow: {
+            kind?: string;
+            /** Format: int32 */
+            total?: number;
+            /** Format: int32 */
+            passed?: number;
+            /** Format: int32 */
+            failed?: number;
+            /** Format: int32 */
+            notRun?: number;
+            /** Format: int32 */
+            other?: number;
+        };
+        NfrRow: {
+            key?: string;
+            title?: string;
+            category?: string;
+            threshold?: string;
+            target?: string;
+            measured?: string;
+            status?: string;
+        };
+        Recommendation: {
+            verdict?: string;
+            reasons?: string[];
+        };
+        RegressionSection: {
+            campaignKey?: string;
+            name?: string;
+            status?: string;
+            /** Format: int32 */
+            total?: number;
+            /** Format: int32 */
+            passed?: number;
+            /** Format: int32 */
+            failed?: number;
+            /** Format: int32 */
+            notRun?: number;
+            /** Format: double */
+            passRate?: number;
+        };
+        ReportData: {
+            header?: components["schemas"]["Header"];
+            summary?: components["schemas"]["Summary"];
+            delivery?: components["schemas"]["Delivery"];
+            burndown?: components["schemas"]["BurnChart"];
+            coverage?: components["schemas"]["CoverageSection"];
+            execution?: components["schemas"]["ExecutionSection"];
+            exploratory?: components["schemas"]["ExploratorySection"];
+            defects?: components["schemas"]["DefectSection"];
+            risks?: components["schemas"]["RiskItem"][];
+            sprintTrend?: components["schemas"]["SprintTrendRow"][];
+            regression?: components["schemas"]["RegressionSection"];
+            nfr?: components["schemas"]["NfrRow"][];
+            requirements?: components["schemas"]["RequirementRow"][];
+            defectList?: components["schemas"]["DefectRow"][];
+            testResults?: components["schemas"]["TestResultRow"][];
+            recommendation?: components["schemas"]["Recommendation"];
+        };
+        ReportDetailResponse: {
+            report: components["schemas"]["ReportSummaryResponse"];
+            sections: ("SUMMARY" | "DELIVERY" | "BURNDOWN" | "COVERAGE" | "EXECUTION" | "EXPLORATORY" | "DEFECTS" | "RISKS" | "SPRINT_TREND" | "REGRESSION" | "NFR" | "REQUIREMENTS" | "DEFECT_LIST" | "TEST_RESULTS" | "RECOMMENDATION")[];
+            includeCharts: boolean;
+            includeDetails: boolean;
+            /** @enum {string} */
+            verdictOverride?: "GO" | "GO_WITH_RESERVATIONS" | "NO_GO";
+            verdictComment?: string;
+            verdictBy?: string;
+            /** Format: date-time */
+            verdictAt?: string;
+            data: components["schemas"]["ReportData"];
+        };
+        ReportSummaryResponse: {
+            key: string;
+            title: string;
+            definitionName: string;
+            /** @enum {string} */
+            scopeType: "SPRINT" | "RELEASE" | "PROJECT";
+            scope: string;
+            scopeLabel: string;
+            /**
+             * @description Verdict retenu (modifié par le PO ou calculé)
+             * @enum {string}
+             */
+            verdict?: "GO" | "GO_WITH_RESERVATIONS" | "NO_GO";
+            /** @enum {string} */
+            computedVerdict?: "GO" | "GO_WITH_RESERVATIONS" | "NO_GO";
+            frozen: boolean;
+            /** Format: date-time */
+            frozenAt?: string;
+            frozenBy?: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+        };
+        RequirementRow: {
+            key?: string;
+            title?: string;
+            type?: string;
+            risk?: string;
+            /** Format: int32 */
+            tests?: number;
+            /** Format: int32 */
+            executed?: number;
+            /** Format: int32 */
+            passed?: number;
+            status?: string;
+        };
+        RiskItem: {
+            key?: string;
+            title?: string;
+            risk?: string;
+            status?: string;
+        };
+        SprintTrendRow: {
+            key?: string;
+            name?: string;
+            status?: string;
+            /** Format: int32 */
+            committedPoints?: number;
+            /** Format: int32 */
+            donePoints?: number;
+            /** Format: double */
+            validationPercent?: number;
+            /** Format: int32 */
+            defectsCreated?: number;
+            /** Format: int32 */
+            defectsClosed?: number;
+        };
+        StoryRow: {
+            key?: string;
+            title?: string;
+            /** Format: int32 */
+            points?: number;
+            status?: string;
+            outcome?: string;
+            sprint?: string;
+        };
+        Summary: {
+            goal?: string;
+            objective?: string;
+            verdict?: string;
+            /** Format: double */
+            validationPercent?: number;
+            /** Format: int32 */
+            velocity?: number;
+            /** Format: int32 */
+            openDefects?: number;
+            /** Format: int32 */
+            openBlockingDefects?: number;
+        };
+        TestResultRow: {
+            campaign?: string;
+            test?: string;
+            title?: string;
+            kind?: string;
+            status?: string;
+            executedBy?: string;
+            date?: string;
+        };
+        UnmetRequirement: {
+            key?: string;
+            title?: string;
+            status?: string;
+        };
+        ReportDefinitionRequest: {
+            name: string;
+            description?: string;
+            /** @enum {string} */
+            scopeType: "SPRINT" | "RELEASE" | "PROJECT";
+            sections: ("SUMMARY" | "DELIVERY" | "BURNDOWN" | "COVERAGE" | "EXECUTION" | "EXPLORATORY" | "DEFECTS" | "RISKS" | "SPRINT_TREND" | "REGRESSION" | "NFR" | "REQUIREMENTS" | "DEFECT_LIST" | "TEST_RESULTS" | "RECOMMENDATION")[];
+            /** @enum {string} */
+            defaultFormat?: "HTML" | "PDF" | "DOCX" | "XLSX" | "MARKDOWN" | "CSV" | "JSON";
+            includeCharts?: boolean;
+            includeDetails?: boolean;
+        };
+        ReportDefinitionResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            description?: string;
+            /** @enum {string} */
+            scopeType: "SPRINT" | "RELEASE" | "PROJECT";
+            sections: ("SUMMARY" | "DELIVERY" | "BURNDOWN" | "COVERAGE" | "EXECUTION" | "EXPLORATORY" | "DEFECTS" | "RISKS" | "SPRINT_TREND" | "REGRESSION" | "NFR" | "REQUIREMENTS" | "DEFECT_LIST" | "TEST_RESULTS" | "RECOMMENDATION")[];
+            /** @enum {string} */
+            defaultFormat: "HTML" | "PDF" | "DOCX" | "XLSX" | "MARKDOWN" | "CSV" | "JSON";
+            includeCharts: boolean;
+            includeDetails: boolean;
+            /** @description Définition intégrée (§9.2 / §9.3) : non modifiable */
+            builtIn: boolean;
         };
         HeuristicsRequest: {
             custom: string[];
@@ -3106,6 +3646,13 @@ export interface components {
         ImportResponse: {
             created: string[];
         };
+        GenerateReportRequest: {
+            /** Format: uuid */
+            definitionId: string;
+            /** @description SPR-n ou REL-n selon le périmètre de la définition */
+            scopeKey?: string;
+            title?: string;
+        };
         CreateReleaseRequest: {
             name: string;
             goal?: string;
@@ -3905,6 +4452,74 @@ export interface components {
             techniques: ("BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT")[];
             usable: boolean;
         };
+        ActiveSprint: {
+            key?: string;
+            name?: string;
+            goal?: string;
+            startDate?: string;
+            endDate?: string;
+            /** Format: int64 */
+            daysLeft?: number;
+            /** Format: int32 */
+            donePoints?: number;
+            /** Format: int32 */
+            committedPoints?: number;
+        };
+        Coverage: {
+            scope?: string;
+            design?: components["schemas"]["Indicator"];
+            validation?: components["schemas"]["Indicator"];
+        };
+        Dashboard: {
+            activeSprint?: components["schemas"]["ActiveSprint"];
+            sprintCoverage?: components["schemas"]["Coverage"];
+            releaseCoverage?: components["schemas"]["Coverage"];
+            lastCampaign?: components["schemas"]["LastCampaign"];
+            openDefectsBySeverity?: {
+                [key: string]: number;
+            };
+            weekSessions?: components["schemas"]["WeekSessions"];
+            lastRuns?: components["schemas"]["RunRow"][];
+            burndown?: components["schemas"]["BurnPoint"][];
+            releaseKey?: string;
+            burnup?: components["schemas"]["BurnPoint"][];
+            automatedTrend?: components["schemas"]["RunRow"][];
+            defectsBySprint?: components["schemas"]["SprintTrendRow"][];
+        };
+        LastCampaign: {
+            key?: string;
+            name?: string;
+            status?: string;
+            /** Format: int32 */
+            total?: number;
+            byStatus?: {
+                [key: string]: number;
+            };
+        };
+        RunRow: {
+            key?: string;
+            status?: string;
+            campaignKey?: string;
+            requestedAt?: string;
+            /** Format: int32 */
+            total?: number;
+            /** Format: int32 */
+            passed?: number;
+            /** Format: int32 */
+            failed?: number;
+            /** Format: double */
+            passRate?: number;
+        };
+        WeekSessions: {
+            /** Format: int32 */
+            sessions?: number;
+            /** Format: int64 */
+            minutes?: number;
+            /** Format: int32 */
+            debriefed?: number;
+            /** Format: int32 */
+            awaitingApproval?: number;
+        };
         CoverageResponse: {
             scope: string;
             /** @description Couverture de conception */
@@ -3984,6 +4599,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FrameworkResponse"][];
+                };
+            };
+        };
+    };
+    verdictRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerdictRulesDto"];
+                };
+            };
+        };
+    };
+    updateVerdictRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerdictRulesDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerdictRulesDto"];
                 };
             };
         };
@@ -4144,6 +4807,81 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CriterionResponse"][];
                 };
+            };
+        };
+    };
+    verdict: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                reportKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerdictRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDetailResponse"];
+                };
+            };
+        };
+    };
+    updateDefinition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportDefinitionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDefinitionResponse"];
+                };
+            };
+        };
+    };
+    deleteDefinition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5317,6 +6055,148 @@ export interface operations {
             };
         };
     };
+    list_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportSummaryResponse"][];
+                };
+            };
+        };
+    };
+    generate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateReportRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDetailResponse"];
+                };
+            };
+        };
+    };
+    freeze_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                reportKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDetailResponse"];
+                };
+            };
+        };
+    };
+    definitions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDefinitionResponse"][];
+                };
+            };
+        };
+    };
+    createDefinition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportDefinitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDefinitionResponse"];
+                };
+            };
+        };
+    };
+    duplicateDefinition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDefinitionResponse"];
+                };
+            };
+        };
+    };
     releases: {
         parameters: {
             query?: never;
@@ -5442,7 +6322,7 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    list_7: {
         parameters: {
             query?: {
                 status?: ("OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED")[];
@@ -5495,7 +6375,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_8: {
         parameters: {
             query?: {
                 status?: ("PLANNED" | "IN_PROGRESS" | "COMPLETED" | "ABORTED")[];
@@ -5875,7 +6755,7 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
         parameters: {
             query?: never;
             header?: never;
@@ -6018,7 +6898,7 @@ export interface operations {
             };
         };
     };
-    list_9: {
+    list_10: {
         parameters: {
             query?: never;
             header?: never;
@@ -6936,7 +7816,7 @@ export interface operations {
             };
         };
     };
-    list_10: {
+    list_11: {
         parameters: {
             query?: never;
             header?: never;
@@ -7226,7 +8106,33 @@ export interface operations {
             };
         };
     };
-    list_11: {
+    sprintReview: {
+        parameters: {
+            query?: {
+                format?: string;
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                sprintKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    list_12: {
         parameters: {
             query?: {
                 state?: ("RUNNING" | "PAUSED" | "FINISHED" | "DEBRIEFED")[];
@@ -7705,6 +8611,102 @@ export interface operations {
             };
         };
     };
+    get_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                reportKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDetailResponse"];
+                };
+            };
+        };
+    };
+    delete_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                reportKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    export_1: {
+        parameters: {
+            query?: {
+                format?: string;
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                reportKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    releaseReview: {
+        parameters: {
+            query?: {
+                format?: string;
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                releaseKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
     mine: {
         parameters: {
             query?: {
@@ -7822,6 +8824,28 @@ export interface operations {
             };
         };
     };
+    dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+        };
+    };
     coverage: {
         parameters: {
             query?: {
@@ -7846,7 +8870,7 @@ export interface operations {
             };
         };
     };
-    get_8: {
+    get_9: {
         parameters: {
             query?: never;
             header?: never;
@@ -7914,7 +8938,7 @@ export interface operations {
             };
         };
     };
-    get_9: {
+    get_10: {
         parameters: {
             query?: never;
             header?: never;

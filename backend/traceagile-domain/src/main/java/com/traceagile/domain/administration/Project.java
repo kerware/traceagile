@@ -2,6 +2,7 @@ package com.traceagile.domain.administration;
 
 import com.traceagile.domain.common.AuditableEntity;
 import com.traceagile.domain.common.BusinessRuleException;
+import com.traceagile.domain.reporting.VerdictRules;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,6 +47,11 @@ public class Project extends AuditableEntity {
     @Column(name = "custom_heuristics", nullable = false, columnDefinition = "jsonb")
     private List<String> customHeuristics = new ArrayList<>();
 
+    /** §9.2 / ADR-0023 règles du verdict des bilans ({@code null} = règles par défaut). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "verdict_rules", columnDefinition = "jsonb")
+    private VerdictRules verdictRules;
+
     protected Project() {
     }
 
@@ -57,6 +63,14 @@ public class Project extends AuditableEntity {
         this.key = key;
         rename(name);
         this.description = description;
+    }
+
+    public VerdictRules getVerdictRules() {
+        return verdictRules == null ? VerdictRules.DEFAULT : verdictRules;
+    }
+
+    public void setVerdictRules(VerdictRules rules) {
+        this.verdictRules = rules == null || rules.equals(VerdictRules.DEFAULT) ? null : rules;
     }
 
     public String getKey() {

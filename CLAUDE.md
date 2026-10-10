@@ -17,7 +17,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`, `lot-5-complements`) |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | **Fait** (branche `lot-6-exploratoire`) |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports, artefacts (traces, JUnit, Jest, copies d'écran) | **Fait** (branches `lot-7-execution-automatisee`, `lot-7-artefacts`) |
-| 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
+| 8. Bilans | Tableau de bord, burndown / burnup, bilans de sprint et de release, verdict, rapports configurables, exports HTML / PDF / Word / Excel / Markdown / CSV / JSON | **Fait** (branche `lot-8-bilans`) |
 | 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
 
 Reporté (à reprendre dans le lot indiqué) :
@@ -29,9 +29,11 @@ Reporté (à reprendre dans le lot indiqué) :
   autres annotations → lot 9 si besoin.
 - Jeu de données d'un test automatisé : le job transmet le premier jeu du test ; choix d'une ligne
   pour un run → lot 9 si besoin.
-- Métriques de performance des webhooks (`metrics{}`) et F-REQ-18 valeur mesurée d'une ENF → lot 8
-  (bilans) ; signalement des tests instables dans le bilan (F-EXE-11) → lot 8 ; vidéos et stockage
-  des artefacts dans TraceAgile (ils sont relus sur le serveur, ADR-0021) → lot 9 ; widget « derniers runs » → lot 8.
+- Métriques de performance des webhooks (`metrics{}`) et F-REQ-18 valeur mesurée d'une ENF → lot 9
+  (la section ENF des bilans affiche seuil et cible, « non mesuré ») ; vidéos et stockage des
+  artefacts dans TraceAgile (ils sont relus sur le serveur, ADR-0021) → lot 9.
+- Rapports (ADR-0023) : périmètre « campagne », traduction des documents produits par le serveur
+  (français seulement), burndown exact si une story change de statut hors audit → lot 9 si besoin.
 - Glisser-déposer des campagnes d'un dossier à l'autre dans l'arbre lui-même (aujourd'hui : depuis
   la liste vers un dossier, ou « Ranger ») → lot 9 si besoin.
 - Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
@@ -173,6 +175,16 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   ouvert. Tout nouveau flux SSE s'ajoute à `OpenInViewConfig.STREAMS` (test
   `AutomatedRunApiTest.streamsDoNotHoldConnections`). La CSP de `frontend/nginx.conf` autorise
   `img-src blob:` pour les images chargées avec le jeton.
+- Bilans et rapports (ADR-0023) : règles pures dans le domaine `reporting` (`VerdictRules`,
+  `Burndown`, `ReportDefinition`, `ReportSnapshot`) ; `ReportCalculator` calcule les sections
+  (records `ReportData`, stockés en `jsonb` dans l'instantané), `ReportDocumentBuilder` en fait un
+  `ReportDocument` (libellés français : `Labels`), rendu par un `ReportRenderer` par format
+  (`infrastructure.reporting` : gabarit Thymeleaf `templates/reports/report.html` pour HTML et PDF
+  via OpenHTMLtoPDF, POI pour Word / Excel avec graphiques natifs). Pas de flexbox ni de caractère
+  hors WinAnsi (« → », « ≥ ») dans le gabarit : OpenHTMLtoPDF, polices PDF de base. La clôture d'un
+  sprint publie `PlanningService.SprintClosed` → `ReportService.onSprintClosed` fige son bilan.
+  Tableau de bord : `DashboardService` (une requête). Les records applicatifs exposés tels quels
+  doivent garder des noms de schéma uniques (`RequirementRef` existait déjà → `UnmetRequirement`).
 - Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
   `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
   `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :
@@ -217,6 +229,10 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Statut de vérification : `features/traceability/VerificationBadge` (pastille, `data-status`) ;
   hooks dans `src/api/traceability.ts`, qui invalident traçabilité, tests et exigences.
 - Pluriels i18next : en français, 0 est au singulier (`_one`).
+- Graphiques (tableau de bord) : `components/charts/Charts` (`LineChart`, `ColumnChart`, SVG maison,
+  géométrie dans `geometry.ts`) ; pas de bibliothèque de graphiques. Rapports : hooks dans
+  `src/api/reports.ts`, exports par `downloadReport` (Bearer + URL d'objet), affichage web dans une
+  `iframe` `sandbox` alimentée par l'export HTML. Textes génériques : `common.cancel|save|edit|delete`.
 - Glisser-déposer entre colonnes (planification) : `useDraggable` / `useDroppable` de dnd-kit, avec
   toujours un bouton équivalent (clavier, tests) ; en Playwright, `glisser()` de `e2e/tests/support.ts`.
 - Mutation optimiste suivie d'une navigation : dans un test bout en bout, attendre la réponse
@@ -254,6 +270,9 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   stories non couvertes. Tous `READY`.
 - Lot 4 : `REL-1` « Version 2.0 », 3 sprints de 2 semaines calés sur la date du jour — `SPR-1` clos
   (une story reportée), `SPR-2` actif, `SPR-3` planifié (`DemoPlanningLoader`, rejoué si aucune release).
+- Lot 8 : ordre du chargement — SPR-1 démarré, recette CMP-1 jouée, **puis** SPR-1 clos (son bilan
+  figé `RPT-1` a donc des données), SPR-2 démarré, CMP-2 / CMP-3 ; définition « Synthèse qualité »
+  (Word) et bilan non figé de SPR-2 (`DemoReportLoader`).
 - Lot 7 : serveur « Simulateur » appairé dès qu'il répond (jeton émis par le simulateur) ; 3 runs
   passés sur CMP-2 (RUN-1 à RUN-3), deux tests automatisés instables.
 - Lot 6 : 5 sessions exploratoires débriefées et approuvées par le PO (2 par charte de CMP-1, la

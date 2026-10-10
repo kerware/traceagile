@@ -54,6 +54,10 @@ export const handlers = [
   http.get('/api/v1/projects/:key/campaigns/:ck/runs', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/campaigns/:ck/run-events', () => new HttpResponse('', { headers: { 'Content-Type': 'text/event-stream' } })),
   http.get('/api/v1/projects/:key/runs/:rk/artifacts', () => HttpResponse.json([])),
+  // Tableau de bord (page d'accueil d'un projet), vide par défaut.
+  http.get('/api/v1/projects/:key/dashboard', () =>
+    HttpResponse.json({ openDefectsBySeverity: {}, lastRuns: [], burndown: [], burnup: [], automatedTrend: [], defectsBySprint: [] }),
+  ),
   http.get('/api/v1/projects/:key/runs/:rk/events', () => new HttpResponse('', { headers: { 'Content-Type': 'text/event-stream' } })),
 ];
 

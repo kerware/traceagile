@@ -86,14 +86,22 @@ public class DemoCampaignLoader {
         this.planning = planning;
     }
 
-    public void load(String project) {
+    /** Recette de SPR-1 ({@code CMP-1}), jouée avant la clôture du sprint pour que son bilan figé ait des données (ADR-0023). */
+    public void loadFirstSprint(String project) {
         if (campaignRepository.existsByProject_Key(project)) {
+            return;
+        }
+        sprint1(project, planning.sprint(project, "SPR-1"));
+    }
+
+    /** Après la clôture de SPR-1 : CMP-2 (SPR-2), CMP-3 (régression), anomalies, dossiers. */
+    public void load(String project) {
+        if (campaignRepository.findByProject_KeyOrderByKeyNumberDesc(project).stream().anyMatch(c -> !c.getName().equals("Recette SPR-1"))) {
             organize(project);
             return;
         }
-        Sprint spr1 = planning.sprint(project, "SPR-1");
+        loadFirstSprint(project);
         Sprint spr2 = planning.sprint(project, "SPR-2");
-        sprint1(project, spr1);
         sprint2(project, spr2);
         Campaign regression = campaigns.create(project, new CampaignCommand("Régression 2.0", CampaignScope.REGRESSION, null, null,
                 "preprod", "2.0.0", spr2.getEndDate().minusDays(2), spr2.getEndDate()));

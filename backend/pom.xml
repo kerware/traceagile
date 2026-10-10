@@ -61,6 +61,17 @@
                 <artifactId>openpdf</artifactId>
                 <version>2.0.3</version>
             </dependency>
+            <!-- ADR-0023 rapports : PDF depuis le gabarit HTML (§11.1), Word et Excel -->
+            <dependency>
+                <groupId>com.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-pdfbox</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>5.4.1</version>
+            </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

@@ -51,8 +51,10 @@ class PlanningServiceTest {
     final SprintRepository sprints = mock(SprintRepository.class);
     final RequirementService requirements = mock(RequirementService.class);
     final KeyGenerator keys = mock(KeyGenerator.class);
+    final org.springframework.context.ApplicationEventPublisher events = mock(org.springframework.context.ApplicationEventPublisher.class);
     final PlanningService service = new PlanningService(releases, sprints, mock(ProjectRepository.class), requirements,
-            mock(TraceabilityService.class), keys, mock(AuditService.class), Clock.fixed(Instant.parse("2026-10-09T10:00:00Z"), ZoneOffset.UTC));
+            mock(TraceabilityService.class), keys, mock(AuditService.class), Clock.fixed(Instant.parse("2026-10-09T10:00:00Z"), ZoneOffset.UTC),
+            events);
     final List<Sprint> all = new ArrayList<>();
 
     static <T extends AuditableEntity> T withId(T entity) {
@@ -143,7 +145,7 @@ class PlanningServiceTest {
     }
 
     @Test
-    @DisplayName("F-PLN-06 clôture : terminées, renvoyées au backlog (défaut) ou reportées sur le sprint suivant")
+    @DisplayName("F-PLN-06 clôture : terminées, renvoyées au backlog (défaut) ou reportées sur le sprint suivant ; ADR-0023 bilan à figer (SprintClosed)")
     void close() {
         Sprint s1 = sprint("SPR-1", MONDAY);
         Sprint s2 = sprint("SPR-2", MONDAY.plusWeeks(2));
@@ -153,6 +155,7 @@ class PlanningServiceTest {
         service.replaceScope("SHOP", "SPR-1", List.of("REQ-1", "REQ-2", "REQ-3"));
         service.start("SHOP", "SPR-1");
         done.changeStatus(RequirementStatus.DONE);
+        org.mockito.Mockito.verifyNoInteractions(events);
 
         service.close("SHOP", "SPR-1", List.of(new CloseDecision("REQ-3", CloseAction.NEXT_SPRINT)));
 
@@ -164,6 +167,7 @@ class PlanningServiceTest {
         assertThat(s2.requirements()).containsExactly(carried);
         assertThat(s1.donePoints()).isEqualTo(5);
         assertThat(s1.loadPoints()).isEqualTo(16);
+        org.mockito.Mockito.verify(events).publishEvent(new PlanningService.SprintClosed("SHOP", "SPR-1"));
     }
 
     @Test

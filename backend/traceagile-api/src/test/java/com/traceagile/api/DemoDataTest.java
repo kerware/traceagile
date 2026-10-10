@@ -29,6 +29,7 @@ import com.traceagile.domain.planning.ScopeOutcome;
 import com.traceagile.domain.planning.Sprint;
 import com.traceagile.domain.planning.SprintScopeItem;
 import com.traceagile.api.demo.DemoPlanningLoader;
+import com.traceagile.api.demo.DemoReportLoader;
 import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.defect.DefectService;
 import com.traceagile.domain.campaign.Campaign;
@@ -93,10 +94,14 @@ class DemoDataTest extends AbstractApiTest {
     AutomatedRunService runs;
     @Autowired
     ExecutionServerService executionServers;
+    @Autowired
+    DemoReportLoader reportLoader;
+    @Autowired
+    com.traceagile.application.reporting.ReportService reports;
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
-                testsLoader, planningLoader, campaignLoader, automationLoader);
+                testsLoader, planningLoader, campaignLoader, automationLoader, reportLoader);
     }
 
     @Test
@@ -219,6 +224,20 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(sprint1.sessions()).isEqualTo(4);
         assertThat(sprint1.chartersExecuted()).isEqualTo(sprint1.chartersPlanned());
         assertThat(sprint1.averageConfidence()).isNotNull();
+
+        // Lot 8 (ADR-0023) : bilan de SPR-1 figé à sa clôture, après sa recette ; bilan de SPR-2 en cours ; définition « Synthèse qualité »
+        var snapshots = reports.list("SHOP");
+        var frozen = snapshots.stream().filter(r -> r.getScope().equals("sprint:SPR-1")).findFirst().orElseThrow();
+        assertThat(frozen.isFrozen()).isTrue();
+        assertThat(frozen.getFrozenBy()).isEqualTo("clôture du sprint");
+        assertThat(reports.data(frozen).execution().items()).isPositive();
+        assertThat(reports.data(frozen).header().status()).isEqualTo("CLOSED");
+        assertThat(snapshots).anySatisfy(r -> {
+            assertThat(r.getScope()).isEqualTo("sprint:SPR-2");
+            assertThat(r.isFrozen()).isFalse();
+            assertThat(r.getVerdict()).isIn(com.traceagile.domain.reporting.Verdict.NO_GO, com.traceagile.domain.reporting.Verdict.GO_WITH_RESERVATIONS);
+        });
+        assertThat(reports.definitions("SHOP")).extracting(d -> d.getName()).contains("Bilan de sprint", "Bilan de release", "Synthèse qualité");
 
         // Lot 7 (§15.1) : simulateur déclaré (appairé dès qu'il répond) ; 3 runs sur CMP-2 ; 2 tests instables
         assertThat(executionServers.list()).extracting(s -> s.getName()).containsExactly("Simulateur");

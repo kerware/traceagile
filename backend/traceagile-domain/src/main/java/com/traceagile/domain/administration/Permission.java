@@ -27,5 +27,7 @@ public enum Permission {
     EXECUTION_READ,
     /** Exécuter, saisir des sessions, créer des anomalies. */
     EXECUTION_WRITE,
-    AUTOMATED_RUN_LAUNCH
+    AUTOMATED_RUN_LAUNCH,
+    /** ADR-0023 définitions de rapports, génération et gel des rapports. */
+    REPORT_WRITE
 }

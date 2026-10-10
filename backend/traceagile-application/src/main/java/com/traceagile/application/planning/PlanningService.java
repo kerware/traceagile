@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,9 +79,15 @@ public class PlanningService {
     private final KeyGenerator keys;
     private final AuditService audit;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
+
+    /** ADR-0023 sprint clos : son bilan est généré et figé. */
+    public record SprintClosed(String projectKey, String sprintKey) {
+    }
 
     public PlanningService(ReleaseRepository releases, SprintRepository sprints, ProjectRepository projects, RequirementService requirements,
-                           TraceabilityService traceability, KeyGenerator keys, AuditService audit, Clock clock) {
+                           TraceabilityService traceability, KeyGenerator keys, AuditService audit, Clock clock, ApplicationEventPublisher events) {
+        this.events = events;
         this.releases = releases;
         this.sprints = sprints;
         this.projects = projects;
@@ -358,6 +365,7 @@ public class PlanningService {
             sprint.recordOutcome(requirement, outcome);
         }
         audit.record(sprint.getProject().getId(), AUDIT_SPRINT, sprint.getId(), key, AuditAction.STATUS_CHANGED, before, snapshot(sprint));
+        events.publishEvent(new SprintClosed(projectKey, key));
         return sprint;
     }
 

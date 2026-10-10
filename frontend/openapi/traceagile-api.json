@@ -56,6 +56,66 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/verdict-rules" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "verdictRules",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VerdictRulesDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "updateVerdictRules",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VerdictRulesDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VerdictRulesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/test-cases/{key}/requirements" : {
       "get" : {
         "tags" : [ "Tests" ],
@@ -318,6 +378,118 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/reports/{reportKey}/verdict" : {
+      "put" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "verdict",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "reportKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VerdictRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/report-definitions/{id}" : {
+      "put" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "updateDefinition",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReportDefinitionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDefinitionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "deleteDefinition",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           }
         }
       }
@@ -2240,6 +2412,199 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/reports" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "list_6",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ReportSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "generate",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GenerateReportRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/reports/{reportKey}/freeze" : {
+      "post" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "freeze_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "reportKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/report-definitions" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "definitions",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ReportDefinitionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "createDefinition",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReportDefinitionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDefinitionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/report-definitions/{id}/duplicate" : {
+      "post" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "duplicateDefinition",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDefinitionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/releases" : {
       "get" : {
         "tags" : [ "Planification" ],
@@ -2426,7 +2791,7 @@
     "/api/v1/projects/{projectKey}/defects" : {
       "get" : {
         "tags" : [ "Anomalies" ],
-        "operationId" : "list_6",
+        "operationId" : "list_7",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -2527,7 +2892,7 @@
     "/api/v1/projects/{projectKey}/campaigns" : {
       "get" : {
         "tags" : [ "Campagnes" ],
-        "operationId" : "list_7",
+        "operationId" : "list_8",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3126,7 +3491,7 @@
     "/api/v1/projects/{projectKey}/campaign-folders" : {
       "get" : {
         "tags" : [ "Campagnes" ],
-        "operationId" : "list_8",
+        "operationId" : "list_9",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3314,7 +3679,7 @@
     "/api/v1/execution-servers" : {
       "get" : {
         "tags" : [ "Serveurs d'exécution" ],
-        "operationId" : "list_9",
+        "operationId" : "list_10",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -4660,7 +5025,7 @@
     "/api/v1/reference/frameworks" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "list_10",
+        "operationId" : "list_11",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -5152,10 +5517,60 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/sprints/{sprintKey}/report" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "sprintReview",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sprintKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "format",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "json"
+          }
+        }, {
+          "name" : "download",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/sessions" : {
       "get" : {
         "tags" : [ "Exploratoire" ],
-        "operationId" : "list_11",
+        "operationId" : "list_12",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -5965,6 +6380,164 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/reports/{reportKey}" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "get_8",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "reportKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "delete_7",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "reportKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/reports/{reportKey}/export" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "summary" : "Exporter un rapport (HTML, PDF, Word, Excel, Markdown, CSV, JSON)",
+        "operationId" : "export_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "reportKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "format",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "pdf"
+          }
+        }, {
+          "name" : "download",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/releases/{releaseKey}/report" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "releaseReview",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "releaseKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "format",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "json"
+          }
+        }, {
+          "name" : "download",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/my-executions" : {
       "get" : {
         "tags" : [ "Exécutions" ],
@@ -6138,6 +6711,32 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/dashboard" : {
+      "get" : {
+        "tags" : [ "Rapports" ],
+        "operationId" : "dashboard",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/coverage" : {
       "get" : {
         "tags" : [ "Traçabilité" ],
@@ -6174,7 +6773,7 @@
     "/api/v1/projects/{projectKey}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_8",
+        "operationId" : "get_9",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -6266,7 +6865,7 @@
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "get_9",
+        "operationId" : "get_10",
         "parameters" : [ {
           "name" : "key",
           "in" : "path",
@@ -6326,6 +6925,33 @@
           }
         },
         "required" : [ "name", "position", "technique" ]
+      },
+      "VerdictRulesDto" : {
+        "type" : "object",
+        "properties" : {
+          "goMinValidation" : {
+            "type" : "number",
+            "format" : "double",
+            "maximum" : 100,
+            "minimum" : 0
+          },
+          "reservedMinValidation" : {
+            "type" : "number",
+            "format" : "double",
+            "maximum" : 100,
+            "minimum" : 0
+          },
+          "goForbidsCriticalDefects" : {
+            "type" : "boolean"
+          },
+          "goRequiresCriticalRequirements" : {
+            "type" : "boolean"
+          },
+          "reservedForbidsBlockerDefects" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "goForbidsCriticalDefects", "goMinValidation", "goRequiresCriticalRequirements", "reservedForbidsBlockerDefects", "reservedMinValidation" ]
       },
       "LinkRequest" : {
         "type" : "object",
@@ -6835,6 +7461,913 @@
           }
         },
         "required" : [ "ids" ]
+      },
+      "VerdictRequest" : {
+        "type" : "object",
+        "properties" : {
+          "verdict" : {
+            "type" : "string",
+            "enum" : [ "GO", "GO_WITH_RESERVATIONS", "NO_GO" ]
+          },
+          "comment" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          }
+        }
+      },
+      "BlockingDefect" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "BurnChart" : {
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "points" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BurnPoint"
+            }
+          }
+        }
+      },
+      "BurnPoint" : {
+        "type" : "object",
+        "properties" : {
+          "label" : {
+            "type" : "string"
+          },
+          "actual" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "reference" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        }
+      },
+      "CoverageSection" : {
+        "type" : "object",
+        "properties" : {
+          "design" : {
+            "$ref" : "#/components/schemas/Indicator"
+          },
+          "criteria" : {
+            "$ref" : "#/components/schemas/Indicator"
+          },
+          "execution" : {
+            "$ref" : "#/components/schemas/Indicator"
+          },
+          "validation" : {
+            "$ref" : "#/components/schemas/Indicator"
+          },
+          "riskWeighted" : {
+            "$ref" : "#/components/schemas/Indicator"
+          },
+          "uncovered" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UnmetRequirement"
+            }
+          },
+          "failing" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UnmetRequirement"
+            }
+          }
+        }
+      },
+      "DayRow" : {
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "type" : "string"
+          },
+          "attempts" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "DefectRow" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "requirements" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DefectSection" : {
+        "type" : "object",
+        "properties" : {
+          "created" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "resolved" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "open" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "openBySeverity" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "blocking" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BlockingDefect"
+            }
+          }
+        }
+      },
+      "Delivery" : {
+        "type" : "object",
+        "properties" : {
+          "committedStories" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "committedPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "doneStories" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "donePoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "acceptedStories" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "carriedOverStories" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "returnedStories" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "droppedStories" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "stories" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StoryRow"
+            }
+          }
+        }
+      },
+      "ExecutionSection" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "attempts" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "byStatus" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "byKind" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/KindRow"
+            }
+          },
+          "attemptsByDay" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DayRow"
+            }
+          },
+          "flaky" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FlakyTest"
+            }
+          }
+        }
+      },
+      "ExploratorySection" : {
+        "type" : "object",
+        "properties" : {
+          "sessions" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "debriefed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalMinutes" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "averageMinutes" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "testPct" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "bugPct" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "setupPct" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "defectsPerHour" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "chartersPlanned" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "chartersExecuted" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "averageConfidence" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "neverExploredAreas" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "findings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Finding"
+            }
+          }
+        }
+      },
+      "Finding" : {
+        "type" : "object",
+        "properties" : {
+          "charter" : {
+            "type" : "string"
+          },
+          "tester" : {
+            "type" : "string"
+          },
+          "results" : {
+            "type" : "string"
+          },
+          "obstacles" : {
+            "type" : "string"
+          }
+        }
+      },
+      "FlakyTest" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Header" : {
+        "type" : "object",
+        "properties" : {
+          "projectKey" : {
+            "type" : "string"
+          },
+          "projectName" : {
+            "type" : "string"
+          },
+          "scope" : {
+            "type" : "string"
+          },
+          "scopeLabel" : {
+            "type" : "string"
+          },
+          "goal" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string"
+          },
+          "endDate" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "generatedAt" : {
+            "type" : "string"
+          },
+          "generatedBy" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Indicator" : {
+        "type" : "object",
+        "properties" : {
+          "numerator" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "denominator" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "percent" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        }
+      },
+      "KindRow" : {
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "notRun" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "other" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "NfrRow" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "threshold" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : "string"
+          },
+          "measured" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Recommendation" : {
+        "type" : "object",
+        "properties" : {
+          "verdict" : {
+            "type" : "string"
+          },
+          "reasons" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "RegressionSection" : {
+        "type" : "object",
+        "properties" : {
+          "campaignKey" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "notRun" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passRate" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        }
+      },
+      "ReportData" : {
+        "type" : "object",
+        "properties" : {
+          "header" : {
+            "$ref" : "#/components/schemas/Header"
+          },
+          "summary" : {
+            "$ref" : "#/components/schemas/Summary"
+          },
+          "delivery" : {
+            "$ref" : "#/components/schemas/Delivery"
+          },
+          "burndown" : {
+            "$ref" : "#/components/schemas/BurnChart"
+          },
+          "coverage" : {
+            "$ref" : "#/components/schemas/CoverageSection"
+          },
+          "execution" : {
+            "$ref" : "#/components/schemas/ExecutionSection"
+          },
+          "exploratory" : {
+            "$ref" : "#/components/schemas/ExploratorySection"
+          },
+          "defects" : {
+            "$ref" : "#/components/schemas/DefectSection"
+          },
+          "risks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RiskItem"
+            }
+          },
+          "sprintTrend" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SprintTrendRow"
+            }
+          },
+          "regression" : {
+            "$ref" : "#/components/schemas/RegressionSection"
+          },
+          "nfr" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NfrRow"
+            }
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RequirementRow"
+            }
+          },
+          "defectList" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectRow"
+            }
+          },
+          "testResults" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TestResultRow"
+            }
+          },
+          "recommendation" : {
+            "$ref" : "#/components/schemas/Recommendation"
+          }
+        }
+      },
+      "ReportDetailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "report" : {
+            "$ref" : "#/components/schemas/ReportSummaryResponse"
+          },
+          "sections" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "SUMMARY", "DELIVERY", "BURNDOWN", "COVERAGE", "EXECUTION", "EXPLORATORY", "DEFECTS", "RISKS", "SPRINT_TREND", "REGRESSION", "NFR", "REQUIREMENTS", "DEFECT_LIST", "TEST_RESULTS", "RECOMMENDATION" ]
+            }
+          },
+          "includeCharts" : {
+            "type" : "boolean"
+          },
+          "includeDetails" : {
+            "type" : "boolean"
+          },
+          "verdictOverride" : {
+            "type" : "string",
+            "enum" : [ "GO", "GO_WITH_RESERVATIONS", "NO_GO" ]
+          },
+          "verdictComment" : {
+            "type" : "string"
+          },
+          "verdictBy" : {
+            "type" : "string"
+          },
+          "verdictAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/ReportData"
+          }
+        },
+        "required" : [ "data", "includeCharts", "includeDetails", "report", "sections" ]
+      },
+      "ReportSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "definitionName" : {
+            "type" : "string"
+          },
+          "scopeType" : {
+            "type" : "string",
+            "enum" : [ "SPRINT", "RELEASE", "PROJECT" ]
+          },
+          "scope" : {
+            "type" : "string"
+          },
+          "scopeLabel" : {
+            "type" : "string"
+          },
+          "verdict" : {
+            "type" : "string",
+            "description" : "Verdict retenu (modifié par le PO ou calculé)",
+            "enum" : [ "GO", "GO_WITH_RESERVATIONS", "NO_GO" ]
+          },
+          "computedVerdict" : {
+            "type" : "string",
+            "enum" : [ "GO", "GO_WITH_RESERVATIONS", "NO_GO" ]
+          },
+          "frozen" : {
+            "type" : "boolean"
+          },
+          "frozenAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "frozenBy" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "createdAt", "definitionName", "frozen", "key", "scope", "scopeLabel", "scopeType", "title" ]
+      },
+      "RequirementRow" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "risk" : {
+            "type" : "string"
+          },
+          "tests" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "executed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RiskItem" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "risk" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SprintTrendRow" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "committedPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "donePoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "validationPercent" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "defectsCreated" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defectsClosed" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "StoryRow" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "points" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "outcome" : {
+            "type" : "string"
+          },
+          "sprint" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Summary" : {
+        "type" : "object",
+        "properties" : {
+          "goal" : {
+            "type" : "string"
+          },
+          "objective" : {
+            "type" : "string"
+          },
+          "verdict" : {
+            "type" : "string"
+          },
+          "validationPercent" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "velocity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "openDefects" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "openBlockingDefects" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "TestResultRow" : {
+        "type" : "object",
+        "properties" : {
+          "campaign" : {
+            "type" : "string"
+          },
+          "test" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "executedBy" : {
+            "type" : "string"
+          },
+          "date" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UnmetRequirement" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ReportDefinitionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          },
+          "scopeType" : {
+            "type" : "string",
+            "enum" : [ "SPRINT", "RELEASE", "PROJECT" ]
+          },
+          "sections" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "SUMMARY", "DELIVERY", "BURNDOWN", "COVERAGE", "EXECUTION", "EXPLORATORY", "DEFECTS", "RISKS", "SPRINT_TREND", "REGRESSION", "NFR", "REQUIREMENTS", "DEFECT_LIST", "TEST_RESULTS", "RECOMMENDATION" ]
+            },
+            "minItems" : 1
+          },
+          "defaultFormat" : {
+            "type" : "string",
+            "enum" : [ "HTML", "PDF", "DOCX", "XLSX", "MARKDOWN", "CSV", "JSON" ]
+          },
+          "includeCharts" : {
+            "type" : "boolean"
+          },
+          "includeDetails" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "name", "scopeType", "sections" ]
+      },
+      "ReportDefinitionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "scopeType" : {
+            "type" : "string",
+            "enum" : [ "SPRINT", "RELEASE", "PROJECT" ]
+          },
+          "sections" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "SUMMARY", "DELIVERY", "BURNDOWN", "COVERAGE", "EXECUTION", "EXPLORATORY", "DEFECTS", "RISKS", "SPRINT_TREND", "REGRESSION", "NFR", "REQUIREMENTS", "DEFECT_LIST", "TEST_RESULTS", "RECOMMENDATION" ]
+            }
+          },
+          "defaultFormat" : {
+            "type" : "string",
+            "enum" : [ "HTML", "PDF", "DOCX", "XLSX", "MARKDOWN", "CSV", "JSON" ]
+          },
+          "includeCharts" : {
+            "type" : "boolean"
+          },
+          "includeDetails" : {
+            "type" : "boolean"
+          },
+          "builtIn" : {
+            "type" : "boolean",
+            "description" : "Définition intégrée (§9.2 / §9.3) : non modifiable"
+          }
+        },
+        "required" : [ "builtIn", "defaultFormat", "id", "includeCharts", "includeDetails", "name", "scopeType", "sections" ]
       },
       "HeuristicsRequest" : {
         "type" : "object",
@@ -9242,6 +10775,25 @@
         },
         "required" : [ "created" ]
       },
+      "GenerateReportRequest" : {
+        "type" : "object",
+        "properties" : {
+          "definitionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "scopeKey" : {
+            "type" : "string",
+            "description" : "SPR-n ou REL-n selon le périmètre de la définition"
+          },
+          "title" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "definitionId" ]
+      },
       "CreateReleaseRequest" : {
         "type" : "object",
         "properties" : {
@@ -11461,6 +13013,191 @@
           }
         },
         "required" : [ "id", "name", "status", "techniques", "usable" ]
+      },
+      "ActiveSprint" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "goal" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string"
+          },
+          "endDate" : {
+            "type" : "string"
+          },
+          "daysLeft" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "donePoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "committedPoints" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "Coverage" : {
+        "type" : "object",
+        "properties" : {
+          "scope" : {
+            "type" : "string"
+          },
+          "design" : {
+            "$ref" : "#/components/schemas/Indicator"
+          },
+          "validation" : {
+            "$ref" : "#/components/schemas/Indicator"
+          }
+        }
+      },
+      "Dashboard" : {
+        "type" : "object",
+        "properties" : {
+          "activeSprint" : {
+            "$ref" : "#/components/schemas/ActiveSprint"
+          },
+          "sprintCoverage" : {
+            "$ref" : "#/components/schemas/Coverage"
+          },
+          "releaseCoverage" : {
+            "$ref" : "#/components/schemas/Coverage"
+          },
+          "lastCampaign" : {
+            "$ref" : "#/components/schemas/LastCampaign"
+          },
+          "openDefectsBySeverity" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "weekSessions" : {
+            "$ref" : "#/components/schemas/WeekSessions"
+          },
+          "lastRuns" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RunRow"
+            }
+          },
+          "burndown" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BurnPoint"
+            }
+          },
+          "releaseKey" : {
+            "type" : "string"
+          },
+          "burnup" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BurnPoint"
+            }
+          },
+          "automatedTrend" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RunRow"
+            }
+          },
+          "defectsBySprint" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SprintTrendRow"
+            }
+          }
+        }
+      },
+      "LastCampaign" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "byStatus" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }
+      },
+      "RunRow" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "campaignKey" : {
+            "type" : "string"
+          },
+          "requestedAt" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passRate" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        }
+      },
+      "WeekSessions" : {
+        "type" : "object",
+        "properties" : {
+          "sessions" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "minutes" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "debriefed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "awaitingApproval" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
       },
       "CoverageResponse" : {
         "type" : "object",
