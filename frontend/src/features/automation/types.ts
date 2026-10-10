@@ -1,4 +1,4 @@
-export type { ReportFormat, RunStatus, ServerStatus } from '../../api/automation';
+export type { ArtifactKind, ReportFormat, RunStatus, ServerStatus } from '../../api/automation';
 
 /** Comptes d'un run (pour les calculs d'affichage). */
 export interface RunCountsLike {

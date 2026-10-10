@@ -3,10 +3,12 @@ package com.traceagile.api.automation;
 import com.traceagile.api.automation.AutomationDtos.ReportImportLine;
 import com.traceagile.api.automation.AutomationDtos.ReportImportResponse;
 import com.traceagile.api.automation.AutomationDtos.LaunchRunRequest;
+import com.traceagile.api.automation.AutomationDtos.RunArtifactResponse;
 import com.traceagile.api.automation.AutomationDtos.RunDetail;
 import com.traceagile.api.automation.AutomationDtos.RunSummaryResponse;
 import com.traceagile.application.automation.AutomatedRunService;
 import com.traceagile.application.automation.AutomatedRunService.LaunchCommand;
+import com.traceagile.application.automation.ExecutionServerClient.ArtifactContent;
 import com.traceagile.application.automation.ReportImportService;
 import com.traceagile.application.automation.ReportImportService.ImportResult;
 import com.traceagile.application.automation.ReportParser.ReportFormat;
@@ -16,6 +18,8 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,7 +85,7 @@ public class RunController {
     @PreAuthorize(READ)
     public RunDetail get(@PathVariable String projectKey, @PathVariable String runKey) {
         AutomatedRun run = runs.get(projectKey, runKey);
-        return mapper.detail(run, runs.executionsOf(run));
+        return mapper.detail(run, runs.executionsOf(run), runs.screenshotsOf(run));
     }
 
     /** F-EXE-08 annulation. */
@@ -89,7 +93,7 @@ public class RunController {
     @PreAuthorize(LAUNCH)
     public RunDetail cancel(@PathVariable String projectKey, @PathVariable String runKey, Authentication authentication) {
         AutomatedRun run = runs.cancel(projectKey, runKey, authentication.getName());
-        return mapper.detail(run, runs.executionsOf(run));
+        return mapper.detail(run, runs.executionsOf(run), runs.screenshotsOf(run));
     }
 
     /** F-EXE-09 relance des seuls tests en échec : nouveau run. */
@@ -123,6 +127,30 @@ public class RunController {
         return runs.logs(projectKey, runKey);
     }
 
+    /** ADR-0021 artefacts du run : copies d'écran des échecs, traces système, résultats JUnit XML et Jest JSON, rapport. */
+    @GetMapping("/runs/{runKey}/artifacts")
+    @PreAuthorize(READ)
+    public List<RunArtifactResponse> artifacts(@PathVariable String projectKey, @PathVariable String runKey) {
+        return runs.artifactsOf(projectKey, runKey).stream().map(mapper::artifact).toList();
+    }
+
+    /** ADR-0021 contenu d'un artefact, relu sur le serveur d'exécution avec le jeton qu'il a émis. */
+    @GetMapping("/runs/{runKey}/artifacts/{name:.+}")
+    @PreAuthorize(READ)
+    public ResponseEntity<byte[]> artifact(@PathVariable String projectKey, @PathVariable String runKey, @PathVariable String name,
+                                           @RequestParam(defaultValue = "false") boolean download) {
+        ArtifactContent content = runs.artifact(projectKey, runKey, name);
+        MediaType type;
+        try {
+            type = MediaType.parseMediaType(content.contentType());
+        } catch (RuntimeException e) {
+            type = MediaType.APPLICATION_OCTET_STREAM;
+        }
+        ContentDisposition disposition = (download ? ContentDisposition.attachment() : ContentDisposition.inline()).filename(name).build();
+        return ResponseEntity.ok().contentType(type).header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .header("X-Content-Type-Options", "nosniff").body(content.content());
+    }
+
     /** F-EXE-10 import d'un rapport : {@code apply=false} pour l'aperçu, {@code createUnknown} crée les tests inconnus. */
     @PostMapping(path = "/campaigns/{campaignKey}/imports", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize(IMPORT)
@@ -136,6 +164,6 @@ public class RunController {
 
     private ResponseEntity<RunDetail> created(String projectKey, String runKey) {
         AutomatedRun run = runs.get(projectKey, runKey);
-        return ResponseEntity.created(URI.create("/api/v1/projects/" + projectKey + "/runs/" + runKey)).body(mapper.detail(run, runs.executionsOf(run)));
+        return ResponseEntity.created(URI.create("/api/v1/projects/" + projectKey + "/runs/" + runKey)).body(mapper.detail(run, runs.executionsOf(run), runs.screenshotsOf(run)));
     }
 }

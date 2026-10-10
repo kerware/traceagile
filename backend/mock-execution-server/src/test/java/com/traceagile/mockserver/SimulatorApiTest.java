@@ -156,4 +156,41 @@ class SimulatorApiTest {
         assertThat(WebhookSender.sign("key", "The quick brown fox jumps over the lazy dog".getBytes(StandardCharsets.UTF_8)))
                 .isEqualTo("sha256=f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8");
     }
+
+    @Test
+    @DisplayName("ADR-0021 artefacts : traces système, JUnit XML, Jest JSON, rapport ; copie d'écran PNG de chaque échec, annoncée dans TEST_FINISHED")
+    void artifacts() throws Exception {
+        String jobId = submit("RUN-20", List.of(test("TC-1", "CartApiTest#add"), test("TC-2", "CartApiTest#total @fail")));
+        JsonNode done = awaitStatus(jobId, "COMPLETED");
+        JsonNode failed = done.get("results").get(4);
+        assertThat(failed.get("event").asText()).isEqualTo("TEST_FINISHED");
+        assertThat(failed.get("artifacts").get(0).get("name").asText()).isEqualTo("screenshot-TC-2.png");
+        assertThat(failed.get("artifacts").get(0).get("kind").asText()).isEqualTo("SCREENSHOT");
+        assertThat(failed.get("artifacts").get(0).get("executionId").asText()).isEqualTo("exec-TC-2");
+        assertThat(done.get("results").get(2).get("artifacts")).isEmpty();
+        JsonNode end = done.get("results").get(5);
+        List<String> jobArtifacts = new ArrayList<>();
+        end.get("artifacts").forEach(a -> jobArtifacts.add(a.get("name").asText()));
+        assertThat(jobArtifacts).containsExactly("system.log", "junit.xml", "jest.json", "report.json");
+
+        mvc.perform(get("/api/v1/jobs/" + jobId + "/artifacts").header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].name", org.hamcrest.Matchers.containsInAnyOrder("screenshot-TC-2.png", "system.log", "junit.xml", "jest.json", "report.json")));
+        String junit = mvc.perform(get("/api/v1/jobs/" + jobId + "/artifacts/junit.xml").header("Authorization", token))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        assertThat(junit).contains("<testcase classname=\"CartApiTest\" name=\"add\"").contains("<failure message=\"AssertionError simulée sur TC-2\"")
+                .contains("<system-out>");
+        JsonNode jest = json.readTree(mvc.perform(get("/api/v1/jobs/" + jobId + "/artifacts/jest.json").header("Authorization", token))
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8));
+        assertThat(jest.get("numFailedTests").asInt()).isEqualTo(1);
+        assertThat(jest.at("/testResults/0/assertionResults/1/status").asText()).isEqualTo("failed");
+        assertThat(jest.at("/testResults/0/assertionResults/1/fullName").asText()).isEqualTo("CartApiTest total @fail");
+        String system = mvc.perform(get("/api/v1/jobs/" + jobId + "/artifacts/system.log").header("Authorization", token))
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+        assertThat(system).contains("[system] agent=").contains("[TC-2] terminé : FAILED").contains("AssertionFailedError");
+        byte[] png = mvc.perform(get("/api/v1/jobs/" + jobId + "/artifacts/screenshot-TC-2.png").header("Authorization", token))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+        assertThat(png).startsWith((byte) 0x89, (byte) 'P', (byte) 'N', (byte) 'G');
+        mvc.perform(get("/api/v1/jobs/" + jobId + "/artifacts/inconnu.txt").header("Authorization", token)).andExpect(status().isNotFound());
+    }
 }

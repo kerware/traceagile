@@ -3,6 +3,7 @@ package com.traceagile.application.automation;
 import com.traceagile.application.audit.AuditService;
 import com.traceagile.application.automation.AutomationRepositories.AutomatedRunRepository;
 import com.traceagile.application.automation.AutomationRepositories.ProcessedWebhookEventRepository;
+import com.traceagile.application.automation.AutomationRepositories.RunArtifactRepository;
 import com.traceagile.application.automation.ExecutionServerClient.JobRequest;
 import com.traceagile.application.automation.ExecutionServerClient.JobTest;
 import com.traceagile.application.automation.ExecutionServerClient.ServerConnection;
@@ -14,6 +15,7 @@ import com.traceagile.domain.audit.AuditAction;
 import com.traceagile.domain.automation.AutomatedRun;
 import com.traceagile.domain.automation.ExecutionServer;
 import com.traceagile.domain.automation.ProcessedWebhookEvent;
+import com.traceagile.domain.automation.RunArtifact;
 import com.traceagile.domain.automation.RunStatus;
 import com.traceagile.domain.campaign.Campaign;
 import com.traceagile.domain.campaign.CampaignItem;
@@ -72,6 +74,7 @@ public class AutomatedRunService {
     private final AutomatedRunRepository runs;
     private final ExecutionRepository executions;
     private final ProcessedWebhookEventRepository processed;
+    private final RunArtifactRepository artifacts;
     private final CampaignService campaigns;
     private final ExecutionServerService servers;
     private final ExecutionServerClient client;
@@ -84,12 +87,14 @@ public class AutomatedRunService {
     private final String callbackUrl;
 
     public AutomatedRunService(AutomatedRunRepository runs, ExecutionRepository executions, ProcessedWebhookEventRepository processed,
+                               RunArtifactRepository artifacts,
                                CampaignService campaigns, ExecutionServerService servers, ExecutionServerClient client, FlakyService flaky,
                                KeyGenerator keys, AuditService audit, ApplicationEventPublisher events, PlatformTransactionManager transactions,
                                Clock clock, @Value("${traceagile.automation.callback-url:http://localhost:8085/api/v1/execution-callbacks}") String callbackUrl) {
         this.runs = runs;
         this.executions = executions;
         this.processed = processed;
+        this.artifacts = artifacts;
         this.campaigns = campaigns;
         this.servers = servers;
         this.client = client;
@@ -299,6 +304,7 @@ public class AutomatedRunService {
             return; // événement tardif d'un run annulé, expiré ou terminé
         }
         Instant at = event.occurredAt() == null ? clock.instant() : event.occurredAt();
+        event.artifacts().forEach(ref -> remember(run, ref));
         switch (event.event()) {
             case "JOB_STARTED" -> run.started(event.agent(), at);
             case "TEST_STARTED" -> execution(run, event.executionId()).ifPresent(e -> {
@@ -329,6 +335,66 @@ public class AutomatedRunService {
             default -> LOG.info("Événement {} ignoré pour le run {}", event.event(), run.getKey());
         }
         publish(run);
+    }
+
+    // ---------------------------------------------------------------- artefacts (ADR-0021)
+
+    /**
+     * ADR-0021 artefacts du run : ceux annoncés par les webhooks, complétés par la liste du serveur
+     * (s'il répond) ; dans l'ordre : copies d'écran, puis traces, résultats et rapports.
+     */
+    @Transactional
+    public List<RunArtifact> artifactsOf(String projectKey, String runKey) {
+        AutomatedRun run = get(projectKey, runKey);
+        if (run.getExternalJobId() != null && run.getServer().isPaired()) {
+            try {
+                client.artifacts(servers.connection(run.getServer()), run.getExternalJobId()).forEach(ref -> remember(run, ref));
+            } catch (RuntimeException e) {
+                LOG.info("Liste des artefacts du run {} indisponible : {}", runKey, e.getMessage());
+            }
+        }
+        return artifacts.findByRun_Id(run.getId()).stream()
+                .sorted(Comparator.comparing((RunArtifact a) -> a.getKind() != RunArtifact.Kind.SCREENSHOT).thenComparing(RunArtifact::getName))
+                .toList();
+    }
+
+    /** ADR-0021 contenu d'un artefact, relu sur le serveur avec le jeton qu'il a émis. */
+    @Transactional(readOnly = true)
+    public ExecutionServerClient.ArtifactContent artifact(String projectKey, String runKey, String name) {
+        AutomatedRun run = get(projectKey, runKey);
+        RunArtifact artifact = artifacts.findByRun_IdAndName(run.getId(), name)
+                .orElseThrow(() -> new NotFoundException("ARTIFACT_NOT_FOUND", "Artefact « " + name + " » inconnu pour le run " + runKey + "."));
+        if (run.getExternalJobId() == null) {
+            throw new NotFoundException("ARTIFACT_NOT_FOUND", "Le run " + runKey + " n'a pas de job sur le serveur.");
+        }
+        try {
+            ExecutionServerClient.ArtifactContent content = client.download(servers.connection(run.getServer()), run.getExternalJobId(), name);
+            return new ExecutionServerClient.ArtifactContent(content.content(),
+                    content.contentType() == null ? artifact.getContentType() : content.contentType());
+        } catch (ExecutionServerClient.UnauthorizedException e) {
+            throw new BusinessRuleException("SERVER_UNAUTHORIZED", "Le serveur refuse le jeton : appairez-le à nouveau.");
+        } catch (ExecutionServerClient.UnavailableException e) {
+            throw new BusinessRuleException("ARTIFACT_UNAVAILABLE", "Artefact indisponible sur le serveur : " + e.getMessage());
+        }
+    }
+
+    /** Copie d'écran d'une tentative (nom de l'artefact), s'il y en a une. */
+    @Transactional(readOnly = true)
+    public Map<UUID, String> screenshotsOf(AutomatedRun run) {
+        Map<UUID, String> byExecution = new LinkedHashMap<>();
+        artifacts.findByRun_Id(run.getId()).stream()
+                .filter(a -> a.getKind() == RunArtifact.Kind.SCREENSHOT && a.getExecution() != null)
+                .forEach(a -> byExecution.putIfAbsent(a.getExecution().getId(), a.getName()));
+        return byExecution;
+    }
+
+    private void remember(AutomatedRun run, RunEvent.ArtifactRef ref) {
+        if (ref.name() == null || ref.name().isBlank() || ref.name().contains("/") || ref.name().contains("..")
+                || artifacts.findByRun_IdAndName(run.getId(), ref.name()).isPresent()) {
+            return;
+        }
+        Execution execution = ref.executionId() == null ? null : execution(run, ref.executionId()).orElse(null);
+        artifacts.save(new RunArtifact(run, execution, ref.name(), ref.type(), RunArtifact.Kind.of(ref.kind(), ref.name()), ref.size()));
     }
 
     private java.util.Optional<Execution> execution(AutomatedRun run, String executionId) {

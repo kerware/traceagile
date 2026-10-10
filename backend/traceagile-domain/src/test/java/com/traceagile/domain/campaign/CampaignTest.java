@@ -8,11 +8,13 @@ import com.traceagile.domain.administration.User;
 import com.traceagile.domain.planning.Sprint;
 import com.traceagile.domain.requirement.Priority;
 import com.traceagile.domain.requirement.RiskLevel;
+import com.traceagile.domain.testcase.DataSet;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestCaseStatus;
 import com.traceagile.domain.testcase.TestTechnique;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -101,5 +103,23 @@ class CampaignTest {
         assertThat(campaign.getStatus()).isEqualTo(CampaignStatus.COMPLETED);
         assertThatThrownBy(() -> campaign.add(ready("TC-1", Priority.MUST), 1)).extracting("code").isEqualTo("CAMPAIGN_CLOSED");
         assertThatThrownBy(campaign::abort).extracting("code").isEqualTo("CAMPAIGN_CLOSED");
+    }
+
+    @Test
+    @DisplayName("ADR-0022 F-CMP-02 un test manuel à jeu de données est sélectionné une fois par ligne de son premier jeu ; sans jeu, une seule fois")
+    void selectWithDataSet() {
+        Campaign campaign = campaign();
+        TestCase cart = ready("TC-7", Priority.MUST);
+        cart.setDataSets(List.of(DataSet.of("Vide", List.of()),
+                DataSet.of("Recette", List.of(Map.of("produit", "Stylo bleu"), Map.of("produit", "Cahier A4"))),
+                DataSet.of("Limites", List.of(Map.of("produit", "")))));
+        TestCase plain = ready("TC-8", Priority.MUST);
+
+        List<CampaignItem> added = campaign.select(cart, 8);
+        assertThat(added).extracting(CampaignItem::getDataSetName).containsExactly("Recette", "Recette");
+        assertThat(added).extracting(CampaignItem::getDataSetRow).containsExactly(0, 1);
+        assertThat(campaign.select(plain, 8)).singleElement().extracting(CampaignItem::getDataSetName).isNull();
+        assertThat(campaign.select(cart, 8)).isEmpty();
+        assertThat(campaign.getItems()).extracting(CampaignItem::getPosition).containsExactly(1, 2, 3);
     }
 }

@@ -1,0 +1,18 @@
+{
+  "numTotalTests": 3,
+  "numPassedTests": 1,
+  "numFailedTests": 1,
+  "numPendingTests": 1,
+  "success": false,
+  "testResults": [
+    {
+      "name": "/app/src/cart/total.test.ts",
+      "status": "failed",
+      "assertionResults": [
+        { "ancestorTitles": ["Panier", "total"], "title": "applique la remise", "fullName": "Panier total applique la remise", "status": "passed", "duration": 12, "failureMessages": [] },
+        { "ancestorTitles": ["Panier", "total"], "title": "livraison gratuite @REQ-12", "fullName": "Panier total livraison gratuite @REQ-12", "status": "failed", "duration": 30, "failureMessages": ["Error: expect(received).toBe(expected)\n\nExpected: 0\nReceived: 4.9"] },
+        { "ancestorTitles": ["Panier"], "title": "code promo expiré", "fullName": "Panier code promo expiré", "status": "pending", "duration": null, "failureMessages": [] }
+      ]
+    }
+  ]
+}

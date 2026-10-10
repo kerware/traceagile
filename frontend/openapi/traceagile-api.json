@@ -2918,7 +2918,7 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "JUNIT", "CUCUMBER", "ROBOT", "PLAYWRIGHT" ]
+            "enum" : [ "JUNIT", "JEST", "CUCUMBER", "ROBOT", "PLAYWRIGHT" ]
           }
         }, {
           "name" : "apply",
@@ -5356,6 +5356,91 @@
               "text/event-stream" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/SseEmitter"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs/{runKey}/artifacts" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "artifacts",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RunArtifactResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs/{runKey}/artifacts/{name}" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "artifact",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "download",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
                 }
               }
             }
@@ -8907,6 +8992,10 @@
           "flaky" : {
             "type" : "boolean",
             "description" : "F-EXE-11 test instable"
+          },
+          "screenshot" : {
+            "type" : "string",
+            "description" : "ADR-0021 copie d'écran de l'échec (nom de l'artefact)"
           }
         },
         "required" : [ "flaky", "id", "itemId", "startedAt", "status", "technique", "test" ]
@@ -10741,6 +10830,30 @@
             "format" : "int64"
           }
         }
+      },
+      "RunArtifactResponse" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "contentType" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "SYSTEM_TRACE", "JUNIT", "JEST", "REPORT", "SCREENSHOT", "OTHER" ]
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "testKey" : {
+            "type" : "string",
+            "description" : "Test concerné (copie d'écran)"
+          }
+        },
+        "required" : [ "contentType", "kind", "name" ]
       },
       "PageResponseRequirementSummary" : {
         "type" : "object",

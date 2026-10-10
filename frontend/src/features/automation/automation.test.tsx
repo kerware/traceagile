@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionServer, RunDetail, ServerChoice } from '../../api/automation';
 import type { CampaignDetail } from '../../api/campaigns';
 import type { Schemas } from '../../api/client';
@@ -41,6 +41,7 @@ describe('§8.5 affichage des runs', () => {
     expect(guessFormat('output.xml')).toBe('ROBOT');
     expect(guessFormat('cucumber-report.json')).toBe('CUCUMBER');
     expect(guessFormat('playwright-results.json')).toBe('PLAYWRIGHT');
+    expect(guessFormat('jest-results.json')).toBe('JEST');
     expect(progressPercent({ total: 4, pending: 1, running: 1, passed: 2, failed: 0, error: 0, skipped: 0 })).toBe(50);
     expect(isFinal('TIMEOUT')).toBe(true);
     expect(isFinal('DISPATCHED')).toBe(false);
@@ -102,6 +103,51 @@ describe('§13.2 /p/:key/runs/:rk — run en temps réel (F-EXE-07), annulation 
     renderRoutes([{ path: '/p/:key/runs/:rk', element: <RunPage /> }], '/p/SHOP/runs/RUN-1');
     await screen.findAllByTestId('run-status');
     expect(screen.queryAllByTestId('run-cancel')).toHaveLength(0);
+  });
+
+  it('ADR-0021 artefacts : copie d’écran du test en échec, traces système, JUnit XML et Jest JSON téléchargeables', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    const createObjectURL = vi.fn(() => 'blob:capture');
+    Object.assign(URL, { createObjectURL, revokeObjectURL: vi.fn() });
+    const save = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    const fetched: string[] = [];
+    server.use(
+      http.get(`${P}/runs/RUN-1`, () =>
+        HttpResponse.json(run({ status: 'COMPLETED', counts: { ...counts, running: 0, failed: 1 } },
+          [execution('TC-1', 'PASSED'), execution('TC-2', 'FAILED', { screenshot: 'screenshot-TC-2.png' })])),
+      ),
+      http.get(`${P}/runs/RUN-1/artifacts`, () =>
+        HttpResponse.json([
+          { name: 'junit.xml', contentType: 'application/xml', kind: 'JUNIT', size: 1242 },
+          { name: 'system.log', contentType: 'text/plain', kind: 'SYSTEM_TRACE', size: 512 },
+          { name: 'screenshot-TC-2.png', contentType: 'image/png', kind: 'SCREENSHOT', size: 3198, testKey: 'TC-2' },
+          { name: 'jest.json', contentType: 'application/json', kind: 'JEST', size: 900 },
+        ]),
+      ),
+      http.get(`${P}/runs/RUN-1/artifacts/:name`, ({ params, request }) => {
+        fetched.push(`${String(params.name)}?${new URL(request.url).searchParams.get('download')}`);
+        return new HttpResponse(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), { headers: { 'Content-Type': 'image/png' } });
+      }),
+    );
+    renderRoutes([{ path: '/p/:key/runs/:rk', element: <RunPage /> }], '/p/SHOP/runs/RUN-1');
+
+    const card = await screen.findByTestId('run-artifact-system.log');
+    const rows = within(screen.getByTestId('run-artifacts')).getAllByRole('row');
+    expect(rows.map((r) => r.getAttribute('data-testid'))).toEqual([
+      'run-artifact-screenshot-TC-2.png', 'run-artifact-system.log', 'run-artifact-junit.xml', 'run-artifact-jest.json',
+    ]);
+    expect(card).toHaveTextContent('Traces système');
+    expect(screen.getByTestId('run-artifact-screenshot-TC-2.png')).toHaveTextContent('TC-2');
+    expect(screen.queryByTestId('run-screenshot-TC-1')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('run-screenshot-TC-2'));
+    expect(await screen.findByTestId('screenshot-image')).toHaveAttribute('src', 'blob:capture');
+    expect(fetched).toEqual(['screenshot-TC-2.png?false']);
+
+    await userEvent.click(screen.getByTestId('run-artifact-download-junit.xml'));
+    await waitFor(() => expect(fetched).toContain('junit.xml?true'));
+    await waitFor(() => expect(save).toHaveBeenCalled());
+    save.mockRestore();
   });
 });
 

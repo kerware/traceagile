@@ -2,6 +2,7 @@ package com.traceagile.mockserver;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,11 @@ public class Job {
     private volatile boolean cancelled;
     private volatile Instant startedAt;
     private volatile Instant endedAt;
-    private volatile String report;
+    private final Map<String, Artifact> artifacts = new LinkedHashMap<>();
+
+    /** ADR-0021 artefact produit par le job. */
+    public record Artifact(String name, String type, String kind, String executionId, byte[] content) {
+    }
 
     public Job(String jobId, String tokenId, Map<String, Object> request) {
         this.jobId = jobId;
@@ -98,11 +103,17 @@ public class Job {
         this.endedAt = endedAt;
     }
 
-    public String report() {
-        return report;
+    public synchronized Artifact store(String name, String type, String kind, String executionId, byte[] content) {
+        Artifact artifact = new Artifact(name, type, kind, executionId, content);
+        artifacts.put(name, artifact);
+        return artifact;
     }
 
-    public void report(String report) {
-        this.report = report;
+    public synchronized Artifact artifact(String name) {
+        return artifacts.get(name);
+    }
+
+    public synchronized List<Artifact> artifacts() {
+        return List.copyOf(artifacts.values());
     }
 }

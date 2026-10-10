@@ -3,6 +3,7 @@ package com.traceagile.application.automation;
 import com.traceagile.domain.automation.AutomatedRun;
 import com.traceagile.domain.automation.ExecutionServer;
 import com.traceagile.domain.automation.ProcessedWebhookEvent;
+import com.traceagile.domain.automation.RunArtifact;
 import com.traceagile.domain.automation.RunStatus;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +44,15 @@ public final class AutomationRepositories {
         boolean existsByServer_Id(UUID serverId);
 
         AutomatedRun save(AutomatedRun run);
+    }
+
+    public interface RunArtifactRepository {
+
+        List<RunArtifact> findByRun_Id(UUID runId);
+
+        Optional<RunArtifact> findByRun_IdAndName(UUID runId, String name);
+
+        RunArtifact save(RunArtifact artifact);
     }
 
     public interface ProcessedWebhookEventRepository {

@@ -93,14 +93,28 @@ public class JobController {
         return job == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).body("Job inconnu") : ResponseEntity.ok(job.logs());
     }
 
-    @GetMapping("/jobs/{jobId}/artifacts/{name}")
-    public ResponseEntity<String> artifact(@PathVariable String jobId, @PathVariable String name,
+    /** ADR-0021 artefacts du job : traces système, JUnit XML, Jest JSON, rapport, copies d'écran. */
+    @GetMapping("/jobs/{jobId}/artifacts")
+    public ResponseEntity<List<Map<String, Object>>> artifacts(@PathVariable String jobId, @RequestAttribute(SecurityFilter.TOKEN_ATTRIBUTE) TokenRecord token,
+                                                               HttpServletRequest http) {
+        Job job = owned(jobId, token);
+        if (job == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        String baseUrl = ServletUriComponentsBuilder.fromContextPath(http).build().toUriString();
+        return ResponseEntity.ok(job.artifacts().stream().map(a -> JobRunner.describe(job, a, baseUrl)).toList());
+    }
+
+    @GetMapping("/jobs/{jobId}/artifacts/{name:.+}")
+    public ResponseEntity<byte[]> artifact(@PathVariable String jobId, @PathVariable String name,
                                            @RequestAttribute(SecurityFilter.TOKEN_ATTRIBUTE) TokenRecord token) {
         Job job = owned(jobId, token);
-        if (job == null || !name.equals("report.json") || job.report() == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"code\":\"ARTIFACT_NOT_FOUND\"}");
+        Job.Artifact artifact = job == null ? null : job.artifact(name);
+        if (artifact == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"code\":\"ARTIFACT_NOT_FOUND\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(job.report());
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(artifact.type())).body(artifact.content());
     }
 
     /** Un jeton ne voit que ses propres jobs. */

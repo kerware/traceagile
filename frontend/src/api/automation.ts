@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { campaignKeys } from './campaigns';
 import { api, authorizedFetch, type Schemas } from './client';
-import { unwrap } from './errors';
+import { ApiError, unwrap, type Problem } from './errors';
 import { requirementKeys } from './requirements';
 import { testKeys } from './testcases';
 import { traceKeys } from './traceability';
@@ -17,7 +17,9 @@ export type RunDetail = Schemas['RunDetail'];
 export type RunExecution = Schemas['RunExecutionResponse'];
 export type RunStatus = RunSummary['status'];
 export type ReportImport = Schemas['ReportImportResponse'];
-export type ReportFormat = 'JUNIT' | 'CUCUMBER' | 'ROBOT' | 'PLAYWRIGHT';
+export type ReportFormat = 'JUNIT' | 'JEST' | 'CUCUMBER' | 'ROBOT' | 'PLAYWRIGHT';
+export type RunArtifact = Schemas['RunArtifactResponse'];
+export type ArtifactKind = RunArtifact['kind'];
 
 export const automationKeys = {
   servers: ['execution-servers'] as const,
@@ -26,6 +28,8 @@ export const automationKeys = {
   campaign: (project: string, campaignKey: string) => ['runs', project, 'campaign', campaignKey] as const,
   run: (project: string, runKey: string) => ['runs', project, 'run', runKey] as const,
   logs: (project: string, runKey: string) => ['runs', project, 'logs', runKey] as const,
+  artifacts: (project: string, runKey: string) => ['runs', project, 'artifacts', runKey] as const,
+  artifact: (project: string, runKey: string, name: string) => ['runs', project, 'artifact', runKey, name] as const,
 };
 
 /** Un résultat change la campagne, la couverture, les exigences et les tests (instables). */
@@ -154,6 +158,68 @@ export function useRunLogs(project: string, runKey: string, enabled: boolean) {
       return response.ok ? response.text() : '';
     },
   });
+}
+
+/** ADR-0021 artefacts du run : copies d'écran des échecs, traces système, JUnit XML, Jest JSON, rapport. */
+export function useRunArtifacts(project: string, runKey: string, refreshKey?: string) {
+  return useQuery({
+    queryKey: [...automationKeys.artifacts(project, runKey), refreshKey ?? ''],
+    queryFn: async () =>
+      unwrap(await api.GET('/api/v1/projects/{projectKey}/runs/{runKey}/artifacts', { params: { path: { projectKey: project, runKey } } })),
+  });
+}
+
+function artifactPath(project: string, runKey: string, name: string, download: boolean) {
+  return `/api/v1/projects/${project}/runs/${runKey}/artifacts/${encodeURIComponent(name)}?download=${download}`;
+}
+
+/** ADR-0021 contenu d'un artefact (le jeton Bearer passe en en-tête : pas de simple lien). */
+export async function fetchArtifact(project: string, runKey: string, name: string, download = false): Promise<Blob> {
+  const response = await authorizedFetch(artifactPath(project, runKey, name, download));
+  if (!response.ok) {
+    let problem: unknown = undefined;
+    try {
+      problem = await response.json();
+    } catch {
+      // corps vide ou non JSON
+    }
+    throw new ApiError(response.status, problem as Problem | undefined);
+  }
+  return response.blob();
+}
+
+/** ADR-0021 enregistre un artefact sous son nom. */
+export async function downloadArtifact(project: string, runKey: string, name: string) {
+  const blob = await fetchArtifact(project, runKey, name, true);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+}
+
+/** ADR-0021 copie d'écran affichée dans l'interface : URL d'objet libérée au démontage. */
+export function useArtifactImage(project: string, runKey: string, name: string | null) {
+  const query = useQuery({
+    queryKey: automationKeys.artifact(project, runKey, name ?? ''),
+    enabled: !!name,
+    staleTime: Infinity,
+    queryFn: async () => fetchArtifact(project, runKey, name as string),
+  });
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!query.data) return;
+    const objectUrl = URL.createObjectURL(query.data);
+    setUrl(objectUrl);
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+      setUrl(null);
+    };
+  }, [query.data]);
+  return { url, isLoading: query.isLoading, error: query.error };
 }
 
 /** F-EXE-10 import d'un rapport : aperçu ({@code apply} faux) ou application. */

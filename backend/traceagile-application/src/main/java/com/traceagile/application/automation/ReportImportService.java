@@ -54,9 +54,9 @@ public class ReportImportService {
     public record ImportResult(List<ImportLine> lines, List<String> created, int recorded, boolean applied) {
     }
 
-    private static final Map<ReportFormat, TestTechnique> TECHNIQUE = Map.of(ReportFormat.JUNIT, TestTechnique.UNIT,
+    private static final Map<ReportFormat, TestTechnique> TECHNIQUE = Map.of(ReportFormat.JUNIT, TestTechnique.UNIT, ReportFormat.JEST, TestTechnique.UNIT,
             ReportFormat.CUCUMBER, TestTechnique.BDD, ReportFormat.ROBOT, TestTechnique.KEYWORD, ReportFormat.PLAYWRIGHT, TestTechnique.UI);
-    private static final Map<ReportFormat, String> FRAMEWORK = Map.of(ReportFormat.JUNIT, "JUnit 5", ReportFormat.CUCUMBER, "Cucumber-JVM",
+    private static final Map<ReportFormat, String> FRAMEWORK = Map.of(ReportFormat.JUNIT, "JUnit 5", ReportFormat.JEST, "Jest", ReportFormat.CUCUMBER, "Cucumber-JVM",
             ReportFormat.ROBOT, "Robot Framework", ReportFormat.PLAYWRIGHT, "Playwright");
 
     private final ReportParser parser;

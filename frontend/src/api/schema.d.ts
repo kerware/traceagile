@@ -1605,6 +1605,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/runs/{runKey}/artifacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["artifacts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/runs/{runKey}/artifacts/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["artifact"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}": {
         parameters: {
             query?: never;
@@ -2981,6 +3013,8 @@ export interface components {
             message?: string;
             /** @description F-EXE-11 test instable */
             flaky: boolean;
+            /** @description ADR-0021 copie d'écran de l'échec (nom de l'artefact) */
+            screenshot?: string;
         };
         RunSummaryResponse: {
             key: string;
@@ -3628,6 +3662,16 @@ export interface components {
         SseEmitter: {
             /** Format: int64 */
             timeout?: number | null;
+        };
+        RunArtifactResponse: {
+            name: string;
+            contentType: string;
+            /** @enum {string} */
+            kind: "SYSTEM_TRACE" | "JUNIT" | "JEST" | "REPORT" | "SCREENSHOT" | "OTHER";
+            /** Format: int64 */
+            size?: number;
+            /** @description Test concerné (copie d'écran) */
+            testKey?: string;
         };
         PageResponseRequirementSummary: {
             content: components["schemas"]["RequirementSummary"][];
@@ -5700,7 +5744,7 @@ export interface operations {
     importReport: {
         parameters: {
             query: {
-                format: "JUNIT" | "CUCUMBER" | "ROBOT" | "PLAYWRIGHT";
+                format: "JUNIT" | "JEST" | "CUCUMBER" | "ROBOT" | "PLAYWRIGHT";
                 apply?: boolean;
                 createUnknown?: boolean;
             };
@@ -7317,6 +7361,55 @@ export interface operations {
                 };
                 content: {
                     "text/event-stream": components["schemas"]["SseEmitter"];
+                };
+            };
+        };
+    };
+    artifacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunArtifactResponse"][];
+                };
+            };
+        };
+    };
+    artifact: {
+        parameters: {
+            query?: {
+                download?: boolean;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
                 };
             };
         };

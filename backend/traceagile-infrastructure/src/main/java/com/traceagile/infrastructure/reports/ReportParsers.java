@@ -24,7 +24,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * F-EXE-10 lecture des rapports (ADR-0020). JUnit : un résultat par {@code testcase}, identifiants
+ * F-EXE-10 lecture des rapports (ADR-0020, ADR-0021). Jest : un résultat par assertion, identifiants
+ * « fullName », « describe › titre », « describe#titre ». JUnit : un résultat par {@code testcase}, identifiants
  * « Classe#méthode » ; Cucumber : un par scénario, identifiant = nom ; Robot : un par {@code test} ;
  * Playwright : un par spec, dernière tentative retenue. Le XML est lu sans DTD ni entité externe.
  */
@@ -40,6 +41,7 @@ public class ReportParsers implements ReportParser {
         try {
             List<ReportResult> results = switch (format) {
                 case JUNIT -> junit(xml(content));
+                case JEST -> jest(JSON.readTree(content));
                 case CUCUMBER -> cucumber(JSON.readTree(content));
                 case ROBOT -> robot(xml(content));
                 case PLAYWRIGHT -> playwright(JSON.readTree(content));
@@ -89,6 +91,51 @@ public class ReportParsers implements ReportParser {
                 status = ExecutionStatus.SKIPPED;
             }
             results.add(new ReportResult(name, List.copyOf(ids), status, seconds(tc.getAttribute("time")), message, List.of()));
+        }
+        return results;
+    }
+
+    // ---------------------------------------------------------------- Jest JSON (jest --json)
+
+    private static List<ReportResult> jest(JsonNode root) {
+        if (!root.has("testResults")) {
+            throw new IllegalArgumentException("« testResults » attendu");
+        }
+        List<ReportResult> results = new ArrayList<>();
+        for (JsonNode file : root.path("testResults")) {
+            String path = file.path("name").asText();
+            String fileName = path.substring(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1);
+            for (JsonNode a : file.path("assertionResults")) {
+                String title = a.path("title").asText();
+                List<String> ancestors = new ArrayList<>();
+                a.path("ancestorTitles").forEach(t -> ancestors.add(t.asText()));
+                String fullName = a.hasNonNull("fullName") ? a.get("fullName").asText() : String.join(" ", ancestors) + " " + title;
+                LinkedHashSet<String> ids = new LinkedHashSet<>();
+                ids.add(fullName);
+                if (!ancestors.isEmpty()) {
+                    ids.add(String.join(" › ", ancestors) + " › " + title);
+                    ids.add(ancestors.getLast() + "#" + title);
+                }
+                if (!fileName.isEmpty()) {
+                    ids.add(fileName + " › " + fullName);
+                }
+                ids.add(title);
+                ExecutionStatus status = switch (a.path("status").asText()) {
+                    case "passed" -> ExecutionStatus.PASSED;
+                    case "failed" -> ExecutionStatus.FAILED;
+                    case "pending", "skipped", "todo", "disabled" -> ExecutionStatus.SKIPPED;
+                    default -> ExecutionStatus.ERROR;
+                };
+                List<String> messages = new ArrayList<>();
+                a.path("failureMessages").forEach(m -> messages.add(m.asText()));
+                List<String> tags = new ArrayList<>();
+                Matcher inTitle = TAG_IN_TITLE.matcher(title);
+                while (inTitle.find()) {
+                    tags.add(inTitle.group());
+                }
+                results.add(new ReportResult(title, List.copyOf(ids), status, a.hasNonNull("duration") ? a.get("duration").asLong() : null,
+                        messages.isEmpty() ? null : String.join("\n", messages), tags));
+            }
         }
         return results;
     }

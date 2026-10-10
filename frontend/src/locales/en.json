@@ -1208,6 +1208,7 @@
   },
   "reportFormat": {
     "JUNIT": "JUnit XML",
+    "JEST": "Jest JSON",
     "CUCUMBER": "Cucumber JSON",
     "ROBOT": "Robot output.xml",
     "PLAYWRIGHT": "Playwright JSON"
@@ -1257,7 +1258,12 @@
     "timeout": "Timeout (minutes)",
     "timeoutHint": "Without news beyond this delay + 5 min, the run times out.",
     "launch_one": "Run {{count}} test",
-    "launch_other": "Run {{count}} tests"
+    "launch_other": "Run {{count}} tests",
+    "noArtifacts": "No artifacts yet.",
+    "showScreenshot": "Show screenshot",
+    "download": "Download",
+    "screenshot": "Screenshot",
+    "screenshotOf": "Screenshot {{name}}"
   },
   "import": {
     "action": "Import results",
@@ -1309,5 +1315,13 @@
     "tokenId": "Token id (optional)",
     "pairSubmit": "Pair",
     "pairedDone": "{{name}} paired"
+  },
+  "artifactKind": {
+    "SCREENSHOT": "Screenshot",
+    "SYSTEM_TRACE": "System traces",
+    "JUNIT": "JUnit XML",
+    "JEST": "Jest JSON",
+    "REPORT": "Report",
+    "OTHER": "Other"
   }
 }

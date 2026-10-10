@@ -193,6 +193,15 @@ class DemoDataTest extends AbstractApiTest {
             });
         }
         assertThat(campaigns.get("SHOP", "CMP-3").getStatus()).isEqualTo(CampaignStatus.PLANNED);
+        // ADR-0022 un test manuel à jeu de données (« Ajouter un produit au panier »…) n'est jamais prévu sans ligne du jeu
+        for (String key : List.of("CMP-1", "CMP-2", "CMP-3")) {
+            assertThat(campaigns.get("SHOP", key).getItems()).as(key)
+                    .filteredOn(i -> i.getTestCase().getKind() == com.traceagile.domain.testcase.TestKind.MANUAL && !i.getTestCase().getDataSets().isEmpty())
+                    .allSatisfy(i -> assertThat(i.getDataSetName()).isEqualTo("Recette"));
+        }
+        assertThat(java.util.stream.Stream.of("CMP-1", "CMP-2", "CMP-3").flatMap(k -> campaigns.get("SHOP", k).getItems().stream())
+                .filter(i -> i.getTestCase().getTitle().equals("Ajouter un produit au panier")).map(i -> i.getDataSetRow()))
+                .isNotEmpty().containsOnly(0, 1);
         List<Defect> allDefects = defectService.list("SHOP", new DefectService.DefectFilter(null, null, null, null));
         assertThat(allDefects).hasSize(6);
         assertThat(allDefects).extracting(Defect::getSeverity).contains(DefectSeverity.BLOCKER, DefectSeverity.CRITICAL,

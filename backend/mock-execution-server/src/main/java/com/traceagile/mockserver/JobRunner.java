@@ -2,6 +2,7 @@ package com.traceagile.mockserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -63,6 +64,14 @@ public class JobRunner {
         emit(job, event(job, "JOB_STARTED", Map.of("agent", agent, "startedAt", job.startedAt().toString())));
         Map<String, Integer> counts = new LinkedHashMap<>(Map.of("total", 0, "passed", 0, "failed", 0, "error", 0, "skipped", 0));
         List<Map<String, Object>> results = new ArrayList<>();
+        List<ResultFormats.TestResult> formatted = new ArrayList<>();
+        StringBuilder system = new StringBuilder();
+        system.append(Instant.now()).append(" [system] agent=").append(agent).append(" os=").append(System.getProperty("os.name"))
+                .append(' ').append(System.getProperty("os.arch")).append(" java=").append(System.getProperty("java.version"))
+                .append(" processeurs=").append(Runtime.getRuntime().availableProcessors()).append('\n');
+        system.append(Instant.now()).append(" [system] run=").append(job.runId()).append(" projet=").append(job.request().get("project"))
+                .append(" environnement=").append(job.request().get("environment")).append(" build=").append(job.request().get("buildVersion"))
+                .append(" dépôt=").append(job.request().get("repository")).append('\n');
         for (Map<String, Object> test : job.tests()) {
             if (job.cancelled()) {
                 break;
@@ -71,6 +80,9 @@ public class JobRunner {
             String key = String.valueOf(test.get("testKey"));
             emit(job, event(job, "TEST_STARTED", Map.of("executionId", executionId, "startedAt", Instant.now().toString())));
             job.log(key + " démarré (" + test.get("technique") + ", " + test.getOrDefault("testIdentifier", "") + ")");
+            List<String> trace = new ArrayList<>();
+            trace.add(Instant.now() + " [" + key + "] démarrage sur " + agent + " (" + test.get("framework") + ")");
+            trace.add(Instant.now() + " [" + key + "] mémoire libre " + Runtime.getRuntime().freeMemory() / 1_048_576 + " Mo");
             long duration = pause();
             if (job.cancelled()) {
                 break;
@@ -89,8 +101,22 @@ public class JobRunner {
             finished.put("metrics", "PERFORMANCE".equals(test.get("technique"))
                     ? Map.of("p95Ms", 300 + ThreadLocalRandom.current().nextInt(700), "throughputRps", 50 + ThreadLocalRandom.current().nextInt(150))
                     : Map.of());
-            finished.put("artifacts", List.of(Map.of("name", "report.json", "type", "application/json",
-                    "url", baseUrl + "/api/v1/jobs/" + job.jobId() + "/artifacts/report.json")));
+            trace.add(Instant.now() + " [" + key + "] terminé : " + status + " en " + duration + " ms");
+            List<Map<String, Object>> testArtifacts = new ArrayList<>();
+            if (status.equals("FAILED") || status.equals("ERROR")) {
+                // ADR-0021 copie d'écran au moment de l'échec
+                Job.Artifact screenshot = job.store("screenshot-" + key + ".png", "image/png", "SCREENSHOT", executionId,
+                        Screenshots.failure(key, status.equals("ERROR")));
+                testArtifacts.add(describe(job, screenshot, baseUrl));
+                trace.add(Instant.now() + " [" + key + "] capture d'écran " + screenshot.name());
+            }
+            finished.put("artifacts", testArtifacts);
+            system.append(String.join("\n", trace)).append('\n');
+            if (finished.get("stackTrace") != null) {
+                system.append(finished.get("stackTrace")).append('\n');
+            }
+            formatted.add(new ResultFormats.TestResult(key, String.valueOf(test.getOrDefault("testIdentifier", "")), String.valueOf(test.get("technique")),
+                    status, duration, (String) finished.get("message"), (String) finished.get("stackTrace"), trace));
             emit(job, event(job, "TEST_FINISHED", finished));
             job.log(key + " terminé : " + status + " en " + duration + " ms");
             results.add(Map.of("testKey", key, "status", status, "durationMs", duration));
@@ -103,13 +129,21 @@ public class JobRunner {
             }, 1, Integer::sum);
         }
         job.endedAt(Instant.now());
-        job.report(toJson(Map.of("jobId", job.jobId(), "runId", job.runId(), "summary", counts, "results", results)));
+        system.append(job.endedAt()).append(" [system] fin du job ").append(job.jobId()).append(" : ").append(counts).append('\n');
+        // ADR-0021 traces système, résultats JUnit XML et Jest JSON, synthèse
+        List<Map<String, Object>> jobArtifacts = new ArrayList<>();
+        jobArtifacts.add(describe(job, job.store("system.log", "text/plain", "SYSTEM_TRACE", null, system.toString().getBytes(StandardCharsets.UTF_8)), baseUrl));
+        jobArtifacts.add(describe(job, job.store("junit.xml", "application/xml", "JUNIT", null,
+                ResultFormats.junit(job.runId(), formatted, job.startedAt()).getBytes(StandardCharsets.UTF_8)), baseUrl));
+        jobArtifacts.add(describe(job, job.store("jest.json", "application/json", "JEST", null,
+                ResultFormats.jest(json, formatted, job.startedAt()).getBytes(StandardCharsets.UTF_8)), baseUrl));
+        jobArtifacts.add(describe(job, job.store("report.json", "application/json", "REPORT", null,
+                toJson(Map.of("jobId", job.jobId(), "runId", job.runId(), "summary", counts, "results", results)).getBytes(StandardCharsets.UTF_8)), baseUrl));
         if (job.cancelled()) {
             job.status("CANCELLED");
             job.log("Job annulé");
             return;
         }
-        job.status("COMPLETED");
         job.log("Job terminé : " + counts);
         Map<String, Object> end = new LinkedHashMap<>();
         end.put("status", "COMPLETED");
@@ -117,7 +151,26 @@ public class JobRunner {
         end.put("summary", counts);
         end.put("reportUrl", baseUrl + "/api/v1/jobs/" + job.jobId() + "/artifacts/report.json");
         end.put("logsUrl", baseUrl + "/api/v1/jobs/" + job.jobId() + "/logs");
-        emit(job, event(job, "JOB_FINISHED", end));
+        end.put("artifacts", jobArtifacts);
+        // JOB_FINISHED est visible au plus tard quand le job passe à COMPLETED (lecture par polling)
+        Map<String, Object> finished = event(job, "JOB_FINISHED", end);
+        job.record(finished);
+        job.status("COMPLETED");
+        tokens.byId(job.tokenId()).ifPresent(token -> webhooks.send(job.callbackUrl(), token.webhookSecret(), finished));
+    }
+
+    /** ADR-0021 description d'un artefact (liste, événements). */
+    static Map<String, Object> describe(Job job, Job.Artifact artifact, String baseUrl) {
+        Map<String, Object> description = new LinkedHashMap<>();
+        description.put("name", artifact.name());
+        description.put("type", artifact.type());
+        description.put("kind", artifact.kind());
+        description.put("size", artifact.content().length);
+        if (artifact.executionId() != null) {
+            description.put("executionId", artifact.executionId());
+        }
+        description.put("url", baseUrl + "/api/v1/jobs/" + job.jobId() + "/artifacts/" + artifact.name());
+        return description;
     }
 
     /** BDD : statut par étape du Gherkin (la dernière échoue en cas d'échec). */

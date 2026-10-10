@@ -130,15 +130,38 @@ paths:
           content:
             text/plain:
               schema: { type: string }
+  /api/v1/jobs/{jobId}/artifacts:
+    get:
+      summary: Artefacts du job (ADR-0021)
+      description: |
+        Artefacts disponibles, au fur et à mesure du job. Noms normalisés :
+        - `system.log` : traces système de l'agent (environnement, versions, horodatages, traces d'erreur) ;
+        - `junit.xml` : résultats au format JUnit XML (un testcase par test, system-out / system-err) ;
+        - `jest.json` : résultats au format Jest JSON (`jest --json`) ;
+        - `report.json` : synthèse du serveur ;
+        - `screenshot-<testKey>.png` : copie d'écran au moment de l'échec d'un test (FAILED ou ERROR).
+        Les formats de résultats et les traces sont produits à la fin du job ; une copie d'écran l'est
+        dès la fin du test, et figure aussi dans son événement TEST_FINISHED.
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Artifact' }
+        '404': { description: Job inconnu }
   /api/v1/jobs/{jobId}/artifacts/{name}:
     get:
-      summary: Rapports, captures, vidéos
+      summary: Contenu d'un artefact (traces, JUnit XML, Jest JSON, copie d'écran…)
       parameters:
         - { name: jobId, in: path, required: true, schema: { type: string } }
         - { name: name, in: path, required: true, schema: { type: string } }
       responses:
         '200':
-          description: Contenu de l'artefact
+          description: Contenu, avec son type (text/plain, application/xml, application/json, image/png…)
           content:
             application/octet-stream:
               schema: { type: string, format: binary }
@@ -246,6 +269,16 @@ components:
         results:
           type: array
           items: { $ref: '#/components/schemas/WebhookEvent' }
+    Artifact:
+      type: object
+      required: [name, type]
+      properties:
+        name: { type: string, example: screenshot-TC-45.png }
+        type: { type: string, description: Type MIME, example: image/png }
+        size: { type: integer, format: int64 }
+        kind: { type: string, enum: [SYSTEM_TRACE, JUNIT, JEST, REPORT, SCREENSHOT, OTHER] }
+        executionId: { type: string, description: Test concerné (copie d'écran) }
+        url: { type: string, description: Adresse de téléchargement sur le serveur (jeton Bearer requis) }
     WebhookEvent:
       description: |
         Corps des webhooks envoyés en POST sur callbackUrl (§10.4), signés par X-TraceAgile-Signature.
@@ -277,13 +310,9 @@ components:
               status: { type: string }
         metrics: { type: object, additionalProperties: { type: number } }
         artifacts:
+          description: TEST_FINISHED (copie d'écran d'un échec) et JOB_FINISHED (traces, JUnit, Jest, rapport)
           type: array
-          items:
-            type: object
-            properties:
-              name: { type: string }
-              type: { type: string }
-              url: { type: string }
+          items: { $ref: '#/components/schemas/Artifact' }
         summary:
           type: object
           properties:

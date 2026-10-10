@@ -47,14 +47,12 @@ test('Jeu de données en campagne, appel de cas de test, dossiers de campagnes',
     await expect(page.getByTestId('campaign-folder-path')).toHaveText(`${dossier} › Paiement`);
   });
 
-  await test.step('Il sélectionne le test et le décline sur les deux lignes du jeu « Clients »', async () => {
+  await test.step('Il sélectionne le test : il est décliné d’office sur les deux lignes du jeu « Clients » (ADR-0022)', async () => {
     await page.getByTestId('selection-strategy').click();
     await page.getByRole('option', { name: 'Sélection manuelle' }).click();
     await page.getByTestId('selection-tests').fill(appelant.key);
     await page.getByRole('option', { name: new RegExp(`^${appelant.key} —`) }).click();
     await page.getByTestId('selection-submit').click();
-    await page.getByTestId(`item-expand-${appelant.key}`).click();
-    await page.getByTestId('expand-Clients').click();
     await expect(page.getByTestId(`item-${appelant.key}-1`)).toBeVisible();
     await expect(page.getByTestId(`item-${appelant.key}-2`)).toBeVisible();
   });

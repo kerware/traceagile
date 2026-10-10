@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
+import com.traceagile.application.automation.ExecutionServerClient;
 import com.traceagile.application.automation.ExecutionServerClient.Capabilities;
 import com.traceagile.application.automation.ExecutionServerClient.IssuedToken;
 import com.traceagile.application.automation.ExecutionServerClient.JobRequest;
@@ -118,5 +119,26 @@ class HttpExecutionServerClientTest {
         assertThat(events).extracting(RunEvent::event).containsExactly("TEST_FINISHED", "JOB_FINISHED");
         assertThat(events.getFirst().durationMs()).isEqualTo(800L);
         assertThat(events.get(1).summary().failed()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("ADR-0021 artefacts : liste du job, téléchargement avec le jeton (type MIME conservé), artefact inconnu")
+    void artifacts() {
+        server.stubFor(get("/api/v1/jobs/job-42/artifacts").withHeader("Authorization", equalTo("Bearer ets_jeton")).willReturn(okJson("""
+                [{"name":"screenshot-TC-2.png","type":"image/png","kind":"SCREENSHOT","size":3198,"executionId":"8f1c"},
+                 {"name":"junit.xml","type":"application/xml","kind":"JUNIT","size":1242}]""")));
+        byte[] png = {(byte) 0x89, 'P', 'N', 'G'};
+        server.stubFor(get("/api/v1/jobs/job-42/artifacts/screenshot-TC-2.png").withHeader("Authorization", equalTo("Bearer ets_jeton"))
+                .willReturn(aResponse().withHeader("Content-Type", "image/png").withBody(png)));
+        server.stubFor(get("/api/v1/jobs/job-42/artifacts/absent.txt").willReturn(aResponse().withStatus(404)));
+
+        List<RunEvent.ArtifactRef> artifacts = client.artifacts(connection, "job-42");
+        assertThat(artifacts).containsExactly(new RunEvent.ArtifactRef("screenshot-TC-2.png", "image/png", "SCREENSHOT", 3198L, "8f1c"),
+                new RunEvent.ArtifactRef("junit.xml", "application/xml", "JUNIT", 1242L, null));
+        ExecutionServerClient.ArtifactContent content = client.download(connection, "job-42", "screenshot-TC-2.png");
+        assertThat(content.contentType()).isEqualTo("image/png");
+        assertThat(content.content()).isEqualTo(png);
+        assertThatThrownBy(() -> client.download(connection, "job-42", "absent.txt"))
+                .isInstanceOf(ExecutionServerClient.UnavailableException.class);
     }
 }

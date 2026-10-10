@@ -42,7 +42,8 @@ class ContractTest {
         List<String> implemented = new ArrayList<>();
         mappings.getHandlerMethods().keySet().forEach(info -> {
             Set<String> patterns = info.getPatternValues();
-            info.getMethodsCondition().getMethods().forEach(m -> patterns.forEach(p -> implemented.add(m.name() + " " + p)));
+            // « {name:.+} » (expression régulière Spring) correspond à « {name} » du contrat
+            info.getMethodsCondition().getMethods().forEach(m -> patterns.forEach(p -> implemented.add(m.name() + " " + p.replaceAll("\\{(\\w+):[^}]+}", "{$1}"))));
         });
         assertThat(expected).hasSizeGreaterThanOrEqualTo(10);
         assertThat(implemented).containsAll(expected);

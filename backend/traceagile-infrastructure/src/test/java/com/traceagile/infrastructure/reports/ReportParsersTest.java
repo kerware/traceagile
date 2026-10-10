@@ -38,6 +38,19 @@ class ReportParsersTest {
     }
 
     @Test
+    @DisplayName("ADR-0021 Jest JSON : un résultat par assertion, identifiants « fullName » / « describe › titre », pending = ignoré, tag d'exigence dans le titre")
+    void jest() throws IOException {
+        List<ReportResult> results = parsers.parse(ReportFormat.JEST, sample("jest.json"));
+        assertThat(results).extracting(ReportResult::status).containsExactly(ExecutionStatus.PASSED, ExecutionStatus.FAILED, ExecutionStatus.SKIPPED);
+        assertThat(results.getFirst().identifiers()).containsExactly("Panier total applique la remise", "Panier › total › applique la remise",
+                "total#applique la remise", "total.test.ts › Panier total applique la remise", "applique la remise");
+        assertThat(results.getFirst().durationMs()).isEqualTo(12L);
+        assertThat(results.get(1).message()).startsWith("Error: expect(received).toBe(expected)");
+        assertThat(results.get(1).requirementKeys()).containsExactly("REQ-12");
+        assertThat(results.get(2).durationMs()).isNull();
+    }
+
+    @Test
     @DisplayName("F-EXE-10 Cucumber JSON : un résultat par scénario (identifiant = nom), tags d'exigence, durée en nanosecondes")
     void cucumber() throws IOException {
         List<ReportResult> results = parsers.parse(ReportFormat.CUCUMBER, sample("cucumber.json"));

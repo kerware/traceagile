@@ -294,7 +294,8 @@ public class CampaignService {
     /**
      * F-CMP-02 ajoute les tests trouvés par la stratégie (cumulable avec les sélections précédentes).
      * Seuls les tests READY sont retenus ; les autres sont signalés. Les nouveaux tests arrivent en
-     * fin de campagne, triés par score de risque (F-CMP-03).
+     * fin de campagne, triés par score de risque (F-CMP-03). Un test manuel à jeu de données est
+     * décliné sur les lignes de son premier jeu (ADR-0022).
      */
     public SelectionResult select(String projectKey, String key, Strategy strategy, SelectionParams params) {
         Campaign campaign = get(projectKey, key);
@@ -325,7 +326,7 @@ public class CampaignService {
         }
         eligible.sort(Comparator.comparingInt((TestCase t) -> -score(scores, t)).thenComparingInt(TestCase::getKeyNumber));
         for (TestCase test : eligible) {
-            campaign.add(test, score(scores, test));
+            campaign.select(test, score(scores, test));
             added.add(test.getKey());
         }
         if (!added.isEmpty()) {

@@ -4,7 +4,8 @@ import { connexion, MOT_DE_PASSE_DEMO } from './support';
 /**
  * Parcours 4 (§15.3) — critère de fin du lot 7 : le développeur lance un run automatisé sur le
  * simulateur ; les résultats arrivent en temps réel ; un test « @fail » échoue et rend l'exigence
- * rouge dans la matrice. Le simulateur est appairé par un jeton qu'il a lui-même émis (ADR-0020).
+ * rouge dans la matrice ; ses artefacts (copie d'écran, traces, JUnit, Jest) sont consultables
+ * (ADR-0021). Le simulateur est appairé par un jeton qu'il a lui-même émis (ADR-0020).
  * Story, tests et campagne sont créés par l'API (suffixe horodaté).
  */
 async function jeton(request: APIRequestContext, login: string): Promise<string> {
@@ -69,6 +70,20 @@ test('Parcours 4 : run automatisé sur le simulateur, résultats en temps réel,
     await expect(page.getByTestId(`run-message-${echec!.key}`)).toContainText('AssertionError');
     await page.getByTestId('run-logs-load').click();
     await expect(page.getByTestId('run-logs')).toContainText(echec!.key);
+  });
+
+  await test.step('Artefacts (ADR-0021) : copie d’écran de l’échec, traces système, JUnit XML et Jest JSON', async () => {
+    const capture = `screenshot-${echec!.key}.png`;
+    for (const nom of [capture, 'system.log', 'junit.xml', 'jest.json']) {
+      await expect(page.getByTestId(`run-artifact-${nom}`)).toBeVisible();
+    }
+    await page.getByTestId(`run-screenshot-${echec!.key}`).click();
+    await expect(page.getByTestId('screenshot-image')).toBeVisible();
+    await expect.poll(() => page.getByTestId('screenshot-image').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+    await page.keyboard.press('Escape');
+    const telechargement = page.waitForEvent('download');
+    await page.getByTestId('run-artifact-download-junit.xml').click();
+    expect((await telechargement).suggestedFilename()).toBe('junit.xml');
   });
 
   await test.step('L’exigence est rouge dans la matrice de traçabilité', async () => {

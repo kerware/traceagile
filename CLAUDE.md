@@ -16,7 +16,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`, `lot-5-complements`) |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | **Fait** (branche `lot-6-exploratoire`) |
-| 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | **Fait** (branche `lot-7-execution-automatisee`) |
+| 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports, artefacts (traces, JUnit, Jest, copies d'écran) | **Fait** (branches `lot-7-execution-automatisee`, `lot-7-artefacts`) |
 | 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
 | 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
 
@@ -30,8 +30,8 @@ Reporté (à reprendre dans le lot indiqué) :
 - Jeu de données d'un test automatisé : le job transmet le premier jeu du test ; choix d'une ligne
   pour un run → lot 9 si besoin.
 - Métriques de performance des webhooks (`metrics{}`) et F-REQ-18 valeur mesurée d'une ENF → lot 8
-  (bilans) ; signalement des tests instables dans le bilan (F-EXE-11) → lot 8 ; artefacts du
-  serveur (captures, vidéos) seulement référencés par URL ; widget « derniers runs » → lot 8.
+  (bilans) ; signalement des tests instables dans le bilan (F-EXE-11) → lot 8 ; vidéos et stockage
+  des artefacts dans TraceAgile (ils sont relus sur le serveur, ADR-0021) → lot 9 ; widget « derniers runs » → lot 8.
 - Glisser-déposer des campagnes d'un dossier à l'autre dans l'arbre lui-même (aujourd'hui : depuis
   la liste vers un dossier, ou « Ranger ») → lot 9 si besoin.
 - Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
@@ -80,6 +80,7 @@ npm run api:generate   # après une modification de l'API (voir ci-dessous)
 # Bout en bout (Playwright, parcours du §15.3) contre la pile Docker Compose démarrée
 cd e2e && npm ci && npx playwright install chromium
 npx playwright test            # E2E_BASE_URL=http://localhost:5173 pour viser le serveur Vite
+# après `docker compose up --build -d`, attendre l'état « healthy » de backend avant Playwright
 ```
 
 Windows : si une JVM échoue avec `Unable to establish loopback connection` (sockets unix des
@@ -162,6 +163,16 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `RunChanged`, diffusé en SSE après commit (`RunEventStreams`). Les dépôts Spring Data doivent être
   des interfaces de premier niveau (pas imbriquées). Tests d'API : `@MockitoBean ExecutionServerClient`
   et webhooks signés avec `WebhookSignature.sign`.
+- Artefacts (ADR-0021) : références dans `RunArtifact` (annoncées par `TEST_FINISHED` / `JOB_FINISHED`,
+  complétées par `ExecutionServerClient.artifacts`), contenu relayé sans stockage
+  (`AutomatedRunService.artifact` → `ExecutionServerClient.download`). Simulateur : `system.log`,
+  `junit.xml`, `jest.json`, `report.json`, `screenshot-<test>.png` par échec (`ResultFormats`, `Screenshots`).
+  Côté front, contenu par `fetchArtifact` (Bearer + URL d'objet), jamais par lien direct.
+- « Open in view » est enregistré par `OpenInViewConfig` (et non `spring.jpa.open-in-view`) pour
+  en exclure les flux SSE : une requête asynchrone garderait sa connexion JDBC tant que le flux est
+  ouvert. Tout nouveau flux SSE s'ajoute à `OpenInViewConfig.STREAMS` (test
+  `AutomatedRunApiTest.streamsDoNotHoldConnections`). La CSP de `frontend/nginx.conf` autorise
+  `img-src blob:` pour les images chargées avec le jeton.
 - Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
   `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
   `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :
@@ -173,7 +184,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `Execution.unfold`) ; dossiers de campagnes (`CampaignFolder`, `CampaignFolderService`, mêmes
   chemins « a/b » que les tests) ; anomalies d'une exigence par traçabilité
   (`DefectService.tracedFor`). Un test peut figurer plusieurs fois dans une campagne : les
-  `data-testid` des lignes prennent le suffixe `itemSuffix` (« -2 » = ligne 2 du jeu).
+  `data-testid` des lignes prennent le suffixe `itemSuffix` (« -2 » = ligne 2 du jeu). La sélection
+  décline d'office un test manuel à jeu de données sur les lignes de son premier jeu (`Campaign.select`, ADR-0022).
 - Campagnes et exécutions (ADR-0016) : règles dans `Campaign`, `CampaignItem`, `Execution`
   (statut déduit : `ExecutionRules`), `Defect`, `DefectDraft` (domaine). Après avoir ajouté des
   éléments à une collection en cascade, `flush()` avant de renvoyer leurs identifiants.

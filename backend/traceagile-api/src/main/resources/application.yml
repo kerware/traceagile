@@ -10,8 +10,9 @@ spring:
     username: ${TRACEAGILE_DB_USER:traceagile}
     password: ${TRACEAGILE_DB_PASSWORD:traceagile}
   jpa:
-    # Le mapping DTO se fait dans les contrôleurs, après la transaction applicative (ADR-0002).
-    open-in-view: true
+    # Le mapping DTO se fait dans les contrôleurs, après la transaction applicative (ADR-0002) :
+    # « open in view » est enregistré par OpenInViewConfig, sauf pour les flux SSE.
+    open-in-view: false
     hibernate:
       ddl-auto: validate
   flyway:

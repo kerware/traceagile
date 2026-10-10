@@ -53,6 +53,7 @@ export const handlers = [
   // Runs automatisés de la page campagne et leur flux temps réel (fermé aussitôt).
   http.get('/api/v1/projects/:key/campaigns/:ck/runs', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/campaigns/:ck/run-events', () => new HttpResponse('', { headers: { 'Content-Type': 'text/event-stream' } })),
+  http.get('/api/v1/projects/:key/runs/:rk/artifacts', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/runs/:rk/events', () => new HttpResponse('', { headers: { 'Content-Type': 'text/event-stream' } })),
 ];
 

@@ -32,6 +32,10 @@ public interface ExecutionServerClient {
                       String repositoryUrl, String branch, List<JobTest> tests, int timeoutMinutes, int parallelism, int retryFailed) {
     }
 
+    /** ADR-0021 contenu d'un artefact et son type MIME. */
+    record ArtifactContent(byte[] content, String contentType) {
+    }
+
     /** Le serveur refuse le jeton (401) : il faut l'appairer à nouveau. */
     class UnauthorizedException extends RuntimeException {
         public UnauthorizedException(String message) {
@@ -60,4 +64,10 @@ public interface ExecutionServerClient {
     List<RunEvent> poll(ServerConnection connection, String jobId);
 
     String logs(ServerConnection connection, String jobId);
+
+    /** ADR-0021 artefacts du job (traces système, JUnit XML, Jest JSON, rapport, copies d'écran). */
+    List<RunEvent.ArtifactRef> artifacts(ServerConnection connection, String jobId);
+
+    /** ADR-0021 contenu d'un artefact ; artefact inconnu → {@link UnavailableException}. */
+    ArtifactContent download(ServerConnection connection, String jobId, String name);
 }

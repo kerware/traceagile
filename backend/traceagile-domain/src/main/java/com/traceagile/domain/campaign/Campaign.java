@@ -7,6 +7,7 @@ import com.traceagile.domain.planning.Release;
 import com.traceagile.domain.planning.Sprint;
 import com.traceagile.domain.testcase.DataSetRow;
 import com.traceagile.domain.testcase.TestCase;
+import com.traceagile.domain.testcase.TestKind;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -164,6 +165,24 @@ public class Campaign extends AuditableEntity {
         CampaignItem item = new CampaignItem(this, test, items.size() + 1, riskScore);
         items.add(item);
         return item;
+    }
+
+    /**
+     * F-CMP-02 / ADR-0022 sélection d'un test : un test manuel qui a un jeu de données est décliné sur
+     * toutes les lignes de son premier jeu (il ne s'exécute pas avec les seules valeurs par défaut) ;
+     * les autres sont ajoutés une fois. Renvoie les éléments ajoutés (vide si le test y est déjà).
+     */
+    public List<CampaignItem> select(TestCase test, int riskScore) {
+        CampaignItem item = add(test, riskScore);
+        if (item == null) {
+            return List.of();
+        }
+        List<CampaignItem> added = new ArrayList<>(List.of(item));
+        if (test.getKind() == TestKind.MANUAL) {
+            test.getDataSets().stream().filter(set -> !set.rows().isEmpty()).findFirst()
+                    .ifPresent(set -> added.addAll(expandDataSet(item, set.name())));
+        }
+        return added;
     }
 
     /**

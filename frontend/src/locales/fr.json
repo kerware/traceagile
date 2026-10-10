@@ -1208,6 +1208,7 @@
   },
   "reportFormat": {
     "JUNIT": "JUnit XML",
+    "JEST": "Jest JSON",
     "CUCUMBER": "Cucumber JSON",
     "ROBOT": "Robot output.xml",
     "PLAYWRIGHT": "Playwright JSON"
@@ -1257,7 +1258,12 @@
     "timeout": "Délai (minutes)",
     "timeoutHint": "Sans nouvelles au-delà de ce délai + 5 min, le run passe « Expiré ».",
     "launch_one": "Lancer {{count}} test",
-    "launch_other": "Lancer {{count}} tests"
+    "launch_other": "Lancer {{count}} tests",
+    "noArtifacts": "Aucun artefact pour l'instant.",
+    "showScreenshot": "Voir la copie d'écran",
+    "download": "Télécharger",
+    "screenshot": "Copie d'écran",
+    "screenshotOf": "Copie d'écran {{name}}"
   },
   "import": {
     "action": "Importer des résultats",
@@ -1309,5 +1315,13 @@
     "tokenId": "Identifiant du jeton (facultatif)",
     "pairSubmit": "Appairer",
     "pairedDone": "{{name}} appairé"
+  },
+  "artifactKind": {
+    "SCREENSHOT": "Copie d'écran",
+    "SYSTEM_TRACE": "Traces système",
+    "JUNIT": "JUnit XML",
+    "JEST": "Jest JSON",
+    "REPORT": "Rapport",
+    "OTHER": "Autre"
   }
 }

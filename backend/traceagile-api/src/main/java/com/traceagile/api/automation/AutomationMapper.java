@@ -1,5 +1,6 @@
 package com.traceagile.api.automation;
 
+import com.traceagile.api.automation.AutomationDtos.RunArtifactResponse;
 import com.traceagile.api.automation.AutomationDtos.RunCounts;
 import com.traceagile.api.automation.AutomationDtos.RunDetail;
 import com.traceagile.api.automation.AutomationDtos.RunExecutionResponse;
@@ -9,10 +10,13 @@ import com.traceagile.api.automation.AutomationDtos.ServerResponse;
 import com.traceagile.api.campaign.CampaignMapper;
 import com.traceagile.domain.automation.AutomatedRun;
 import com.traceagile.domain.automation.ExecutionServer;
+import com.traceagile.domain.automation.RunArtifact;
 import com.traceagile.domain.automation.ServerStatus;
 import com.traceagile.domain.execution.Execution;
 import com.traceagile.domain.execution.ExecutionStatus;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /** Correspondance domaine → DTO de l'exécution automatisée. */
@@ -43,14 +47,19 @@ public class AutomationMapper {
                 counts(executions));
     }
 
-    RunDetail detail(AutomatedRun run, List<Execution> executions) {
-        return new RunDetail(summary(run, executions), executions.stream().map(this::execution).toList(), !run.isFinal());
+    RunDetail detail(AutomatedRun run, List<Execution> executions, Map<UUID, String> screenshots) {
+        return new RunDetail(summary(run, executions), executions.stream().map(e -> execution(e, screenshots.get(e.getId()))).toList(), !run.isFinal());
     }
 
-    RunExecutionResponse execution(Execution e) {
+    RunArtifactResponse artifact(RunArtifact a) {
+        return new RunArtifactResponse(a.getName(), a.getContentType(), a.getKind(), a.getSize(),
+                a.getExecution() == null ? null : a.getExecution().getTestCase().getKey());
+    }
+
+    RunExecutionResponse execution(Execution e, String screenshot) {
         return new RunExecutionResponse(e.getId(), e.getItem().getId(), campaigns.test(e.getTestCase()), e.getTestCase().getAutomation().getTechnique(),
                 e.getTestCase().getAutomation().getTestIdentifier(), e.getStatus(), e.getStartedAt(), e.getEndedAt(), e.getDurationMs(), e.getComment(),
-                e.getTestCase().isFlaky());
+                e.getTestCase().isFlaky(), screenshot);
     }
 
     static RunCounts counts(List<Execution> executions) {

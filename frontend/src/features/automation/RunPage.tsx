@@ -10,6 +10,7 @@ import { ExecutionStatusBadge } from '../campaigns/CampaignBadges';
 import { duration } from '../campaigns/model';
 import { TechniqueBadge } from '../tests/Badges';
 import { useCanLaunchRuns } from './model';
+import { RunArtifactsCard, ScreenshotButton } from './RunArtifacts';
 import { FlakyBadge, RunProgress, RunStatusBadge } from './RunBadges';
 
 /** §13.2 /p/:key/runs/:rk — run automatisé : statut en temps réel (F-EXE-07), tests, journaux, annulation, relance des échecs. */
@@ -110,6 +111,7 @@ function RunView({ project, detail }: { project: string; detail: RunDetail }) {
                   <TechniqueBadge technique={e.technique} />
                   <Text size="sm">{e.test.title}</Text>
                   {e.flaky && <FlakyBadge />}
+                  {e.screenshot && <ScreenshotButton project={project} runKey={run.key} name={e.screenshot} testKey={e.test.key} />}
                 </Group>
                 {e.message && (
                   <Code block mt={4} c="red" style={{ whiteSpace: 'pre-wrap', maxHeight: 120, overflow: 'auto' }} data-testid={`run-message-${e.test.key}`}>
@@ -143,16 +145,13 @@ function RunView({ project, detail }: { project: string; detail: RunDetail }) {
           </Group>
           {logsOpen && <Logs project={project} runKey={run.key} />}
         </Card>
-        {run.reportUrl && (
-          <Card withBorder>
-            <Title order={5}>{t('runs.artifacts')}</Title>
-            <Text size="sm" c="dimmed" mt="xs">
-              {t('runs.reportAt')}
-            </Text>
-            <Code>{run.reportUrl}</Code>
-          </Card>
-        )}
+        <RunArtifactsCard project={project} runKey={run.key} refreshKey={`${run.status}-${run.counts.total - run.counts.pending - run.counts.running}`} />
       </SimpleGrid>
+      {run.reportUrl && (
+        <Text size="xs" c="dimmed">
+          {t('runs.reportAt')} <Code>{run.reportUrl}</Code>
+        </Text>
+      )}
     </Stack>
   );
 }

@@ -3,6 +3,7 @@ package com.traceagile.api.automation;
 import com.traceagile.api.campaign.CampaignDtos.CampaignRef;
 import com.traceagile.api.campaign.CampaignDtos.TestRef;
 import com.traceagile.application.automation.ReportImportService.MatchedBy;
+import com.traceagile.domain.automation.RunArtifact;
 import com.traceagile.domain.automation.RunStatus;
 import com.traceagile.domain.automation.ServerStatus;
 import com.traceagile.domain.execution.ExecutionStatus;
@@ -118,7 +119,17 @@ public final class AutomationDtos {
             Instant endedAt,
             Long durationMs,
             String message,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-EXE-11 test instable") boolean flaky) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-EXE-11 test instable") boolean flaky,
+            @Schema(description = "ADR-0021 copie d'écran de l'échec (nom de l'artefact)") String screenshot) {
+    }
+
+    /** ADR-0021 artefact d'un run : traces système, JUnit XML, Jest JSON, rapport, copie d'écran. */
+    public record RunArtifactResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String contentType,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RunArtifact.Kind kind,
+            Long size,
+            @Schema(description = "Test concerné (copie d'écran)") String testKey) {
     }
 
     public record RunDetail(

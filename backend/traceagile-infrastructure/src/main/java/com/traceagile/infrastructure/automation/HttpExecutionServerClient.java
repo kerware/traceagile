@@ -17,6 +17,7 @@ import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -129,6 +130,21 @@ public class HttpExecutionServerClient implements ExecutionServerClient {
         String logs = call(() -> http.get().uri(connection.baseUrl() + "/api/v1/jobs/{id}/logs", jobId).headers(auth(connection))
                 .accept(MediaType.TEXT_PLAIN).retrieve().body(String.class), true);
         return logs == null ? "" : logs;
+    }
+
+    @Override
+    public List<RunEvent.ArtifactRef> artifacts(ServerConnection connection, String jobId) {
+        JsonNode list = call(() -> http.get().uri(connection.baseUrl() + "/api/v1/jobs/{id}/artifacts", jobId).headers(auth(connection))
+                .retrieve().body(JsonNode.class), true);
+        return list == null ? List.of() : RunEventJson.artifacts(list);
+    }
+
+    @Override
+    public ArtifactContent download(ServerConnection connection, String jobId, String name) {
+        ResponseEntity<byte[]> response = call(() -> http.get().uri(connection.baseUrl() + "/api/v1/jobs/{id}/artifacts/{name}", jobId, name)
+                .headers(auth(connection)).retrieve().toEntity(byte[].class), true);
+        MediaType type = response.getHeaders().getContentType();
+        return new ArtifactContent(response.getBody() == null ? new byte[0] : response.getBody(), type == null ? null : type.toString());
     }
 
     /** Jeton Bearer émis par le serveur ; corrélation propagée (NF-15). */

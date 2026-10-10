@@ -316,7 +316,7 @@ class AutomatedRunApiTest extends AbstractApiTest {
         db.update("update automated_runs set last_event_at = now() - interval '16 minutes' where run_key = 'RUN-1'");
         when(client.poll(any(), eq("job-1"))).thenReturn(List.of(new RunEvent("p1", "TEST_FINISHED", "RUN-1", "job-1",
                 java.time.Instant.now().minusSeconds(900), null,
-                executionOf(run, "TC-1"), "PASSED", 500L, null, null, null, null, null, null)));
+                executionOf(run, "TC-1"), "PASSED", 500L, null, null, null, null, null, null, null)));
         runService.checkTimeouts();
         mvc.perform(get(P + "/runs/RUN-1").header("Authorization", qa))
                 .andExpect(jsonPath("$.run.status", is("TIMEOUT")))
@@ -369,5 +369,78 @@ class AutomatedRunApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.code", is("REPORT_INVALID")));
         mvc.perform(multipart(P + "/campaigns/CMP-1/imports").file(file).param("format", "JUNIT").header("Authorization", bearer("viewer")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("ADR-0021 artefacts : copie d'écran annoncée par TEST_FINISHED, traces système, JUnit XML et Jest JSON par JOB_FINISHED ; contenu relu sur le serveur")
+    void artifacts() throws Exception {
+        JsonNode run = launch(dev, Map.of("serverId", serverId, "itemIds", itemIds("TC-1", "TC-2")));
+        String failed = executionOf(run, "TC-2");
+        webhook(event("TEST_FINISHED", "RUN-1", Map.of("executionId", failed, "status", "FAILED", "durationMs", 640, "message", "AssertionError",
+                "artifacts", List.of(Map.of("name", "screenshot-TC-2.png", "type", "image/png", "kind", "SCREENSHOT", "size", 3198,
+                        "executionId", failed)))), SECRET).andExpect(status().isOk());
+        webhook(event("JOB_FINISHED", "RUN-1", Map.of("status", "COMPLETED", "artifacts", List.of(
+                Map.of("name", "system.log", "type", "text/plain", "kind", "SYSTEM_TRACE"),
+                Map.of("name", "junit.xml", "type", "application/xml", "kind", "JUNIT"),
+                Map.of("name", "jest.json", "type", "application/json", "kind", "JEST"),
+                Map.of("name", "../secret", "type", "text/plain")))), SECRET).andExpect(status().isOk());
+        when(client.artifacts(any(), eq("job-1"))).thenReturn(List.of(new RunEvent.ArtifactRef("report.json", "application/json", "REPORT", 223L, null)));
+
+        mvc.perform(get(P + "/runs/RUN-1/artifacts").header("Authorization", qa))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].name", contains("screenshot-TC-2.png", "jest.json", "junit.xml", "report.json", "system.log")))
+                .andExpect(jsonPath("$[0].kind", is("SCREENSHOT")))
+                .andExpect(jsonPath("$[0].testKey", is("TC-2")))
+                .andExpect(jsonPath("$[4].kind", is("SYSTEM_TRACE")));
+        mvc.perform(get(P + "/runs/RUN-1").header("Authorization", qa))
+                .andExpect(jsonPath("$.executions[1].screenshot", is("screenshot-TC-2.png")))
+                .andExpect(jsonPath("$.executions[0].screenshot").doesNotExist());
+
+        byte[] png = {(byte) 0x89, 'P', 'N', 'G'};
+        when(client.download(any(), eq("job-1"), eq("screenshot-TC-2.png"))).thenReturn(new ExecutionServerClient.ArtifactContent(png, "image/png"));
+        when(client.download(any(), eq("job-1"), eq("junit.xml")))
+                .thenReturn(new ExecutionServerClient.ArtifactContent("<testsuites/>".getBytes(StandardCharsets.UTF_8), "application/xml"));
+        mvc.perform(get(P + "/runs/RUN-1/artifacts/screenshot-TC-2.png").header("Authorization", qa))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().contentType("image/png"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().bytes(png))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Content-Disposition",
+                        org.hamcrest.Matchers.startsWith("inline")));
+        mvc.perform(get(P + "/runs/RUN-1/artifacts/junit.xml").param("download", "true").header("Authorization", qa))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Content-Disposition",
+                        org.hamcrest.Matchers.startsWith("attachment")));
+        mvc.perform(get(P + "/runs/RUN-1/artifacts/inconnu.txt").header("Authorization", qa)).andExpect(status().isNotFound());
+        when(client.download(any(), eq("job-1"), eq("jest.json"))).thenThrow(new ExecutionServerClient.UnavailableException("HTTP 404", null));
+        mvc.perform(get(P + "/runs/RUN-1/artifacts/jest.json").header("Authorization", qa)).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("ARTIFACT_UNAVAILABLE")));
+        mvc.perform(get(P + "/runs/RUN-1/artifacts").header("Authorization", bearer("viewer"))).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("ADR-0021 import d'un rapport Jest JSON : rapprochement par identifiant « describe#titre »")
+    void importJest() throws Exception {
+        String jest = """
+                {"testResults":[{"name":"/app/cart.test.ts","assertionResults":[
+                  {"ancestorTitles":["CartApiTest"],"title":"add","fullName":"CartApiTest add","status":"failed","duration":40,"failureMessages":["boom"]}]}]}""";
+        MockMultipartFile file = new MockMultipartFile("file", "jest.json", "application/json", jest.getBytes(StandardCharsets.UTF_8));
+        mvc.perform(multipart(P + "/campaigns/CMP-1/imports").file(file).param("format", "JEST").param("apply", "true").header("Authorization", qa))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lines[0].testKey", is("TC-1")))
+                .andExpect(jsonPath("$.recorded", is(1)));
+    }
+
+    @Autowired
+    javax.sql.DataSource dataSource;
+
+    @Test
+    @DisplayName("F-EXE-07 un flux SSE ouvert ne garde pas de connexion JDBC (sinon dix onglets épuisent le pool)")
+    void streamsDoNotHoldConnections() throws Exception {
+        launch(dev, Map.of("serverId", serverId, "itemIds", itemIds("TC-1")));
+        com.zaxxer.hikari.HikariPoolMXBean pool = dataSource.unwrap(com.zaxxer.hikari.HikariDataSource.class).getHikariPoolMXBean();
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(get(P + "/runs/RUN-1/events").header("Authorization", qa)).andExpect(request().asyncStarted());
+            mvc.perform(get(P + "/campaigns/CMP-1/run-events").header("Authorization", qa)).andExpect(request().asyncStarted());
+        }
+        assertThat(pool.getActiveConnections()).isZero();
     }
 }

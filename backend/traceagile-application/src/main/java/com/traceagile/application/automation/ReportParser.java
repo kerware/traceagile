@@ -6,10 +6,10 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** F-EXE-10 port de lecture des rapports de tests (JUnit XML, Cucumber JSON, Robot output.xml, Playwright JSON). */
+/** F-EXE-10 port de lecture des rapports de tests (JUnit XML, Jest JSON, Cucumber JSON, Robot output.xml, Playwright JSON). */
 public interface ReportParser {
 
-    enum ReportFormat { JUNIT, CUCUMBER, ROBOT, PLAYWRIGHT }
+    enum ReportFormat { JUNIT, JEST, CUCUMBER, ROBOT, PLAYWRIGHT }
 
     /**
      * Résultat d'un test du rapport. {@code identifiers} : identifiants candidats, du plus précis au plus

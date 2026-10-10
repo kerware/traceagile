@@ -49,12 +49,11 @@ class CampaignExecutionApiTest extends AbstractApiTest {
         send(po, P + "/sprints", Map.of("name", "Sprint 1", "startDate", "2026-10-12", "endDate", "2026-10-25"));
         mvc.perform(put(P + "/sprints/SPR-1/scope").header("Authorization", po).contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(Map.of("requirementKeys", List.of("REQ-2"))))).andExpect(status().isOk());
-        // TC-1 manuel MUST paramétré, lié ; TC-2 manuel « smoke » non lié ; TC-3 automatisé lié ; TC-4 brouillon smoke
+        // TC-1 manuel MUST paramétré (jeu « Recette » ajouté par les tests qui en ont besoin : ADR-0022), lié ; TC-2 manuel « smoke » non lié ; TC-3 automatisé lié ; TC-4 brouillon smoke
         send(qa, P + "/test-cases", Map.of("kind", "MANUAL", "title", "Ajouter un produit", "priority", "MUST", "estimatedDurationMin", 10,
                 "steps", List.of(Map.of("action", "Ouvrir ${produit}", "expectedResult", "La fiche s'affiche"),
                         Map.of("action", "Ajouter au panier", "expectedResult", "Total ${prix}")),
                 "parameters", List.of(Map.of("name", "prix", "defaultValue", "2,50 €")),
-                "dataSets", List.of(Map.of("name", "Recette", "rows", List.of(Map.of("produit", "Stylo"), Map.of("produit", "Cahier", "prix", "3,90 €")))),
                 "links", List.of(Map.of("requirementKey", "REQ-2", "linkType", "VERIFIES"))));
         send(qa, P + "/test-cases", Map.of("kind", "MANUAL", "title", "Accueil", "priority", "COULD", "tags", List.of("smoke"),
                 "steps", List.of(Map.of("action", "Ouvrir l'accueil", "expectedResult", "OK"))));
@@ -70,6 +69,14 @@ class CampaignExecutionApiTest extends AbstractApiTest {
         String json = mvc.perform(post(url).header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content(toJson(body)))
                 .andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString();
         return json.isBlank() ? null : readJson(json);
+    }
+
+    /** ADR-0018 jeu « Recette » de TC-1 (Stylo / Cahier à 3,90 €). */
+    void recetteDataSet() throws Exception {
+        mvc.perform(patch(P + "/test-cases/TC-1").header("Authorization", qa).contentType("application/merge-patch+json")
+                        .content(toJson(Map.of("dataSets", List.of(Map.of("name", "Recette",
+                                "rows", List.of(Map.of("produit", "Stylo"), Map.of("produit", "Cahier", "prix", "3,90 €"))))))))
+                .andExpect(status().isOk());
     }
 
     void campaign() throws Exception {
@@ -111,6 +118,8 @@ class CampaignExecutionApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.campaign.items[0].riskScore", is(16)))
                 .andExpect(jsonPath("$.campaign.items[1].executedByServer", is(true)))
                 .andExpect(jsonPath("$.campaign.items[0].id").isNotEmpty());
+        // jeu ajouté au test après sa sélection : la ligne se choisit au lancement de l'exécution
+        recetteDataSet();
         String tc1 = itemId("TC-1");
         mvc.perform(patch(P + "/campaign-items/" + tc1).header("Authorization", qa).contentType("application/merge-patch+json")
                         .content(toJson(Map.of("assignee", "qa1"))))
@@ -461,8 +470,15 @@ class CampaignExecutionApiTest extends AbstractApiTest {
     @Test
     @DisplayName("ADR-0018 test sélectionné avec un jeu de données : une ligne par élément, déclinaison de toutes les lignes, valeurs à l'exécution")
     void dataSetInCampaign() throws Exception {
+        recetteDataSet();
         campaign();
-        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-1", "TC-2")));
+        // ADR-0022 la sélection décline déjà TC-1 sur les lignes de son premier jeu
+        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-1", "TC-2")))
+                .andExpect(jsonPath("$.added", contains("TC-1", "TC-2")))
+                .andExpect(jsonPath("$.campaign.items[*].test.key", contains("TC-1", "TC-1", "TC-2")))
+                .andExpect(jsonPath("$.campaign.items[0].dataSetRow", is(0)))
+                .andExpect(jsonPath("$.campaign.items[1].dataSetRow", is(1)))
+                .andExpect(jsonPath("$.campaign.items[2].dataSetName").doesNotExist());
         String tc1 = itemId("TC-1");
         mvc.perform(post(P + "/campaign-items/" + tc1 + "/expand-data-set").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("dataSetName", "recette"))))
