@@ -168,6 +168,15 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(cmp1.getItems()).anySatisfy(i -> assertThat(i.getExecutions()).hasSize(2));
         assertThat(campaigns.get("SHOP", "CMP-2").getStatus()).isEqualTo(CampaignStatus.IN_PROGRESS);
         assertThat(campaigns.get("SHOP", "CMP-2").getItems()).anySatisfy(i -> assertThat(i.lastStatus()).isEqualTo(ExecutionStatus.NOT_RUN));
+        // « Mes exécutions » : qa1 et qa2 ont chacun au moins un test manuel à jouer dans CMP-2
+        for (String tester : List.of("qa1", "qa2")) {
+            assertThat(campaigns.get("SHOP", "CMP-2").getItems()).as(tester).anySatisfy(i -> {
+                assertThat(i.getAssignee()).isNotNull();
+                assertThat(i.getAssignee().getLogin()).isEqualTo(tester);
+                assertThat(i.getTestCase().getKind()).isEqualTo(com.traceagile.domain.testcase.TestKind.MANUAL);
+                assertThat(i.lastStatus()).isEqualTo(ExecutionStatus.NOT_RUN);
+            });
+        }
         assertThat(campaigns.get("SHOP", "CMP-3").getStatus()).isEqualTo(CampaignStatus.PLANNED);
         List<Defect> allDefects = defectService.list("SHOP", new DefectService.DefectFilter(null, null, null, null));
         assertThat(allDefects).hasSize(6);

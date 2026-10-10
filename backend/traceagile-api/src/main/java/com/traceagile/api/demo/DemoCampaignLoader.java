@@ -31,8 +31,12 @@ import com.traceagile.domain.testcase.TestTechnique;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /**
@@ -165,8 +169,10 @@ public class DemoCampaignLoader {
         campaigns.select(project, campaign.getKey(), Strategy.SPRINT_REQUIREMENTS, params(null));
         campaigns.select(project, campaign.getKey(), Strategy.TAG, params("smoke"));
         Instant clock = at(sprint.getStartDate().plusDays(1));
-        int index = 0;
-        int executed = 0;
+        // Alternance qa1 / qa2 par nature : chacun a des tests manuels et des chartes. Seul le premier
+        // test manuel de chacun est exécuté, pour que « Mes exécutions » en garde à faire pour les deux.
+        Map<TestKind, Integer> turns = new EnumMap<>(TestKind.class);
+        Set<String> executedBy = new HashSet<>();
         int automated = 0;
         for (CampaignItem item : campaign.getItems()) {
             TestKind kind = item.getTestCase().getKind();
@@ -176,16 +182,17 @@ public class DemoCampaignLoader {
                 }
                 continue;
             }
-            String tester = index++ % 2 == 0 ? "qa1" : "qa2";
+            int turn = turns.merge(kind, 1, Integer::sum) - 1;
+            String tester = turn % 2 == 0 ? "qa1" : "qa2";
             campaigns.assign(project, item.getId(), tester);
-            if (kind == TestKind.MANUAL && executed < 2 && tester.equals("qa1")) {
+            if (kind == TestKind.MANUAL && executedBy.add(tester)) {
                 clock = clock.plusSeconds(7_200);
-                Execution execution = manual(item, tester, clock, executed == 1);
-                if (executed == 1) {
+                boolean fail = tester.equals("qa2");
+                Execution execution = manual(item, tester, clock, fail);
+                if (fail) {
                     Defect blocker = defectFrom(project, execution, DefectSeverity.BLOCKER);
                     defects.update(project, blocker.getKey(), status(DefectStatus.IN_PROGRESS), null);
                 }
-                executed++;
             }
         }
     }
