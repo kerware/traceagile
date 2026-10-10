@@ -83,13 +83,15 @@ public class DemoDataLoader implements ApplicationRunner {
     private final DemoCampaignLoader campaignLoader;
     private final DemoAutomationLoader automationLoader;
     private final DemoReportLoader reportLoader;
+    private final DemoWorkshopLoader workshopLoader;
 
     public DemoDataLoader(UserAdministrationService userService, ProjectService projectService, UserRepository users,
                           ProjectRepository projects, RequirementService requirements,
                           RequirementRepository requirementRepository, ObjectMapper json, DemoTestsLoader testsLoader,
                           DemoPlanningLoader planningLoader, DemoCampaignLoader campaignLoader, DemoAutomationLoader automationLoader,
-                          DemoReportLoader reportLoader) {
+                          DemoReportLoader reportLoader, DemoWorkshopLoader workshopLoader) {
         this.reportLoader = reportLoader;
+        this.workshopLoader = workshopLoader;
         this.automationLoader = automationLoader;
         this.planningLoader = planningLoader;
         this.campaignLoader = campaignLoader;
@@ -132,6 +134,7 @@ public class DemoDataLoader implements ApplicationRunner {
         planningLoader.closeFirstSprint(SHOP);
         campaignLoader.load(SHOP);
         reportLoader.load(SHOP);
+        workshopLoader.load(SHOP);
         automationLoader.ensureServer();
         LOG.info("Jeu de démonstration prêt (utilisateurs {}, mot de passe « {} »)",
                 USERS.stream().map(DemoUser::login).toList(), PASSWORD);

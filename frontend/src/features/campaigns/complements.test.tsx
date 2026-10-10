@@ -117,8 +117,8 @@ describe('ADR-0018 appel d’un cas de test comme pas', () => {
       parameterValues: {}, defects: [], editable: true, dataSets: [],
       attempts: [{ id: 'e1', attempt: 1, status: 'RUNNING', startedAt: '2026-10-09T09:00:00Z', origin: 'MANUAL' }],
       steps: [
-        { position: 1, action: 'Saisir alice', expectedResult: 'Champ rempli', status: 'NOT_RUN', calledFrom: 'TC-5 Se connecter' },
-        { position: 2, action: 'Payer', expectedResult: 'Payé', status: 'NOT_RUN' },
+        { id: 's1', position: 1, action: 'Saisir alice', expectedResult: 'Champ rempli', status: 'NOT_RUN', calledFrom: 'TC-5 Se connecter' },
+        { id: 's2', position: 2, action: 'Payer', expectedResult: 'Payé', status: 'NOT_RUN' },
       ],
     };
     server.use(http.get(`${P}/executions/e1`, () => HttpResponse.json(execution)));

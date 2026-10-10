@@ -1,5 +1,5 @@
 import { DndContext, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
-import { ActionIcon, Alert, Badge, Button, Card, Group, Loader, Paper, Progress, ScrollArea, Select, SimpleGrid, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Button, Card, Group, Loader, Paper, ScrollArea, Select, SimpleGrid, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconAlertTriangle, IconArrowLeft, IconArrowRight, IconGripVertical, IconLock, IconPlayerPlay, IconSearch } from '@tabler/icons-react';
 import { useState, type ReactNode } from 'react';
@@ -12,6 +12,7 @@ import { VerificationBadge } from '../traceability/VerificationBadge';
 import { loadColor, PLANNING_STATUS_COLORS, shortDate } from './model';
 import { CloseSprintModal } from './PlanningModals';
 import { useCanPlan } from './permissions';
+import { LabeledProgress } from '../../components/LabeledProgress';
 
 const PLANNABLE = ['USER_STORY', 'TECHNICAL_ENABLER', 'BUSINESS_RULE', 'NON_FUNCTIONAL'];
 
@@ -142,7 +143,8 @@ function SprintBoard({ project, detail, openScopes }: { project: string; detail:
                 : t('planning.loadNoCapacity', { load: sprint.loadPoints })}
             </Text>
           </Group>
-          <Progress value={Math.min(100, sprint.loadPercent ?? 0)} color={loadColor(sprint.loadPercent)} size="lg" />
+          <LabeledProgress value={Math.min(100, sprint.loadPercent ?? 0)} color={loadColor(sprint.loadPercent)} size="lg"
+            label={`${sprint.name} : ${sprint.loadPercent ?? 0} %`} />
           {sprint.overCapacity && (
             <Alert color="red" icon={<IconAlertTriangle size={16} />} py={6} data-testid="over-capacity">
               {t('planning.overCapacity', { over: sprint.loadPoints - (sprint.capacityPoints ?? 0) })}

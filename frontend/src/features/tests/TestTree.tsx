@@ -143,7 +143,7 @@ export function TestTree({
           </Badge>
         </NodeMenuRow>
         {open && (
-          <Stack gap={2} mt={4}>
+          <Stack gap={2} mt={4} role="group">
             {content}
           </Stack>
         )}

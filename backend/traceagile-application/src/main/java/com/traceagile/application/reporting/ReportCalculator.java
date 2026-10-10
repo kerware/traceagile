@@ -34,6 +34,7 @@ import com.traceagile.application.reporting.ReportData.StoryRow;
 import com.traceagile.application.reporting.ReportData.Summary;
 import com.traceagile.application.reporting.ReportData.FlakyTest;
 import com.traceagile.application.reporting.ReportData.TestResultRow;
+import com.traceagile.application.requirement.NfrMeasurementService;
 import com.traceagile.application.requirement.RequirementRepository;
 import com.traceagile.application.traceability.TraceabilityService;
 import com.traceagile.application.traceability.TraceabilityService.CoverageReport;
@@ -108,11 +109,13 @@ public class ReportCalculator {
     private final DefectRepository defects;
     private final RequirementRepository requirements;
     private final AuditEventRepository audit;
+    private final NfrMeasurementService measurements;
     private final Clock clock;
 
     public ReportCalculator(ProjectRepository projects, PlanningService planning, TraceabilityService traceability, CampaignRepository campaigns,
                             ExploratoryService exploratory, ExploratorySessionRepository sessions, DefectRepository defects,
-                            RequirementRepository requirements, AuditEventRepository audit, Clock clock) {
+                            RequirementRepository requirements, AuditEventRepository audit, NfrMeasurementService measurements, Clock clock) {
+        this.measurements = measurements;
         this.projects = projects;
         this.planning = planning;
         this.traceability = traceability;
@@ -487,9 +490,11 @@ public class ReportCalculator {
             Planguage p = r.getPlanguage() == null ? Planguage.EMPTY : r.getPlanguage();
             String unit = p.unit() == null ? "" : " " + p.unit();
             VerificationStatus status = statuses.get(r.getId());
+            var measured = measurements.latest(r);
             return new NfrRow(r.getKey(), r.getTitle(), r.getCategory() == null ? null : r.getCategory().name(),
-                    p.minimumThreshold() == null ? null : p.minimumThreshold() + unit, p.target() == null ? null : p.target() + unit, null,
-                    status == null ? null : status.name());
+                    p.minimumThreshold() == null ? null : p.minimumThreshold() + unit, p.target() == null ? null : p.target() + unit,
+                    measured.map(m -> ReportDocumentBuilder.number(m.getValue()) + unit).orElse(null),
+                    measured.map(m -> m.getOutcome().name()).orElse(null), status == null ? null : status.name());
         }).toList();
     }
 

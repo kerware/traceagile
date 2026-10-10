@@ -113,7 +113,7 @@ public class RequirementController {
 
     // ---------------------------------------------------------------- backlog
 
-    /** F-REQ-01 vue liste (tri par défaut : rang) ; F-REQ-04 recherche {@code q}. */
+    /** F-REQ-01 vue liste (tri par défaut : rang) ; F-REQ-04 recherche {@code q} ; §12 filtre {@code verification}. */
     @GetMapping
     @PreAuthorize(READ)
     public PageResponse<RequirementSummary> list(@PathVariable String projectKey,
@@ -124,11 +124,17 @@ public class RequirementController {
                                                  @RequestParam(required = false) String tag,
                                                  @RequestParam(required = false) String q,
                                                  @RequestParam(required = false) String sprint,
+                                                 @RequestParam(required = false) Set<VerificationStatus> verification,
                                                  @ParameterObject Pageable pageable) {
-        RequirementFilter filter = new RequirementFilter(type, status, priority, risk, tag, q, sprint);
-        Map<UUID, VerificationStatus> statuses = traceability.statuses(projectKey);
-        return PageResponse.of(requirements.search(projectKey, filter, pageable),
-                r -> mapper.toSummary(r, statuses.getOrDefault(r.getId(), VerificationStatus.NOT_COVERED)));
+        // §12 / ADR-0024 filtre sur le statut de vérification calculé (non stocké) : il faut alors les statuts de tout le projet
+        Map<UUID, VerificationStatus> all = verification == null || verification.isEmpty() ? null : traceability.statuses(projectKey);
+        Set<UUID> ids = all == null ? null : all.entrySet().stream()
+                .filter(e -> verification.contains(e.getValue())).map(Map.Entry::getKey).collect(java.util.stream.Collectors.toSet());
+        RequirementFilter filter = new RequirementFilter(type, status, priority, risk, tag, q, sprint, ids);
+        var page = requirements.search(projectKey, filter, pageable);
+        // NF-01 sinon, seuls les statuts de la page sont calculés
+        Map<UUID, VerificationStatus> statuses = all != null ? all : traceability.statusesOf(projectKey, page.getContent());
+        return PageResponse.of(page, r -> mapper.toSummary(r, statuses.getOrDefault(r.getId(), VerificationStatus.NOT_COVERED)));
     }
 
     /** F-REQ-01 vue arbre. */
@@ -335,7 +341,7 @@ public class RequirementController {
     private RequirementDetail detail(Requirement requirement) {
         String projectKey = requirement.getProject().getKey();
         return mapper.toDetail(requirement, requirements.applicableTransverseNfrs(requirement),
-                traceability.statuses(projectKey).getOrDefault(requirement.getId(), VerificationStatus.NOT_COVERED),
+                traceability.statusesOf(projectKey, List.of(requirement)).getOrDefault(requirement.getId(), VerificationStatus.NOT_COVERED),
                 new CriterionStatuses(traceability.criterionStatuses(projectKey, requirement)));
     }
 }

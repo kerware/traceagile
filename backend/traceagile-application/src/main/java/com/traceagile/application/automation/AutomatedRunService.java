@@ -9,6 +9,7 @@ import com.traceagile.application.automation.ExecutionServerClient.JobTest;
 import com.traceagile.application.automation.ExecutionServerClient.ServerConnection;
 import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.common.KeyGenerator;
+import com.traceagile.application.requirement.NfrMeasurementService;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.domain.audit.AuditAction;
@@ -86,8 +87,10 @@ public class AutomatedRunService {
     private final Clock clock;
     private final String callbackUrl;
 
+    private final NfrMeasurementService measurements;
+
     public AutomatedRunService(AutomatedRunRepository runs, ExecutionRepository executions, ProcessedWebhookEventRepository processed,
-                               RunArtifactRepository artifacts,
+                               RunArtifactRepository artifacts, NfrMeasurementService measurements,
                                CampaignService campaigns, ExecutionServerService servers, ExecutionServerClient client, FlakyService flaky,
                                KeyGenerator keys, AuditService audit, ApplicationEventPublisher events, PlatformTransactionManager transactions,
                                Clock clock, @Value("${traceagile.automation.callback-url:http://localhost:8085/api/v1/execution-callbacks}") String callbackUrl) {
@@ -95,6 +98,7 @@ public class AutomatedRunService {
         this.executions = executions;
         this.processed = processed;
         this.artifacts = artifacts;
+        this.measurements = measurements;
         this.campaigns = campaigns;
         this.servers = servers;
         this.client = client;
@@ -315,6 +319,7 @@ public class AutomatedRunService {
                 if (!e.isFinal()) {
                     e.automatedFinished(ExecutionStatus.valueOf(event.status()), event.durationMs(), message(event), at);
                     flaky.recompute(e.getTestCase());
+                    measurements.fromRun(e, run.getKey(), event.metrics(), at);
                 }
                 run.touch(at);
             });

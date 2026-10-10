@@ -19,10 +19,15 @@ import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestCaseStatus;
 import com.traceagile.domain.testcase.TestKind;
 import com.traceagile.domain.traceability.CoverageCalculator.Coverage;
+import com.traceagile.domain.traceability.TraceEntityType;
 import com.traceagile.domain.traceability.TraceLink;
 import com.traceagile.domain.traceability.VerificationStatus;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import com.traceagile.domain.campaign.Campaign;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,6 +139,39 @@ public class TraceabilityService {
                     || (c.getSprint() != null && c.getSprint().getRelease() != null && c.getSprint().getRelease().getKey().equals(value));
             default -> null;
         };
+    }
+
+    /**
+     * NF-01 / ADR-0024 statuts de quelques exigences (une page du backlog, une fiche) : seuls leurs
+     * sous-arbres, leurs liens et les derniers résultats de leurs tests sont chargés. Le statut ne
+     * dépend que de ces faits (§7.3), le résultat est donc celui de {@link #statuses(String)}.
+     */
+    public Map<UUID, VerificationStatus> statusesOf(String projectKey, Collection<Requirement> requirementsOfPage) {
+        if (requirementsOfPage.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, List<UUID>> children = new HashMap<>();
+        for (RequirementRepository.TreeLink link : requirements.treeOf(projectKey)) {
+            if (link.parentId() != null) {
+                children.computeIfAbsent(link.parentId(), id -> new ArrayList<>()).add(link.id());
+            }
+        }
+        Set<UUID> scope = new LinkedHashSet<>();
+        Deque<UUID> pending = new ArrayDeque<>(requirementsOfPage.stream().map(Requirement::getId).toList());
+        while (!pending.isEmpty()) {
+            UUID id = pending.pop();
+            if (scope.add(id)) {
+                pending.addAll(children.getOrDefault(id, List.of()));
+            }
+        }
+        List<Requirement> loaded = requirements.findByIdIn(scope).stream().sorted(Comparator.comparing(Requirement::getRank)).toList();
+        List<TraceLink> scopedLinks = links.findByTargetTypeAndTargetIdIn(TraceEntityType.REQUIREMENT, scope);
+        Set<UUID> testIds = scopedLinks.stream().map(TraceLink::getSourceId).collect(Collectors.toSet());
+        ProjectTrace trace = new ProjectTrace(loaded, testIds.isEmpty() ? List.of() : tests.findByIdIn(testIds), scopedLinks,
+                executions.latestOf(testIds), executions.requirementsWithOpenBlockingDefect(projectKey));
+        Map<UUID, VerificationStatus> statuses = new HashMap<>();
+        requirementsOfPage.forEach(r -> statuses.put(r.getId(), trace.status(trace.requirement(r.getId()))));
+        return statuses;
     }
 
     /** §7.3 statut de chaque exigence du projet (backlog, fiche). */
@@ -264,7 +303,12 @@ public class TraceabilityService {
 
     /** F-REQ-12 états calculés des critères d'une exigence. */
     public Map<UUID, CriterionStatus> criterionStatuses(String projectKey, Requirement requirement) {
-        ProjectTrace trace = load(projectKey);
+        // NF-01 / ADR-0024 seuls les liens vers ces critères et les derniers résultats de leurs tests sont chargés
+        List<UUID> criteria = requirement.getCriteria().stream().map(AcceptanceCriterion::getId).toList();
+        List<TraceLink> criterionLinks = criteria.isEmpty() ? List.of() : links.findByTargetTypeAndTargetIdIn(TraceEntityType.ACCEPTANCE_CRITERION, criteria);
+        Set<UUID> testIds = criterionLinks.stream().map(TraceLink::getSourceId).collect(Collectors.toSet());
+        ProjectTrace trace = new ProjectTrace(List.of(requirement), testIds.isEmpty() ? List.of() : tests.findByIdIn(testIds), criterionLinks,
+                executions.latestOf(testIds), Set.of());
         Map<UUID, CriterionStatus> statuses = new LinkedHashMap<>();
         requirement.getCriteria().forEach(c -> statuses.put(c.getId(), trace.criterionStatus(c)));
         return statuses;

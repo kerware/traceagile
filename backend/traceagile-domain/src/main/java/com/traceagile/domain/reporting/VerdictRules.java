@@ -70,6 +70,6 @@ public record VerdictRules(double goMinValidation, double reservedMinValidation,
     }
 
     private static String percent(double value) {
-        return (value == Math.rint(value) ? String.valueOf((long) value) : String.valueOf(value)) + " %";
+        return (Math.abs(value - Math.rint(value)) < 1e-9 ? String.valueOf((long) Math.rint(value)) : String.valueOf(value)) + " %";
     }
 }

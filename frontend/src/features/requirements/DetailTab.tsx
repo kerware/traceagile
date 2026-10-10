@@ -36,8 +36,10 @@ import {
 } from '../../api/requirements';
 import { StatusBadge } from './Badges';
 import { MarkdownField } from './MarkdownField';
+import { MeasurementsPanel } from './MeasurementsPanel';
 import { FIBONACCI, needsSplitting, NFR_CATEGORIES, PRIORITIES, REQUIREMENT_TYPES, RISK_LEVELS, userStorySentence } from './model';
 import { ChecklistResults } from './StatusMenu';
+import { useShortcuts } from '../../components/search/useShortcuts';
 
 interface FormValues {
   type: string;
@@ -123,6 +125,8 @@ export function DetailTab({
   // Re-rendu limité aux champs qui pilotent l'affichage (aperçu de la story, alerte, section ENF).
   const [type, asA, iWant, soThat, storyPoints] = useWatch({ control, name: ['type', 'asA', 'iWant', 'soThat', 'storyPoints'] });
   const readOnly = !canWrite || requirement.status === 'OBSOLETE';
+  // §13.3 E : éditer (la fiche se modifie en place : le titre prend le focus)
+  useShortcuts({ e: () => document.querySelector<HTMLInputElement>('[data-testid="field-title"]')?.focus() }, !readOnly);
   const option = (list: readonly string[], prefix: string) => list.map((value) => ({ value, label: t(`${prefix}.${value}`) }));
 
   const save = handleSubmit(async (form) => {
@@ -256,6 +260,8 @@ export function DetailTab({
                     <TextInput label={t('requirement.target')} disabled={readOnly} {...register('target')} />
                     <TextInput label={t('requirement.unit')} disabled={readOnly} {...register('unit')} />
                   </Group>
+                  <MeasurementsPanel project={project} requirementKey={requirement.key} threshold={requirement.planguage.minimumThreshold}
+                    target={requirement.planguage.target} unit={requirement.planguage.unit} />
                 </Stack>
               </Fieldset>
             )}
@@ -264,7 +270,7 @@ export function DetailTab({
               control={control}
               name="description"
               render={({ field }) => (
-                <MarkdownField label={t('requirement.description')} value={field.value} onChange={field.onChange} readOnly={readOnly} />
+                <MarkdownField label={t('requirement.description')} value={field.value} onChange={field.onChange} readOnly={readOnly} project={project} />
               )}
             />
 

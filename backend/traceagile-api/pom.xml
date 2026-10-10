@@ -108,6 +108,65 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- NF-12 rapport de couverture agrégé : les services de l'application sont surtout exercés par les tests d'API -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
+                        <goals><goal>report-aggregate</goal></goals>
+                        <configuration>
+                            <includeCurrentProject>true</includeCurrentProject>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- NF-12 seuil bloquant : 70 % des lignes des modules métier, toutes exécutions de tests confondues (ADR-0024) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>coverage-check</id>
+                        <phase>verify</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <skip>${jacoco.skip}</skip>
+                            <target>
+                                <taskdef name="jacocoReport" classname="org.jacoco.ant.ReportTask" classpathref="maven.plugin.classpath"/>
+                                <jacocoReport>
+                                    <executiondata>
+                                        <fileset dir="${project.basedir}/.." includes="traceagile-*/target/jacoco.exec"/>
+                                    </executiondata>
+                                    <structure name="TraceAgile">
+                                        <classfiles>
+                                            <fileset dir="${project.basedir}/../traceagile-domain/target/classes"/>
+                                            <fileset dir="${project.basedir}/../traceagile-application/target/classes"/>
+                                            <fileset dir="${project.basedir}/../traceagile-infrastructure/target/classes"/>
+                                            <fileset dir="${project.basedir}/target/classes"/>
+                                        </classfiles>
+                                    </structure>
+                                    <csv destfile="${project.build.directory}/coverage-total.csv"/>
+                                    <check>
+                                        <rule element="BUNDLE">
+                                            <limit counter="LINE" value="COVEREDRATIO" minimum="${coverage.minimum}"/>
+                                        </rule>
+                                    </check>
+                                </jacocoReport>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>org.jacoco.ant</artifactId>
+                        <version>${jacoco.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 </project>

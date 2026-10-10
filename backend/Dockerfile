@@ -13,7 +13,7 @@ RUN mvn -B -q package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine AS api
 WORKDIR /app
-RUN addgroup -S app && adduser -S app -G app
+RUN addgroup -S app && adduser -S app -G app && mkdir -p /data/attachments && chown app:app /data/attachments
 COPY --from=build /workspace/traceagile-api/target/traceagile-api.jar app.jar
 USER app
 EXPOSE 8085

@@ -2,7 +2,7 @@ import { Button, Group, MultiSelect, TextInput } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import type { RequirementFilters } from '../../api/requirements';
 import { hasFilters } from './filters';
-import { PRIORITIES, REQUIREMENT_STATUSES, REQUIREMENT_TYPES, RISK_LEVELS } from './model';
+import { PRIORITIES, REQUIREMENT_STATUSES, REQUIREMENT_TYPES, RISK_LEVELS, VERIFICATION_STATUSES } from './model';
 
 /** F-REQ-01 barre de filtres de la vue liste. */
 export function BacklogFilters({
@@ -53,6 +53,15 @@ export function BacklogFilters({
         w={180}
         data-testid="filter-risk"
       />
+      <MultiSelect
+        label={t('backlog.filterVerification')}
+        data={options(VERIFICATION_STATUSES, 'verification')}
+        value={filters.verification ?? []}
+        onChange={(value) => onChange({ verification: value })}
+        clearable
+        w={200}
+        data-testid="filter-verification"
+      />
       <TextInput
         label={t('backlog.filterTag')}
         defaultValue={filters.tag ?? ''}
@@ -66,7 +75,7 @@ export function BacklogFilters({
       {hasFilters(filters) && (
         <Button
           variant="subtle"
-          onClick={() => onChange({ type: null, status: null, priority: null, risk: null, tag: null, q: null })}
+          onClick={() => onChange({ type: null, status: null, priority: null, risk: null, verification: null, tag: null, q: null })}
           data-testid="filters-reset"
         >
           {t('backlog.resetFilters')}

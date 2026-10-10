@@ -25,6 +25,13 @@ public interface RequirementRepository {
 
     List<Requirement> findByIdIn(java.util.Collection<java.util.UUID> ids);
 
+    /** NF-01 / ADR-0024 arbre du projet sans charger les entités : (id, parent). */
+    List<TreeLink> treeOf(String projectKey);
+
+    /** Une exigence et son parent ({@code null} à la racine). */
+    record TreeLink(java.util.UUID id, java.util.UUID parentId) {
+    }
+
     /** F-REQ-01 / F-REQ-04 liste filtrée, paginée et triée. */
     Page<Requirement> search(String projectKey, RequirementFilter filter, Pageable pageable);
 

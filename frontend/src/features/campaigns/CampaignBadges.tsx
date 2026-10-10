@@ -51,7 +51,7 @@ export function ProgressBar({ progress }: { progress: CampaignSummary['progress'
           if (!count || !progress.total) return null;
           return (
             <Tooltip key={status} label={`${t(`executionStatus.${status}`)} : ${count}`}>
-              <Progress.Section value={(count * 100) / progress.total} color={EXECUTION_COLORS[status]} />
+              <Progress.Section value={(count * 100) / progress.total} color={EXECUTION_COLORS[status]} aria-label={`${t(`executionStatus.${status}`)} : ${count}`} />
             </Tooltip>
           );
         })}

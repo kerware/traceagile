@@ -184,6 +184,7 @@ public final class CampaignDtos {
     // ---------------------------------------------------------------- exécutions
 
     public record StepResultResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0024 porteur des captures du pas") java.util.UUID id,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int position,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String action,
             String expectedResult,
@@ -316,7 +317,8 @@ public final class CampaignDtos {
             String description,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DefectStatus> allowedTransitions,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DefectRequirementRef> requirements,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DefectExecutionRef> executions) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DefectExecutionRef> executions,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0024 porteur des pièces jointes") java.util.UUID id) {
     }
 
     public record CreateDefectRequest(@NotBlank @Size(max = 200) String title, String description, @NotNull DefectSeverity severity,

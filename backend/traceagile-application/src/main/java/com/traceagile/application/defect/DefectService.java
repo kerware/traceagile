@@ -1,6 +1,7 @@
 package com.traceagile.application.defect;
 
 import com.traceagile.application.administration.ProjectRepository;
+import com.traceagile.application.attachment.AttachmentService;
 import com.traceagile.application.audit.AuditService;
 import com.traceagile.application.common.KeyGenerator;
 import com.traceagile.application.common.NotFoundException;
@@ -53,8 +54,12 @@ public class DefectService {
     private final KeyGenerator keys;
     private final AuditService audit;
 
+    private final AttachmentService attachments;
+
     public DefectService(DefectRepository defects, ProjectRepository projects, RequirementService requirements, ExecutionService executions,
-                         TraceLinkService links, KeyGenerator keys, AuditService audit) {
+                         TraceLinkService links, KeyGenerator keys, AuditService audit,
+                         AttachmentService attachments) {
+        this.attachments = attachments;
         this.defects = defects;
         this.projects = projects;
         this.requirements = requirements;
@@ -156,6 +161,8 @@ public class DefectService {
         Defect defect = create(projectKey, new DefectCommand(command.title(), command.description(), command.severity(),
                 command.externalRef(), requirementKeys));
         defect.linkExecution(execution);
+        // F-EXE-03 « captures » : celles des pas jusqu'au pas en échec (ADR-0024)
+        attachments.copyStepCaptures(execution, defect.getId());
         return defect;
     }
 

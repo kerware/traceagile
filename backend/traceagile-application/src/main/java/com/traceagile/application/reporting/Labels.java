@@ -26,6 +26,8 @@ public final class Labels {
     private static final Map<String, String> OUTCOME = Map.of("PLANNED", "En cours", "DONE", "Terminée", "RETURNED", "Renvoyée au backlog",
             "CARRIED_OVER", "Reportée", "DROPPED", "Abandonnée");
     private static final Map<String, String> VERDICT = Map.of("GO", "Go", "GO_WITH_RESERVATIONS", "Go sous réserve", "NO_GO", "No go");
+    private static final Map<String, String> MEASUREMENT = Map.of("TARGET_MET", "cible atteinte", "THRESHOLD_MET", "seuil respecté",
+            "NOT_MET", "seuil dépassé", "UNKNOWN", "sans seuil chiffré");
     private static final Map<String, String> OBJECTIVE = Map.of("ACHIEVED", "Atteint", "PARTIALLY_ACHIEVED", "Partiellement atteint",
             "NOT_ACHIEVED", "Non atteint");
 
@@ -98,6 +100,10 @@ public final class Labels {
 
     public static String verdict(String value) {
         return label(VERDICT, value);
+    }
+
+    public static String measurement(String value) {
+        return label(MEASUREMENT, value);
     }
 
     public static String objective(String value) {

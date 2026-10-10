@@ -1,10 +1,10 @@
-import { Anchor, Badge, Card, Group, Loader, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import { Badge, Card, Group, Loader, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { useOrphans } from '../../api/traceability';
 import { TypeBadge } from '../requirements/Badges';
 import { KindBadge, TechniqueBadge } from '../tests/Badges';
+import { KeyLink } from '../../components/keys/KeyLink';
 
 /** F-TRA-06 rapport des orphelins. */
 export function OrphansView({ project }: { project: string }) {
@@ -17,9 +17,7 @@ export function OrphansView({ project }: { project: string }) {
       <Section title={t('orphans.requirements')} count={data.requirementsWithoutTests.length} testId="orphans-requirements">
         {data.requirementsWithoutTests.map((r) => (
           <Group key={r.key} gap={6} wrap="nowrap">
-            <Anchor component={Link} to={`/p/${project}/requirements/${r.key}`} ff="monospace" fw={600} size="sm">
-              {r.key}
-            </Anchor>
+            <KeyLink project={project} itemKey={r.key} />
             <TypeBadge type={r.type} />
             <Text size="sm">{r.title}</Text>
           </Group>
@@ -28,9 +26,7 @@ export function OrphansView({ project }: { project: string }) {
       <Section title={t('orphans.tests')} count={data.testsWithoutRequirement.length} testId="orphans-tests">
         {data.testsWithoutRequirement.map((test) => (
           <Group key={test.key} gap={6} wrap="nowrap">
-            <Anchor component={Link} to={`/p/${project}/tests/${test.key}`} ff="monospace" fw={600} size="sm">
-              {test.key}
-            </Anchor>
+            <KeyLink project={project} itemKey={test.key} />
             <KindBadge kind={test.kind} />
             <Text size="sm">{test.title}</Text>
           </Group>
@@ -39,9 +35,7 @@ export function OrphansView({ project }: { project: string }) {
       <Section title={t('orphans.neverExecuted')} count={data.automatedNeverExecuted.length} testId="orphans-never-executed">
         {data.automatedNeverExecuted.map((test) => (
           <Group key={test.key} gap={6} wrap="nowrap">
-            <Anchor component={Link} to={`/p/${project}/tests/${test.key}`} ff="monospace" fw={600} size="sm">
-              {test.key}
-            </Anchor>
+            <KeyLink project={project} itemKey={test.key} />
             <TechniqueBadge technique={test.technique} />
             <Text size="sm">{test.title}</Text>
           </Group>

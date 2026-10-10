@@ -54,6 +54,12 @@ export const handlers = [
   http.get('/api/v1/projects/:key/campaigns/:ck/runs', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/campaigns/:ck/run-events', () => new HttpResponse('', { headers: { 'Content-Type': 'text/event-stream' } })),
   http.get('/api/v1/projects/:key/runs/:rk/artifacts', () => HttpResponse.json([])),
+  // ADR-0024 barre supérieure (notifications), pièces jointes, recherche : vides par défaut.
+  http.get('/api/v1/projects/:key/notifications', () =>
+    HttpResponse.json({ myTests: 0, sessionsToApprove: 0, blockingDefects: 0, failedRuns: 0 }),
+  ),
+  http.get('/api/v1/projects/:key/attachments', () => HttpResponse.json([])),
+  http.get('/api/v1/projects/:key/search', () => HttpResponse.json([])),
   // Tableau de bord (page d'accueil d'un projet), vide par défaut.
   http.get('/api/v1/projects/:key/dashboard', () =>
     HttpResponse.json({ openDefectsBySeverity: {}, lastRuns: [], burndown: [], burnup: [], automatedTrend: [], defectsBySprint: [] }),

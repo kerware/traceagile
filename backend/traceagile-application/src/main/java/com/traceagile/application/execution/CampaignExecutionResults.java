@@ -42,6 +42,22 @@ public class CampaignExecutionResults implements ExecutionResults {
     }
 
     @Override
+    public Map<UUID, LastExecution> latestOf(Collection<UUID> testIds) {
+        Map<UUID, LastExecution> latest = new HashMap<>();
+        if (testIds.isEmpty()) {
+            return latest;
+        }
+        // tri décroissant : la première exécution finie rencontrée pour un test est la dernière
+        for (Execution execution : executions.findByTestCase_IdInOrderByStartedAtDesc(testIds)) {
+            if (execution.isFinal()) {
+                latest.putIfAbsent(execution.getTestCase().getId(), new LastExecution(execution.getStatus(),
+                        execution.getEndedAt() == null ? execution.getStartedAt() : execution.getEndedAt()));
+            }
+        }
+        return latest;
+    }
+
+    @Override
     public Map<UUID, LastExecution> latestIn(String projectKey, Predicate<Campaign> campaigns) {
         Map<UUID, LastExecution> latest = new HashMap<>();
         for (Execution execution : executions.findByTestCase_Project_KeyOrderByStartedAtAsc(projectKey)) {

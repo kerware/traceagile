@@ -21,6 +21,7 @@ import { ConfirmModal } from '../../components/Dialogs';
 import { FORMATS, useCanEditVerdictRules, useCanWriteReports } from './model';
 import { FrozenBadge, VerdictBadge } from './ReportBadges';
 import { DefinitionModal, GenerateReportModal } from './ReportModals';
+import { useShortcuts } from '../../components/search/useShortcuts';
 
 /** §13.2 /p/:key/reports — bilans et rapports générés, modèles configurables, règles du verdict (§9, ADR-0023). */
 export function ReportsPage() {
@@ -30,6 +31,8 @@ export function ReportsPage() {
   const tab = params.get('tab') ?? 'reports';
   const canWrite = useCanWriteReports(project);
   const [generate, setGenerate] = useState<{ opened: boolean; definitionId?: string | null }>({ opened: false });
+  // §13.3 N : générer un rapport
+  useShortcuts({ n: () => setGenerate({ opened: true }) }, canWrite);
 
   return (
     <Stack data-testid="reports-page">

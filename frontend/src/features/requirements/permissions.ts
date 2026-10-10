@@ -15,3 +15,12 @@ export function useCanContribute(project: string): boolean {
   const canWrite = useCanWriteRequirements(project);
   return canWrite || user?.projects.find((p) => p.key === project)?.role === 'TESTER';
 }
+
+/** §2.2 commenter (et poser des questions) : tous les rôles sauf le lecteur. */
+export function useCanComment(project: string): boolean {
+  const user = useAuthStore((s) => s.user);
+  if (!user) return false;
+  if (user.systemAdmin) return true;
+  const role = user.projects.find((p) => p.key === project)?.role;
+  return !!role && role !== 'VIEWER';
+}

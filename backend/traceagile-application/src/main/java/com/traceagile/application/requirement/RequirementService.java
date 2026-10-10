@@ -65,11 +65,13 @@ public class RequirementService {
     private final GherkinValidator gherkin;
     private final TraceLinkService links;
     private final ExecutionRepository executions;
+    private final CommentRepository comments;
 
     public RequirementService(RequirementRepository requirements, RequirementVersionRepository versions,
                               ProjectRepository projects, KeyGenerator keys, ChecklistService checklists,
                               AuditService audit, ApplicationEventPublisher events, GherkinValidator gherkin,
-                              TraceLinkService links, ExecutionRepository executions) {
+                              TraceLinkService links, ExecutionRepository executions, CommentRepository comments) {
+        this.comments = comments;
         this.executions = executions;
         this.gherkin = gherkin;
         this.links = links;
@@ -192,10 +194,16 @@ public class RequirementService {
                         "La " + label(kind) + " n'est pas satisfaite : " + String.join(", ", labels(blocking)) + ".",
                         Map.of("checklist", kind.name(), "unmetItems", labels(blocking)));
             }
-            if (!toAcknowledge.isEmpty() && !acknowledgeUnmet) {
+            List<String> unmet = new java.util.ArrayList<>(labels(toAcknowledge));
+            long openQuestions = target == RequirementStatus.READY ? comments.countByRequirement_IdAndQuestionTrueAndResolvedAtIsNull(requirement.getId()) : 0;
+            if (openQuestions > 0) {
+                // F-REQ-15 questions ouvertes de l'atelier : avertissement contournable comme un item manuel
+                unmet.add(openQuestions + " question(s) ouverte(s) (Example Mapping)");
+            }
+            if (!unmet.isEmpty() && !acknowledgeUnmet) {
                 throw new UnprocessableException("CHECKLIST_ACKNOWLEDGEMENT_REQUIRED",
-                        "Des items manuels de la " + label(kind) + " ne sont pas cochés : " + String.join(", ", labels(toAcknowledge)) + ".",
-                        Map.of("checklist", kind.name(), "unmetItems", labels(toAcknowledge)));
+                        "Des items de la " + label(kind) + " ne sont pas satisfaits : " + String.join(", ", unmet) + ".",
+                        Map.of("checklist", kind.name(), "unmetItems", unmet));
             }
         }
         requirement.changeStatus(target);

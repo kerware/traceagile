@@ -4,6 +4,9 @@ import { IconAlertTriangle, IconArrowLeft, IconArrowRight, IconBug, IconLock, Ic
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { AttachmentsPanel } from '../../components/attachments/AttachmentsPanel';
+import { KeyLink } from '../../components/keys/KeyLink';
+import { useShortcuts } from '../../components/search/useShortcuts';
 import { useExecution, useOverrideExecution, useRecordStep, useStartExecution, type ExecutionDetail, type ExecutionStatus } from '../../api/campaigns';
 import { errorMessage } from '../../api/errors';
 import { DefectStatusBadge, ExecutionStatusBadge, SeverityBadge } from './CampaignBadges';
@@ -55,6 +58,8 @@ function ExecutionView({ project, execution }: { project: string; execution: Exe
       { itemId: execution.itemId, dataSetName: execution.dataSetName ?? undefined, row: execution.dataSetRow ?? undefined },
       { onSuccess: (e) => navigate(`/p/${project}/executions/${e.id}`), onError: fail },
     );
+  // §13.3 P / F / B : passer, échouer, bloquer le pas courant
+  useShortcuts({ p: () => decide('PASSED'), f: () => decide('FAILED'), b: () => decide('BLOCKED') }, editable && !!step);
   const final = execution.status !== 'RUNNING' && execution.status !== 'NOT_RUN';
   const hasFailure = execution.steps.some((s) => s.status === 'FAILED') || execution.status === 'FAILED';
 
@@ -150,6 +155,8 @@ function ExecutionView({ project, execution }: { project: string; execution: Exe
                 {step.testData && <Field label={t('steps.data')} value={step.testData} />}
                 <Textarea label={t('executions.actual')} autosize minRows={2} value={actual} onChange={(e) => setActual(e.currentTarget.value)}
                   disabled={!editable} data-testid="step-actual" />
+                <AttachmentsPanel key={step.id} project={project} target="EXECUTION_STEP" targetId={step.id} canWrite={editable} pasteZone
+                  testId="step-attachments" />
                 {editable && (
                   <Group>
                     {STEP_STATUSES.map((status) => (
@@ -197,9 +204,7 @@ function ExecutionView({ project, execution }: { project: string; execution: Exe
           )}
           {execution.defects.map((d) => (
             <Group key={d.key} gap={6} data-testid={`linked-defect-${d.key}`}>
-              <Anchor component={Link} to={`/p/${project}/defects?selected=${d.key}`} ff="monospace" fw={600} size="sm">
-                {d.key}
-              </Anchor>
+              <KeyLink project={project} itemKey={d.key} />
               <SeverityBadge severity={d.severity} />
               <Text size="sm">{d.title}</Text>
               <DefectStatusBadge status={d.status} />

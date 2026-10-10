@@ -10,7 +10,7 @@ export function VerificationBadge({ status, compact = false, testId }: { status:
   if (compact) {
     return (
       <Tooltip label={`${t(`verification.${status}`)} — ${t(`verification.hint.${status}`)}`}>
-        <ColorSwatch color={color} size={12} aria-label={t(`verification.${status}`)} data-testid={testId} data-status={status} />
+        <ColorSwatch color={color} size={12} role="img" aria-label={t(`verification.${status}`)} data-testid={testId} data-status={status} />
       </Tooltip>
     );
   }

@@ -114,7 +114,7 @@ export function MatrixView({ project, options, onOptions }: { project: string; o
                         component={Link}
                         to={`/p/${project}/tests/${test.key}`}
                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', whiteSpace: 'nowrap', textDecoration: 'none' }}
-                        c={`${KIND_COLORS[test.kind]}.7`}
+                        c={`${KIND_COLORS[test.kind]}.9`}
                         ff="monospace"
                         fz="xs"
                         fw={600}

@@ -89,3 +89,6 @@ export const TYPE_COLORS: Record<RequirementType, string> = {
 export const PRIORITY_COLORS: Record<Priority, string> = { MUST: 'red', SHOULD: 'orange', COULD: 'blue', WONT: 'gray' };
 
 export const RISK_COLORS: Record<RiskLevel, string> = { LOW: 'green', MEDIUM: 'yellow', HIGH: 'orange', CRITICAL: 'red' };
+
+/** §7.3 statuts de vérification (filtre du backlog, ADR-0024). */
+export const VERIFICATION_STATUSES = ['NOT_COVERED', 'NOT_RUN', 'IN_PROGRESS', 'VALIDATED', 'FAILED', 'BLOCKED', 'SUSPECT'];

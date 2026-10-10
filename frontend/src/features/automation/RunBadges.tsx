@@ -32,11 +32,12 @@ export function RunProgress({ counts }: { counts: RunCountsLike }) {
   return (
     <div data-testid="run-progress">
       <Progress.Root size="lg">
-        <Progress.Section value={(counts.passed / total) * 100} color="green" />
-        <Progress.Section value={(counts.failed / total) * 100} color="red" />
-        <Progress.Section value={(counts.error / total) * 100} color="grape" />
-        <Progress.Section value={(counts.skipped / total) * 100} color="gray" />
-        <Progress.Section value={(counts.running / total) * 100} color="blue" animated />
+        <Progress.Section value={(counts.passed / total) * 100} color="green" aria-label={`${t('executionStatus.PASSED')} : ${counts.passed}`} />
+        <Progress.Section value={(counts.failed / total) * 100} color="red" aria-label={`${t('executionStatus.FAILED')} : ${counts.failed}`} />
+        <Progress.Section value={(counts.error / total) * 100} color="grape" aria-label={`${t('executionStatus.ERROR')} : ${counts.error}`} />
+        <Progress.Section value={(counts.skipped / total) * 100} color="gray" aria-label={`${t('executionStatus.SKIPPED')} : ${counts.skipped}`} />
+        <Progress.Section value={(counts.running / total) * 100} color="blue" animated
+          aria-label={`${t('executionStatus.RUNNING')} : ${counts.running}`} />
       </Progress.Root>
       <Group gap="md" mt={4}>
         <Text size="xs" c="dimmed">

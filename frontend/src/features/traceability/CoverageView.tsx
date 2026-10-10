@@ -1,10 +1,11 @@
-import { Badge, Card, Group, Loader, Progress, SimpleGrid, Stack, Table, Text, Tooltip } from '@mantine/core';
+import { Badge, Card, Group, Loader, SimpleGrid, Stack, Table, Text, Tooltip } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useCoverage, type IndicatorResponse } from '../../api/traceability';
 import { percent } from './model';
 import { ScopeSelect } from './ScopeSelect';
 import { VerificationBadge } from './VerificationBadge';
+import { LabeledProgress } from '../../components/LabeledProgress';
 
 const INDICATORS = ['design', 'criteria', 'execution', 'validation', 'riskWeighted'] as const;
 
@@ -83,7 +84,7 @@ function IndicatorCard({ name, indicator }: { name: (typeof INDICATORS)[number];
       <Text size="xl" fw={700} data-testid={`indicator-${name}-value`}>
         {percent(indicator.percent, i18n.language)}
       </Text>
-      <Progress value={value} color={color} mt={4} />
+      <LabeledProgress value={value} color={color} mt={4} label={t(`coverage.${name}`)} />
       <Text size="xs" c="dimmed" mt={4}>
         {new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 }).format(indicator.numerator)} / {indicator.denominator}
       </Text>

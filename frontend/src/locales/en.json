@@ -16,7 +16,8 @@
     "search": "Search (Ctrl+K)",
     "toggleTheme": "Toggle light / dark theme",
     "projects": "Projects",
-    "userMenu": "User menu"
+    "userMenu": "User menu",
+    "activeSprint": "Active sprint"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -217,7 +218,8 @@
     "collapse": "Collapse",
     "openFull": "Open full page",
     "moved": "{{key}} moved",
-    "total": "{{count}} requirement(s)"
+    "total": "{{count}} requirement(s)",
+    "filterVerification": "Verification"
   },
   "requirement": {
     "create": "Create requirement",
@@ -1090,7 +1092,8 @@
     "folderHint": "Path “a/b”; empty = root. A new path creates the folder.",
     "file": "File",
     "fileTitle": "File {{key}} in a folder",
-    "fileHint": "Existing folder or new path; empty = root. Allowed even for a completed campaign."
+    "fileHint": "Existing folder or new path; empty = root. Allowed even for a completed campaign.",
+    "tree": "Campaign folders"
   },
   "sessionState": {
     "RUNNING": "Running",
@@ -1159,7 +1162,8 @@
     "awaitingApproval": "Awaiting approval by another user (PO or test lead).",
     "followUp": "Follow-up charters (Outlook)",
     "followUpCreated": "Charter {{key}} created",
-    "createCharter": "Create charter"
+    "createCharter": "Create charter",
+    "capture": "Screenshot"
   },
   "exploratory": {
     "title": "Exploratory",
@@ -1452,5 +1456,114 @@
     "GO": "Go",
     "GO_WITH_RESERVATIONS": "Go with reservations",
     "NO_GO": "No go"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Key or title: REQ-12, “payment”…",
+    "noProject": "Pick a project first",
+    "results": "Results",
+    "empty": "Nothing matches “{{q}}”.",
+    "hint": "Type at least 2 characters; ↑ ↓ to choose, Enter to open.",
+    "notFound": "{{key}} not found",
+    "type": {
+      "REQUIREMENT": "Requirement",
+      "TEST": "Test",
+      "CAMPAIGN": "Campaign",
+      "DEFECT": "Defect",
+      "RUN": "Run",
+      "REPORT": "Report",
+      "SPRINT": "Sprint",
+      "RELEASE": "Release"
+    }
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "intro": "Single-letter shortcuts are ignored while typing in a field.",
+    "help": "Show this help",
+    "search": "Global search",
+    "searchSlash": "Global search",
+    "new": "New item",
+    "edit": "Edit (focus the title)",
+    "pass": "Current step passed",
+    "fail": "Current step failed",
+    "block": "Current step blocked",
+    "where": {
+      "everywhere": "Everywhere",
+      "lists": "Backlog, tests, campaigns, defects, reports",
+      "details": "Requirement and test pages",
+      "execution": "Manual execution"
+    }
+  },
+  "notifications": {
+    "title_one": "Notifications ({{count}})",
+    "title_other": "Notifications ({{count}})",
+    "label": "To do",
+    "myTests": "Tests assigned to me",
+    "sessionsToApprove": "Sessions to approve",
+    "blockingDefects": "Open blocker or critical defects",
+    "failedRuns": "Failed runs (24 h)"
+  },
+  "attachments": {
+    "title": "Attachments",
+    "pasteHint": "· paste an image (Ctrl+V)",
+    "add": "Add a file",
+    "deleteTitle": "Delete attachment",
+    "deleteMessage": "Delete “{{name}}”?",
+    "delete": "Delete {{name}}"
+  },
+  "comments": {
+    "empty": "No comment.",
+    "placeholder": "Your comment (Markdown; keys such as REQ-12 become links)",
+    "new": "New comment",
+    "asQuestion": "This is a question (blocks “Ready” while open)",
+    "send": "Comment",
+    "edited": "edited",
+    "openQuestion": "Open question",
+    "resolvedBy": "Resolved by {{by}}",
+    "resolve": "Mark as resolved",
+    "reopen": "Reopen the question",
+    "deleteTitle": "Delete comment",
+    "deleteMessage": "Delete this comment?",
+    "openQuestionsWarning_one": "{{count}} open question: the story will only move to “Ready” with the PO's approval.",
+    "openQuestionsWarning_other": "{{count}} open questions: the story will only move to “Ready” with the PO's approval."
+  },
+  "exampleMapping": {
+    "story": "Story",
+    "iWant": "I want",
+    "soThat": "so that",
+    "rules": "Rules",
+    "ruleN": "Rule {{n}}",
+    "newRule": "New rule…",
+    "examples": "Examples",
+    "noRule": "Add a rule first.",
+    "newExample": "New example…",
+    "questions": "Questions",
+    "newQuestion": "New question…",
+    "convertedTo": "Converted:",
+    "actions": "Card actions",
+    "convertRule": "Convert to business rule",
+    "convertExample": "Convert to Gherkin criterion",
+    "ruleConverted": "Business rule {{key}} created",
+    "exampleConverted": "Criterion {{position}} created (Gherkin to complete)",
+    "editCard": "Edit card",
+    "text": "Text"
+  },
+  "measurements": {
+    "title": "Measured values",
+    "limits": "threshold {{threshold}} · target {{target}} {{unit}}",
+    "none": "No measurement yet.",
+    "date": "Date",
+    "value": "Value",
+    "source": "Source",
+    "result": "Result",
+    "manual": "entered ({{by}})",
+    "newValue": "New measurement",
+    "record": "Record",
+    "outcome": {
+      "TARGET_MET": "Target met",
+      "THRESHOLD_MET": "Threshold met",
+      "NOT_MET": "Threshold exceeded",
+      "UNKNOWN": "No numeric threshold"
+    }
   }
 }

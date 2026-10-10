@@ -37,6 +37,7 @@ import { ItemDataSetCell } from './ItemDataSetCell';
 import { useStartSession } from '../../api/exploratory';
 import { attemptPath, itemSuffix, minutes, RESULT_STATUSES, STRATEGIES } from './model';
 import { useCanExecute, useCanManageCampaigns } from './permissions';
+import { KeyLink } from '../../components/keys/KeyLink';
 
 /**
  * §13.2 /p/:key/campaigns/:ck — sélection des tests (F-CMP-02), ordre par risque (F-CMP-03),
@@ -315,9 +316,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
               </Table.Td>
               <Table.Td>
                 <Group gap={6} wrap="nowrap">
-                  <Anchor component={Link} to={`/p/${project}/tests/${item.test.key}`} ff="monospace" fw={600} size="sm">
-                    {item.test.key}
-                  </Anchor>
+                  <KeyLink project={project} itemKey={item.test.key} />
                   <KindBadge kind={item.test.kind} />
                   <Text size="sm">{item.test.title}</Text>
                   {item.test.flaky && <FlakyBadge />}

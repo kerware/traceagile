@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NF-13 exclusions SpotBugs, chacune justifiée (ADR-0024). -->
+<FindBugsFilter>
+    <!--
+      ADR-0009 merge-patch à trois états : null = champ absent (inchangé), Optional.empty() = champ
+      effacé, Optional.of(v) = nouvelle valeur. Le null d'un Optional est ici le contrat voulu.
+    -->
+    <Match>
+        <Class name="com.traceagile.api.web.MergePatch"/>
+        <Method name="field"/>
+        <Bug pattern="NP_OPTIONAL_RETURN_NULL"/>
+    </Match>
+</FindBugsFilter>

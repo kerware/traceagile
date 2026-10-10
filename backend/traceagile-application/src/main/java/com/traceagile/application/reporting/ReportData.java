@@ -106,7 +106,8 @@ public record ReportData(
     }
 
     /** §9.3 ENF : seuil et cible Planguage, valeur mesurée (F-REQ-18, non saisie au lot 8), statut. */
-    public record NfrRow(String key, String title, String category, String threshold, String target, String measured, String status) {
+    public record NfrRow(String key, String title, String category, String threshold, String target, String measured, String measuredOutcome,
+                         String status) {
     }
 
     /** Matrice simplifiée : exigence, tests liés, exécutés, réussis, statut. */

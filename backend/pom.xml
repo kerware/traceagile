@@ -33,6 +33,12 @@
         <archunit.version>1.4.2</archunit.version>
         <gherkin.version>42.0.1</gherkin.version>
         <jacoco.version>0.8.13</jacoco.version>
+        <!-- NF-12 seuil de couverture des lignes (agrégé, vérifié par traceagile-api) -->
+        <coverage.minimum>0.70</coverage.minimum>
+        <jacoco.skip>false</jacoco.skip>
+        <!-- ADR-0024 banc de performance (tag « perf ») hors du build courant ; profil « perf » pour le lancer -->
+        <surefire.groups></surefire.groups>
+        <surefire.excludedGroups>perf</surefire.excludedGroups>
         <!-- Windows : un TEMP en nom court 8.3 casse les sockets unix de la JVM (Pipe NIO : WireMock,
              Jetty…) ; le dossier personnel, toujours présent, convient (voir CLAUDE.md) -->
         <argLine>-Djdk.net.unixdomain.tmpdir=${user.home}</argLine>
@@ -106,6 +112,33 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <groups>${surefire.groups}</groups>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
+                </configuration>
+            </plugin>
+            <!-- NF-13 analyse statique : aucune anomalie de priorité haute (exclusions justifiées dans spotbugs-exclude.xml) -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.9.3.0</version>
+                <configuration>
+                    <threshold>High</threshold>
+                    <effort>Default</effort>
+                    <failOnError>true</failOnError>
+                    <excludeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- NF-12 : couverture de code back-end (rapport JaCoCo par module) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -124,4 +157,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- §14 NF-01 à NF-03 : mvn -Pperf -pl traceagile-api -am verify -Dsurefire.failIfNoSpecifiedTests=false -->
+        <profile>
+            <id>perf</id>
+            <properties>
+                <surefire.groups>perf</surefire.groups>
+                <surefire.excludedGroups>aucun</surefire.excludedGroups>
+                <jacoco.skip>true</jacoco.skip>
+                <spotbugs.skip>true</spotbugs.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

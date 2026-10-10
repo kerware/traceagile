@@ -21,10 +21,22 @@ public final class RunEventJson {
                 node.hasNonNull("durationMs") ? node.get("durationMs").asLong() : null, text(node, "message"), text(node, "stackTrace"),
                 summary.isObject() ? new RunSummary(summary.path("total").asInt(), summary.path("passed").asInt(), summary.path("failed").asInt(),
                         summary.path("error").asInt(), summary.path("skipped").asInt()) : null,
-                text(node, "reportUrl"), text(node, "logsUrl"), text(node, "errorCode"), artifacts(node.path("artifacts")));
+                text(node, "reportUrl"), text(node, "logsUrl"), text(node, "errorCode"), artifacts(node.path("artifacts")),
+                metrics(node.path("metrics")));
     }
 
     /** ADR-0021 artefacts annoncés (copie d'écran d'un test, traces, résultats…). */
+    /** F-REQ-18 métriques numériques ({@code metrics} de TEST_FINISHED) ; les autres valeurs sont ignorées. */
+    static java.util.Map<String, Double> metrics(JsonNode object) {
+        java.util.Map<String, Double> metrics = new java.util.LinkedHashMap<>();
+        object.properties().forEach(e -> {
+            if (e.getValue().isNumber()) {
+                metrics.put(e.getKey(), e.getValue().asDouble());
+            }
+        });
+        return metrics;
+    }
+
     public static List<RunEvent.ArtifactRef> artifacts(JsonNode array) {
         List<RunEvent.ArtifactRef> refs = new ArrayList<>();
         array.forEach(a -> refs.add(new RunEvent.ArtifactRef(text(a, "name"), text(a, "type"), text(a, "kind"),

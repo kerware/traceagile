@@ -11,6 +11,8 @@ import { flatten } from '../requirements/model';
 import { DefectStatusBadge, ExecutionStatusBadge, SeverityBadge } from './CampaignBadges';
 import { DEFECT_STATUSES, SEVERITIES } from './model';
 import { useCanExecute, useCanUpdateDefects } from './permissions';
+import { useShortcuts } from '../../components/search/useShortcuts';
+import { AttachmentsPanel } from '../../components/attachments/AttachmentsPanel';
 
 /** §13.2 /p/:key/defects — anomalies (F-DEF-01, F-DEF-02) : liste filtrée, fiche, cycle de vie. */
 export function DefectsPage() {
@@ -22,6 +24,8 @@ export function DefectsPage() {
   const [q, setQ] = useState(params.get('q') ?? '');
   const { data, isLoading } = useDefects(project, { status, severity, q: params.get('q') ?? undefined });
   const canCreate = useCanExecute(project);
+  // §13.3 N : nouvelle anomalie
+  useShortcuts({ n: () => setCreating(true) }, canCreate);
   const [creating, setCreating] = useState(false);
   const selected = params.get('selected');
 
@@ -181,6 +185,8 @@ function DefectEditor({ project, detail }: { project: string; detail: DefectDeta
           <ExecutionStatusBadge status={e.status} />
         </Group>
       ))}
+      {/* F-EXE-03 captures reprises de l'exécution, et pièces jointes ajoutées ensuite */}
+      <AttachmentsPanel project={project} target="DEFECT" targetId={detail.id} canWrite={canUpdate} pasteZone testId="defect-attachments" />
     </Stack>
   );
 }

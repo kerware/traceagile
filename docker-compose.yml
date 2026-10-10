@@ -36,6 +36,10 @@ services:
       TRACEAGILE_SIMULATOR_URL: http://mock-execution-server:8090
       SIMULATOR_ADMIN_USER: ${SIMULATOR_ADMIN_USER:-admin}
       SIMULATOR_ADMIN_PASSWORD: ${SIMULATOR_ADMIN_PASSWORD:-simulateur}
+      # ADR-0024 contenu des pièces jointes (FileStorage disque)
+      TRACEAGILE_ATTACHMENTS_DIR: /data/attachments
+    volumes:
+      - attachments:/data/attachments
     ports:
       - "8085:8085"
     depends_on:
@@ -64,3 +68,4 @@ services:
 
 volumes:
   pgdata:
+  attachments:

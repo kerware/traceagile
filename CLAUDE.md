@@ -18,29 +18,16 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | **Fait** (branche `lot-6-exploratoire`) |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports, artefacts (traces, JUnit, Jest, copies d'écran) | **Fait** (branches `lot-7-execution-automatisee`, `lot-7-artefacts`) |
 | 8. Bilans | Tableau de bord, burndown / burnup, bilans de sprint et de release, verdict, rapports configurables, exports HTML / PDF / Word / Excel / Markdown / CSV / JSON | **Fait** (branche `lot-8-bilans`) |
-| 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
+| 9. Atelier et finitions | Example Mapping, commentaires, pièces jointes, Ctrl+K, aperçus des clés, raccourcis, notifications, accessibilité (axe-core), SpotBugs, seuil JaCoCo, banc NF-01 à NF-03 | **Fait** (branche `lot-9-finitions`) |
 
-Reporté (à reprendre dans le lot indiqué) :
+Reporté (hors périmètre du prototype à l'issue du lot 9, ADR-0024) :
 - Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
-  des tests à NEEDS_UPDATE (non sélectionnables) ; cache des statuts si §14 l'exige.
-- F-EXP-08 captures de session (collage, téléversement) et commentaires sur une session → lot 9
-  (pièces jointes) ; widget « sessions de la semaine » du tableau de bord (F-RPT-01) → lot 8.
-- F-AUT-09 annotations (`@REQ-n`) : l'import des résultats rapproche par tag d'exigence (ADR-0020) ;
-  autres annotations → lot 9 si besoin.
-- Jeu de données d'un test automatisé : le job transmet le premier jeu du test ; choix d'une ligne
-  pour un run → lot 9 si besoin.
-- Métriques de performance des webhooks (`metrics{}`) et F-REQ-18 valeur mesurée d'une ENF → lot 9
-  (la section ENF des bilans affiche seuil et cible, « non mesuré ») ; vidéos et stockage des
-  artefacts dans TraceAgile (ils sont relus sur le serveur, ADR-0021) → lot 9.
-- Rapports (ADR-0023) : périmètre « campagne », traduction des documents produits par le serveur
-  (français seulement), burndown exact si une story change de statut hors audit → lot 9 si besoin.
-- Glisser-déposer des campagnes d'un dossier à l'autre dans l'arbre lui-même (aujourd'hui : depuis
-  la liste vers un dossier, ou « Ranger ») → lot 9 si besoin.
-- Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
-- Commentaires, pièces jointes (dont captures des pas et des anomalies, F-EXE-01 / F-EXE-03),
-  Example Mapping → lot 9.
-- Seuil JaCoCo bloquant (NF-12), SpotBugs (NF-13), axe-core (NF-10) → lot 9 ; le rapport JaCoCo est
-  déjà produit par `mvn verify`.
+  des tests à NEEDS_UPDATE (non sélectionnables) ; pas de cache des statuts (calcul par sous-arbre).
+- F-AUT-09 annotations autres que `@REQ-n` ; choix de la ligne de jeu de données d'un run automatisé.
+- Vidéos et stockage des artefacts de run dans TraceAgile (ils sont relus sur le serveur, ADR-0021).
+- Rapports (ADR-0023) : périmètre « campagne », traduction des documents produits par le serveur.
+- Glisser-déposer des campagnes d'un dossier à l'autre dans l'arbre lui-même.
+- NF-11 : seul Chromium est testé automatiquement (Edge et Firefox à la main).
 
 ## Méthode de travail (§16.1)
 
@@ -83,6 +70,12 @@ npm run api:generate   # après une modification de l'API (voir ci-dessous)
 cd e2e && npm ci && npx playwright install chromium
 npx playwright test            # E2E_BASE_URL=http://localhost:5173 pour viser le serveur Vite
 # après `docker compose up --build -d`, attendre l'état « healthy » de backend avant Playwright
+# (accessibilite.spec.ts : contrôle axe-core WCAG 2.1 AA des écrans principaux, NF-10)
+
+# §14 vérification des NF-01 à NF-16 : docs/nf-verification.md
+# §14 banc de performance NF-01 à NF-03 (5 000 exigences, 10 000 tests ; ~10 min) → target/nf-benchmark.md
+cd backend && mvn -Pperf -pl traceagile-api test -Dtest=PerformanceBenchmarkTest -Dsurefire.failIfNoSpecifiedTests=false
+# diagnostic rapide (requêtes SQL d'un appel) : -Dperf.scale=0.2 -Dperf.diagnostic=true
 ```
 
 Windows : si une JVM échoue avec `Unable to establish loopback connection` (sockets unix des
@@ -185,6 +178,20 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   sprint publie `PlanningService.SprintClosed` → `ReportService.onSprintClosed` fige son bilan.
   Tableau de bord : `DashboardService` (une requête). Les records applicatifs exposés tels quels
   doivent garder des noms de schéma uniques (`RequirementRef` existait déjà → `UnmetRequirement`).
+- Lot 9 (ADR-0024) : commentaires et atelier Example Mapping dans `WorkshopService` (`Comment` porte
+  les questions, `ExampleCard` les règles et exemples) ; les questions ouvertes s'ajoutent aux items
+  à acquitter de la DoR (`RequirementService.changeStatus`). Pièces jointes : `AttachmentService`,
+  port `FileStorage` (`LocalFileStorage`, volume Docker `attachments`), type déduit de l'extension,
+  contenu partagé quand une anomalie reprend les captures d'un pas. Valeurs mesurées des ENF :
+  `NfrMeasurementService` (métriques de TEST_FINISHED, `RunEvent.metrics`). Recherche, aperçu des
+  clés, notifications : `SearchService` (port `SearchIndex`), `NotificationService`.
+- Performances (NF-01, ADR-0024) : ne jamais recharger toute la traçabilité pour une page ou une
+  fiche — `TraceabilityService.statusesOf` (sous-arbres) ; les `@OneToOne(mappedBy)` de `TestCase`
+  ne sont pas paresseux : tout chargement en masse passe par une requête avec `left join fetch`
+  (`JpaTestCaseRepository`) ; `default_batch_fetch_size` est réglé à 100.
+- Qualité : `mvn verify` échoue sous 70 % de lignes couvertes (agrégat JaCoCo vérifié dans
+  `traceagile-api`, NF-12) ou sur une anomalie SpotBugs « High » (NF-13 ; exclusions justifiées dans
+  `backend/spotbugs-exclude.xml`).
 - Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
   `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
   `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :
@@ -229,6 +236,11 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Statut de vérification : `features/traceability/VerificationBadge` (pastille, `data-status`) ;
   hooks dans `src/api/traceability.ts`, qui invalident traçabilité, tests et exigences.
 - Pluriels i18next : en français, 0 est au singulier (`_one`).
+- Clés : `components/keys/KeyLink` (lien + aperçu au survol), `MarkdownView` (Markdown assaini, clés
+  cliquables). Raccourcis (§13.3) : `components/search/useShortcuts` (N, E et touches de page ;
+  ignorés pendant la saisie) ; `?` et `Ctrl+K` sont gérés par `AppLayout`. Pièces jointes :
+  `components/attachments/AttachmentsPanel` (téléversement, collage d'image avec `pasteZone`).
+  Sous jsdom, un `FormData` n'arrive pas à MSW : tester la requête (paramètres), pas son corps.
 - Graphiques (tableau de bord) : `components/charts/Charts` (`LineChart`, `ColumnChart`, SVG maison,
   géométrie dans `geometry.ts`) ; pas de bibliothèque de graphiques. Rapports : hooks dans
   `src/api/reports.ts`, exports par `downloadReport` (Bearer + URL d'objet), affichage web dans une
@@ -273,6 +285,10 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Lot 8 : ordre du chargement — SPR-1 démarré, recette CMP-1 jouée, **puis** SPR-1 clos (son bilan
   figé `RPT-1` a donc des données), SPR-2 démarré, CMP-2 / CMP-3 ; définition « Synthèse qualité »
   (Word) et bilan non figé de SPR-2 (`DemoReportLoader`).
+- Lot 9 : atelier Example Mapping sur « Choisir le mode de livraison » (règles, exemples, une question
+  ouverte, une résolue ; pas de conversion, elle rendrait ses tests suspects), commentaires, valeurs
+  mesurées des ENF « Temps de réponse des pages » et « Disponibilité du tunnel de commande », capture
+  jointe à l'anomalie bloquante (`DemoWorkshopLoader`).
 - Lot 7 : serveur « Simulateur » appairé dès qu'il répond (jeton émis par le simulateur) ; 3 runs
   passés sur CMP-2 (RUN-1 à RUN-3), deux tests automatisés instables.
 - Lot 6 : 5 sessions exploratoires débriefées et approuvées par le PO (2 par charte de CMP-1, la

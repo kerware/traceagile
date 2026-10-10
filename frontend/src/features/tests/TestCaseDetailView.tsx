@@ -14,6 +14,7 @@ import { useTestWriteKinds } from './permissions';
 import { TestHistoryPanel, TestVersionsPanel } from './TestVersionsPanel';
 import { TestLinksTab } from './TestLinksTab';
 import { TestDefectsPanel, TestExecutionsPanel } from '../campaigns/RequirementRunsPanels';
+import { useShortcuts } from '../../components/search/useShortcuts';
 
 /** §13.2 fiche test : définition selon la nature, exigences liées, exécutions (lot 5), versions, historique. */
 export function TestCaseDetailView({ project, testKey }: { project: string; testKey: string }) {
@@ -23,6 +24,9 @@ export function TestCaseDetailView({ project, testKey }: { project: string; test
   const writable = useTestWriteKinds(project);
   const remove = useDeleteTest(project);
   const [deleting, deleteModal] = useDisclosure(false);
+  // §13.3 E : éditer (la fiche se modifie en place : le titre prend le focus)
+  useShortcuts({ e: () => document.querySelector<HTMLInputElement>('[data-testid="test-field-title"]')?.focus() },
+    !!test && writable.includes(test.kind) && test.status !== 'OBSOLETE');
 
   if (isLoading) return <Loader />;
   if (error instanceof ApiError && error.status === 403) return <Forbidden />;

@@ -1,14 +1,14 @@
-import { Alert, Anchor, Badge, Button, Group, Loader, Select, Stack, Table, Text } from '@mantine/core';
+import { Alert, Badge, Button, Group, Loader, Select, Stack, Table, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconAlertTriangle, IconCheck } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { errorMessage } from '../../api/errors';
 import { useRequirementTree } from '../../api/requirements';
 import { useImpact, useReviewLink } from '../../api/traceability';
 import { flatten } from '../requirements/model';
 import { KindBadge, TestStatusBadge } from '../tests/Badges';
 import { useTestWriteKinds } from '../tests/permissions';
+import { KeyLink } from '../../components/keys/KeyLink';
 
 /** F-TRA-07 analyse d'impact : tests à revoir si l'exigence (ou un descendant) change, campagnes en cours. */
 export function ImpactView({ project, requirementKey, onRequirement }: { project: string; requirementKey: string | null; onRequirement?: (key: string | null) => void }) {
@@ -55,9 +55,7 @@ export function ImpactView({ project, requirementKey, onRequirement }: { project
                   <Table.Tr key={`${item.test.key}-${item.via.key}`} data-testid={`impact-test-${item.test.key}`}>
                     <Table.Td>
                       <Group gap={6} wrap="nowrap">
-                        <Anchor component={Link} to={`/p/${project}/tests/${item.test.key}`} ff="monospace" fw={600} size="sm">
-                          {item.test.key}
-                        </Anchor>
+                        <KeyLink project={project} itemKey={item.test.key} />
                         <KindBadge kind={item.test.kind} />
                         <Text size="sm">{item.test.title}</Text>
                       </Group>

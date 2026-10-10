@@ -316,7 +316,7 @@ class AutomatedRunApiTest extends AbstractApiTest {
         db.update("update automated_runs set last_event_at = now() - interval '16 minutes' where run_key = 'RUN-1'");
         when(client.poll(any(), eq("job-1"))).thenReturn(List.of(new RunEvent("p1", "TEST_FINISHED", "RUN-1", "job-1",
                 java.time.Instant.now().minusSeconds(900), null,
-                executionOf(run, "TC-1"), "PASSED", 500L, null, null, null, null, null, null, null)));
+                executionOf(run, "TC-1"), "PASSED", 500L, null, null, null, null, null, null, null, null)));
         runService.checkTimeouts();
         mvc.perform(get(P + "/runs/RUN-1").header("Authorization", qa))
                 .andExpect(jsonPath("$.run.status", is("TIMEOUT")))
@@ -442,5 +442,57 @@ class AutomatedRunApiTest extends AbstractApiTest {
             mvc.perform(get(P + "/campaigns/CMP-1/run-events").header("Authorization", qa)).andExpect(request().asyncStarted());
         }
         assertThat(pool.getActiveConnections()).isZero();
+    }
+
+    @Test
+    @DisplayName("F-REQ-18 un test de performance lié à une ENF remonte une valeur mesurée (metrics de TEST_FINISHED), comparée au seuil et à la cible ; saisie manuelle")
+    void nfrMeasurements() throws Exception {
+        String po = bearer("po");
+        send(po, P + "/requirements", Map.of("type", "NON_FUNCTIONAL", "title", "Temps de réponse du panier", "category", "PERFORMANCE",
+                "minimumThreshold", "1500", "target", "800", "unit", "ms"));
+        org.springframework.test.web.servlet.ResultActions link = mvc.perform(post(P + "/trace-links").header("Authorization", dev)
+                .contentType(MediaType.APPLICATION_JSON).content(toJson(Map.of("testKey", "TC-1", "requirementKey", "REQ-3", "linkType", "VERIFIES"))));
+        link.andExpect(status().is2xxSuccessful());
+        JsonNode run = launch(dev, Map.of("serverId", serverId, "itemIds", itemIds("TC-1")));
+        webhook(event("TEST_FINISHED", "RUN-1", Map.of("executionId", executionOf(run, "TC-1"), "status", "PASSED", "durationMs", 900,
+                "metrics", Map.of("throughputRps", 140, "p95Ms", 1200))), SECRET).andExpect(status().isOk());
+
+        mvc.perform(get(P + "/requirements/REQ-3/measurements").header("Authorization", bearer("viewer")))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].value", is(1200.0)))
+                .andExpect(jsonPath("$[0].metric", is("p95Ms")))
+                .andExpect(jsonPath("$[0].unit", is("ms")))
+                .andExpect(jsonPath("$[0].testKey", is("TC-1")))
+                .andExpect(jsonPath("$[0].runKey", is("RUN-1")))
+                .andExpect(jsonPath("$[0].outcome", is("THRESHOLD_MET")));
+        // REQ-2 (story) n'a pas de mesure : seules les ENF vérifiées par le test en reçoivent une
+        mvc.perform(get(P + "/requirements/REQ-2/measurements").header("Authorization", qa)).andExpect(jsonPath("$", hasSize(0)));
+
+        mvc.perform(post(P + "/requirements/REQ-3/measurements").header("Authorization", bearer("viewer")).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("value", 700)))).andExpect(status().isForbidden());
+        mvc.perform(post(P + "/requirements/REQ-3/measurements").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("value", 700))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.outcome", is("TARGET_MET")))
+                .andExpect(jsonPath("$.testKey").doesNotExist());
+        mvc.perform(post(P + "/requirements/REQ-2/measurements").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("value", 1)))).andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code", is("MEASUREMENT_NFR_ONLY")));
+        mvc.perform(post(P + "/requirements/REQ-3/measurements").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of()))).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("NF-06 webhooks désordonnés : un TEST_STARTED arrivé après TEST_FINISHED, un second TEST_FINISHED contradictoire sont sans effet")
+    void outOfOrderWebhooks() throws Exception {
+        JsonNode run = launch(dev, Map.of("serverId", serverId, "itemIds", itemIds("TC-1")));
+        String execution = executionOf(run, "TC-1");
+        webhook(event("TEST_FINISHED", "RUN-1", Map.of("executionId", execution, "status", "PASSED", "durationMs", 400)), SECRET)
+                .andExpect(status().isOk());
+        webhook(event("TEST_STARTED", "RUN-1", Map.of("executionId", execution)), SECRET).andExpect(status().isOk());
+        webhook(event("TEST_FINISHED", "RUN-1", Map.of("executionId", execution, "status", "FAILED", "durationMs", 900)), SECRET)
+                .andExpect(status().isOk());
+        mvc.perform(get(P + "/runs/RUN-1").header("Authorization", qa))
+                .andExpect(jsonPath("$.executions[0].status", is("PASSED")))
+                .andExpect(jsonPath("$.executions[0].durationMs", is(400)));
     }
 }

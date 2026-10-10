@@ -606,6 +606,144 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/example-cards/{id}" : {
+      "put" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "editCard",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExampleCardEditRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExampleCardResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "deleteCard",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/comments/{id}" : {
+      "put" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "editComment",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CommentEditRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "deleteComment",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/checklists/{kind}" : {
       "put" : {
         "tags" : [ "Exigences" ],
@@ -1979,6 +2117,18 @@
             "type" : "string"
           }
         }, {
+          "name" : "verification",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "NOT_COVERED", "NOT_RUN", "IN_PROGRESS", "VALIDATED", "FAILED", "BLOCKED", "SUSPECT" ]
+            },
+            "uniqueItems" : true
+          }
+        }, {
           "name" : "page",
           "in" : "query",
           "description" : "Zero-based page index (0..N)",
@@ -2220,6 +2370,126 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/requirements/{key}/measurements" : {
+      "get" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "history",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/NfrMeasurementResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Exigences" ],
+        "operationId" : "record",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NfrMeasurementRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NfrMeasurementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/example-cards" : {
+      "post" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "addCard",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExampleCardRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExampleCardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/duplicate" : {
       "post" : {
         "tags" : [ "Exigences" ],
@@ -2286,6 +2556,83 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/comments" : {
+      "get" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "comments",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CommentResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "addComment",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CommentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommentResponse"
                 }
               }
             }
@@ -2788,6 +3135,40 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/example-cards/{id}/convert" : {
+      "post" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "convert_1",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConversionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/defects" : {
       "get" : {
         "tags" : [ "Anomalies" ],
@@ -2882,6 +3263,50 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/comments/{id}/resolve" : {
+      "post" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "resolve",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommentResponse"
                 }
               }
             }
@@ -3611,6 +4036,110 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/attachments" : {
+      "get" : {
+        "tags" : [ "Pièces jointes" ],
+        "operationId" : "list_10",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "targetType",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "REQUIREMENT", "EXECUTION_STEP", "DEFECT", "SESSION_NOTE" ]
+          }
+        }, {
+          "name" : "targetIds",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AttachmentResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Pièces jointes" ],
+        "operationId" : "upload",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "targetType",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "REQUIREMENT", "EXECUTION_STEP", "DEFECT", "SESSION_NOTE" ]
+          }
+        }, {
+          "name" : "targetId",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AttachmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}/generate-test" : {
       "post" : {
         "tags" : [ "Tests" ],
@@ -3679,7 +4208,7 @@
     "/api/v1/execution-servers" : {
       "get" : {
         "tags" : [ "Serveurs d'exécution" ],
-        "operationId" : "list_10",
+        "operationId" : "list_11",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -5025,7 +5554,7 @@
     "/api/v1/reference/frameworks" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "list_11",
+        "operationId" : "list_12",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -5310,7 +5839,7 @@
     "/api/v1/projects/{projectKey}/test-cases/{key}/history" : {
       "get" : {
         "tags" : [ "Tests" ],
-        "operationId" : "history",
+        "operationId" : "history_1",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -5570,7 +6099,7 @@
     "/api/v1/projects/{projectKey}/sessions" : {
       "get" : {
         "tags" : [ "Exploratoire" ],
-        "operationId" : "list_12",
+        "operationId" : "list_13",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -5643,6 +6172,42 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/DefectDraftResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/search" : {
+      "get" : {
+        "tags" : [ "Recherche" ],
+        "operationId" : "search",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SearchHit"
+                  }
                 }
               }
             }
@@ -6061,7 +6626,7 @@
     "/api/v1/projects/{projectKey}/requirements/{key}/history" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "history_1",
+        "operationId" : "history_2",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -6151,6 +6716,39 @@
                   "items" : {
                     "$ref" : "#/components/schemas/RequirementExecutionResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/requirements/{key}/example-map" : {
+      "get" : {
+        "tags" : [ "Atelier et commentaires" ],
+        "operationId" : "exampleMap",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExampleMapResponse"
                 }
               }
             }
@@ -6538,6 +7136,32 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/notifications" : {
+      "get" : {
+        "tags" : [ "Recherche" ],
+        "operationId" : "notifications",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/my-executions" : {
       "get" : {
         "tags" : [ "Exécutions" ],
@@ -6572,6 +7196,39 @@
                   "items" : {
                     "$ref" : "#/components/schemas/MyExecutionResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/items/{itemKey}" : {
+      "get" : {
+        "tags" : [ "Recherche" ],
+        "operationId" : "item",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "itemKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SearchHit"
                 }
               }
             }
@@ -6862,6 +7519,41 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/attachments/{id}/content" : {
+      "get" : {
+        "tags" : [ "Pièces jointes" ],
+        "operationId" : "content",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
@@ -6902,6 +7594,33 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/attachments/{id}" : {
+      "delete" : {
+        "tags" : [ "Pièces jointes" ],
+        "operationId" : "delete_8",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           }
         }
       }
@@ -7899,6 +8618,9 @@
           "measured" : {
             "type" : "string"
           },
+          "measuredOutcome" : {
+            "type" : "string"
+          },
           "status" : {
             "type" : "string"
           }
@@ -8618,6 +9340,11 @@
       "StepResultResponse" : {
         "type" : "object",
         "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "ADR-0024 porteur des captures du pas"
+          },
           "position" : {
             "type" : "integer",
             "format" : "int32"
@@ -8643,7 +9370,7 @@
             "description" : "ADR-0018 test appelé d'où vient ce pas"
           }
         },
-        "required" : [ "action", "position", "status" ]
+        "required" : [ "action", "id", "position", "status" ]
       },
       "TestRef" : {
         "type" : "object",
@@ -8685,6 +9412,96 @@
           }
         },
         "required" : [ "currentVersion", "key", "kind", "priority", "status", "title" ]
+      },
+      "ExampleCardEditRequest" : {
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "text" ]
+      },
+      "ExampleCardResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "RULE", "EXAMPLE" ]
+          },
+          "ruleId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "convertedTo" : {
+            "type" : "string",
+            "description" : "F-REQ-14 clé de la règle métier créée ou « Critère n »"
+          }
+        },
+        "required" : [ "id", "kind", "position", "text" ]
+      },
+      "CommentEditRequest" : {
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : "string",
+            "maxLength" : 5000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "text" ]
+      },
+      "CommentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "author" : {
+            "type" : "string"
+          },
+          "text" : {
+            "type" : "string",
+            "description" : "Markdown"
+          },
+          "question" : {
+            "type" : "boolean"
+          },
+          "open" : {
+            "type" : "boolean",
+            "description" : "F-REQ-15 question non résolue"
+          },
+          "resolvedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "resolvedBy" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "editedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "required" : [ "author", "createdAt", "id", "open", "question", "text" ]
       },
       "ChecklistItemRequest" : {
         "type" : "object",
@@ -10081,9 +10898,14 @@
             "items" : {
               "$ref" : "#/components/schemas/DefectExecutionRef"
             }
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "ADR-0024 porteur des pièces jointes"
           }
         },
-        "required" : [ "allowedTransitions", "defect", "executions", "requirements" ]
+        "required" : [ "allowedTransitions", "defect", "executions", "id", "requirements" ]
       },
       "DefectExecutionRef" : {
         "type" : "object",
@@ -10763,6 +11585,83 @@
           }
         }
       },
+      "NfrMeasurementRequest" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        },
+        "required" : [ "value" ]
+      },
+      "NfrMeasurementResponse" : {
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "unit" : {
+            "type" : "string"
+          },
+          "metric" : {
+            "type" : "string"
+          },
+          "testKey" : {
+            "type" : "string",
+            "description" : "Test de performance d'origine (absent : saisie)"
+          },
+          "runKey" : {
+            "type" : "string"
+          },
+          "measuredAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "outcome" : {
+            "type" : "string",
+            "enum" : [ "TARGET_MET", "THRESHOLD_MET", "NOT_MET", "UNKNOWN" ]
+          },
+          "createdBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "measuredAt", "outcome", "value" ]
+      },
+      "ExampleCardRequest" : {
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "RULE", "EXAMPLE" ]
+          },
+          "ruleId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "text" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "kind", "text" ]
+      },
+      "CommentRequest" : {
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : "string",
+            "maxLength" : 5000,
+            "minLength" : 0
+          },
+          "question" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "text" ]
+      },
       "ImportResponse" : {
         "type" : "object",
         "properties" : {
@@ -10892,6 +11791,32 @@
           }
         },
         "required" : [ "count", "durationWeeks" ]
+      },
+      "ConversionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "card" : {
+            "$ref" : "#/components/schemas/ExampleCardResponse"
+          },
+          "requirementKey" : {
+            "type" : "string",
+            "description" : "Règle métier créée"
+          },
+          "criterionPosition" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Critère créé"
+          }
+        },
+        "required" : [ "card" ]
+      },
+      "ResolveRequest" : {
+        "type" : "object",
+        "properties" : {
+          "resolved" : {
+            "type" : "boolean"
+          }
+        }
       },
       "CreateCampaignRequest" : {
         "type" : "object",
@@ -11237,6 +12162,44 @@
           }
         },
         "required" : [ "movedCampaigns", "path" ]
+      },
+      "AttachmentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "targetType" : {
+            "type" : "string",
+            "enum" : [ "REQUIREMENT", "EXECUTION_STEP", "DEFECT", "SESSION_NOTE" ]
+          },
+          "targetId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "fileName" : {
+            "type" : "string"
+          },
+          "contentType" : {
+            "type" : "string"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "image" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "contentType", "createdAt", "fileName", "id", "image", "size", "targetId", "targetType" ]
       },
       "GherkinValidateRequest" : {
         "type" : "object",
@@ -12374,6 +13337,29 @@
         },
         "required" : [ "description", "requirementKeys", "severity", "title" ]
       },
+      "SearchHit" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "REQUIREMENT", "TEST", "CAMPAIGN", "DEFECT", "RUN", "REPORT", "SPRINT", "RELEASE" ]
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "detail" : {
+            "type" : "string",
+            "description" : "Type d'exigence, nature du test, sévérité, campagne d'un run…"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "key", "title", "type" ]
+      },
       "SseEmitter" : {
         "type" : "object",
         "properties" : {
@@ -12728,6 +13714,58 @@
         },
         "required" : [ "linkId", "linkType", "suspect", "test", "via" ]
       },
+      "ExampleMapResponse" : {
+        "type" : "object",
+        "properties" : {
+          "storyKey" : {
+            "type" : "string"
+          },
+          "storyTitle" : {
+            "type" : "string"
+          },
+          "asA" : {
+            "type" : "string"
+          },
+          "iWant" : {
+            "type" : "string"
+          },
+          "soThat" : {
+            "type" : "string"
+          },
+          "rules" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ExampleRuleResponse"
+            }
+          },
+          "questions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CommentResponse"
+            }
+          },
+          "openQuestions" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "openQuestions", "questions", "rules", "storyKey", "storyTitle" ]
+      },
+      "ExampleRuleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "rule" : {
+            "$ref" : "#/components/schemas/ExampleCardResponse"
+          },
+          "examples" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ExampleCardResponse"
+            }
+          }
+        },
+        "required" : [ "examples", "rule" ]
+      },
       "RequirementDefectResponse" : {
         "type" : "object",
         "properties" : {
@@ -12846,6 +13884,34 @@
           }
         },
         "required" : [ "children", "criteriaCount", "key", "needsSplitting", "priority", "rank", "riskLevel", "status", "title", "type", "verificationStatus" ]
+      },
+      "NotificationsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "activeSprintKey" : {
+            "type" : "string"
+          },
+          "activeSprintName" : {
+            "type" : "string"
+          },
+          "myTests" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "sessionsToApprove" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "blockingDefects" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "failedRuns" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "blockingDefects", "failedRuns", "myTests", "sessionsToApprove" ]
       },
       "MyExecutionResponse" : {
         "type" : "object",

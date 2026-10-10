@@ -48,6 +48,13 @@ class RequirementSearchFragmentImpl implements RequirementSearchFragment {
                 return new PageImpl<>(List.of(), pageable, 0);
             }
         }
+        if (filter.ids() != null) {
+            List<UUID> restricted = matching == null ? new ArrayList<>(filter.ids()) : matching.stream().filter(filter.ids()::contains).toList();
+            if (restricted.isEmpty()) {
+                return new PageImpl<>(List.of(), pageable, 0);
+            }
+            matching = restricted;
+        }
         List<UUID> ids = matching;
         Specification<Requirement> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

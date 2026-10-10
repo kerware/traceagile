@@ -39,8 +39,8 @@ const EXECUTION: ExecutionDetail = {
   parameterValues: {}, defects: [], editable: true, dataSets: [],
   attempts: [{ id: 'e1', attempt: 1, status: 'RUNNING', startedAt: '2026-10-09T09:00:00Z', origin: 'MANUAL' }],
   steps: [
-    { position: 1, action: 'Ouvrir la fiche', expectedResult: 'La fiche s’affiche', status: 'NOT_RUN' },
-    { position: 2, action: 'Ajouter au panier', expectedResult: 'Total 2,50 €', status: 'NOT_RUN' },
+    { id: 's1', position: 1, action: 'Ouvrir la fiche', expectedResult: 'La fiche s’affiche', status: 'NOT_RUN' },
+    { id: 's2', position: 2, action: 'Ajouter au panier', expectedResult: 'Total 2,50 €', status: 'NOT_RUN' },
   ],
 };
 
@@ -192,7 +192,7 @@ describe('§13.2 /p/:key/campaigns/:ck — campagne (F-CMP-02 à F-CMP-05)', () 
 });
 
 describe('§13.2 /p/:key/executions/:id — exécution pas à pas (F-EXE-01 à F-EXE-03)', () => {
-  it('un pas réussi passe au suivant ; un pas en échec propose de créer l’anomalie pré-remplie', async () => {
+  it('un pas réussi passe au suivant (touche P, §13.3) ; un pas en échec propose de créer l’anomalie pré-remplie', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     let current = EXECUTION;
     const puts: unknown[] = [];
@@ -221,11 +221,13 @@ describe('§13.2 /p/:key/executions/:id — exécution pas à pas (F-EXE-01 à F
     renderRoutes(routes, '/p/SHOP/executions/e1');
 
     expect(await screen.findByTestId('step-action')).toHaveTextContent('Ouvrir la fiche');
-    await userEvent.click(screen.getByTestId('step-PASSED'));
+    await userEvent.keyboard('p');
     await waitFor(() => expect(screen.getByTestId('step-action')).toHaveTextContent('Ajouter au panier'));
-    await userEvent.type(screen.getByTestId('step-actual'), 'Total 0 €');
+    // une saisie contenant « f » ne déclenche pas le raccourci « échouer »
+    await userEvent.type(screen.getByTestId('step-actual'), 'Total faux');
+    expect(puts).toHaveLength(1);
     await userEvent.click(screen.getByTestId('step-FAILED'));
-    await waitFor(() => expect(puts).toEqual([{ position: 1, status: 'PASSED' }, { position: 2, status: 'FAILED', actualResult: 'Total 0 €' }]));
+    await waitFor(() => expect(puts).toEqual([{ position: 1, status: 'PASSED' }, { position: 2, status: 'FAILED', actualResult: 'Total faux' }]));
 
     await userEvent.click(await screen.findByTestId('create-defect'));
     expect(await screen.findByTestId('defect-title')).toHaveValue('TC-1 Ajouter un produit : échec au pas 2');
@@ -298,7 +300,7 @@ describe('F-DEF-01 anomalies', () => {
         return HttpResponse.json([summary]);
       }),
       http.get(`${P}/defects/DEF-1`, () =>
-        HttpResponse.json({ defect: summary, description: 'Étapes…', allowedTransitions: ['IN_PROGRESS', 'RESOLVED', 'REJECTED'], requirements: [{ key: 'REQ-2', title: 'Ajouter' }], executions: [] } satisfies DefectDetail),
+        HttpResponse.json({ defect: summary, description: 'Étapes…', allowedTransitions: ['IN_PROGRESS', 'RESOLVED', 'REJECTED'], requirements: [{ key: 'REQ-2', title: 'Ajouter' }], executions: [], id: 'd-1' } satisfies DefectDetail),
       ),
       http.patch(`${P}/defects/DEF-1`, async ({ request }) => {
         patch = await request.json();

@@ -19,6 +19,9 @@ public interface ExecutionResults {
     /** Dernière exécution de chaque test du projet ; un test absent n'a jamais été exécuté. */
     Map<UUID, LastExecution> latest(String projectKey);
 
+    /** NF-01 dernière exécution de ces tests seulement (statuts d'une page du backlog). */
+    Map<UUID, LastExecution> latestOf(Collection<UUID> testIds);
+
     /** §7.2 dernière exécution de chaque test dans les campagnes du périmètre (sprint, release). */
     Map<UUID, LastExecution> latestIn(String projectKey, Predicate<Campaign> campaigns);
 

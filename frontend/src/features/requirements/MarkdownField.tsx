@@ -1,10 +1,10 @@
 import { Input, Loader, useComputedColorScheme } from '@mantine/core';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import rehypeSanitize from 'rehype-sanitize';
+import { MarkdownView } from '../../components/markdown/MarkdownView';
 
 // Éditeur chargé à la demande : il pèse lourd et n'est utile que sur la fiche (§11.4).
 const MDEditor = lazy(() => import('@uiw/react-md-editor'));
-const Markdown = lazy(() => import('@uiw/react-md-editor').then((m) => ({ default: m.default.Markdown })));
 
 /**
  * F-REQ-08 description Markdown avec prévisualisation ; le rendu est assaini (rehype-sanitize,
@@ -15,19 +15,33 @@ export function MarkdownField({
   value,
   onChange,
   readOnly,
+  project,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   readOnly: boolean;
+  /** ADR-0024 les clés citées deviennent cliquables en lecture. */
+  project?: string;
 }) {
   const scheme = useComputedColorScheme('light');
+  const container = useRef<HTMLDivElement>(null);
+  // NF-10 icônes de la barre d'outils (bibliothèque tierce) : décoratives, leurs boutons sont nommés
+  useEffect(() => {
+    const root = container.current;
+    if (!root) return;
+    const hide = () => root.querySelectorAll('svg[role="img"]:not([aria-hidden])').forEach((svg) => svg.setAttribute('aria-hidden', 'true'));
+    hide();
+    const observer = new MutationObserver(hide);
+    observer.observe(root, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
   return (
     <Input.Wrapper label={label}>
-      <div data-color-mode={scheme} data-testid="field-description">
+      <div ref={container} data-color-mode={scheme} data-testid="field-description">
         <Suspense fallback={<Loader size="sm" />}>
           {readOnly ? (
-            <Markdown source={value || '—'} rehypePlugins={[[rehypeSanitize]]} />
+            <MarkdownView project={project} source={value} />
           ) : (
             <MDEditor
               value={value}

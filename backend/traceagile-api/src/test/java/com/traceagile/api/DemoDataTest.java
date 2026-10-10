@@ -97,11 +97,17 @@ class DemoDataTest extends AbstractApiTest {
     @Autowired
     DemoReportLoader reportLoader;
     @Autowired
+    com.traceagile.api.demo.DemoWorkshopLoader workshopLoader;
+    @Autowired
+    com.traceagile.application.requirement.WorkshopService workshop;
+    @Autowired
+    com.traceagile.application.requirement.NfrMeasurementService measurements;
+    @Autowired
     com.traceagile.application.reporting.ReportService reports;
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
-                testsLoader, planningLoader, campaignLoader, automationLoader, reportLoader);
+                testsLoader, planningLoader, campaignLoader, automationLoader, reportLoader, workshopLoader);
     }
 
     @Test
@@ -238,6 +244,14 @@ class DemoDataTest extends AbstractApiTest {
             assertThat(r.getVerdict()).isIn(com.traceagile.domain.reporting.Verdict.NO_GO, com.traceagile.domain.reporting.Verdict.GO_WITH_RESERVATIONS);
         });
         assertThat(reports.definitions("SHOP")).extracting(d -> d.getName()).contains("Bilan de sprint", "Bilan de release", "Synthèse qualité");
+
+        // Lot 9 (ADR-0024) : atelier Example Mapping, commentaires, questions, valeurs mesurées des ENF
+        Requirement delivery = requirements.backlog("SHOP").stream().filter(r -> r.getTitle().equals("Choisir le mode de livraison")).findFirst().orElseThrow();
+        assertThat(workshop.cards("SHOP", delivery.getKey())).hasSize(5).allSatisfy(c -> assertThat(c.getConvertedTo()).isNull());
+        assertThat(workshop.comments("SHOP", delivery.getKey())).hasSize(3)
+                .filteredOn(c -> c.isOpenQuestion()).hasSize(1);
+        Requirement responseTime = requirements.backlog("SHOP").stream().filter(r -> r.getTitle().equals("Temps de réponse des pages")).findFirst().orElseThrow();
+        assertThat(measurements.latest(responseTime)).hasValueSatisfying(m -> assertThat(m.getOutcome()).hasToString("THRESHOLD_MET"));
 
         // Lot 7 (§15.1) : simulateur déclaré (appairé dès qu'il répond) ; 3 runs sur CMP-2 ; 2 tests instables
         assertThat(executionServers.list()).extracting(s -> s.getName()).containsExactly("Simulateur");

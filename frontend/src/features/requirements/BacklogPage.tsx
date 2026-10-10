@@ -18,6 +18,7 @@ import { useCanWriteRequirements } from './permissions';
 import { RequirementDetailView } from './RequirementDetailView';
 import { RequirementList } from './RequirementList';
 import { RequirementTree } from './RequirementTree';
+import { useShortcuts } from '../../components/search/useShortcuts';
 
 /**
  * §13.2 /p/:key/backlog — vues arbre et liste (F-REQ-01), glisser-déposer (F-REQ-02/03),
@@ -34,6 +35,8 @@ export function BacklogPage() {
   const [importing, importModal] = useDisclosure(false);
   const [search, setSearch] = useState(params.get('q') ?? '');
   const canWrite = useCanWriteRequirements(project);
+  // §13.3 N : nouvelle exigence
+  useShortcuts({ n: createModal.open }, canWrite);
 
   const view = params.get('view') === 'list' || params.get('q') ? 'list' : 'tree';
   const filters: RequirementFilters = filtersFromParams(params);

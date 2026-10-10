@@ -180,6 +180,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/example-cards/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["editCard"];
+        post?: never;
+        delete: operations["deleteCard"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/comments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["editComment"];
+        post?: never;
+        delete: operations["deleteComment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/checklists/{kind}": {
         parameters: {
             query?: never;
@@ -628,6 +660,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/requirements/{key}/measurements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post: operations["record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/example-cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}/duplicate": {
         parameters: {
             query?: never;
@@ -654,6 +718,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["linkToRequirement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["comments"];
+        put?: never;
+        post: operations["addComment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -820,6 +900,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/example-cards/{id}/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["convert_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/defects": {
         parameters: {
             query?: never;
@@ -830,6 +926,22 @@ export interface paths {
         get: operations["list_7"];
         put?: never;
         post: operations["create_6"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/comments/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resolve"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1060,6 +1172,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_10"];
+        put?: never;
+        post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/acceptance-criteria/{id}/generate-test": {
         parameters: {
             query?: never;
@@ -1099,7 +1227,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_10"];
+        get: operations["list_11"];
         put?: never;
         post: operations["create_9"];
         delete?: never;
@@ -1436,7 +1564,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_11"];
+        get: operations["list_12"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1548,7 +1676,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["history"];
+        get: operations["history_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1644,7 +1772,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_12"];
+        get: operations["list_13"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1661,6 +1789,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["defectDraft"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["search"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1852,7 +1996,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["history_1"];
+        get: operations["history_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1869,6 +2013,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["ofRequirement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/requirements/{key}/example-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exampleMap"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2006,6 +2166,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["notifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/my-executions": {
         parameters: {
             query?: never;
@@ -2014,6 +2190,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/items/{itemKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["item"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2166,6 +2358,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/attachments/{id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["content"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{key}": {
         parameters: {
             query?: never;
@@ -2193,6 +2401,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/attachments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_8"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2591,6 +2815,7 @@ export interface components {
             threshold?: string;
             target?: string;
             measured?: string;
+            measuredOutcome?: string;
             status?: string;
         };
         Recommendation: {
@@ -2857,6 +3082,11 @@ export interface components {
             dataSets: components["schemas"]["DataSetRef"][];
         };
         StepResultResponse: {
+            /**
+             * Format: uuid
+             * @description ADR-0024 porteur des captures du pas
+             */
+            id: string;
             /** Format: int32 */
             position: number;
             action: string;
@@ -2888,6 +3118,42 @@ export interface components {
             durationMin?: number;
             /** @description F-EXE-11 test instable */
             flaky?: boolean;
+        };
+        ExampleCardEditRequest: {
+            text: string;
+        };
+        ExampleCardResponse: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "RULE" | "EXAMPLE";
+            /** Format: uuid */
+            ruleId?: string;
+            text: string;
+            /** Format: int32 */
+            position: number;
+            /** @description F-REQ-14 clé de la règle métier créée ou « Critère n » */
+            convertedTo?: string;
+        };
+        CommentEditRequest: {
+            text: string;
+        };
+        CommentResponse: {
+            /** Format: uuid */
+            id: string;
+            author: string;
+            /** @description Markdown */
+            text: string;
+            question: boolean;
+            /** @description F-REQ-15 question non résolue */
+            open: boolean;
+            /** Format: date-time */
+            resolvedAt?: string;
+            resolvedBy?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            editedAt?: string;
         };
         ChecklistItemRequest: {
             /** Format: uuid */
@@ -3379,6 +3645,11 @@ export interface components {
             allowedTransitions: ("OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED")[];
             requirements: components["schemas"]["DefectRequirementRef"][];
             executions: components["schemas"]["DefectExecutionRef"][];
+            /**
+             * Format: uuid
+             * @description ADR-0024 porteur des pièces jointes
+             */
+            id: string;
         };
         DefectExecutionRef: {
             /** Format: uuid */
@@ -3643,6 +3914,35 @@ export interface components {
             /** @description Exigence après laquelle insérer (précédente) */
             afterKey?: string;
         };
+        NfrMeasurementRequest: {
+            /** Format: double */
+            value: number;
+        };
+        NfrMeasurementResponse: {
+            /** Format: double */
+            value: number;
+            unit?: string;
+            metric?: string;
+            /** @description Test de performance d'origine (absent : saisie) */
+            testKey?: string;
+            runKey?: string;
+            /** Format: date-time */
+            measuredAt: string;
+            /** @enum {string} */
+            outcome: "TARGET_MET" | "THRESHOLD_MET" | "NOT_MET" | "UNKNOWN";
+            createdBy?: string;
+        };
+        ExampleCardRequest: {
+            /** @enum {string} */
+            kind: "RULE" | "EXAMPLE";
+            /** Format: uuid */
+            ruleId?: string;
+            text: string;
+        };
+        CommentRequest: {
+            text: string;
+            question?: boolean;
+        };
         ImportResponse: {
             created: string[];
         };
@@ -3693,6 +3993,19 @@ export interface components {
             startDate?: string;
             /** Format: int32 */
             capacityPoints?: number;
+        };
+        ConversionResponse: {
+            card: components["schemas"]["ExampleCardResponse"];
+            /** @description Règle métier créée */
+            requirementKey?: string;
+            /**
+             * Format: int32
+             * @description Critère créé
+             */
+            criterionPosition?: number;
+        };
+        ResolveRequest: {
+            resolved?: boolean;
         };
         CreateCampaignRequest: {
             name: string;
@@ -3801,6 +4114,22 @@ export interface components {
              * @description Nombre de campagnes reclassées
              */
             movedCampaigns: number;
+        };
+        AttachmentResponse: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            targetType: "REQUIREMENT" | "EXECUTION_STEP" | "DEFECT" | "SESSION_NOTE";
+            /** Format: uuid */
+            targetId: string;
+            fileName: string;
+            contentType: string;
+            /** Format: int64 */
+            size: number;
+            image: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
         };
         GherkinValidateRequest: {
             source: string;
@@ -4206,6 +4535,15 @@ export interface components {
             /** @description Exigences couvertes par le test (liées par défaut) */
             requirementKeys: string[];
         };
+        SearchHit: {
+            /** @enum {string} */
+            type: "REQUIREMENT" | "TEST" | "CAMPAIGN" | "DEFECT" | "RUN" | "REPORT" | "SPRINT" | "RELEASE";
+            key: string;
+            title: string;
+            /** @description Type d'exigence, nature du test, sévérité, campagne d'un run… */
+            detail?: string;
+            status?: string;
+        };
         SseEmitter: {
             /** Format: int64 */
             timeout?: number | null;
@@ -4339,6 +4677,21 @@ export interface components {
             linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
             suspect: boolean;
         };
+        ExampleMapResponse: {
+            storyKey: string;
+            storyTitle: string;
+            asA?: string;
+            iWant?: string;
+            soThat?: string;
+            rules: components["schemas"]["ExampleRuleResponse"][];
+            questions: components["schemas"]["CommentResponse"][];
+            /** Format: int32 */
+            openQuestions: number;
+        };
+        ExampleRuleResponse: {
+            rule: components["schemas"]["ExampleCardResponse"];
+            examples: components["schemas"]["ExampleCardResponse"][];
+        };
         RequirementDefectResponse: {
             defect: components["schemas"]["DefectSummary"];
             linked: boolean;
@@ -4382,6 +4735,18 @@ export interface components {
              */
             verificationStatus: "NOT_COVERED" | "NOT_RUN" | "IN_PROGRESS" | "VALIDATED" | "FAILED" | "BLOCKED" | "SUSPECT";
             children: components["schemas"]["RequirementTreeNode"][];
+        };
+        NotificationsResponse: {
+            activeSprintKey?: string;
+            activeSprintName?: string;
+            /** Format: int32 */
+            myTests: number;
+            /** Format: int32 */
+            sessionsToApprove: number;
+            /** Format: int32 */
+            blockingDefects: number;
+            /** Format: int32 */
+            failedRuns: number;
         };
         MyExecutionResponse: {
             /** Format: uuid */
@@ -4958,6 +5323,102 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExecutionDetail"];
                 };
+            };
+        };
+    };
+    editCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExampleCardEditRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleCardResponse"];
+                };
+            };
+        };
+    };
+    deleteCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    editComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentEditRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentResponse"];
+                };
+            };
+        };
+    };
+    deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5773,6 +6234,7 @@ export interface operations {
                 tag?: string;
                 q?: string;
                 sprint?: string;
+                verification?: ("NOT_COVERED" | "NOT_RUN" | "IN_PROGRESS" | "VALIDATED" | "FAILED" | "BLOCKED" | "SUSPECT")[];
                 /** @description Zero-based page index (0..N) */
                 page?: number;
                 /** @description The size of the page to be returned */
@@ -5929,6 +6391,83 @@ export interface operations {
             };
         };
     };
+    history: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NfrMeasurementResponse"][];
+                };
+            };
+        };
+    };
+    record: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NfrMeasurementRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NfrMeasurementResponse"];
+                };
+            };
+        };
+    };
+    addCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExampleCardRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleCardResponse"];
+                };
+            };
+        };
+    };
     duplicate: {
         parameters: {
             query?: never;
@@ -5972,6 +6511,56 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
+    comments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentResponse"][];
+                };
+            };
+        };
+    };
+    addComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentResponse"];
                 };
             };
         };
@@ -6322,6 +6911,29 @@ export interface operations {
             };
         };
     };
+    convert_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversionResponse"];
+                };
+            };
+        };
+    };
     list_7: {
         parameters: {
             query?: {
@@ -6371,6 +6983,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
+    resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommentResponse"];
                 };
             };
         };
@@ -6851,6 +7490,63 @@ export interface operations {
             };
         };
     };
+    list_10: {
+        parameters: {
+            query: {
+                targetType: "REQUIREMENT" | "EXECUTION_STEP" | "DEFECT" | "SESSION_NOTE";
+                targetIds: string[];
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentResponse"][];
+                };
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query: {
+                targetType: "REQUIREMENT" | "EXECUTION_STEP" | "DEFECT" | "SESSION_NOTE";
+                targetId: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentResponse"];
+                };
+            };
+        };
+    };
     generateTest: {
         parameters: {
             query?: never;
@@ -6898,7 +7594,7 @@ export interface operations {
             };
         };
     };
-    list_10: {
+    list_11: {
         parameters: {
             query?: never;
             header?: never;
@@ -7816,7 +8512,7 @@ export interface operations {
             };
         };
     };
-    list_11: {
+    list_12: {
         parameters: {
             query?: never;
             header?: never;
@@ -7982,7 +8678,7 @@ export interface operations {
             };
         };
     };
-    history: {
+    history_1: {
         parameters: {
             query?: {
                 /** @description Zero-based page index (0..N) */
@@ -8132,7 +8828,7 @@ export interface operations {
             };
         };
     };
-    list_12: {
+    list_13: {
         parameters: {
             query?: {
                 state?: ("RUNNING" | "PAUSED" | "FINISHED" | "DEBRIEFED")[];
@@ -8176,6 +8872,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DefectDraftResponse"];
+                };
+            };
+        };
+    };
+    search: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchHit"][];
                 };
             };
         };
@@ -8438,7 +9158,7 @@ export interface operations {
             };
         };
     };
-    history_1: {
+    history_2: {
         parameters: {
             query?: {
                 /** @description Zero-based page index (0..N) */
@@ -8487,6 +9207,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RequirementExecutionResponse"][];
+                };
+            };
+        };
+    };
+    exampleMap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleMapResponse"];
                 };
             };
         };
@@ -8707,6 +9450,28 @@ export interface operations {
             };
         };
     };
+    notifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsResponse"];
+                };
+            };
+        };
+    };
     mine: {
         parameters: {
             query?: {
@@ -8727,6 +9492,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MyExecutionResponse"][];
+                };
+            };
+        };
+    };
+    item: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                itemKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchHit"];
                 };
             };
         };
@@ -8938,6 +9726,29 @@ export interface operations {
             };
         };
     };
+    content: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
     get_10: {
         parameters: {
             query?: never;
@@ -8977,6 +9788,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MeResponse"];
                 };
+            };
+        };
+    };
+    delete_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

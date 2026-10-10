@@ -96,7 +96,7 @@ public class CampaignMapper {
                 e.getTestCaseVersion(), e.getStatus(), e.derivedStatus(), e.isStatusOverridden(), e.getStartedAt(), e.getEndedAt(),
                 e.getDurationMs(), e.getComment(), e.getExecutedBy(), e.getOrigin(), e.getDataSetName(), e.getDataSetRow(),
                 e.getParameterValues(),
-                e.getSteps().stream().map(s -> new StepResultResponse(s.getPosition(), s.getAction(), s.getExpectedResult(), s.getTestData(),
+                e.getSteps().stream().map(s -> new StepResultResponse(s.getId(), s.getPosition(), s.getAction(), s.getExpectedResult(), s.getTestData(),
                         s.getStatus(), s.getActualResult(), s.getCalledFrom())).toList(),
                 defects.stream().map(this::defectRef).toList(),
                 item.getExecutions().stream().map(this::attempt).toList(),
@@ -119,6 +119,6 @@ public class CampaignMapper {
         return new DefectDetail(defectSummary(d), d.getDescription(), List.copyOf(d.getStatus().nextStatuses()),
                 d.getRequirements().stream().map(r -> new DefectRequirementRef(r.getKey(), r.getTitle())).toList(),
                 d.getExecutions().stream().map(e -> new DefectExecutionRef(e.getId(), e.getTestCase().getKey(),
-                        e.getItem().getCampaign().getKey(), e.getAttempt(), e.getStatus())).toList());
+                        e.getItem().getCampaign().getKey(), e.getAttempt(), e.getStatus())).toList(), d.getId());
     }
 }

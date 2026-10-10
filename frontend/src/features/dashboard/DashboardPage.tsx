@@ -104,7 +104,10 @@ function ActiveSprintCard({ project, data }: { project: string; data: Dashboard 
           <Text size="sm" data-testid="widget-sprint-days">
             {t('dashboard.daysLeft', { count: sprint.daysLeft ?? 0 })}
           </Text>
-          <Progress value={sprint.committedPoints ? ((sprint.donePoints ?? 0) * 100) / sprint.committedPoints : 0} />
+          <Progress.Root>
+            <Progress.Section value={sprint.committedPoints ? ((sprint.donePoints ?? 0) * 100) / sprint.committedPoints : 0}
+              aria-label={t('dashboard.points', { done: sprint.donePoints ?? 0, committed: sprint.committedPoints ?? 0 })} />
+          </Progress.Root>
           <Text size="sm" data-testid="widget-sprint-points">
             {t('dashboard.points', { done: sprint.donePoints ?? 0, committed: sprint.committedPoints ?? 0 })}
           </Text>
@@ -212,7 +215,10 @@ function DefectsCard({ project, data }: { project: string; data: Dashboard }) {
             <Text size="xs" w={70}>
               {t(`severity.${severity}`)}
             </Text>
-            <Progress value={(n * 100) / max} color={SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS]} style={{ flex: 1 }} />
+            <Progress.Root style={{ flex: 1 }}>
+              <Progress.Section value={(n * 100) / max} color={SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS]}
+                aria-label={`${t(`severity.${severity}`)} : ${n}`} />
+            </Progress.Root>
             <Text size="xs" w={20} ta="right" data-testid={`widget-defects-${severity}`}>
               {n}
             </Text>

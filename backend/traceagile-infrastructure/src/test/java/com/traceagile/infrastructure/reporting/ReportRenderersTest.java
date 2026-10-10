@@ -80,7 +80,7 @@ class ReportRenderersTest {
                 new DefectSection(3, 1, 2, severities, List.of(new BlockingDefect("DEF-3", "Paiement refusé à tort", "BLOCKER", "IN_PROGRESS"))),
                 List.of(new RiskItem("REQ-12", "Payer par carte", "CRITICAL", "FAILED")),
                 null, null,
-                List.of(new NfrRow("REQ-40", "Temps de réponse du paiement", "PERFORMANCE", "2 s", "1 s", null, "NOT_RUN")),
+                List.of(new NfrRow("REQ-40", "Temps de réponse du paiement", "PERFORMANCE", "2 s", "1 s", "1,4 s", "THRESHOLD_MET", "NOT_RUN")),
                 List.of(new RequirementRow("REQ-12", "Payer par carte", "USER_STORY", "CRITICAL", 3, 3, 2, "FAILED")),
                 List.of(new DefectRow("DEF-3", "Paiement refusé à tort", "BLOCKER", "IN_PROGRESS", "REQ-12", "2026-10-14")),
                 List.of(new TestResultRow("CMP-2", "TC-7", "Ajouter un produit au panier", "MANUAL", "PASSED", "qa1", "2026-10-13")),

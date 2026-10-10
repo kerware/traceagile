@@ -144,15 +144,18 @@ export function CampaignFolderTree({ project, campaigns, selected, onSelect, can
     return (
       <Box key={n.path} pl={depth ? 18 : 0} role="treeitem" aria-expanded={open}>
         {row(n.path, n.path, n.name, selected === n.path ? <IconFolderOpen size={16} /> : <IconFolder size={16} />, n.total, items(n.path, n.total), n.children.length > 0, open)}
-        {open && n.children.length > 0 && <Stack gap={2}>{n.children.map((c) => node(c, depth + 1))}</Stack>}
+        {open && n.children.length > 0 && <Stack gap={2} role="group">{n.children.map((c) => node(c, depth + 1))}</Stack>}
       </Box>
     );
   };
 
   return (
-    <Stack gap={2} data-testid="campaign-folder-tree" role="tree">
+    <Stack gap={2} data-testid="campaign-folder-tree">
       {row('root', null, t('campaignFolders.all'), <IconStack2 size={16} />, campaigns.length, items(null, 0), false, true)}
-      {roots.map((n) => node(n, 0))}
+      {/* NF-10 le rôle « tree » ne contient que des nœuds (treeitem) */}
+      <Stack gap={2} role="tree" aria-label={t('campaignFolders.tree')}>
+        {roots.map((n) => node(n, 0))}
+      </Stack>
       {unclassified.length > 0 && roots.length > 0 && (
         <Text size="xs" c="dimmed" pl={28}>
           {t('campaignFolders.unclassified', { count: unclassified.length })}

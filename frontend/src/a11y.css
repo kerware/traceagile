@@ -1,0 +1,54 @@
+/* NF-10 contrastes WCAG 2.1 AA (≥ 4,5:1) en thème clair : texte « atténué » et textes colorés des
+   variantes « light », « subtle », « outline » et des Text colorés, plus foncés que les teintes Mantine
+   par défaut (shade 6, environ 3:1 sur fond clair). Sélecteur renforcé : Mantine injecte ses variables
+   dans une balise <style> ajoutée après cette feuille. */
+:root:root[data-mantine-color-scheme='light'] {
+  --mantine-color-dimmed: #5c636a;
+  --mantine-color-blue-light-color: #1864ab;
+  --mantine-color-blue-text: #1864ab;
+  --mantine-color-blue-outline: #1864ab;
+  --mantine-color-red-light-color: #b02525;
+  --mantine-color-red-text: #b02525;
+  --mantine-color-red-outline: #b02525;
+  --mantine-color-green-light-color: #1f6b30;
+  --mantine-color-green-text: #1f6b30;
+  --mantine-color-green-outline: #1f6b30;
+  --mantine-color-teal-light-color: #066649;
+  --mantine-color-teal-text: #066649;
+  --mantine-color-teal-outline: #066649;
+  --mantine-color-orange-light-color: #a8380b;
+  --mantine-color-orange-text: #a8380b;
+  --mantine-color-orange-outline: #a8380b;
+  --mantine-color-yellow-light-color: #7a5200;
+  --mantine-color-yellow-text: #7a5200;
+  --mantine-color-yellow-outline: #7a5200;
+  --mantine-color-grape-light-color: #862e9c;
+  --mantine-color-grape-text: #862e9c;
+  --mantine-color-grape-outline: #862e9c;
+  --mantine-color-cyan-light-color: #0b6375;
+  --mantine-color-cyan-text: #0b6375;
+  --mantine-color-cyan-outline: #0b6375;
+  --mantine-color-violet-light-color: #5f3dc4;
+  --mantine-color-violet-text: #5f3dc4;
+  --mantine-color-violet-outline: #5f3dc4;
+  --mantine-color-indigo-light-color: #364fc7;
+  --mantine-color-indigo-text: #364fc7;
+  --mantine-color-indigo-outline: #364fc7;
+  --mantine-color-pink-light-color: #a61e4d;
+  --mantine-color-pink-text: #a61e4d;
+  --mantine-color-pink-outline: #a61e4d;
+  --mantine-color-lime-light-color: #456f0a;
+  --mantine-color-lime-text: #456f0a;
+  --mantine-color-lime-outline: #456f0a;
+  --mantine-color-gray-light-color: #495057;
+  --mantine-color-gray-text: #495057;
+  --mantine-color-gray-outline: #495057;
+  --mantine-color-dark-light-color: #25262b;
+  --mantine-color-dark-text: #25262b;
+  --mantine-color-dark-outline: #25262b;
+}
+
+/* NF-10 thème sombre : texte « atténué » plus clair (dark-2 = 4:1 sur les cartes, #a3a3a3 ≥ 5,4:1). */
+:root:root[data-mantine-color-scheme='dark'] {
+  --mantine-color-dimmed: #a3a3a3;
+}

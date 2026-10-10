@@ -4,17 +4,19 @@ import {
   Burger,
   Button,
   Group,
+  Indicator,
+  Kbd,
   Menu,
   NavLink,
   Select,
   Text,
-  TextInput,
   Title,
-  Tooltip,
   useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useEffect } from 'react';
 import {
+  IconBell,
   IconBug,
   IconChartBar,
   IconChecklist,
@@ -39,6 +41,10 @@ import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useProjects } from '../api/queries';
+import { useNotifications } from '../api/workshop';
+import { SearchSpotlight } from '../components/search/SearchSpotlight';
+import { emitShortcut, typing } from '../components/search/shortcuts';
+import { ShortcutsHelp } from '../components/search/ShortcutsHelp';
 import { useAuthStore } from '../features/auth/authStore';
 import { navigationFor, type NavId } from './navigation';
 
@@ -63,6 +69,9 @@ export function AppLayout() {
   const user = useAuthStore((s) => s.user)!;
   const projectKey = useMatch('/p/:key/*')?.params.key ?? null;
   const { pathname } = useLocation();
+  const [searchOpened, search] = useDisclosure(false);
+  const [helpOpened, help] = useDisclosure(false);
+  useGlobalShortcuts(search.open, help.open);
 
   return (
     <AppShell
@@ -83,16 +92,22 @@ export function AppLayout() {
             <ProjectSelector current={projectKey} />
           </Group>
           <Group wrap="nowrap">
-            <Tooltip label="Lot 9">
-              <TextInput
-                data-testid="global-search"
-                placeholder={t('layout.search')}
-                aria-label={t('layout.search')}
-                leftSection={<IconSearch size={16} />}
-                disabled
-                visibleFrom="md"
-              />
-            </Tooltip>
+            {projectKey && <ActiveSprint project={projectKey} />}
+            <Button
+              variant="default"
+              leftSection={<IconSearch size={16} />}
+              rightSection={<Kbd size="xs">Ctrl K</Kbd>}
+              onClick={search.open}
+              visibleFrom="md"
+              w={260}
+              justify="space-between"
+              c="dimmed"
+              fw={400}
+              data-testid="global-search"
+            >
+              {t('layout.search')}
+            </Button>
+            {projectKey && <NotificationsMenu project={projectKey} />}
             <ThemeToggle />
             <UserMenu />
           </Group>
@@ -119,7 +134,84 @@ export function AppLayout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+      <SearchSpotlight project={projectKey} opened={searchOpened} onClose={search.close} />
+      <ShortcutsHelp opened={helpOpened} onClose={help.close} />
     </AppShell>
+  );
+}
+
+/** §13.3 raccourcis globaux : Ctrl+K et « / » (recherche), « ? » (aide), N et E (diffusés aux pages). */
+function useGlobalShortcuts(openSearch: () => void, openHelp: () => void) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        openSearch();
+        return;
+      }
+      if (event.ctrlKey || event.metaKey || event.altKey || typing(event.target) || document.querySelector('[role="dialog"]')) return;
+      if (event.key === '?') {
+        event.preventDefault();
+        openHelp();
+      } else if (event.key === '/') {
+        event.preventDefault();
+        openSearch();
+      } else if (event.key === 'n' || event.key === 'N') {
+        emitShortcut('new');
+      } else if (event.key === 'e' || event.key === 'E') {
+        emitShortcut('edit');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [openSearch, openHelp]);
+}
+
+/** §13.1 sprint actif du projet (lien vers la planification). */
+function ActiveSprint({ project }: { project: string }) {
+  const { t } = useTranslation();
+  const { data } = useNotifications(project);
+  if (!data?.activeSprintKey) return null;
+  return (
+    <Button component={Link} to={`/p/${project}/planning?sprint=${data.activeSprintKey}`} variant="light" size="xs" visibleFrom="lg"
+      data-testid="active-sprint" title={t('layout.activeSprint')}>
+      {data.activeSprintKey} — {data.activeSprintName}
+    </Button>
+  );
+}
+
+/** §13.1 notifications calculées à la demande (ADR-0024). */
+function NotificationsMenu({ project }: { project: string }) {
+  const { t } = useTranslation();
+  const { data } = useNotifications(project);
+  const items = data
+    ? [
+        { id: 'myTests', count: data.myTests, to: `/p/${project}/my-executions` },
+        { id: 'sessionsToApprove', count: data.sessionsToApprove, to: `/p/${project}/exploratory` },
+        { id: 'blockingDefects', count: data.blockingDefects, to: `/p/${project}/defects?status=OPEN&status=IN_PROGRESS&severity=BLOCKER&severity=CRITICAL` },
+        { id: 'failedRuns', count: data.failedRuns, to: `/p/${project}/dashboard` },
+      ]
+    : [];
+  const total = items.reduce((sum, i) => sum + i.count, 0);
+  return (
+    <Indicator label={total} size={16} disabled={total === 0} offset={4} color="red">
+      <Menu position="bottom-end" withinPortal>
+        <Menu.Target>
+          <ActionIcon variant="default" size="lg" aria-label={t('notifications.title', { count: total })} data-testid="notifications">
+            <IconBell size={18} />
+          </ActionIcon>
+        </Menu.Target>
+      <Menu.Dropdown>
+        <Menu.Label>{t('notifications.label')}</Menu.Label>
+        {items.map((item) => (
+          <Menu.Item key={item.id} component={Link} to={item.to} disabled={item.count === 0} data-testid={`notification-${item.id}`}
+            rightSection={<Text size="sm" fw={700}>{item.count}</Text>}>
+            {t(`notifications.${item.id}`)}
+          </Menu.Item>
+        ))}
+        </Menu.Dropdown>
+      </Menu>
+    </Indicator>
   );
 }
 

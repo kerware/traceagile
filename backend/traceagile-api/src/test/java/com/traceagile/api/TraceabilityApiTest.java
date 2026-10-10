@@ -277,4 +277,26 @@ class TraceabilityApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.verificationStatus", is("NOT_RUN")))
                 .andExpect(jsonPath("$.criteria[0].status", is("TO_VERIFY")));
     }
+
+    @Test
+    @DisplayName("NF-01 / ADR-0024 les statuts calculés page par page (sous-arbres seulement) sont ceux du calcul sur tout le projet")
+    void pagedStatusesMatchProjectStatuses() throws Exception {
+        link("TC-1", "REQ-3", "VERIFIES", List.of());
+        Map<String, String> fromTree = new java.util.HashMap<>();
+        java.util.Deque<com.fasterxml.jackson.databind.JsonNode> nodes = new java.util.ArrayDeque<>();
+        readJson(mvc.perform(get(P + "/requirements/tree").header("Authorization", po)).andReturn().getResponse().getContentAsString())
+                .forEach(nodes::add);
+        while (!nodes.isEmpty()) {
+            var node = nodes.pop();
+            fromTree.put(node.get("key").asText(), node.get("verificationStatus").asText());
+            node.get("children").forEach(nodes::add);
+        }
+        Map<String, String> fromPages = new java.util.HashMap<>();
+        for (int page = 0; page * 2 < fromTree.size(); page++) {
+            readJson(mvc.perform(get(P + "/requirements").param("size", "2").param("page", String.valueOf(page)).param("sort", "key,asc")
+                    .header("Authorization", po)).andReturn().getResponse().getContentAsString()).get("content")
+                    .forEach(r -> fromPages.put(r.get("key").asText(), r.get("verificationStatus").asText()));
+        }
+        org.assertj.core.api.Assertions.assertThat(fromPages).isEqualTo(fromTree).isNotEmpty();
+    }
 }

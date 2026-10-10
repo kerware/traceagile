@@ -16,7 +16,8 @@
     "search": "Rechercher (Ctrl+K)",
     "toggleTheme": "Basculer thème clair / sombre",
     "projects": "Projets",
-    "userMenu": "Menu utilisateur"
+    "userMenu": "Menu utilisateur",
+    "activeSprint": "Sprint actif"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -217,7 +218,8 @@
     "collapse": "Replier",
     "openFull": "Ouvrir en pleine page",
     "moved": "{{key}} déplacée",
-    "total": "{{count}} exigence(s)"
+    "total": "{{count}} exigence(s)",
+    "filterVerification": "Vérification"
   },
   "requirement": {
     "create": "Créer l'exigence",
@@ -1090,7 +1092,8 @@
     "folderHint": "Chemin « a/b » ; vide = racine. Un nouveau chemin crée le dossier.",
     "file": "Ranger",
     "fileTitle": "Ranger {{key}} dans un dossier",
-    "fileHint": "Dossier existant ou nouveau chemin ; vide = racine. Possible même campagne terminée."
+    "fileHint": "Dossier existant ou nouveau chemin ; vide = racine. Possible même campagne terminée.",
+    "tree": "Dossiers de campagnes"
   },
   "sessionState": {
     "RUNNING": "En cours",
@@ -1159,7 +1162,8 @@
     "awaitingApproval": "En attente d'approbation par un autre utilisateur (PO ou responsable des tests).",
     "followUp": "Chartes de suivi (Outlook)",
     "followUpCreated": "Charte {{key}} créée",
-    "createCharter": "Créer la charte"
+    "createCharter": "Créer la charte",
+    "capture": "Capture d'écran"
   },
   "exploratory": {
     "title": "Exploratoire",
@@ -1452,5 +1456,114 @@
     "GO": "Go",
     "GO_WITH_RESERVATIONS": "Go sous réserve",
     "NO_GO": "No go"
+  },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Clé ou titre : REQ-12, « paiement »…",
+    "noProject": "Choisissez d'abord un projet",
+    "results": "Résultats",
+    "empty": "Rien ne correspond à « {{q}} ».",
+    "hint": "Tapez au moins 2 caractères ; ↑ ↓ pour choisir, Entrée pour ouvrir.",
+    "notFound": "{{key}} introuvable",
+    "type": {
+      "REQUIREMENT": "Exigence",
+      "TEST": "Test",
+      "CAMPAIGN": "Campagne",
+      "DEFECT": "Anomalie",
+      "RUN": "Run",
+      "REPORT": "Rapport",
+      "SPRINT": "Sprint",
+      "RELEASE": "Release"
+    }
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "intro": "Les raccourcis d'une lettre ne s'appliquent pas pendant la saisie dans un champ.",
+    "help": "Afficher cette aide",
+    "search": "Recherche globale",
+    "searchSlash": "Recherche globale",
+    "new": "Nouvel élément",
+    "edit": "Éditer (le titre prend le focus)",
+    "pass": "Pas courant réussi",
+    "fail": "Pas courant en échec",
+    "block": "Pas courant bloqué",
+    "where": {
+      "everywhere": "Partout",
+      "lists": "Backlog, tests, campagnes, anomalies, rapports",
+      "details": "Fiche exigence, fiche test",
+      "execution": "Exécution manuelle"
+    }
+  },
+  "notifications": {
+    "title_one": "Notifications ({{count}})",
+    "title_other": "Notifications ({{count}})",
+    "label": "À traiter",
+    "myTests": "Tests à exécuter qui me sont affectés",
+    "sessionsToApprove": "Sessions à approuver",
+    "blockingDefects": "Anomalies bloquantes ou critiques ouvertes",
+    "failedRuns": "Runs en échec (24 h)"
+  },
+  "attachments": {
+    "title": "Pièces jointes",
+    "pasteHint": "· collez une image (Ctrl+V)",
+    "add": "Ajouter un fichier",
+    "deleteTitle": "Supprimer la pièce jointe",
+    "deleteMessage": "Supprimer « {{name}} » ?",
+    "delete": "Supprimer {{name}}"
+  },
+  "comments": {
+    "empty": "Aucun commentaire.",
+    "placeholder": "Votre commentaire (Markdown ; les clés comme REQ-12 deviennent des liens)",
+    "new": "Nouveau commentaire",
+    "asQuestion": "C'est une question (bloque « Prête » tant qu'elle est ouverte)",
+    "send": "Commenter",
+    "edited": "modifié",
+    "openQuestion": "Question ouverte",
+    "resolvedBy": "Résolue par {{by}}",
+    "resolve": "Marquer comme résolue",
+    "reopen": "Rouvrir la question",
+    "deleteTitle": "Supprimer le commentaire",
+    "deleteMessage": "Supprimer ce commentaire ?",
+    "openQuestionsWarning_one": "{{count}} question ouverte : la story ne passera à « Prête » qu'avec l'accord du PO.",
+    "openQuestionsWarning_other": "{{count}} questions ouvertes : la story ne passera à « Prête » qu'avec l'accord du PO."
+  },
+  "exampleMapping": {
+    "story": "Story",
+    "iWant": "je veux",
+    "soThat": "afin de",
+    "rules": "Règles",
+    "ruleN": "Règle {{n}}",
+    "newRule": "Nouvelle règle…",
+    "examples": "Exemples",
+    "noRule": "Ajoutez d'abord une règle.",
+    "newExample": "Nouvel exemple…",
+    "questions": "Questions",
+    "newQuestion": "Nouvelle question…",
+    "convertedTo": "Converti :",
+    "actions": "Actions de la carte",
+    "convertRule": "Convertir en règle métier",
+    "convertExample": "Convertir en critère Gherkin",
+    "ruleConverted": "Règle métier {{key}} créée",
+    "exampleConverted": "Critère {{position}} créé (Gherkin à compléter)",
+    "editCard": "Modifier la carte",
+    "text": "Texte"
+  },
+  "measurements": {
+    "title": "Valeurs mesurées",
+    "limits": "seuil {{threshold}} · cible {{target}} {{unit}}",
+    "none": "Aucune mesure pour l'instant.",
+    "date": "Date",
+    "value": "Valeur",
+    "source": "Origine",
+    "result": "Résultat",
+    "manual": "saisie ({{by}})",
+    "newValue": "Nouvelle mesure",
+    "record": "Enregistrer",
+    "outcome": {
+      "TARGET_MET": "Cible atteinte",
+      "THRESHOLD_MET": "Seuil respecté",
+      "NOT_MET": "Seuil dépassé",
+      "UNKNOWN": "Sans seuil chiffré"
+    }
   }
 }

@@ -48,7 +48,7 @@ function RunView({ project, detail }: { project: string; detail: RunDetail }) {
             <RunStatusBadge status={run.status} testId="run-status" />
           </Group>
           <Text size="sm" c="dimmed">
-            <Anchor component={Link} to={`/p/${project}/campaigns/${run.campaign.key}`} size="sm">
+            <Anchor component={Link} to={`/p/${project}/campaigns/${run.campaign.key}`} size="sm" underline="always">
               {run.campaign.key} {run.campaign.name}
             </Anchor>
             {` · ${t('campaigns.environment')} : ${run.environment ?? '—'} · ${t('campaigns.build')} : ${run.buildVersion ?? '—'}`}

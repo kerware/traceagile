@@ -20,7 +20,7 @@ final class Screenshots {
     }
 
     static byte[] failure(String testKey, boolean technicalError) {
-        int seed = Math.abs(testKey.hashCode());
+        int seed = Math.floorMod(testKey.hashCode(), 1_000_003);
         int[] accent = {40 + seed % 120, 90 + seed % 100, 160 + seed % 80};
         int[] alert = technicalError ? new int[] {140, 60, 170} : new int[] {220, 50, 50};
         ByteArrayOutputStream raw = new ByteArrayOutputStream();

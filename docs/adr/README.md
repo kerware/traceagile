@@ -28,3 +28,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0021](0021-artefacts-execution-automatisee.md) | Artefacts d'exécution automatisée : traces système, JUnit XML, Jest JSON, copies d'écran | 7 |
 | [0022](0022-selection-jeux-de-donnees.md) | Un test manuel à jeu de données est sélectionné avec ses lignes | 5 |
 | [0023](0023-bilans-et-rapports-configurables.md) | Bilans, tableau de bord et générateur de rapports configurables (HTML, PDF, Word, Excel, Markdown, CSV, JSON) | 8 |
+| [0024](0024-atelier-et-finitions.md) | Atelier Example Mapping, commentaires, pièces jointes, recherche, raccourcis, finitions et vérification des NF | 9 |

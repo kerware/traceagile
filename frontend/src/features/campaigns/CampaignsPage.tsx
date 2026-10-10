@@ -9,6 +9,7 @@ import { useReleases, useSprints } from '../../api/planning';
 import { CampaignStatusBadge, ProgressBar } from './CampaignBadges';
 import { CAMPAIGN_DRAG_TYPE, CampaignFolderTree } from './CampaignFolderTree';
 import { useCanManageCampaigns } from './permissions';
+import { useShortcuts } from '../../components/search/useShortcuts';
 
 /** Dossier sélectionné dans l'arbre : la campagne y est rangée, directement ou dans un sous-dossier. */
 function within(folder: string | null | undefined, root: string | null): boolean {
@@ -23,6 +24,8 @@ export function CampaignsPage() {
   const canManage = useCanManageCampaigns(project);
   const [creating, setCreating] = useState<{ folder: string | null } | null>(null);
   const [folder, setFolder] = useState<string | null>(null);
+  // §13.3 N : nouvelle campagne (dans le dossier affiché)
+  useShortcuts({ n: () => setCreating({ folder }) }, canManage);
   const data = all?.filter((c) => within(c.folder, folder));
 
   return (

@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Box, Button, Card, Group, Loader, Menu, Progress, Stack, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Card, Group, Loader, Menu, Stack, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
 import { IconCalendarPlus, IconDots, IconFileAnalytics, IconLock, IconPencil, IconPlus, IconWand } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { ConfirmModal } from '../../components/Dialogs';
 import { loadColor, looseSprints, PLANNING_STATUS_COLORS, shortDate, span } from './model';
 import { GenerateSprintsModal, ReleaseModal, ReleaseReportModal, SprintModal } from './PlanningModals';
 import { useCanPlan } from './permissions';
+import { LabeledProgress } from '../../components/LabeledProgress';
 
 /**
  * F-PLN-02 feuille de route : frise chronologique de chaque release et de ses sprints, avec pour
@@ -175,13 +176,15 @@ function SprintBlock({ sprint, onOpen }: { sprint: SprintSummary; onOpen: () => 
         <Text size="xs" truncate>
           {sprint.name}
         </Text>
-        <Progress value={Math.min(100, sprint.loadPercent ?? 0)} color={loadColor(sprint.loadPercent)} size="xs" mt={2} />
+        <LabeledProgress value={Math.min(100, sprint.loadPercent ?? 0)} color={loadColor(sprint.loadPercent)} size="xs" mt={2}
+          label={`${sprint.name} : ${sprint.loadPercent ?? 0} %`} />
         <Group gap={4} wrap="nowrap" justify="space-between">
-          <Text size="xs" c="dimmed">
+          {/* NF-10 texte normal : le gris atténué n'atteint pas 4,5:1 sur le fond coloré du bloc */}
+          <Text size="xs">
             {sprint.loadPoints}
             {sprint.capacityPoints != null ? ` / ${sprint.capacityPoints}` : ''} pts
           </Text>
-          <Text size="xs" c="dimmed" data-testid={`sprint-validation-${sprint.key}`}>
+          <Text size="xs" data-testid={`sprint-validation-${sprint.key}`}>
             {t('planning.validationShort', { rate: sprint.validationRate === null || sprint.validationRate === undefined ? '—' : `${sprint.validationRate} %` })}
           </Text>
         </Group>

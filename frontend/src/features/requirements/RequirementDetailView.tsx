@@ -1,7 +1,7 @@
 import { Alert, Badge, Button, Group, Loader, Menu, Modal, Stack, Tabs, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { IconCopy, IconDots, IconHourglass, IconSitemap, IconTrash } from '@tabler/icons-react';
+import { IconCopy, IconDots, IconSitemap, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, errorMessage } from '../../api/errors';
@@ -19,12 +19,10 @@ import { LinkedTestsPanel } from './LinkedTestsPanel';
 import { MoveModal } from './MoveModal';
 import { StatusMenu } from './StatusMenu';
 import { VersionsPanel } from './VersionsPanel';
+import { CommentsPanel } from './CommentsPanel';
+import { ExampleMappingPanel } from './ExampleMappingPanel';
 
 /** Onglets des lots suivants (§13.2) : emplacement réservé avec le lot de livraison. */
-const LATER_TABS = [
-  { value: 'exampleMapping', lot: 9 },
-  { value: 'comments', lot: 9 },
-] as const;
 
 /**
  * §13.2 fiche exigence : onglets Détail, Critères, Example Mapping, Tests liés, Exécutions,
@@ -128,11 +126,14 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
           <Tabs.Tab value="defects" data-testid="tab-defects">
             {t('requirement.tabs.defects')}
           </Tabs.Tab>
-          {LATER_TABS.map((tab) => (
-            <Tabs.Tab key={tab.value} value={tab.value} c="dimmed">
-              {t(`requirement.tabs.${tab.value}`)}
+          {requirement.type === 'USER_STORY' && (
+            <Tabs.Tab value="exampleMapping" data-testid="tab-example-mapping">
+              {t('requirement.tabs.exampleMapping')}
             </Tabs.Tab>
-          ))}
+          )}
+          <Tabs.Tab value="comments" data-testid="tab-comments">
+            {t('requirement.tabs.comments')}
+          </Tabs.Tab>
           <Tabs.Tab value="versions">{t('requirement.tabs.versions')}</Tabs.Tab>
           <Tabs.Tab value="history">{t('requirement.tabs.history')}</Tabs.Tab>
         </Tabs.List>
@@ -154,13 +155,12 @@ export function RequirementDetailView({ project, requirementKey }: { project: st
         <Tabs.Panel value="traceability" pt="md">
           <TraceTreePanel project={project} requirementKey={requirement.key} />
         </Tabs.Panel>
-        {LATER_TABS.map((tab) => (
-          <Tabs.Panel key={tab.value} value={tab.value} pt="md">
-            <Alert color="gray" icon={<IconHourglass size={16} />}>
-              {t('requirement.laterLot', { lot: tab.lot })}
-            </Alert>
-          </Tabs.Panel>
-        ))}
+        <Tabs.Panel value="exampleMapping" pt="md">
+          <ExampleMappingPanel project={project} requirementKey={requirement.key} />
+        </Tabs.Panel>
+        <Tabs.Panel value="comments" pt="md">
+          <CommentsPanel project={project} requirementKey={requirement.key} requirementId={requirement.id} />
+        </Tabs.Panel>
         <Tabs.Panel value="versions" pt="md">
           <VersionsPanel project={project} requirement={requirement} canWrite={canWrite} />
         </Tabs.Panel>

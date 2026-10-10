@@ -116,7 +116,8 @@ public final class ReportDocumentBuilder {
             case NFR -> d.nfr() == null ? null : d.nfr().isEmpty() ? List.of(new Paragraph("Aucune exigence non fonctionnelle."))
                     : List.of(table(null, List.of("ENF", "Titre", "Catégorie", "Seuil", "Cible", "Mesuré", "Statut"), d.nfr(),
                     n -> List.of(n.key(), n.title(), Labels.of(n.category()), Labels.of(n.threshold()), Labels.of(n.target()),
-                            n.measured() == null ? "non mesuré" : n.measured(), Labels.verification(n.status()))));
+                            n.measured() == null ? "non mesuré" : n.measured() + " (" + Labels.measurement(n.measuredOutcome()) + ")",
+                            Labels.verification(n.status()))));
             case REQUIREMENTS -> d.requirements() == null ? null
                     : List.of(table(null, List.of("Exigence", "Titre", "Type", "Risque", "Tests", "Exécutés", "Réussis", "Statut"), d.requirements(),
                     r -> List.of(r.key(), r.title(), Labels.requirementType(r.type()), Labels.risk(r.risk()), String.valueOf(r.tests()),
@@ -353,7 +354,7 @@ public final class ReportDocumentBuilder {
     /** Nombre au format français, sans décimale inutile. */
     public static String number(double value) {
         double rounded = Math.round(value * 10) / 10.0;
-        return rounded == Math.rint(rounded) ? String.valueOf((long) rounded) : String.valueOf(rounded).replace('.', ',');
+        return Math.abs(rounded - Math.rint(rounded)) < 1e-9 ? String.valueOf((long) Math.rint(rounded)) : String.valueOf(rounded).replace('.', ',');
     }
 
     private static String date(String iso) {

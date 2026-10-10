@@ -16,6 +16,7 @@ import { useTestWriteKinds } from './permissions';
 import { TestCaseDetailView } from './TestCaseDetailView';
 import { TestList } from './TestList';
 import { TestTree } from './TestTree';
+import { useShortcuts } from '../../components/search/useShortcuts';
 
 /**
  * §13.2 /p/:key/tests — référentiel par dossier, par feature ou en liste filtrée (§12) ; import et
@@ -31,6 +32,8 @@ export function TestsPage() {
   const [discovering, discoveryModal] = useDisclosure(false);
   const [search, setSearch] = useState(params.get('q') ?? '');
   const writableKinds = useTestWriteKinds(project);
+  // §13.3 N : nouveau test
+  useShortcuts({ n: createModal.open }, writableKinds.length > 0);
   const canWriteAutomated = writableKinds.includes('AUTOMATED');
 
   const filters = testFiltersFromParams(params);

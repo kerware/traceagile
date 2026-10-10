@@ -50,7 +50,7 @@ function ReportView({ project, detail }: { project: string; detail: ReportDetail
             {report.frozen && <FrozenBadge testId="report-frozen" />}
           </Group>
           <Text size="sm" c="dimmed">
-            <Anchor component={Link} to={`/p/${project}/reports`} size="sm">
+            <Anchor component={Link} to={`/p/${project}/reports`} size="sm" underline="always">
               {t('reports.pageTitle')}
             </Anchor>
             {` · ${report.definitionName} · ${report.scopeLabel} · ${t('reports.generatedBy', {

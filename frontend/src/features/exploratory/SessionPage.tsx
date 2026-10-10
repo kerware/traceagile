@@ -41,6 +41,9 @@ import { ExecutionStatusBadge } from '../campaigns/CampaignBadges';
 import { DefectDraftModal } from '../campaigns/DefectFromExecutionModal';
 import { useTestWriteKinds } from '../tests/permissions';
 import { AUTOSAVE_MS, clock, NOTE_COLORS, NOTE_TYPES, noteTypeForShortcut, SESSION_STATE_COLORS, tbsTotal, useCanApproveDebrief } from './model';
+import { AttachmentsPanel } from '../../components/attachments/AttachmentsPanel';
+import { useUploadAttachment } from '../../api/workshop';
+import { LabeledProgress } from '../../components/LabeledProgress';
 
 /**
  * §13.2 /p/:key/sessions/:id — session exploratoire : mission, chronomètre (F-EXP-05), notes
@@ -148,7 +151,7 @@ function Timer({ project, session, fetchedAt }: { project: string; session: Sess
           </Button>
         )}
       </Group>
-      <Progress value={percent} color={elapsed > session.timeboxMin * 60 ? 'orange' : 'blue'} mt="xs" />
+      <LabeledProgress value={percent} color={elapsed > session.timeboxMin * 60 ? 'orange' : 'blue'} mt="xs" label={`${Math.round(percent)} %`} />
     </Card>
   );
 }
@@ -164,6 +167,7 @@ function Notes({ project, session }: { project: string; session: SessionDetail }
   const [text, setText] = useState(session.draft ?? '');
   const saved = useRef(session.draft ?? '');
   const [converting, setConverting] = useState<SessionNote | null>(null);
+  const upload = useUploadAttachment(project);
 
   const saveDraft = () => {
     if (!editable || text === saved.current) return;
@@ -212,6 +216,20 @@ function Notes({ project, session }: { project: string; session: SessionDetail }
             value={text}
             onChange={(e) => setText(e.currentTarget.value)}
             onBlur={saveDraft}
+            onPaste={(e) => {
+              // F-EXP-08 image collée : rattachée à la note en cours (créée avec le texte saisi, ou « Capture d'écran »)
+              const image = Array.from(e.clipboardData.files).find((f) => f.type.startsWith('image/'));
+              if (!image) return;
+              e.preventDefault();
+              const file = new File([image], `capture-${Date.now()}.png`, { type: image.type });
+              add.mutateAsync({ type, text: text.trim() || t('session.capture') })
+                .then((note) => upload.mutateAsync({ target: 'SESSION_NOTE', targetId: note.id, file }))
+                .then(() => {
+                  setText('');
+                  saved.current = '';
+                })
+                .catch((error: unknown) => notifications.show({ color: 'red', message: errorMessage(error, t('errors.generic')) }));
+            }}
             onKeyDown={(e) => {
               const shortcut = noteTypeForShortcut(e);
               if (shortcut) {
@@ -244,9 +262,12 @@ function Notes({ project, session }: { project: string; session: SessionDetail }
             <Badge color={NOTE_COLORS[n.type]} variant="light" w={92}>
               {t(`noteType.${n.type}`)}
             </Badge>
-            <Text size="sm" flex={1} style={{ whiteSpace: 'pre-wrap' }}>
-              {n.text}
-            </Text>
+            <Stack gap={4} flex={1}>
+              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                {n.text}
+              </Text>
+              <AttachmentsPanel project={project} target="SESSION_NOTE" targetId={n.id} canWrite={!!editable} compact testId={`note-attachments-${index + 1}`} />
+            </Stack>
             {n.defect ? (
               <Anchor component={Link} to={`/p/${project}/defects?selected=${n.defect.key}`} size="sm" ff="monospace" data-testid={`note-defect-${index + 1}`}>
                 {n.defect.key}
@@ -363,13 +384,13 @@ function Summary({ session }: { session: SessionDetail }) {
               TBS
             </Text>
             <Progress.Root size="lg">
-              <Progress.Section value={session.tbs.testPct} color="blue">
+              <Progress.Section value={session.tbs.testPct} color="blue" aria-label={`T ${session.tbs.testPct} %`}>
                 <Progress.Label>T {session.tbs.testPct}</Progress.Label>
               </Progress.Section>
-              <Progress.Section value={session.tbs.bugPct} color="red">
+              <Progress.Section value={session.tbs.bugPct} color="red" aria-label={`B ${session.tbs.bugPct} %`}>
                 <Progress.Label>B {session.tbs.bugPct}</Progress.Label>
               </Progress.Section>
-              <Progress.Section value={session.tbs.setupPct} color="gray">
+              <Progress.Section value={session.tbs.setupPct} color="gray" aria-label={`S ${session.tbs.setupPct} %`}>
                 <Progress.Label>S {session.tbs.setupPct}</Progress.Label>
               </Progress.Section>
             </Progress.Root>

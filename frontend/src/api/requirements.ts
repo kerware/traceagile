@@ -26,7 +26,11 @@ export interface RequirementFilters {
   risk?: RiskLevel[];
   tag?: string;
   q?: string;
+  /** §12 / ADR-0024 statut de vérification calculé. */
+  verification?: VerificationStatus[];
 }
+
+export type VerificationStatus = Schemas['RequirementSummary']['verificationStatus'];
 
 export const requirementKeys = {
   all: (project: string) => ['requirements', project] as const,
