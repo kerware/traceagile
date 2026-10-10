@@ -55,3 +55,8 @@ export function minutes(total: number): string {
 export function itemSuffix(item: Pick<CampaignItem, 'dataSetRow'>): string {
   return item.dataSetRow === undefined || item.dataSetRow === null ? '' : `-${item.dataSetRow + 1}`;
 }
+
+/** Écran d'une tentative : session pour une charte (ADR-0019), exécution pas à pas sinon. */
+export function attemptPath(project: string, kind: string, id: string): string {
+  return kind === 'EXPLORATORY' ? `/p/${project}/sessions/${id}` : `/p/${project}/executions/${id}`;
+}

@@ -121,7 +121,7 @@ public class TraceabilityService {
      * §7.2 « dans le périmètre » (ADR-0016) : pour un sprint, les exécutions de ses campagnes ; pour une
      * release, celles de ses campagnes et des campagnes de ses sprints ; sinon toutes.
      */
-    static Predicate<Campaign> executionScope(String scope) {
+    public static Predicate<Campaign> executionScope(String scope) {
         if (scope == null || !scope.contains(":")) {
             return null;
         }

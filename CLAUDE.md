@@ -15,7 +15,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | **Fait** (branche `lot-3-tracabilite`) |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`, `lot-5-complements`) |
-| 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | À faire |
+| 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | **Fait** (branche `lot-6-exploratoire`) |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | À faire |
 | 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
 | 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
@@ -23,9 +23,9 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 Reporté (à reprendre dans le lot indiqué) :
 - Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
   des tests à NEEDS_UPDATE (non sélectionnables) ; cache des statuts si §14 l'exige.
-- Sessions exploratoires (lot 6) : la démo enregistre un résultat global pour les chartes de CMP-1.
 - Runs automatisés et import (lot 7) : réutiliser `ExecutionService.record` / `Execution.recorded`.
-- Heuristiques extensibles par projet (F-EXP-02), sessions et génération de chartes → lot 6.
+- F-EXP-08 captures de session (collage, téléversement) et commentaires sur une session → lot 9
+  (pièces jointes) ; widget « sessions de la semaine » du tableau de bord (F-RPT-01) → lot 8.
 - F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
 - Choix du jeu de données (ADR-0013) : `dataSet` du job d'exécution → lot 7 (en campagne, la ligne
   est portée par l'élément depuis l'ADR-0018).
@@ -144,6 +144,11 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
 - Duplication / génération d'une campagne depuis les résultats d'une autre (ADR-0017) :
   `CampaignService.copy`, `POST /campaigns/{key}/copy`, `CopyCampaignModal` côté front.
+- Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
+  `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
+  `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :
+  `ExploratoryMetrics` ; propositions de chartes F-EXP-04 : `CharterProposals`. Seul le testeur agit
+  sur sa session (`ForbiddenException` → 403).
 - Compléments d'exécution (ADR-0018) : ligne de jeu de données portée par `CampaignItem`
   (`Campaign.add/bindDataSet/expandDataSet`, valeurs : `DataSetRow`) ; appel de cas de test par un
   pas (`StepContent`, `ManualStep.calledTest`, contrôle de boucle dans `TestCase`, déroulé dans
@@ -219,6 +224,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   stories non couvertes. Tous `READY`.
 - Lot 4 : `REL-1` « Version 2.0 », 3 sprints de 2 semaines calés sur la date du jour — `SPR-1` clos
   (une story reportée), `SPR-2` actif, `SPR-3` planifié (`DemoPlanningLoader`, rejoué si aucune release).
+- Lot 6 : 5 sessions exploratoires débriefées et approuvées par le PO (2 par charte de CMP-1, la
+  première bloquée ; 1 de qa1 dans CMP-2), une session de qa2 à approuver dans CMP-2.
 - Lot 5 : `CMP-1` « Recette SPR-1 » terminée (SPR-1 validé à 75 %, une 2ᵉ tentative), `CMP-2`
   « Recette SPR-2 » en cours (« Mes exécutions » de qa1 / qa2), `CMP-3` « Régression 2.0 »
   planifiée ; DEF-1 à DEF-6 de sévérités variées (`DemoCampaignLoader`, rejoué si aucune campagne).

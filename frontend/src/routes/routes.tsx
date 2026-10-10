@@ -7,7 +7,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { PROJECT_SCREENS } from '../layouts/navigation';
 
 /** Écrans déjà livrés ; les autres affichent leur lot de livraison. */
-const DELIVERED = ['dashboard', 'backlog', 'tests', 'planning', 'campaigns', 'myExecutions', 'traceability', 'defects'];
+const DELIVERED = ['dashboard', 'backlog', 'tests', 'planning', 'campaigns', 'myExecutions', 'exploratory', 'traceability', 'defects'];
 
 export const routerFuture = {
   v7_relativeSplatPath: true,
@@ -78,6 +78,14 @@ export const appRoutes: RouteObject[] = [
           {
             path: 'executions/:id',
             lazy: () => import('../features/campaigns/ExecutionPage').then((m) => ({ Component: m.ExecutionPage })),
+          },
+          {
+            path: 'exploratory',
+            lazy: () => import('../features/exploratory/ExploratoryPage').then((m) => ({ Component: m.ExploratoryPage })),
+          },
+          {
+            path: 'sessions/:id',
+            lazy: () => import('../features/exploratory/SessionPage').then((m) => ({ Component: m.SessionPage })),
           },
           {
             path: 'defects',

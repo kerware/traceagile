@@ -3,7 +3,7 @@ import { notifications } from '@mantine/notifications';
 import { IconAlertTriangle, IconArrowLeft, IconArrowRight, IconBug, IconLock, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useExecution, useOverrideExecution, useRecordStep, useStartExecution, type ExecutionDetail, type ExecutionStatus } from '../../api/campaigns';
 import { errorMessage } from '../../api/errors';
 import { DefectStatusBadge, ExecutionStatusBadge, SeverityBadge } from './CampaignBadges';
@@ -23,6 +23,8 @@ export function ExecutionPage() {
 
   if (isLoading) return <Loader />;
   if (error || !data) return <Alert color="red">{errorMessage(error, t('errors.generic'))}</Alert>;
+  // ADR-0019 une tentative de charte se consulte dans sa session
+  if (data.test.kind === 'EXPLORATORY') return <Navigate to={`/p/${project}/sessions/${data.id}`} replace />;
   return <ExecutionView key={data.id} project={project} execution={data} />;
 }
 

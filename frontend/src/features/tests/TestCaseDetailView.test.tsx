@@ -15,6 +15,7 @@ function serve(test: TestCaseDetail) {
   server.use(
     http.get(URL, () => HttpResponse.json(test)),
     http.get('/api/v1/reference/frameworks', () => HttpResponse.json([{ technique: 'BDD', name: 'Cucumber-JVM', position: 1 }])),
+    http.get('/api/v1/projects/SHOP/heuristics', () => HttpResponse.json({ suggested: ['SFDIPOT'], custom: ['RCRCRC'] })),
     http.get('/api/v1/projects/SHOP/requirements/REQ-2', () =>
       HttpResponse.json({ key: 'REQ-2', criteria: [] }),
     ),

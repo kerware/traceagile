@@ -12,6 +12,7 @@ import com.traceagile.application.defect.DefectService.DefectCommand;
 import com.traceagile.application.defect.DefectService.DefectPatch;
 import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.application.execution.ExecutionService;
+import com.traceagile.application.exploratory.ExploratorySessionRepository;
 import com.traceagile.application.planning.PlanningService;
 import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.domain.campaign.Campaign;
@@ -25,6 +26,10 @@ import com.traceagile.domain.execution.Execution;
 import com.traceagile.domain.execution.ExecutionOrigin;
 import com.traceagile.domain.execution.ExecutionStatus;
 import com.traceagile.domain.execution.StepResult;
+import com.traceagile.domain.exploratory.ExploratorySession;
+import com.traceagile.domain.exploratory.NoteType;
+import com.traceagile.domain.exploratory.Proof;
+import com.traceagile.domain.exploratory.Tbs;
 import com.traceagile.domain.planning.Sprint;
 import com.traceagile.domain.testcase.TestKind;
 import com.traceagile.domain.testcase.TestTechnique;
@@ -40,13 +45,15 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /**
- * §15.1 campagnes de démonstration (lot 5), idempotent :
+ * §15.1 campagnes de démonstration (lots 5 et 6), idempotent :
  * <ul>
  *   <li>{@code CMP-1} « Recette SPR-1 », terminée : tout exécuté ; un test manuel échoue (DEF-1,
  *       corrigée puis close) et repasse à la 2ᵉ tentative ; un test automatisé échoue (DEF-2 critique, ouverte) ;</li>
  *   <li>{@code CMP-2} « Recette SPR-2 », en cours : tests affectés à qa1 et qa2, quelques-uns
  *       exécutés (DEF-3 bloquante en cours de correction), le reste à faire (« Mes exécutions ») ;</li>
  *   <li>{@code CMP-3} « Régression 2.0 », planifiée (tests tagués {@code regression}) ;</li>
+ *   <li>sessions exploratoires (lot 6) : deux par charte de CMP-1 (la première bloquée), une de qa1
+ *       dans CMP-2, toutes débriefées et approuvées par le PO ; celle de qa2 dans CMP-2 attend l'approbation ;</li>
  *   <li>DEF-4 mineure, DEF-5 rejetée, DEF-6 sans exigence (orphelins F-TRA-06).</li>
  * </ul>
  */
@@ -61,10 +68,12 @@ public class DemoCampaignLoader {
     private final PlanningService planning;
     private final TraceLinkService links;
     private final CampaignFolderService folders;
+    private final ExploratorySessionRepository sessions;
 
     public DemoCampaignLoader(CampaignService campaigns, CampaignRepository campaignRepository, ExecutionRepository executions,
                               ExecutionService executionService, DefectService defects, PlanningService planning, TraceLinkService links,
-                              CampaignFolderService folders) {
+                              CampaignFolderService folders, ExploratorySessionRepository sessions) {
+        this.sessions = sessions;
         this.links = links;
         this.folders = folders;
         this.campaigns = campaigns;
@@ -145,9 +154,26 @@ public class DemoCampaignLoader {
                 }
                 manual(item, tester, clock, false);
             } else if (kind == TestKind.EXPLORATORY) {
+                // §15.1 deux sessions débriefées par charte : la première écourtée (bloquée ou partielle), la seconde complète
                 campaigns.assign(project, item.getId(), tester);
-                executionService.record(item, ExecutionOrigin.MANUAL, ExecutionStatus.PASSED, tester, clock, clock.plusSeconds(5_400),
-                        "Session exploratoire débriefée (détail des sessions au lot 6).");
+                boolean search = item.getTestCase().getTitle().contains("recherche");
+                session(item, tester, clock, 25, new Tbs(30, 10, 60), List.of(), ExecutionStatus.BLOCKED,
+                        List.of(note(NoteType.NOTE, 120, "Index de recherche vide en recette"), note(NoteType.ISSUE, 900, "Jeu de données incomplet : aucun produit avec accent")),
+                        new Proof("Mise en place de l'environnement", "Session bloquée : index vide", "Index de recherche non alimenté en recette",
+                                "Relancer après réindexation", 2), true);
+                clock = clock.plusSeconds(86_400);
+                session(item, tester, clock, search ? 55 : 65, search ? new Tbs(70, 20, 10) : new Tbs(75, 15, 10),
+                        item.getTestCase().getCharter().getAreas(), ExecutionStatus.PASSED,
+                        search ? List.of(note(NoteType.NOTE, 300, "« café » et « cafe » donnent les mêmes résultats"),
+                                note(NoteType.QUESTION, 1_500, "Faut-il tolérer deux fautes de frappe ?"),
+                                note(NoteType.IDEA, 2_700, "Proposer des suggestions quand il n'y a aucun résultat"))
+                                : List.of(note(NoteType.NOTE, 240, "Fiche lisible sur téléphone, images nettes"),
+                                note(NoteType.BUG, 1_800, "Infobulle du prix tronquée sur petit écran"),
+                                note(NoteType.NOTE, 3_000, "Lecteur d'écran : prix bien annoncé")),
+                        new Proof(search ? "Recherche par mot-clé, accents, fautes de frappe" : "Fiche produit sur téléphone et tablette",
+                                search ? "Aucun défaut bloquant ; une question sur la tolérance aux fautes" : "Un défaut d'affichage mineur (infobulle)",
+                                null, search ? "Explorer les suggestions de recherche\nExplorer le tri des résultats" : "Explorer le zoom des images",
+                                search ? 4 : 3), true);
             } else if (!automatedFailed && item.getTestCase().getAutomation().getTechnique() != TestTechnique.BDD
                     && links.requirementsOf(item.getTestCase()).size() == 1) {
                 // Un échec qui ne touche qu'une story : SPR-1 reste validé à 75 % (3 stories sur 4).
@@ -185,6 +211,19 @@ public class DemoCampaignLoader {
             int turn = turns.merge(kind, 1, Integer::sum) - 1;
             String tester = turn % 2 == 0 ? "qa1" : "qa2";
             campaigns.assign(project, item.getId(), tester);
+            if (kind == TestKind.EXPLORATORY) {
+                // qa1 : session débriefée et approuvée ; qa2 : session terminée, débriefing à approuver
+                clock = clock.plusSeconds(10_800);
+                boolean approved = tester.equals("qa1");
+                session(item, tester, clock, approved ? 110 : 80, approved ? new Tbs(60, 30, 10) : new Tbs(55, 25, 20),
+                        item.getTestCase().getCharter().getAreas().stream().limit(1).toList(), ExecutionStatus.PASSED,
+                        List.of(note(NoteType.NOTE, 600, "Parcours nominal sans anomalie"),
+                                note(NoteType.QUESTION, 2_400, "Comportement attendu après expiration de session ?"),
+                                note(NoteType.IDEA, 3_900, "Tester avec deux onglets ouverts")),
+                        new Proof("Parcours nominal puis cas d'erreur", "Pas de défaut, une question ouverte", null,
+                                "Explorer l'expiration de session", approved ? 4 : 3), approved);
+                continue;
+            }
             if (kind == TestKind.MANUAL && executedBy.add(tester)) {
                 clock = clock.plusSeconds(7_200);
                 boolean fail = tester.equals("qa2");
@@ -195,6 +234,27 @@ public class DemoCampaignLoader {
                 }
             }
         }
+    }
+
+    private record DemoNote(NoteType type, long offsetSeconds, String text) {
+    }
+
+    private static DemoNote note(NoteType type, long offsetSeconds, String text) {
+        return new DemoNote(type, offsetSeconds, text);
+    }
+
+    /** §5.2 session rejouée à une date passée : notes, fin, débriefing, approbation par le PO si {@code approved}. */
+    private void session(CampaignItem item, String tester, Instant start, int minutes, Tbs tbs, List<String> areas, ExecutionStatus status,
+                         List<DemoNote> notes, Proof proof, boolean approved) {
+        ExploratorySession session = ExploratorySession.start(item, tester, start);
+        notes.forEach(n -> session.addNote(n.type(), n.text(), start.plusSeconds(n.offsetSeconds())));
+        Instant end = start.plusSeconds(minutes * 60L);
+        session.finish(tbs, areas, status, end);
+        session.debrief(proof, tester, end.plusSeconds(1_800));
+        if (approved) {
+            session.approve("po", end.plusSeconds(7_200));
+        }
+        sessions.save(session);
     }
 
     /** Exécution pas à pas rejouée à une date passée ; {@code fail} : le dernier pas échoue. */

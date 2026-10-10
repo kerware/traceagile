@@ -8,7 +8,8 @@ import { useMyExecutions, useStartExecution, type MyExecution } from '../../api/
 import { errorMessage } from '../../api/errors';
 import { KindBadge } from '../tests/Badges';
 import { ExecutionStatusBadge } from './CampaignBadges';
-import { minutes } from './model';
+import { useStartSession } from '../../api/exploratory';
+import { attemptPath, minutes } from './model';
 import { useCanExecute } from './permissions';
 
 /** §13.2 /p/:key/my-executions — F-EXE-01 « Mes tests à exécuter » dans les campagnes ouvertes. */
@@ -61,12 +62,20 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
   const navigate = useNavigate();
   const canExecute = useCanExecute(project);
   const start = useStartExecution(project);
+  const startSession = useStartSession(project);
   const rows = item.dataSets.flatMap((d) => Array.from({ length: d.rows }, (_, i) => ({ value: `${d.name}|${i}`, label: t('executions.dataRow', { name: d.name, row: i + 1 }) })));
   const [row, setRow] = useState<string | null>(null);
 
   const go = () => {
     if (item.lastStatus === 'RUNNING' && item.latestExecutionId) {
-      navigate(`/p/${project}/executions/${item.latestExecutionId}`);
+      navigate(attemptPath(project, item.test.kind, item.latestExecutionId));
+      return;
+    }
+    if (item.test.kind === 'EXPLORATORY') {
+      startSession.mutate(item.itemId, {
+        onSuccess: (s) => navigate(`/p/${project}/sessions/${s.id}`),
+        onError: (e) => notifications.show({ color: 'red', message: errorMessage(e, t('errors.generic')) }),
+      });
       return;
     }
     const [dataSetName, index] = row ? row.split('|') : [undefined, undefined];
@@ -98,7 +107,7 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
       <Table.Td>{item.test.durationMin ? minutes(item.test.durationMin) : '—'}</Table.Td>
       <Table.Td>
         {item.latestExecutionId ? (
-          <Anchor component={Link} to={`/p/${project}/executions/${item.latestExecutionId}`}>
+          <Anchor component={Link} to={attemptPath(project, item.test.kind, item.latestExecutionId)}>
             <ExecutionStatusBadge status={item.lastStatus} />
           </Anchor>
         ) : (
@@ -121,10 +130,13 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
             </Button>
           </Group>
         )}
-        {item.test.kind === 'EXPLORATORY' && (
-          <Text size="xs" c="dimmed">
-            {t('myExecutions.sessionsLater')}
-          </Text>
+        {canExecute && item.test.kind === 'EXPLORATORY' && (
+          <Group justify="flex-end">
+            <Button size="xs" variant="light" leftSection={<IconPlayerPlay size={14} />} onClick={go} loading={startSession.isPending}
+              data-testid={`run-${item.test.key}`}>
+              {item.lastStatus === 'RUNNING' ? t('campaigns.resume') : t('exploratory.start')}
+            </Button>
+          </Group>
         )}
       </Table.Td>
     </Table.Tr>

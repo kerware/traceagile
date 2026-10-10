@@ -1,10 +1,14 @@
 import { Fieldset, Group, Input, SegmentedControl, Stack, TagsInput, Text, Textarea, TextInput } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import type { TestDraft } from './draft';
+import { useHeuristics } from '../../api/exploratory';
 import { charterSentence, HEURISTICS, TIMEBOXES } from './model';
 
 /** F-EXP-01 / F-EXP-02 charte exploratoire : mission guidée, durée cible, zones, heuristiques. */
-export function CharterEditor({ draft, onChange, readOnly }: { draft: TestDraft; onChange: (patch: Partial<TestDraft>) => void; readOnly: boolean }) {
+export function CharterEditor({ project, draft, onChange, readOnly }: { project: string; draft: TestDraft; onChange: (patch: Partial<TestDraft>) => void; readOnly: boolean }) {
+  // F-EXP-02 heuristiques suggérées, puis celles propres au projet
+  const { data: heuristics } = useHeuristics(project);
+  const heuristicOptions = heuristics ? [...heuristics.suggested, ...heuristics.custom] : HEURISTICS;
   const { t } = useTranslation();
   return (
     <Fieldset legend={t('charter.mission')} data-testid="charter-editor">
@@ -32,7 +36,7 @@ export function CharterEditor({ draft, onChange, readOnly }: { draft: TestDraft;
         <TagsInput
           label={t('charter.heuristics')}
           description={t('charter.heuristicsHint')}
-          data={HEURISTICS}
+          data={heuristicOptions}
           value={draft.heuristics}
           onChange={(heuristics) => onChange({ heuristics })}
           disabled={readOnly}

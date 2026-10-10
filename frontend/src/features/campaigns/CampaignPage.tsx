@@ -32,7 +32,8 @@ import { KindBadge } from '../tests/Badges';
 import { CampaignStatusBadge, ExecutionStatusBadge, ProgressBar } from './CampaignBadges';
 import { CopyCampaignModal } from './CopyCampaignModal';
 import { ItemDataSetCell } from './ItemDataSetCell';
-import { itemSuffix, minutes, RESULT_STATUSES, STRATEGIES } from './model';
+import { useStartSession } from '../../api/exploratory';
+import { attemptPath, itemSuffix, minutes, RESULT_STATUSES, STRATEGIES } from './model';
 import { useCanExecute, useCanManageCampaigns } from './permissions';
 
 /**
@@ -239,6 +240,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
   const reorder = useReorderItems(project, detail.campaign.key);
   const sortByRisk = useSortByRisk(project, detail.campaign.key);
   const start = useStartExecution(project);
+  const startSession = useStartSession(project);
   const fail = (e: unknown) => notifications.show({ color: 'red', message: errorMessage(e, t('errors.generic')) });
   const items = detail.items;
   const open = detail.campaign.status === 'PLANNED' || detail.campaign.status === 'IN_PROGRESS';
@@ -250,7 +252,11 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
   };
   const execute = (item: CampaignItem) => {
     if (item.lastStatus === 'RUNNING' && item.latestExecutionId) {
-      navigate(`/p/${project}/executions/${item.latestExecutionId}`);
+      navigate(attemptPath(project, item.test.kind, item.latestExecutionId));
+      return;
+    }
+    if (item.test.kind === 'EXPLORATORY') {
+      startSession.mutate(item.id, { onSuccess: (s) => navigate(`/p/${project}/sessions/${s.id}`), onError: fail });
       return;
     }
     start.mutate({ itemId: item.id }, { onSuccess: (e) => navigate(`/p/${project}/executions/${e.id}`), onError: fail });
@@ -349,7 +355,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
               <Table.Td>
                 <Group gap={4} wrap="nowrap">
                   {item.latestExecutionId ? (
-                    <Anchor component={Link} to={`/p/${project}/executions/${item.latestExecutionId}`}>
+                    <Anchor component={Link} to={attemptPath(project, item.test.kind, item.latestExecutionId)}>
                       <ExecutionStatusBadge status={item.lastStatus} testId={`last-status-${item.test.key}${itemSuffix(item)}`} />
                     </Anchor>
                   ) : (
@@ -364,10 +370,16 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
               </Table.Td>
               <Table.Td>
                 <Group gap={4} justify="flex-end" wrap="nowrap">
-                  {canExecute && open && item.test.kind === 'MANUAL' && (
-                    <Button size="xs" variant="light" leftSection={<IconPlayerPlay size={14} />} onClick={() => execute(item)} loading={start.isPending}
-                      data-testid={`execute-${item.test.key}${itemSuffix(item)}`}>
-                      {item.lastStatus === 'RUNNING' ? t('campaigns.resume') : item.attempts > 0 ? t('campaigns.rerun') : t('campaigns.execute')}
+                  {canExecute && open && item.test.kind !== 'AUTOMATED' && (
+                    <Button size="xs" variant="light" leftSection={<IconPlayerPlay size={14} />} onClick={() => execute(item)}
+                      loading={start.isPending || startSession.isPending} data-testid={`execute-${item.test.key}${itemSuffix(item)}`}>
+                      {item.lastStatus === 'RUNNING'
+                        ? t('campaigns.resume')
+                        : item.test.kind === 'EXPLORATORY'
+                          ? t('exploratory.start')
+                          : item.attempts > 0
+                            ? t('campaigns.rerun')
+                            : t('campaigns.execute')}
                     </Button>
                   )}
                   {editable && item.attempts === 0 && (

@@ -9,10 +9,15 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** §3.1 Project : conteneur racine. Porte ses membres et leur rôle (§2.2). */
 @Entity
@@ -36,6 +41,11 @@ public class Project extends AuditableEntity {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectMember> members = new ArrayList<>();
 
+    /** F-EXP-02 heuristiques exploratoires propres au projet (en plus des suggérées). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "custom_heuristics", nullable = false, columnDefinition = "jsonb")
+    private List<String> customHeuristics = new ArrayList<>();
+
     protected Project() {
     }
 
@@ -51,6 +61,23 @@ public class Project extends AuditableEntity {
 
     public String getKey() {
         return key;
+    }
+
+    public List<String> getCustomHeuristics() {
+        return List.copyOf(customHeuristics);
+    }
+
+    /** F-EXP-02 sans doublon (casse ignorée), dans l'ordre saisi ; 60 caractères au plus chacune. */
+    public void setCustomHeuristics(List<String> heuristics) {
+        Map<String, String> unique = new LinkedHashMap<>();
+        (heuristics == null ? List.<String>of() : heuristics).stream().filter(Objects::nonNull).map(String::strip)
+                .filter(h -> !h.isEmpty()).forEach(h -> {
+                    if (h.length() > 60) {
+                        throw new BusinessRuleException("HEURISTIC_TOO_LONG", "Une heuristique fait 60 caractères au plus.");
+                    }
+                    unique.putIfAbsent(h.toLowerCase(Locale.ROOT), h);
+                });
+        this.customHeuristics = new ArrayList<>(unique.values());
     }
 
     public String getName() {

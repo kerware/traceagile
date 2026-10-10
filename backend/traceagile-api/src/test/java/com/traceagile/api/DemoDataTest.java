@@ -37,7 +37,11 @@ import com.traceagile.domain.defect.Defect;
 import com.traceagile.domain.defect.DefectSeverity;
 import com.traceagile.domain.execution.ExecutionStatus;
 import com.traceagile.api.demo.DemoCampaignLoader;
+import com.traceagile.application.exploratory.ExploratoryService;
+import com.traceagile.domain.exploratory.ExploratoryMetrics;
+import com.traceagile.domain.exploratory.SessionState;
 import java.util.List;
+import java.util.Set;
 import java.util.Set;
 import java.util.Map;
 import java.util.function.Function;
@@ -78,6 +82,8 @@ class DemoDataTest extends AbstractApiTest {
     TraceLinkService links;
     @Autowired
     TraceabilityService traceability;
+    @Autowired
+    ExploratoryService exploratory;
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
@@ -185,5 +191,15 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(traceability.orphans("SHOP").defectsWithoutRequirement()).hasSize(1);
         Double validation = traceability.coverage("SHOP", "sprint:SPR-1").coverage().validation().percent();
         assertThat(validation).as("SPR-1 : une story en échec sur quatre").isEqualTo(75.0);
+
+        // Lot 6 (§15.1) : 5 sessions exploratoires débriefées, une autre en attente d'approbation ; métriques de SPR-1
+        assertThat(exploratory.list("SHOP", Set.of(SessionState.DEBRIEFED))).hasSize(5)
+                .allSatisfy(session -> assertThat(session.getApprovedBy()).isEqualTo("po"));
+        assertThat(exploratory.list("SHOP", Set.of(SessionState.FINISHED))).singleElement()
+                .satisfies(session -> assertThat(session.getTester()).isEqualTo("qa2"));
+        ExploratoryMetrics sprint1 = exploratory.metrics("SHOP", "sprint:SPR-1");
+        assertThat(sprint1.sessions()).isEqualTo(4);
+        assertThat(sprint1.chartersExecuted()).isEqualTo(sprint1.chartersPlanned());
+        assertThat(sprint1.averageConfidence()).isNotNull();
     }
 }

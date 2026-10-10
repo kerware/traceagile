@@ -2,6 +2,7 @@ package com.traceagile.api.web;
 
 import com.traceagile.application.common.AuthenticationFailedException;
 import com.traceagile.application.common.ConflictException;
+import com.traceagile.application.common.ForbiddenException;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.common.UnprocessableException;
 import com.traceagile.application.common.VersionConflictException;
@@ -46,6 +47,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = Problems.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getCode(), e.getMessage());
         e.getDetails().forEach(problem::setProperty);
         return problem;
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    ProblemDetail forbidden(ForbiddenException e) {
+        return Problems.of(HttpStatus.FORBIDDEN, e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)

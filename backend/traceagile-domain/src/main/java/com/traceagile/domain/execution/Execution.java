@@ -181,6 +181,35 @@ public class Execution extends AuditableEntity {
         path.pop();
     }
 
+    /**
+     * F-EXP-05 tentative d'une charte exploratoire, portée par une session (ADR-0019) : en cours
+     * jusqu'à la fin de session, qui en fixe le statut et la durée active.
+     */
+    public static Execution exploratory(CampaignItem item, String tester, Instant now) {
+        TestCase test = item.getTestCase();
+        if (test.getKind() != TestKind.EXPLORATORY) {
+            throw new BusinessRuleException("SESSION_NOT_A_CHARTER", test.getKey() + " n'est pas une charte exploratoire.");
+        }
+        Execution latest = item.latest();
+        if (latest != null && latest.getStatus() == ExecutionStatus.RUNNING) {
+            throw new BusinessRuleException("EXECUTION_IN_PROGRESS",
+                    "La session " + latest.getAttempt() + " est en cours : terminez-la avant d'en commencer une autre.");
+        }
+        Execution execution = new Execution(item, ExecutionOrigin.MANUAL, tester, now);
+        item.attach(execution);
+        return execution;
+    }
+
+    /** F-EXP-09 fin de session : statut choisi par le testeur, durée = temps actif (pauses exclues). */
+    public void finishSession(ExecutionStatus status, Instant endedAt, long activeMs) {
+        if (testCase.getKind() != TestKind.EXPLORATORY || this.status != ExecutionStatus.RUNNING) {
+            throw new BusinessRuleException("EXECUTION_STATUS_INVALID", "Seule une session exploratoire en cours se termine ainsi.");
+        }
+        this.status = status;
+        this.endedAt = endedAt;
+        this.durationMs = activeMs;
+    }
+
     /** Résultat enregistré sans saisie pas à pas (run automatisé, import de rapport, démonstration). */
     public static Execution recorded(CampaignItem item, ExecutionOrigin origin, ExecutionStatus status, String executedBy,
                                      Instant startedAt, Instant endedAt, String comment) {

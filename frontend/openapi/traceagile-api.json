@@ -322,6 +322,66 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/heuristics" : {
+      "get" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "heuristics",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HeuristicsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "setHeuristics",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/HeuristicsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HeuristicsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/executions/{id}/steps/{position}" : {
       "put" : {
         "tags" : [ "Exécutions" ],
@@ -1331,6 +1391,268 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/SprintDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/notes" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "addNote",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SessionNoteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionNoteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/notes/{noteId}/defects" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "convert",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "noteId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateDefectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/follow-up-charters" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "followUp",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FollowUpRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FollowUpResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/finish" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "finish",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FinishSessionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/debrief" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "debrief",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DebriefRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/debrief/approve" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "approve",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionDetail"
                 }
               }
             }
@@ -2429,6 +2751,40 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/campaign-items/{id}/sessions" : {
+      "post" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "start_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/campaign-items/{id}/expand-data-set" : {
       "post" : {
         "tags" : [ "Campagnes" ],
@@ -2511,7 +2867,7 @@
       },
       "post" : {
         "tags" : [ "Exécutions" ],
-        "operationId" : "start_2",
+        "operationId" : "start_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3166,10 +3522,91 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/sessions/{id}" : {
+      "get" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "get_2",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "update_3",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/merge-patch+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SessionPatchRequest"
+              }
+            },
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SessionPatchRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_2",
+        "operationId" : "get_3",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3224,7 +3661,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_3",
+        "operationId" : "update_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3365,7 +3802,7 @@
     "/api/v1/projects/{projectKey}/executions/{id}" : {
       "get" : {
         "tags" : [ "Exécutions" ],
-        "operationId" : "get_3",
+        "operationId" : "get_4",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3446,7 +3883,7 @@
     "/api/v1/projects/{projectKey}/defects/{key}" : {
       "get" : {
         "tags" : [ "Anomalies" ],
-        "operationId" : "get_4",
+        "operationId" : "get_5",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3477,7 +3914,7 @@
       },
       "patch" : {
         "tags" : [ "Anomalies" ],
-        "operationId" : "update_4",
+        "operationId" : "update_5",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3532,7 +3969,7 @@
     "/api/v1/projects/{projectKey}/campaigns/{key}" : {
       "get" : {
         "tags" : [ "Campagnes" ],
-        "operationId" : "get_5",
+        "operationId" : "get_6",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3563,7 +4000,7 @@
       },
       "patch" : {
         "tags" : [ "Campagnes" ],
-        "operationId" : "update_5",
+        "operationId" : "update_6",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -3717,7 +4154,7 @@
       },
       "patch" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "update_6",
+        "operationId" : "update_7",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -4265,6 +4702,89 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/sessions" : {
+      "get" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "list_10",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "state",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "RUNNING", "PAUSED", "FINISHED", "DEBRIEFED" ]
+            },
+            "uniqueItems" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SessionSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/sessions/{id}/notes/{noteId}/defect-draft" : {
+      "get" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "defectDraft",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "noteId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DefectDraftResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/{key}/versions/{number}" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -4629,6 +5149,42 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/requirements/{key}/charter-proposals" : {
+      "get" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "proposals",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CharterProposalResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements/tree" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -4823,6 +5379,39 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/exploratory/metrics" : {
+      "get" : {
+        "tags" : [ "Exploratoire" ],
+        "operationId" : "metrics",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "scope",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExploratoryMetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/executions/{id}/defect-draft" : {
       "get" : {
         "tags" : [ "Exécutions" ],
@@ -4893,7 +5482,7 @@
     "/api/v1/projects/{projectKey}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_6",
+        "operationId" : "get_7",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -4952,7 +5541,7 @@
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "get_7",
+        "operationId" : "get_8",
         "parameters" : [ {
           "name" : "key",
           "in" : "path",
@@ -5521,6 +6110,38 @@
           }
         },
         "required" : [ "ids" ]
+      },
+      "HeuristicsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "custom" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 60,
+              "minLength" : 0
+            }
+          }
+        },
+        "required" : [ "custom" ]
+      },
+      "HeuristicsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "suggested" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "custom" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "custom", "suggested" ]
       },
       "StepResultRequest" : {
         "type" : "object",
@@ -7089,6 +7710,459 @@
           }
         }
       },
+      "SessionNoteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "NOTE", "QUESTION", "ISSUE", "BUG", "IDEA" ]
+          },
+          "text" : {
+            "type" : "string",
+            "maxLength" : 5000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "text", "type" ]
+      },
+      "SessionNoteResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "NOTE", "QUESTION", "ISSUE", "BUG", "IDEA" ]
+          },
+          "offsetSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Secondes de temps actif depuis le début"
+          },
+          "offsetLabel" : {
+            "type" : "string",
+            "description" : "« mm:ss »"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "notedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "defect" : {
+            "$ref" : "#/components/schemas/DefectRef",
+            "description" : "F-EXP-07 anomalie créée depuis la note"
+          }
+        },
+        "required" : [ "id", "notedAt", "offsetLabel", "offsetSeconds", "text", "type" ]
+      },
+      "CreateDefectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "externalRef" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "severity", "title" ]
+      },
+      "DefectDetail" : {
+        "type" : "object",
+        "properties" : {
+          "defect" : {
+            "$ref" : "#/components/schemas/DefectSummary"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "allowedTransitions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+            }
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectRequirementRef"
+            }
+          },
+          "executions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectExecutionRef"
+            }
+          }
+        },
+        "required" : [ "allowedTransitions", "defect", "executions", "requirements" ]
+      },
+      "DefectExecutionRef" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "testKey" : {
+            "type" : "string"
+          },
+          "campaignKey" : {
+            "type" : "string"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          }
+        },
+        "required" : [ "attempt", "campaignKey", "id", "status", "testKey" ]
+      },
+      "DefectRequirementRef" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "key", "title" ]
+      },
+      "DefectSummary" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "executionCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdBy" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "createdAt", "executionCount", "key", "requirementKeys", "severity", "status", "title", "version" ]
+      },
+      "FollowUpRequest" : {
+        "type" : "object",
+        "properties" : {
+          "missions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 300,
+              "minLength" : 0
+            },
+            "minItems" : 1
+          }
+        },
+        "required" : [ "missions" ]
+      },
+      "FollowUpResponse" : {
+        "type" : "object",
+        "properties" : {
+          "created" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "created" ]
+      },
+      "FinishSessionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "testPct" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
+          },
+          "bugPct" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
+          },
+          "setupPct" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0
+          },
+          "areasCovered" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 100,
+              "minLength" : 0
+            }
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "PASSED, FAILED ou BLOCKED",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          }
+        },
+        "required" : [ "bugPct", "setupPct", "status", "testPct" ]
+      },
+      "ProofResponse" : {
+        "type" : "object",
+        "properties" : {
+          "past" : {
+            "type" : "string"
+          },
+          "results" : {
+            "type" : "string"
+          },
+          "obstacles" : {
+            "type" : "string"
+          },
+          "outlook" : {
+            "type" : "string"
+          },
+          "feelings" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "outlookItems" : {
+            "type" : "array",
+            "description" : "F-EXP-12 pistes de l'Outlook, une par ligne",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "feelings", "outlookItems" ]
+      },
+      "SessionDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Identifiant de la tentative (ADR-0019)"
+          },
+          "itemId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "charter" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "missionSentence" : {
+            "type" : "string"
+          },
+          "areas" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "heuristics" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "setupNotes" : {
+            "type" : "string"
+          },
+          "targetedRisk" : {
+            "type" : "string"
+          },
+          "timeboxMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignRef"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tester" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "RUNNING", "PAUSED", "FINISHED", "DEBRIEFED" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "endedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "elapsedSeconds" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Temps actif à serverTime (pauses exclues)"
+          },
+          "serverTime" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "durationMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "draft" : {
+            "type" : "string"
+          },
+          "notes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SessionNoteResponse"
+            }
+          },
+          "tbs" : {
+            "$ref" : "#/components/schemas/TbsResponse"
+          },
+          "areasCovered" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "proof" : {
+            "$ref" : "#/components/schemas/ProofResponse"
+          },
+          "debriefedBy" : {
+            "type" : "string"
+          },
+          "debriefedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "approvedBy" : {
+            "type" : "string"
+          },
+          "approvedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "defects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DefectRef"
+            }
+          },
+          "owner" : {
+            "type" : "boolean",
+            "description" : "L'utilisateur courant mène la session"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "areas", "areasCovered", "attempt", "campaign", "charter", "defects", "elapsedSeconds", "heuristics", "id", "itemId", "missionSentence", "notes", "owner", "serverTime", "startedAt", "state", "status", "tester", "timeboxMin", "version" ]
+      },
+      "TbsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "testPct" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bugPct" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "setupPct" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "bugPct", "setupPct", "testPct" ]
+      },
+      "DebriefRequest" : {
+        "type" : "object",
+        "properties" : {
+          "past" : {
+            "type" : "string"
+          },
+          "results" : {
+            "type" : "string"
+          },
+          "obstacles" : {
+            "type" : "string"
+          },
+          "outlook" : {
+            "type" : "string"
+          },
+          "feelings" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "feelings" ]
+      },
       "CreateCriterionRequest" : {
         "type" : "object",
         "properties" : {
@@ -7254,117 +8328,6 @@
           }
         }
       },
-      "DefectDetail" : {
-        "type" : "object",
-        "properties" : {
-          "defect" : {
-            "$ref" : "#/components/schemas/DefectSummary"
-          },
-          "description" : {
-            "type" : "string"
-          },
-          "allowedTransitions" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
-            }
-          },
-          "requirements" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/DefectRequirementRef"
-            }
-          },
-          "executions" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/DefectExecutionRef"
-            }
-          }
-        },
-        "required" : [ "allowedTransitions", "defect", "executions", "requirements" ]
-      },
-      "DefectExecutionRef" : {
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "format" : "uuid"
-          },
-          "testKey" : {
-            "type" : "string"
-          },
-          "campaignKey" : {
-            "type" : "string"
-          },
-          "attempt" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
-          }
-        },
-        "required" : [ "attempt", "campaignKey", "id", "status", "testKey" ]
-      },
-      "DefectRequirementRef" : {
-        "type" : "object",
-        "properties" : {
-          "key" : {
-            "type" : "string"
-          },
-          "title" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "key", "title" ]
-      },
-      "DefectSummary" : {
-        "type" : "object",
-        "properties" : {
-          "key" : {
-            "type" : "string"
-          },
-          "title" : {
-            "type" : "string"
-          },
-          "severity" : {
-            "type" : "string",
-            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED" ]
-          },
-          "externalRef" : {
-            "type" : "string"
-          },
-          "requirementKeys" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "executionCount" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "createdBy" : {
-            "type" : "string"
-          },
-          "version" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        },
-        "required" : [ "createdAt", "executionCount", "key", "requirementKeys", "severity", "status", "title", "version" ]
-      },
       "ImportResponse" : {
         "type" : "object",
         "properties" : {
@@ -7475,35 +8438,6 @@
           }
         },
         "required" : [ "count", "durationWeeks" ]
-      },
-      "CreateDefectRequest" : {
-        "type" : "object",
-        "properties" : {
-          "title" : {
-            "type" : "string",
-            "maxLength" : 200,
-            "minLength" : 0
-          },
-          "description" : {
-            "type" : "string"
-          },
-          "severity" : {
-            "type" : "string",
-            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
-          },
-          "externalRef" : {
-            "type" : "string",
-            "maxLength" : 100,
-            "minLength" : 0
-          },
-          "requirementKeys" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          }
-        },
-        "required" : [ "severity", "title" ]
       },
       "CreateCampaignRequest" : {
         "type" : "object",
@@ -7950,6 +8884,19 @@
           },
           "releaseKey" : {
             "type" : "string"
+          }
+        }
+      },
+      "SessionPatchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "paused" : {
+            "type" : "boolean"
+          },
+          "draft" : {
+            "type" : "string",
+            "maxLength" : 5000,
+            "minLength" : 0
           }
         }
       },
@@ -8665,6 +9612,95 @@
         },
         "required" : [ "name", "tests" ]
       },
+      "SessionSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "charter" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignRef"
+          },
+          "attempt" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tester" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "RUNNING", "PAUSED", "FINISHED", "DEBRIEFED" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "elapsedSeconds" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "timeboxMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "durationMin" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "notes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bugs" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "debriefed" : {
+            "type" : "boolean",
+            "description" : "Débriefing PROOF saisi"
+          },
+          "feelings" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "approvedBy" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "attempt", "bugs", "campaign", "charter", "debriefed", "elapsedSeconds", "id", "notes", "startedAt", "state", "status", "tester", "timeboxMin" ]
+      },
+      "DefectDraftResponse" : {
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "type" : "string",
+            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "description" : "Exigences couvertes par le test (liées par défaut)",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "description", "requirementKeys", "severity", "title" ]
+      },
       "PageResponseRequirementSummary" : {
         "type" : "object",
         "properties" : {
@@ -9005,6 +10041,50 @@
         },
         "required" : [ "defect", "linked", "viaTests" ]
       },
+      "CharterProposalResponse" : {
+        "type" : "object",
+        "properties" : {
+          "source" : {
+            "type" : "string",
+            "description" : "CRITERION ou NFR"
+          },
+          "criterionPosition" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "explore" : {
+            "type" : "string"
+          },
+          "with" : {
+            "type" : "string"
+          },
+          "toDiscover" : {
+            "type" : "string"
+          },
+          "areas" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "heuristics" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "areas", "explore", "heuristics", "requirementKeys", "source", "title", "toDiscover", "with" ]
+      },
       "RequirementTreeNode" : {
         "type" : "object",
         "properties" : {
@@ -9120,28 +10200,86 @@
         },
         "required" : [ "count", "text" ]
       },
-      "DefectDraftResponse" : {
+      "ExploratoryMetricsResponse" : {
         "type" : "object",
         "properties" : {
-          "title" : {
-            "type" : "string"
+          "sessions" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "description" : {
-            "type" : "string"
+          "inProgress" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "severity" : {
-            "type" : "string",
-            "enum" : [ "BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL" ]
+          "awaitingApproval" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "requirementKeys" : {
+          "debriefed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalMinutes" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "averageMinutes" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "averageTimeboxMin" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "durationVsTargetPct" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "averageTbs" : {
+            "$ref" : "#/components/schemas/TbsAverageResponse"
+          },
+          "defectsPerHour" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "chartersPlanned" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "chartersExecuted" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "averageConfidence" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "neverExploredAreas" : {
             "type" : "array",
-            "description" : "Exigences couvertes par le test (liées par défaut)",
             "items" : {
               "type" : "string"
             }
           }
         },
-        "required" : [ "description", "requirementKeys", "severity", "title" ]
+        "required" : [ "awaitingApproval", "chartersExecuted", "chartersPlanned", "debriefed", "inProgress", "neverExploredAreas", "sessions", "totalMinutes" ]
+      },
+      "TbsAverageResponse" : {
+        "type" : "object",
+        "properties" : {
+          "testPct" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "bugPct" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "setupPct" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        },
+        "required" : [ "bugPct", "setupPct", "testPct" ]
       },
       "CoverageResponse" : {
         "type" : "object",

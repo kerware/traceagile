@@ -79,7 +79,7 @@ export function DefinitionTab({ project, test, canWrite }: { project: string; te
           </Group>
         </>
       )}
-      {test.kind === 'EXPLORATORY' && <CharterEditor draft={draft} onChange={change} readOnly={readOnly} />}
+      {test.kind === 'EXPLORATORY' && <CharterEditor project={project} draft={draft} onChange={change} readOnly={readOnly} />}
       {test.kind === 'AUTOMATED' && <AutomationEditor project={project} test={test} draft={draft} onChange={change} readOnly={readOnly} />}
       {test.kind !== 'EXPLORATORY' && <ParametersPanel manual={test.kind === 'MANUAL'} typed={test.kind === 'AUTOMATED'} draft={draft} onChange={change} readOnly={readOnly} />}
 

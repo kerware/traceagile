@@ -1,6 +1,6 @@
 import { ActionIcon, Anchor, Badge, Button, Group, Loader, MultiSelect, Select, Stack, Table, Text, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconAlertTriangle, IconCheck, IconLink, IconTrash } from '@tabler/icons-react';
+import { IconAlertTriangle, IconCheck, IconCompass, IconLink, IconTrash } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { errorMessage } from '../../api/errors';
 import type { RequirementDetail } from '../../api/requirements';
 import { useLinkedTests, useTestList } from '../../api/testcases';
 import { useCreateLink, useDeleteLink, useReviewLink, type LinkType } from '../../api/traceability';
+import { GenerateChartersModal } from '../exploratory/GenerateChartersModal';
 import { KindBadge, TechniqueBadge, TestStatusBadge } from '../tests/Badges';
 import { useTestWriteKinds } from '../tests/permissions';
 import { LINK_TYPES } from '../traceability/model';
@@ -28,6 +29,7 @@ export function LinkedTestsPanel({ project, requirement }: { project: string; re
   const [testKey, setTestKey] = useState<string | null>(null);
   const [linkType, setLinkType] = useState<LinkType>('VERIFIES');
   const [criteria, setCriteria] = useState<string[]>([]);
+  const [generating, setGenerating] = useState(false);
   const fail = (e: unknown) => notifications.show({ color: 'red', message: errorMessage(e, t('errors.generic')) });
 
   const linked = new Set((data ?? []).map((test) => test.key));
@@ -51,6 +53,14 @@ export function LinkedTestsPanel({ project, requirement }: { project: string; re
 
   return (
     <Stack>
+      {writableKinds.includes('EXPLORATORY') && requirement.status !== 'OBSOLETE' && (
+        <Group justify="flex-end">
+          <Button variant="light" color="grape" leftSection={<IconCompass size={16} />} onClick={() => setGenerating(true)} data-testid="generate-charters">
+            {t('generateCharters.action')}
+          </Button>
+          <GenerateChartersModal project={project} requirementKey={requirement.key} opened={generating} onClose={() => setGenerating(false)} />
+        </Group>
+      )}
       {writableKinds.length > 0 && requirement.status !== 'OBSOLETE' && (
         <Group align="flex-end" data-testid="link-test-form">
           <Select
