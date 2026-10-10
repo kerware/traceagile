@@ -22,6 +22,8 @@ export type DefectDetail = Schemas['DefectDetail'];
 export type DefectSeverity = DefectSummary['severity'];
 export type DefectStatus = DefectSummary['status'];
 export type ExecutionStatus = StepResult['status'];
+export type TracedExecution = Schemas['RequirementExecutionResponse'];
+export type RequirementDefect = Schemas['RequirementDefectResponse'];
 
 export const campaignKeys = {
   all: (project: string) => ['campaigns', project] as const,
@@ -34,6 +36,9 @@ export const campaignKeys = {
   defect: (project: string, key: string) => ['campaigns', project, 'defect', key] as const,
   requirementExecutions: (project: string, key: string) => ['campaigns', project, 'requirement-executions', key] as const,
   requirementDefects: (project: string, key: string) => ['campaigns', project, 'requirement-defects', key] as const,
+  testExecutions: (project: string, key: string) => ['campaigns', project, 'test-executions', key] as const,
+  testDefects: (project: string, key: string) => ['campaigns', project, 'test-defects', key] as const,
+  folders: (project: string) => ['campaigns', project, 'folders'] as const,
 };
 
 export interface DefectFilters {
@@ -100,6 +105,41 @@ export function useCampaignAction(project: string, key: string) {
       return unwrap(await api.POST('/api/v1/projects/{projectKey}/campaigns/{key}/abort', params));
     },
     onSuccess: invalidate,
+  });
+}
+
+/** ADR-0018 ligne de jeu de données prévue pour un test de la campagne ({@code dataSetName: null} = valeurs par défaut). */
+export function useItemDataSet(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async ({ id, dataSetName, dataSetRow }: { id: string; dataSetName: string | null; dataSetRow: number | null }) =>
+      unwrap(
+        await api.PATCH('/api/v1/projects/{projectKey}/campaign-items/{id}', {
+          params: { path: { projectKey: project, id } },
+          body: { dataSetName, dataSetRow } as Schemas['ItemPatchRequest'],
+          headers: { 'Content-Type': 'application/merge-patch+json' },
+        }),
+      ),
+    onSuccess: invalidate,
+  });
+}
+
+/** ADR-0018 décliner un test sur toutes les lignes d'un jeu de données. */
+export function useExpandDataSet(project: string, campaignKey: string) {
+  const client = useQueryClient();
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async ({ id, dataSetName }: { id: string; dataSetName: string }) =>
+      unwrap(
+        await api.POST('/api/v1/projects/{projectKey}/campaign-items/{id}/expand-data-set', {
+          params: { path: { projectKey: project, id } },
+          body: { dataSetName },
+        }),
+      ),
+    onSuccess: (detail) => {
+      client.setQueryData(campaignKeys.detail(project, campaignKey), detail);
+      return invalidate();
+    },
   });
 }
 
@@ -308,5 +348,92 @@ export function useRequirementDefects(project: string, key: string) {
     queryKey: campaignKeys.requirementDefects(project, key),
     queryFn: async () =>
       unwrap(await api.GET('/api/v1/projects/{projectKey}/requirements/{key}/defects', { params: { path: { projectKey: project, key } } })),
+  });
+}
+
+/** ADR-0018 rattacher à l'exigence une anomalie trouvée par traçabilité. */
+export function useLinkDefectToRequirement(project: string, requirementKey: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async (defectKey: string) =>
+      unwrap(
+        await api.POST('/api/v1/projects/{projectKey}/requirements/{key}/defects/{defectKey}', {
+          params: { path: { projectKey: project, key: requirementKey, defectKey } },
+        }),
+      ),
+    onSuccess: invalidate,
+  });
+}
+
+// ---------------------------------------------------------------- fiche test (ADR-0018)
+
+export function useTestExecutions(project: string, key: string) {
+  return useQuery({
+    queryKey: campaignKeys.testExecutions(project, key),
+    queryFn: async () =>
+      unwrap(await api.GET('/api/v1/projects/{projectKey}/test-cases/{key}/executions', { params: { path: { projectKey: project, key } } })),
+  });
+}
+
+export function useTestDefects(project: string, key: string) {
+  return useQuery({
+    queryKey: campaignKeys.testDefects(project, key),
+    queryFn: async () =>
+      unwrap(await api.GET('/api/v1/projects/{projectKey}/test-cases/{key}/defects', { params: { path: { projectKey: project, key } } })),
+  });
+}
+
+// ---------------------------------------------------------------- dossiers de campagnes (ADR-0018)
+
+export function useCampaignFolders(project: string) {
+  return useQuery({
+    queryKey: campaignKeys.folders(project),
+    queryFn: async () => unwrap(await api.GET('/api/v1/projects/{projectKey}/campaign-folders', { params: path(project) })),
+  });
+}
+
+export function useCreateCampaignFolder(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async (folder: string) =>
+      unwrap(await api.POST('/api/v1/projects/{projectKey}/campaign-folders', { params: path(project), body: { path: folder } })),
+    onSuccess: invalidate,
+  });
+}
+
+/** Renommer ou déplacer un dossier : ses campagnes et sous-dossiers suivent. */
+export function useMoveCampaignFolder(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async ({ from, to }: { from: string; to: string }) =>
+      unwrap(await api.POST('/api/v1/projects/{projectKey}/campaign-folders/move', { params: path(project), body: { from, to } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteCampaignFolder(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async (folder: string) => {
+      const result = await api.DELETE('/api/v1/projects/{projectKey}/campaign-folders', { params: { path: { projectKey: project }, query: { path: folder } } });
+      if (!result.response.ok) throw new ApiError(result.response.status, result.error as Problem | undefined);
+    },
+    onSuccess: invalidate,
+  });
+}
+
+/** Ranger une campagne (même terminée) ; {@code folder: null} = racine. */
+export function useMoveCampaign(project: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async ({ key, folder }: { key: string; folder: string | null }) =>
+      unwrap(
+        await api.PATCH('/api/v1/projects/{projectKey}/campaigns/{key}', {
+          params: { path: { projectKey: project, key } },
+          body: { folder } as Schemas['UpdateCampaignRequest'],
+          headers: { 'Content-Type': 'application/merge-patch+json' },
+        }),
+      ),
+    onSuccess: invalidate,
   });
 }

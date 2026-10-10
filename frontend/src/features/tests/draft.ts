@@ -8,6 +8,10 @@ export interface StepDraft {
   action: string;
   expectedResult: string;
   testData: string;
+  /** ADR-0018 pas d'appel d'un autre cas de test. */
+  calledTestKey?: string;
+  calledTestTitle?: string;
+  callParameters?: Record<string, string>;
 }
 
 export interface ParameterDraft {
@@ -77,7 +81,11 @@ export function toDraft(test: TestCaseDetail): TestDraft {
     folder: test.folder ?? '',
     automationCandidate: test.automationCandidate,
     automationJustification: test.automationJustification ?? '',
-    steps: test.steps.map((s) => ({ action: s.action, expectedResult: s.expectedResult ?? '', testData: s.testData ?? '' })),
+    steps: test.steps.map((s) =>
+      s.calledTest
+        ? { action: s.action ?? '', expectedResult: s.expectedResult ?? '', testData: s.testData ?? '', calledTestKey: s.calledTest.key, calledTestTitle: s.calledTest.title, callParameters: { ...s.callParameters } }
+        : { action: s.action ?? '', expectedResult: s.expectedResult ?? '', testData: s.testData ?? '' },
+    ),
     // Un paramètre seulement détecté, sans détail, n'est pas « déclaré » : il disparaît avec son ${nom}.
     parameters: test.parameters
       .filter((p) => !p.detected || p.defaultValue || p.description)
@@ -112,7 +120,17 @@ export function toPatch(kind: TestCaseDetail['kind'], initial: TestDraft, draft:
     if (JSON.stringify(initial[field]) === JSON.stringify(draft[field])) return;
     const value = draft[field];
     if (field === 'steps') {
-      patch.steps = draft.steps.map((s) => ({ action: s.action, expectedResult: s.expectedResult.trim() || null, testData: s.testData.trim() || null }));
+      patch.steps = draft.steps.map((s) =>
+        s.calledTestKey !== undefined
+          ? {
+              action: s.action.trim() || null,
+              expectedResult: s.expectedResult.trim() || null,
+              testData: null,
+              calledTestKey: s.calledTestKey || null,
+              callParameters: Object.fromEntries(Object.entries(s.callParameters ?? {}).filter(([, v]) => v.trim() !== '')),
+            }
+          : { action: s.action, expectedResult: s.expectedResult.trim() || null, testData: s.testData.trim() || null },
+      );
     } else if (field === 'parameters') {
       patch.parameters = draft.parameters.map((p) => ({ name: p.name, defaultValue: p.defaultValue || null, description: p.description.trim() || null }));
     } else if (field === 'estimatedDurationMin') {

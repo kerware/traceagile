@@ -115,9 +115,16 @@ function ExecutionView({ project, execution }: { project: string; execution: Exe
                     <Badge variant="default" size="sm">
                       {s.position}
                     </Badge>
-                    <Text size="sm" truncate flex={1}>
-                      {s.action}
-                    </Text>
+                    <Stack gap={0} flex={1} miw={0}>
+                      {s.calledFrom && (
+                        <Text size="xs" c="grape" truncate>
+                          ↳ {s.calledFrom}
+                        </Text>
+                      )}
+                      <Text size="sm" truncate>
+                        {s.action}
+                      </Text>
+                    </Stack>
                     <ExecutionStatusBadge status={s.status} testId={`step-status-badge-${s.position}`} />
                   </Group>
                 </Paper>
@@ -131,6 +138,11 @@ function ExecutionView({ project, execution }: { project: string; execution: Exe
                 <ExecutionStatusBadge status={step.status} />
               </Group>
               <Stack gap="xs">
+                {step.calledFrom && (
+                  <Badge color="grape" variant="light" data-testid="step-called-from">
+                    ↳ {step.calledFrom}
+                  </Badge>
+                )}
                 <Field label={t('steps.action')} value={step.action} testId="step-action" />
                 <Field label={t('steps.expected')} value={step.expectedResult} testId="step-expected" />
                 {step.testData && <Field label={t('steps.data')} value={step.testData} />}

@@ -1,8 +1,10 @@
 package com.traceagile.api.demo;
 
+import com.traceagile.application.campaign.CampaignFolderService;
 import com.traceagile.application.campaign.CampaignRepository;
 import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.campaign.CampaignService.CampaignCommand;
+import com.traceagile.application.campaign.CampaignService.CampaignPatch;
 import com.traceagile.application.campaign.CampaignService.SelectionParams;
 import com.traceagile.application.campaign.CampaignService.Strategy;
 import com.traceagile.application.defect.DefectService;
@@ -54,10 +56,13 @@ public class DemoCampaignLoader {
     private final DefectService defects;
     private final PlanningService planning;
     private final TraceLinkService links;
+    private final CampaignFolderService folders;
 
     public DemoCampaignLoader(CampaignService campaigns, CampaignRepository campaignRepository, ExecutionRepository executions,
-                              ExecutionService executionService, DefectService defects, PlanningService planning, TraceLinkService links) {
+                              ExecutionService executionService, DefectService defects, PlanningService planning, TraceLinkService links,
+                              CampaignFolderService folders) {
         this.links = links;
+        this.folders = folders;
         this.campaigns = campaigns;
         this.campaignRepository = campaignRepository;
         this.executions = executions;
@@ -68,6 +73,7 @@ public class DemoCampaignLoader {
 
     public void load(String project) {
         if (campaignRepository.existsByProject_Key(project)) {
+            organize(project);
             return;
         }
         Sprint spr1 = planning.sprint(project, "SPR-1");
@@ -86,6 +92,28 @@ public class DemoCampaignLoader {
         defects.create(project, new DefectCommand("Journal applicatif : avertissement au démarrage", "Sans exigence associée.",
                 DefectSeverity.MAJOR, "OPS-118", List.of()));
         defects.update(project, minor.getKey(), status(DefectStatus.IN_PROGRESS), null);
+        organize(project);
+    }
+
+    /**
+     * ADR-0018 range les campagnes de démonstration (y compris sur une base créée avant les dossiers) :
+     * recettes de sprint et régression sous « Version 2.0 », dossier « Archives » vide.
+     */
+    void organize(String project) {
+        if (!folders.all(project).isEmpty()) {
+            return;
+        }
+        for (Campaign campaign : campaignRepository.findByProject_KeyOrderByKeyNumberDesc(project)) {
+            String folder = switch (campaign.getName()) {
+                case "Recette SPR-1", "Recette SPR-2" -> "Version 2.0/Recettes de sprint";
+                case "Régression 2.0" -> "Version 2.0/Régression";
+                default -> null;
+            };
+            if (folder != null) {
+                campaigns.update(project, campaign.getKey(), new CampaignPatch(null, null, null, null, null, Optional.of(folder)), null);
+            }
+        }
+        folders.create(project, "Archives");
     }
 
     /** CMP-1 terminée sur SPR-1. */

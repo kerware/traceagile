@@ -30,7 +30,7 @@ export function testDetail(key: string, overrides: Partial<TestCaseDetail> = {})
     tags: [],
     currentVersion: 1,
     automationCandidate: false,
-    steps: [{ id: 's1', position: 1, action: 'Ouvrir la fiche', expectedResult: 'La fiche s’affiche' }],
+    steps: [{ id: 's1', position: 1, action: 'Ouvrir la fiche', expectedResult: 'La fiche s’affiche', callParameters: {} }],
     parameters: [],
     dataSets: [],
     requirements: [],
@@ -40,6 +40,7 @@ export function testDetail(key: string, overrides: Partial<TestCaseDetail> = {})
     createdBy: 'qa1',
     updatedAt: '2026-10-08T10:00:00Z',
     updatedBy: 'qa1',
+    calledBy: [],
     ...overrides,
   };
 }

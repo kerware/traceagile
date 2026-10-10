@@ -22,3 +22,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0015](0015-planification.md) | Releases, sprints et planification | 4 |
 | [0016](0016-campagnes-execution-anomalies.md) | Campagnes, exécution manuelle et anomalies | 5 |
 | [0017](0017-duplication-campagnes.md) | Dupliquer une campagne ou la générer depuis les résultats d'une autre | 5 |
+| [0018](0018-complements-execution.md) | Jeux de données en campagne, appel de cas de test, dossiers de campagnes, traçabilité des anomalies | 5 |

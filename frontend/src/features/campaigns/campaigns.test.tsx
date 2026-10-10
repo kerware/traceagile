@@ -27,8 +27,8 @@ const progress = { total: 2, byStatus: { NOT_RUN: 1, FAILED: 1 }, executed: 1, e
 const CAMPAIGN: CampaignDetail = {
   campaign: { key: 'CMP-1', name: 'Recette SPR-1', scopeType: 'SPRINT', sprintKey: 'SPR-1', environment: 'recette', buildVersion: '2.0.0-rc1', status: 'IN_PROGRESS', progress, version: 0 },
   items: [
-    { id: 'i1', position: 1, test: test1, testCaseVersion: 1, executedByServer: false, riskScore: 16, lastStatus: 'NOT_RUN', attempts: 0 },
-    { id: 'i2', position: 2, test: { ...test1, key: 'TC-3', title: 'API panier', kind: 'AUTOMATED', technique: 'API' }, testCaseVersion: 1, executedByServer: true, riskScore: 12, lastStatus: 'FAILED', attempts: 1, latestExecutionId: 'x2' },
+    { id: 'i1', position: 1, test: test1, testCaseVersion: 1, executedByServer: false, riskScore: 16, lastStatus: 'NOT_RUN', attempts: 0, dataSetValues: {}, dataSets: [{ name: 'Recette', rows: 2 }] },
+    { id: 'i2', position: 2, test: { ...test1, key: 'TC-3', title: 'API panier', kind: 'AUTOMATED', technique: 'API' }, testCaseVersion: 1, executedByServer: true, riskScore: 12, lastStatus: 'FAILED', attempts: 1, latestExecutionId: 'x2', dataSetValues: {}, dataSets: [] },
   ],
   workload: [{ tests: 1, manualMinutes: 10, exploratoryMinutes: 0, unestimated: 0 }],
 };
@@ -51,6 +51,8 @@ function serveCampaign() {
     http.get(`${P}/campaigns`, () => HttpResponse.json([CAMPAIGN.campaign])),
     http.get(`${P}/sprints`, () => HttpResponse.json([])),
     http.get(`${P}/requirements/tree`, () => HttpResponse.json([])),
+    http.get(`${P}/campaign-folders`, () => HttpResponse.json([])),
+    http.get(`${P}/releases`, () => HttpResponse.json([])),
   );
 }
 
@@ -159,6 +161,7 @@ describe('§13.2 /p/:key/campaigns/:ck — campagne (F-CMP-02 à F-CMP-05)', () 
         body = (await request.json()) as Record<string, unknown>;
         return HttpResponse.json({ copied: ['TC-1', 'TC-3'], skipped: [], campaign: { ...CAMPAIGN, campaign: { ...CAMPAIGN.campaign, key: 'CMP-2' } } }, { status: 201 });
       }),
+      http.get(`${P}/campaigns/CMP-2`, () => HttpResponse.json({ ...CAMPAIGN, campaign: { ...CAMPAIGN.campaign, key: 'CMP-2' } })),
     );
     renderRoutes(routes, '/p/SHOP/campaigns/CMP-1');
 

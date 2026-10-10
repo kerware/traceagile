@@ -148,7 +148,9 @@ class CampaignExecutionApiTest extends AbstractApiTest {
 
         mvc.perform(get(P + "/executions/" + execution).header("Authorization", qa)).andExpect(jsonPath("$.defects[0].key", is("DEF-1")));
         mvc.perform(get(P + "/requirements/REQ-2").header("Authorization", po)).andExpect(jsonPath("$.verificationStatus", is("FAILED")));
-        mvc.perform(get(P + "/requirements/REQ-2/defects").header("Authorization", po)).andExpect(jsonPath("$[0].key", is("DEF-1")));
+        mvc.perform(get(P + "/requirements/REQ-2/defects").header("Authorization", po))
+                .andExpect(jsonPath("$[0].defect.key", is("DEF-1")))
+                .andExpect(jsonPath("$[0].linked", is(true)));
         mvc.perform(get(P + "/requirements/REQ-2/executions").header("Authorization", po))
                 .andExpect(jsonPath("$[0].status", is("FAILED")))
                 .andExpect(jsonPath("$[0].campaign.key", is("CMP-1")));
@@ -411,5 +413,168 @@ class CampaignExecutionApiTest extends AbstractApiTest {
                 .content(toJson(Map.of("name", "X")))).andExpect(status().isForbidden());
         mvc.perform(post(P + "/campaigns/CMP-9/copy").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(Map.of("name", "X")))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("ADR-0018 fiche test : ses exécutions et anomalies ; anomalies d'une exigence directes ou trouvées par traçabilité, rattachement")
+    void testRunsAndTracedDefects() throws Exception {
+        campaign();
+        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-1", "TC-2")));
+        String execution = startExecution(itemId("TC-1"), Map.of());
+        mvc.perform(put(P + "/executions/" + execution + "/steps/1").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("status", "FAILED")))).andExpect(status().isOk());
+        // anomalie volontairement rattachée à aucune exigence
+        send(qa, P + "/executions/" + execution + "/defects", Map.of("title", "Fiche vide", "severity", "MINOR", "requirementKeys", List.of()));
+
+        mvc.perform(get(P + "/test-cases/TC-1/executions").header("Authorization", po))
+                .andExpect(jsonPath("$[0].id", is(execution)))
+                .andExpect(jsonPath("$[0].status", is("FAILED")))
+                .andExpect(jsonPath("$[0].campaign.key", is("CMP-1")));
+        mvc.perform(get(P + "/test-cases/TC-1/defects").header("Authorization", po)).andExpect(jsonPath("$[*].key", contains("DEF-1")));
+        mvc.perform(get(P + "/test-cases/TC-2/defects").header("Authorization", po)).andExpect(jsonPath("$", hasSize(0)));
+
+        mvc.perform(get(P + "/requirements/REQ-2/defects").header("Authorization", po))
+                .andExpect(jsonPath("$[0].defect.key", is("DEF-1")))
+                .andExpect(jsonPath("$[0].linked", is(false)))
+                .andExpect(jsonPath("$[0].viaTests", contains("TC-1")));
+        mvc.perform(post(P + "/requirements/REQ-2/defects/DEF-1").header("Authorization", bearer("viewer"))).andExpect(status().isForbidden());
+        mvc.perform(post(P + "/requirements/REQ-2/defects/DEF-1").header("Authorization", qa))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.defect.requirementKeys", contains("REQ-2")));
+        mvc.perform(get(P + "/requirements/REQ-2/defects").header("Authorization", po))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].linked", is(true)))
+                .andExpect(jsonPath("$[0].viaTests", contains("TC-1")));
+        mvc.perform(get(P + "/test-cases/TC-9/executions").header("Authorization", po)).andExpect(status().isNotFound());
+    }
+
+    JsonNode items() throws Exception {
+        return readJson(mvc.perform(get(P + "/campaigns/CMP-1").header("Authorization", qa)).andReturn().getResponse().getContentAsString())
+                .get("items");
+    }
+
+    ResultActions patchItem(String id, Map<String, Object> body) throws Exception {
+        return mvc.perform(patch(P + "/campaign-items/" + id).header("Authorization", qa).contentType("application/merge-patch+json")
+                .content(toJson(body)));
+    }
+
+    @Test
+    @DisplayName("ADR-0018 test sélectionné avec un jeu de données : une ligne par élément, déclinaison de toutes les lignes, valeurs à l'exécution")
+    void dataSetInCampaign() throws Exception {
+        campaign();
+        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-1", "TC-2")));
+        String tc1 = itemId("TC-1");
+        mvc.perform(post(P + "/campaign-items/" + tc1 + "/expand-data-set").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("dataSetName", "recette"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[*].test.key", contains("TC-1", "TC-1", "TC-2")))
+                .andExpect(jsonPath("$.items[0].dataSetName", is("Recette")))
+                .andExpect(jsonPath("$.items[0].dataSetRow", is(0)))
+                .andExpect(jsonPath("$.items[0].dataSetValues.produit", is("Stylo")))
+                .andExpect(jsonPath("$.items[1].dataSetRow", is(1)))
+                .andExpect(jsonPath("$.items[1].dataSetValues.prix", is("3,90 €")))
+                .andExpect(jsonPath("$.items[1].id").isNotEmpty());
+        // idempotent : les lignes déjà présentes ne sont pas dupliquées
+        mvc.perform(post(P + "/campaign-items/" + tc1 + "/expand-data-set").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("dataSetName", "Recette")))).andExpect(jsonPath("$.items", hasSize(3)));
+        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-1")))
+                .andExpect(jsonPath("$.skipped[0].reason", is("ALREADY_SELECTED")));
+
+        String row2 = items().get(1).get("id").asText();
+        patchItem(row2, Map.of("assignee", "qa1")).andExpect(jsonPath("$.dataSetRow", is(1)));
+        String execution = startExecution(row2, Map.of());
+        mvc.perform(get(P + "/executions/" + execution).header("Authorization", qa))
+                .andExpect(jsonPath("$.dataSetName", is("Recette")))
+                .andExpect(jsonPath("$.dataSetRow", is(1)))
+                .andExpect(jsonPath("$.steps[0].action", is("Ouvrir Cahier")))
+                .andExpect(jsonPath("$.steps[1].expectedResult", is("Total 3,90 €")));
+        mvc.perform(get(P + "/test-cases/TC-1/executions").header("Authorization", qa))
+                .andExpect(jsonPath("$[0].dataSetName", is("Recette")))
+                .andExpect(jsonPath("$[0].dataSetRow", is(1)));
+        mvc.perform(get(P + "/my-executions").header("Authorization", qa).param("status", "RUNNING"))
+                .andExpect(jsonPath("$[0].dataSetRow", is(1)));
+
+        // règles : ligne imposée par la campagne, élément exécuté figé, doublon, jeu inconnu
+        mvc.perform(put(P + "/executions/" + execution + "/steps/1").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("status", "PASSED"))));
+        mvc.perform(put(P + "/executions/" + execution + "/steps/2").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("status", "PASSED")))).andExpect(jsonPath("$.status", is("PASSED")));
+        mvc.perform(post(P + "/campaign-items/" + row2 + "/executions").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("dataSetName", "Recette", "row", 0))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("EXECUTION_DATASET_BOUND")));
+        patchItem(row2, Map.of("dataSetName", "Recette", "dataSetRow", 0)).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("CAMPAIGN_ITEM_EXECUTED")));
+        patchItem(tc1, Map.of("dataSetName", "Recette", "dataSetRow", 1)).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("CAMPAIGN_ITEM_DUPLICATE")));
+        patchItem(itemId("TC-2"), Map.of("dataSetName", "Recette", "dataSetRow", 0)).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("EXECUTION_DATASET_UNKNOWN")));
+        patchItem(tc1, Map.of("dataSetRow", 5)).andExpect(status().isUnprocessableEntity());
+        // retour aux valeurs par défaut
+        patchItem(tc1, java.util.Collections.singletonMap("dataSetName", null))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dataSetName").doesNotExist());
+
+        // ADR-0017 la copie garde les lignes
+        copy(Map.of("name", "Bis"))
+                .andExpect(jsonPath("$.copied", contains("TC-1", "TC-1", "TC-2")))
+                .andExpect(jsonPath("$.campaign.items[1].dataSetRow", is(1)));
+    }
+
+    ResultActions patchTest(String key, Map<String, Object> body) throws Exception {
+        return mvc.perform(patch(P + "/test-cases/" + key).header("Authorization", qa).contentType("application/merge-patch+json")
+                .content(toJson(body)));
+    }
+
+    @Test
+    @DisplayName("ADR-0018 un pas appelle un autre cas de test : paramètres transmis, pas déroulés à l'exécution ; cycles, nature et suppression contrôlés")
+    void calledTestSteps() throws Exception {
+        // TC-5 réutilisable « Se connecter », paramètre ${login}
+        send(qa, P + "/test-cases", Map.of("kind", "MANUAL", "title", "Se connecter",
+                "steps", List.of(Map.of("action", "Saisir ${login}", "expectedResult", "Champ rempli"),
+                        Map.of("action", "Valider", "expectedResult", "Connecté en tant que ${login}")),
+                "parameters", List.of(Map.of("name", "login", "defaultValue", "invité"))));
+        // TC-6 appelle TC-5 avec login = ${client}
+        mvc.perform(post(P + "/test-cases").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("kind", "MANUAL", "title", "Commander",
+                                "steps", List.of(Map.of("calledTestKey", "TC-5", "callParameters", Map.of("login", "${client}")),
+                                        Map.of("action", "Payer ${montant}", "expectedResult", "Payé")),
+                                "parameters", List.of(Map.of("name", "client", "defaultValue", "alice"),
+                                        Map.of("name", "montant", "defaultValue", "10 €"))))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.key", is("TC-6")))
+                .andExpect(jsonPath("$.steps[0].calledTest.key", is("TC-5")))
+                .andExpect(jsonPath("$.steps[0].calledTest.title", is("Se connecter")))
+                .andExpect(jsonPath("$.steps[0].callParameters.login", is("${client}")))
+                .andExpect(jsonPath("$.parameters[*].name", containsInAnyOrder("client", "montant")));
+        mvc.perform(get(P + "/test-cases/TC-5").header("Authorization", qa)).andExpect(jsonPath("$.calledBy", contains("TC-6")));
+
+        // règles
+        patchTest("TC-5", Map.of("steps", List.of(Map.of("calledTestKey", "TC-6")))).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_CALL_CYCLE")));
+        patchTest("TC-6", Map.of("steps", List.of(Map.of("calledTestKey", "TC-6")))).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_CALL_CYCLE")));
+        patchTest("TC-6", Map.of("steps", List.of(Map.of("calledTestKey", "TC-3")))).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_CALL_INVALID")));
+        patchTest("TC-6", Map.of("steps", List.of(Map.of("calledTestKey", "TC-99")))).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_CALL_INVALID")));
+        patchTest("TC-6", Map.of("steps", List.of(Map.of("expectedResult", "sans action")))).andExpect(status().isUnprocessableEntity());
+        mvc.perform(delete(P + "/test-cases/TC-5").header("Authorization", qa)).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_CALLED")));
+
+        // exécution : pas de TC-5 déroulés avec login = alice, puis le pas propre à TC-6
+        send(qa, P + "/test-cases/TC-6/status", Map.of("status", "READY"));
+        campaign();
+        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-6")));
+        String execution = startExecution(itemId("TC-6"), Map.of());
+        mvc.perform(get(P + "/executions/" + execution).header("Authorization", qa))
+                .andExpect(jsonPath("$.steps", hasSize(3)))
+                .andExpect(jsonPath("$.steps[0].action", is("Saisir alice")))
+                .andExpect(jsonPath("$.steps[0].calledFrom", is("TC-5 Se connecter")))
+                .andExpect(jsonPath("$.steps[1].expectedResult", is("Connecté en tant que alice")))
+                .andExpect(jsonPath("$.steps[2].action", is("Payer 10 €")))
+                .andExpect(jsonPath("$.steps[2].calledFrom").doesNotExist());
+        mvc.perform(put(P + "/executions/" + execution + "/steps/3").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("status", "FAILED")))).andExpect(jsonPath("$.status", is("FAILED")));
     }
 }

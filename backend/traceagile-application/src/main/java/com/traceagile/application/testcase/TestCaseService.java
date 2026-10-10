@@ -161,7 +161,7 @@ public class TestCaseService {
             }
         };
         if (command.details() != null) {
-            command.details().applyTo(test);
+            command.details().applyTo(test, callable(projectKey));
         }
         prepareGherkin(test);
         TestCase saved = tests.save(test);
@@ -180,7 +180,7 @@ public class TestCaseService {
         VersionConflictException.check(expectedVersion, test.getVersion());
         Map<String, Object> before = test.snapshot();
         Object fingerprint = test.significantFingerprint();
-        patch.applyTo(test);
+        patch.applyTo(test, callable(projectKey));
         prepareGherkin(test);
         if (!Objects.equals(fingerprint, test.significantFingerprint())) {
             test.nextVersion();
@@ -216,6 +216,10 @@ public class TestCaseService {
         if (executions.existsByTestCase_IdIn(List.of(test.getId()))) {
             throw new BusinessRuleException("TEST_ALREADY_EXECUTED", key + " a déjà été exécuté : passez-le à « Obsolète » plutôt que de le supprimer.");
         }
+        List<String> callers = calledBy(test);
+        if (!callers.isEmpty()) {
+            throw new BusinessRuleException("TEST_CALLED", key + " est appelé par " + String.join(", ", callers) + " : retirez d'abord ces appels.");
+        }
         if (campaignItems.existsByTestCase_Id(test.getId())) {
             throw new BusinessRuleException("TEST_IN_CAMPAIGN", key + " est sélectionné dans une campagne : retirez-le d'abord de la campagne.");
         }
@@ -224,7 +228,23 @@ public class TestCaseService {
         tests.delete(test);
     }
 
+    /** ADR-0018 clés des tests qui appellent ce test, dans l'ordre des clés. */
+    @Transactional(readOnly = true)
+    public List<String> calledBy(TestCase test) {
+        if (test.getId() == null) {
+            return List.of();
+        }
+        return tests.findDistinctBySteps_CalledTest_Id(test.getId()).stream()
+                .sorted(java.util.Comparator.comparingInt(TestCase::getKeyNumber)).map(TestCase::getKey).toList();
+    }
+
     // ---------------------------------------------------------------- outils
+
+    /** ADR-0018 résolution des tests appelés par les pas. */
+    private java.util.function.Function<String, TestCase> callable(String projectKey) {
+        return k -> tests.findByProject_KeyAndKey(projectKey, k).orElseThrow(() ->
+                new BusinessRuleException("TEST_CALL_INVALID", "Cas de test appelé « " + k + " » introuvable."));
+    }
 
     /**
      * F-AUT-04 / F-AUT-05 la source Gherkin d'un test BDD est validée ; le nom de la fonctionnalité et,

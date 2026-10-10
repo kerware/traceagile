@@ -452,6 +452,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/requirements/{key}/defects/{defectKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["linkToRequirement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements/{key}/acceptance-criteria": {
         parameters: {
             query?: never;
@@ -676,6 +692,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/campaign-items/{id}/expand-data-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["expandDataSet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/campaign-items/{id}/executions": {
         parameters: {
             query?: never;
@@ -686,6 +718,38 @@ export interface paths {
         get: operations["attempts"];
         put?: never;
         post: operations["start_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaign-folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_8"];
+        put?: never;
+        post: operations["create_8"];
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaign-folders/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["move_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -798,7 +862,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch: operations["update_1"];
@@ -814,7 +878,7 @@ export interface paths {
         get: operations["get_1"];
         put?: never;
         post?: never;
-        delete: operations["delete_2"];
+        delete: operations["delete_3"];
         options?: never;
         head?: never;
         patch: operations["update_2"];
@@ -846,7 +910,7 @@ export interface paths {
         get: operations["get_2"];
         put?: never;
         post?: never;
-        delete: operations["delete_3"];
+        delete: operations["delete_4"];
         options?: never;
         head?: never;
         patch: operations["update_3"];
@@ -942,7 +1006,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete_4"];
+        delete: operations["delete_5"];
         options?: never;
         head?: never;
         patch: operations["update_6"];
@@ -955,7 +1019,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_8"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1068,6 +1132,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ofTest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/test-cases/{key}/defects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ofTest_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1648,6 +1744,9 @@ export interface components {
             executedBy?: string;
             /** @enum {string} */
             origin: "MANUAL" | "AUTOMATED";
+            dataSetName?: string;
+            /** Format: int32 */
+            dataSetRow?: number;
         };
         CampaignRef: {
             key: string;
@@ -1722,6 +1821,8 @@ export interface components {
             /** @enum {string} */
             status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
             actualResult?: string;
+            /** @description ADR-0018 test appelé d'où vient ce pas */
+            calledFrom?: string;
         };
         TestRef: {
             key: string;
@@ -1788,6 +1889,8 @@ export interface components {
             progress: components["schemas"]["ProgressResponse"];
             /** Format: int64 */
             version: number;
+            /** @description ADR-0018 dossier « a/b » ; absent = racine */
+            folder?: string;
         };
         ItemResponse: {
             /** Format: uuid */
@@ -1816,6 +1919,18 @@ export interface components {
             latestExecutionId?: string;
             /** Format: date-time */
             lastExecutedAt?: string;
+            /** @description ADR-0018 jeu de données prévu (absent : valeurs par défaut) */
+            dataSetName?: string;
+            /**
+             * Format: int32
+             * @description Ligne du jeu, base 0
+             */
+            dataSetRow?: number;
+            /** @description Valeurs de la ligne prévue */
+            dataSetValues: {
+                [key: string]: string;
+            };
+            dataSets: components["schemas"]["DataSetRef"][];
         };
         ProgressResponse: {
             /** Format: int32 */
@@ -1974,9 +2089,13 @@ export interface components {
             description?: string;
         };
         StepRequest: {
-            action: string;
+            action?: string;
             expectedResult?: string;
             testData?: string;
+            calledTestKey?: string;
+            callParameters?: {
+                [key: string]: string;
+            };
         };
         TestCaseFieldsRequest: {
             title?: string;
@@ -2041,6 +2160,12 @@ export interface components {
             keywords: string[];
             missingInRepository: boolean;
         };
+        CalledTestRef: {
+            key: string;
+            title: string;
+            /** @enum {string} */
+            status: "DRAFT" | "READY" | "NEEDS_UPDATE" | "OBSOLETE";
+        };
         CharterResponse: {
             explore?: string;
             with?: string;
@@ -2065,9 +2190,16 @@ export interface components {
             id: string;
             /** Format: int32 */
             position: number;
-            action: string;
+            /** @description Facultative pour un pas d'appel */
+            action?: string;
             expectedResult?: string;
             testData?: string;
+            /** @description ADR-0018 cas de test appelé par ce pas */
+            calledTest?: components["schemas"]["CalledTestRef"];
+            /** @description ADR-0018 valeurs des paramètres de l'appelé */
+            callParameters: {
+                [key: string]: string;
+            };
         };
         TestCaseDetail: {
             /** Format: uuid */
@@ -2108,6 +2240,8 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             updatedBy?: string;
+            /** @description ADR-0018 tests dont un pas appelle celui-ci */
+            calledBy: string[];
         };
         TestStatusRequest: {
             /** @enum {string} */
@@ -2222,6 +2356,44 @@ export interface components {
             /** @description Exigence après laquelle insérer (précédente) */
             afterKey?: string;
         };
+        DefectDetail: {
+            defect: components["schemas"]["DefectSummary"];
+            description?: string;
+            allowedTransitions: ("OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED")[];
+            requirements: components["schemas"]["DefectRequirementRef"][];
+            executions: components["schemas"]["DefectExecutionRef"][];
+        };
+        DefectExecutionRef: {
+            /** Format: uuid */
+            id: string;
+            testKey: string;
+            campaignKey: string;
+            /** Format: int32 */
+            attempt: number;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+        };
+        DefectRequirementRef: {
+            key: string;
+            title: string;
+        };
+        DefectSummary: {
+            key: string;
+            title: string;
+            /** @enum {string} */
+            severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
+            /** @enum {string} */
+            status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED";
+            externalRef?: string;
+            requirementKeys: string[];
+            /** Format: int32 */
+            executionCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            /** Format: int64 */
+            version: number;
+        };
         ImportResponse: {
             created: string[];
         };
@@ -2274,44 +2446,6 @@ export interface components {
             externalRef?: string;
             requirementKeys?: string[];
         };
-        DefectDetail: {
-            defect: components["schemas"]["DefectSummary"];
-            description?: string;
-            allowedTransitions: ("OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED")[];
-            requirements: components["schemas"]["DefectRequirementRef"][];
-            executions: components["schemas"]["DefectExecutionRef"][];
-        };
-        DefectExecutionRef: {
-            /** Format: uuid */
-            id: string;
-            testKey: string;
-            campaignKey: string;
-            /** Format: int32 */
-            attempt: number;
-            /** @enum {string} */
-            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
-        };
-        DefectRequirementRef: {
-            key: string;
-            title: string;
-        };
-        DefectSummary: {
-            key: string;
-            title: string;
-            /** @enum {string} */
-            severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
-            /** @enum {string} */
-            status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED";
-            externalRef?: string;
-            requirementKeys: string[];
-            /** Format: int32 */
-            executionCount: number;
-            /** Format: date-time */
-            createdAt: string;
-            createdBy?: string;
-            /** Format: int64 */
-            version: number;
-        };
         CreateCampaignRequest: {
             name: string;
             /** @enum {string} */
@@ -2324,6 +2458,7 @@ export interface components {
             plannedStart?: string;
             /** Format: date */
             plannedEnd?: string;
+            folder?: string;
         };
         SelectRequest: {
             /** @enum {string} */
@@ -2363,10 +2498,31 @@ export interface components {
             skipped: components["schemas"]["SkippedResponse"][];
             campaign: components["schemas"]["CampaignDetail"];
         };
+        ExpandDataSetRequest: {
+            dataSetName: string;
+        };
         StartExecutionRequest: {
             dataSetName?: string;
             /** Format: int32 */
             row?: number;
+        };
+        CampaignFolderRequest: {
+            path: string;
+        };
+        CampaignFolderResponse: {
+            path: string;
+        };
+        MoveCampaignFolderRequest: {
+            from: string;
+            to: string;
+        };
+        MoveCampaignFolderResponse: {
+            path: string;
+            /**
+             * Format: int32
+             * @description Nombre de campagnes reclassées
+             */
+            movedCampaigns: number;
         };
         GherkinValidateRequest: {
             source: string;
@@ -2490,9 +2646,13 @@ export interface components {
             plannedStart?: string;
             /** Format: date */
             plannedEnd?: string;
+            folder?: string;
         };
         ItemPatchRequest: {
             assignee?: string;
+            dataSetName?: string;
+            /** Format: int32 */
+            dataSetRow?: number;
         };
         UpdateCriterionRequest: {
             /** @enum {string} */
@@ -2657,6 +2817,26 @@ export interface components {
             /** Format: int64 */
             totalElements: number;
         };
+        RequirementExecutionResponse: {
+            /** Format: uuid */
+            id: string;
+            test: components["schemas"]["TestRef"];
+            campaign: components["schemas"]["CampaignRef"];
+            /** Format: int32 */
+            attempt: number;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            executedBy?: string;
+            /** @enum {string} */
+            origin: "MANUAL" | "AUTOMATED";
+            dataSetName?: string;
+            /** Format: int32 */
+            dataSetRow?: number;
+        };
         TestCaseGroup: {
             /** @description Dossier ou fonctionnalité ; vide = non classé */
             name: string;
@@ -2781,22 +2961,11 @@ export interface components {
             linkType: "VERIFIES" | "PARTIALLY_VERIFIES" | "RELATES_TO";
             suspect: boolean;
         };
-        RequirementExecutionResponse: {
-            /** Format: uuid */
-            id: string;
-            test: components["schemas"]["TestRef"];
-            campaign: components["schemas"]["CampaignRef"];
-            /** Format: int32 */
-            attempt: number;
-            /** @enum {string} */
-            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
-            /** Format: date-time */
-            startedAt: string;
-            /** Format: date-time */
-            endedAt?: string;
-            executedBy?: string;
-            /** @enum {string} */
-            origin: "MANUAL" | "AUTOMATED";
+        RequirementDefectResponse: {
+            defect: components["schemas"]["DefectSummary"];
+            linked: boolean;
+            /** @description Tests liés à l'exigence dont une exécution a révélé l'anomalie */
+            viaTests: string[];
         };
         RequirementTreeNode: {
             key: string;
@@ -2837,6 +3006,10 @@ export interface components {
             /** Format: uuid */
             latestExecutionId?: string;
             dataSets: components["schemas"]["DataSetRef"][];
+            /** @description ADR-0018 jeu de données prévu dans la campagne */
+            dataSetName?: string;
+            /** Format: int32 */
+            dataSetRow?: number;
         };
         StepUsageResponse: {
             text: string;
@@ -3907,6 +4080,30 @@ export interface operations {
             };
         };
     };
+    linkToRequirement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+                defectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectDetail"];
+                };
+            };
+        };
+    };
     list_5: {
         parameters: {
             query?: never;
@@ -4360,6 +4557,33 @@ export interface operations {
             };
         };
     };
+    expandDataSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpandDataSetRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignDetail"];
+                };
+            };
+        };
+    };
     attempts: {
         parameters: {
             query?: never;
@@ -4406,6 +4630,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
+        };
+    };
+    list_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+        };
+    };
+    create_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignFolderRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignFolderResponse"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    move_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveCampaignFolderRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoveCampaignFolderResponse"];
                 };
             };
         };
@@ -4574,7 +4894,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -4648,7 +4968,7 @@ export interface operations {
             };
         };
     };
-    delete_2: {
+    delete_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -4775,7 +5095,7 @@ export interface operations {
             };
         };
     };
-    delete_3: {
+    delete_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -5085,7 +5405,7 @@ export interface operations {
             };
         };
     };
-    delete_4: {
+    delete_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -5136,7 +5456,7 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
         parameters: {
             query?: never;
             header?: never;
@@ -5328,6 +5648,52 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PageResponseAuditEventResponse"];
+                };
+            };
+        };
+    };
+    ofTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequirementExecutionResponse"][];
+                };
+            };
+        };
+    };
+    ofTest_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DefectSummary"][];
                 };
             };
         };
@@ -5569,7 +5935,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DefectSummary"][];
+                    "application/json": components["schemas"]["RequirementDefectResponse"][];
                 };
             };
         };

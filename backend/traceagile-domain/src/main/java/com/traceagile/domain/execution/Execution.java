@@ -3,7 +3,7 @@ package com.traceagile.domain.execution;
 import com.traceagile.domain.campaign.CampaignItem;
 import com.traceagile.domain.common.AuditableEntity;
 import com.traceagile.domain.common.BusinessRuleException;
-import com.traceagile.domain.testcase.DataSet;
+import com.traceagile.domain.testcase.DataSetRow;
 import com.traceagile.domain.testcase.ManualStep;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestKind;
@@ -21,7 +21,9 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,28 +127,58 @@ public class Execution extends AuditableEntity {
                 values.put(parameter.name(), parameter.defaultValue());
             }
         }
-        if (dataSetName != null) {
-            DataSet set = test.getDataSets().stream().filter(d -> d.name().equalsIgnoreCase(dataSetName)).findFirst()
-                    .orElseThrow(() -> new BusinessRuleException("EXECUTION_DATASET_UNKNOWN", "Jeu de données « " + dataSetName + " » inconnu."));
-            int index = row == null ? 0 : row;
-            if (index < 0 || index >= set.rows().size()) {
-                throw new BusinessRuleException("EXECUTION_DATASET_UNKNOWN", "Le jeu « " + set.name() + " » n'a pas de ligne " + (index + 1) + ".");
+        // ADR-0018 la ligne choisie dans la campagne s'impose ; une autre ligne demandée est refusée
+        if (item.getDataSetName() != null) {
+            if (dataSetName != null && (!dataSetName.equalsIgnoreCase(item.getDataSetName())
+                    || (row == null ? 0 : row) != item.getDataSetRow())) {
+                throw new BusinessRuleException("EXECUTION_DATASET_BOUND", test.getKey() + " est prévu avec la ligne "
+                        + (item.getDataSetRow() + 1) + " du jeu « " + item.getDataSetName() + " » dans cette campagne.");
             }
-            set.rows().get(index).forEach((name, value) -> {
-                if (value != null && !String.valueOf(value).isEmpty()) {
-                    values.put(name, String.valueOf(value));
-                }
-            });
-            execution.dataSetName = set.name();
-            execution.dataSetRow = index;
+            dataSetName = item.getDataSetName();
+            row = item.getDataSetRow();
+        }
+        if (dataSetName != null) {
+            DataSetRow data = DataSetRow.of(test, dataSetName, row);
+            values.putAll(data.values());
+            execution.dataSetName = data.dataSetName();
+            execution.dataSetRow = data.row();
         }
         execution.parameterValues = values;
-        for (ManualStep step : test.getSteps()) {
-            execution.steps.add(new StepResult(execution, step.getPosition(), ParameterResolver.resolve(step.getAction(), values),
-                    ParameterResolver.resolve(step.getExpectedResult(), values), ParameterResolver.resolve(step.getTestData(), values)));
-        }
+        execution.unfold(test, values, null, new ArrayDeque<>());
         item.attach(execution);
         return execution;
+    }
+
+    /**
+     * ADR-0018 pas à jouer : ceux du test, un appel étant remplacé par les pas (courants) du test
+     * appelé. Valeurs de l'appelé : ses défauts, puis toutes les valeurs de l'appelant (même nom),
+     * puis les valeurs de l'appel (où les {@code ${nom}} de l'appelant sont remplacés).
+     */
+    private void unfold(TestCase test, Map<String, String> values, String from, Deque<TestCase> path) {
+        path.push(test);
+        for (ManualStep step : test.getSteps()) {
+            TestCase called = step.getCalledTest();
+            if (called == null) {
+                steps.add(new StepResult(this, steps.size() + 1, ParameterResolver.resolve(step.getAction(), values),
+                        ParameterResolver.resolve(step.getExpectedResult(), values), ParameterResolver.resolve(step.getTestData(), values), from));
+                continue;
+            }
+            if (path.contains(called)) {
+                throw new BusinessRuleException("TEST_CALL_CYCLE", "Boucle d'appels entre " + test.getKey() + " et " + called.getKey() + ".");
+            }
+            Map<String, String> calledValues = new LinkedHashMap<>();
+            for (TestParameter parameter : called.getParameters()) {
+                if (parameter.defaultValue() != null) {
+                    calledValues.put(parameter.name(), parameter.defaultValue());
+                }
+            }
+            // toutes les valeurs de l'appelant descendent, y compris vers les appels imbriqués
+            calledValues.putAll(values);
+            step.getCallParameters().forEach((name, value) -> calledValues.put(name, ParameterResolver.resolve(value, values)));
+            String label = called.getKey() + " " + called.getTitle();
+            unfold(called, calledValues, from == null ? label : from + " › " + label, path);
+        }
+        path.pop();
     }
 
     /** Résultat enregistré sans saisie pas à pas (run automatisé, import de rapport, démonstration). */

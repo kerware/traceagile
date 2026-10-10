@@ -1,9 +1,9 @@
-import { Alert, Badge, Button, Group, Loader, Menu, Modal, Stack, Tabs, Text, Title } from '@mantine/core';
+import { Alert, Anchor, Badge, Button, Group, Loader, Menu, Modal, Stack, Tabs, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { IconChevronDown, IconDots, IconHourglass, IconTrash } from '@tabler/icons-react';
+import { IconChevronDown, IconDots, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, errorMessage } from '../../api/errors';
 import { useChangeTestStatus, useDeleteTest, useTestCase, type TestCaseDetail } from '../../api/testcases';
 import { Forbidden } from '../../components/Forbidden';
@@ -12,6 +12,7 @@ import { DefinitionTab } from './DefinitionTab';
 import { useTestWriteKinds } from './permissions';
 import { TestHistoryPanel, TestVersionsPanel } from './TestVersionsPanel';
 import { TestLinksTab } from './TestLinksTab';
+import { TestDefectsPanel, TestExecutionsPanel } from '../campaigns/RequirementRunsPanels';
 
 /** §13.2 fiche test : définition selon la nature, exigences liées, exécutions (lot 5), versions, historique. */
 export function TestCaseDetailView({ project, testKey }: { project: string; testKey: string }) {
@@ -54,6 +55,18 @@ export function TestCaseDetailView({ project, testKey }: { project: string; test
           <Title order={3} data-testid="test-title">
             {test.title}
           </Title>
+          {test.calledBy.length > 0 && (
+            <Group gap={4} data-testid="test-called-by">
+              <Text size="xs" c="dimmed">
+                {t('test.calledBy')} :
+              </Text>
+              {test.calledBy.map((key) => (
+                <Anchor key={key} component={Link} to={`/p/${project}/tests/${key}`} size="xs" ff="monospace">
+                  {key}
+                </Anchor>
+              ))}
+            </Group>
+          )}
         </Stack>
         <Group wrap="nowrap">
           <TestStatusMenu project={project} test={test} canWrite={writable.includes(test.kind)} />
@@ -85,8 +98,11 @@ export function TestCaseDetailView({ project, testKey }: { project: string; test
           <Tabs.Tab value="requirements">
             {t('test.tabs.requirements')} ({test.requirements.length})
           </Tabs.Tab>
-          <Tabs.Tab value="executions" c="dimmed">
+          <Tabs.Tab value="executions" data-testid="test-tab-executions">
             {t('test.tabs.executions')}
+          </Tabs.Tab>
+          <Tabs.Tab value="defects" data-testid="test-tab-defects">
+            {t('test.tabs.defects')}
           </Tabs.Tab>
           <Tabs.Tab value="versions">{t('test.tabs.versions')}</Tabs.Tab>
           <Tabs.Tab value="history">{t('test.tabs.history')}</Tabs.Tab>
@@ -98,9 +114,10 @@ export function TestCaseDetailView({ project, testKey }: { project: string; test
           <TestLinksTab project={project} test={test} canWrite={canWrite} />
         </Tabs.Panel>
         <Tabs.Panel value="executions" pt="md">
-          <Alert color="gray" icon={<IconHourglass size={16} />}>
-            {t('test.laterLot', { lot: 5 })}
-          </Alert>
+          <TestExecutionsPanel project={project} testKey={test.key} />
+        </Tabs.Panel>
+        <Tabs.Panel value="defects" pt="md">
+          <TestDefectsPanel project={project} testKey={test.key} />
         </Tabs.Panel>
         <Tabs.Panel value="versions" pt="md">
           <TestVersionsPanel project={project} testKey={test.key} />

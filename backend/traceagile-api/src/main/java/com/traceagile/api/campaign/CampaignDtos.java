@@ -90,7 +90,8 @@ public final class CampaignDtos {
             LocalDate plannedStart,
             LocalDate plannedEnd,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ProgressResponse progress,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) long version) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) long version,
+            @Schema(description = "ADR-0018 dossier « a/b » ; absent = racine") String folder) {
     }
 
     public record ItemResponse(
@@ -104,7 +105,11 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionStatus lastStatus,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int attempts,
             UUID latestExecutionId,
-            Instant lastExecutedAt) {
+            Instant lastExecutedAt,
+            @Schema(description = "ADR-0018 jeu de données prévu (absent : valeurs par défaut)") String dataSetName,
+            @Schema(description = "Ligne du jeu, base 0") Integer dataSetRow,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Valeurs de la ligne prévue") Map<String, String> dataSetValues,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetRef> dataSets) {
     }
 
     public record WorkloadResponse(
@@ -123,12 +128,12 @@ public final class CampaignDtos {
 
     public record CreateCampaignRequest(@NotBlank @Size(max = 120) String name, @NotNull CampaignScope scopeType, String sprintKey,
                                         String releaseKey, @Size(max = 60) String environment, @Size(max = 60) String buildVersion,
-                                        LocalDate plannedStart, LocalDate plannedEnd) {
+                                        LocalDate plannedStart, LocalDate plannedEnd, @Size(max = 300) String folder) {
     }
 
-    /** Merge-patch : absent = inchangé, {@code null} = effacé. */
+    /** Merge-patch : absent = inchangé, {@code null} = effacé ; {@code folder} modifiable même campagne terminée. */
     public record UpdateCampaignRequest(@Size(max = 120) String name, @Size(max = 60) String environment, @Size(max = 60) String buildVersion,
-                                        LocalDate plannedStart, LocalDate plannedEnd) {
+                                        LocalDate plannedStart, LocalDate plannedEnd, @Size(max = 300) String folder) {
     }
 
     /** F-CMP-02 sélection cumulable : paramètres selon la stratégie. */
@@ -168,7 +173,11 @@ public final class CampaignDtos {
     }
 
     /** F-CMP-04 merge-patch : {@code assignee: null} désaffecte. */
-    public record ItemPatchRequest(String assignee) {
+    /** F-CMP-04 affectation ; ADR-0018 ligne de jeu de données ({@code dataSetName: null} = valeurs par défaut). */
+    public record ItemPatchRequest(String assignee, @Size(max = 100) String dataSetName, @Min(0) Integer dataSetRow) {
+    }
+
+    public record ExpandDataSetRequest(@NotBlank @Size(max = 100) String dataSetName) {
     }
 
     // ---------------------------------------------------------------- exécutions
@@ -179,7 +188,8 @@ public final class CampaignDtos {
             String expectedResult,
             String testData,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionStatus status,
-            String actualResult) {
+            String actualResult,
+            @Schema(description = "ADR-0018 test appelé d'où vient ce pas") String calledFrom) {
     }
 
     public record AttemptResponse(
@@ -189,7 +199,9 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant startedAt,
             Instant endedAt,
             String executedBy,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin,
+            String dataSetName,
+            Integer dataSetRow) {
     }
 
     public record ExecutionDetail(
@@ -235,7 +247,9 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionStatus lastStatus,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int attempts,
             UUID latestExecutionId,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetRef> dataSets) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetRef> dataSets,
+            @Schema(description = "ADR-0018 jeu de données prévu dans la campagne") String dataSetName,
+            Integer dataSetRow) {
     }
 
     public record DefectDraftResponse(
@@ -255,7 +269,9 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant startedAt,
             Instant endedAt,
             String executedBy,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin,
+            String dataSetName,
+            Integer dataSetRow) {
     }
 
     // ---------------------------------------------------------------- anomalies
@@ -284,6 +300,14 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
             String createdBy,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) long version) {
+    }
+
+    /** ADR-0018 anomalie vue depuis une exigence : rattachée ou trouvée par les exécutions des tests liés. */
+    public record RequirementDefectResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) DefectSummary defect,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean linked,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Tests liés à l'exigence dont une exécution a révélé l'anomalie")
+            List<String> viaTests) {
     }
 
     public record DefectDetail(

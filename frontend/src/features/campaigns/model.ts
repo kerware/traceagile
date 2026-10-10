@@ -1,4 +1,4 @@
-import type { CampaignStatus, DefectSeverity, DefectStatus, ExecutionStatus, StepResult, Strategy } from '../../api/campaigns';
+import type { CampaignItem, CampaignStatus, DefectSeverity, DefectStatus, ExecutionStatus, StepResult, Strategy } from '../../api/campaigns';
 
 /** Règles d'affichage des campagnes, exécutions et anomalies (§8.3, §8.4, §8.6). */
 
@@ -49,4 +49,9 @@ export function duration(ms?: number | null): string {
 export function minutes(total: number): string {
   if (total < 60) return `${total} min`;
   return `${Math.floor(total / 60)} h${total % 60 ? ` ${String(total % 60).padStart(2, '0')}` : ''}`;
+}
+
+/** ADR-0018 suffixe des identifiants d'une ligne : un test peut figurer une fois par ligne de jeu de données. */
+export function itemSuffix(item: Pick<CampaignItem, 'dataSetRow'>): string {
+  return item.dataSetRow === undefined || item.dataSetRow === null ? '' : `-${item.dataSetRow + 1}`;
 }

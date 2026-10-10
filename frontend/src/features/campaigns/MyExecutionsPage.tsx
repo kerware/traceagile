@@ -77,7 +77,7 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
   };
 
   return (
-    <Table.Tr data-testid={`my-item-${item.test.key}`}>
+    <Table.Tr data-testid={`my-item-${item.test.key}${item.dataSetRow === undefined || item.dataSetRow === null ? '' : `-${item.dataSetRow + 1}`}`}>
       <Table.Td>
         <Anchor component={Link} to={`/p/${project}/campaigns/${item.campaign.key}`} size="sm">
           {item.campaign.key}
@@ -108,7 +108,12 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
       <Table.Td>
         {canExecute && item.test.kind === 'MANUAL' && (
           <Group gap={4} justify="flex-end" wrap="nowrap">
-            {rows.length > 0 && item.lastStatus !== 'RUNNING' && (
+            {item.dataSetName && (
+              <Text size="xs" c="dimmed" data-testid={`my-dataset-${item.test.key}`}>
+                {t('executions.dataRow', { name: item.dataSetName, row: (item.dataSetRow ?? 0) + 1 })}
+              </Text>
+            )}
+            {!item.dataSetName && rows.length > 0 && item.lastStatus !== 'RUNNING' && (
               <Select size="xs" w={180} placeholder={t('executions.defaultValues')} data={rows} value={row} onChange={setRow} clearable data-testid={`dataset-${item.test.key}`} />
             )}
             <Button size="xs" leftSection={<IconPlayerPlay size={14} />} onClick={go} loading={start.isPending} data-testid={`run-${item.test.key}`}>

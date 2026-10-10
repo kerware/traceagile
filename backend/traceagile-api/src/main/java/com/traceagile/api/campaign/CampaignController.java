@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.api.campaign.CampaignDtos.CampaignDetail;
 import com.traceagile.api.campaign.CampaignDtos.CampaignSummary;
 import com.traceagile.api.campaign.CampaignDtos.CopyCampaignRequest;
+import com.traceagile.api.campaign.CampaignDtos.ExpandDataSetRequest;
 import com.traceagile.api.campaign.CampaignDtos.CopyCampaignResponse;
 import com.traceagile.api.campaign.CampaignDtos.CreateCampaignRequest;
 import com.traceagile.api.campaign.CampaignDtos.ItemPatchRequest;
@@ -26,6 +27,7 @@ import com.traceagile.application.campaign.CampaignService.CopyResult;
 import com.traceagile.application.campaign.CampaignService.SelectionParams;
 import com.traceagile.application.campaign.CampaignService.SelectionResult;
 import com.traceagile.domain.campaign.Campaign;
+import com.traceagile.domain.campaign.CampaignItem;
 import com.traceagile.domain.campaign.CampaignStatus;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -85,7 +87,7 @@ public class CampaignController {
     @PreAuthorize(WRITE)
     public ResponseEntity<CampaignDetail> create(@PathVariable String projectKey, @Valid @RequestBody CreateCampaignRequest r) {
         Campaign campaign = campaigns.create(projectKey, new CampaignCommand(r.name(), r.scopeType(), r.sprintKey(), r.releaseKey(),
-                r.environment(), r.buildVersion(), r.plannedStart(), r.plannedEnd()));
+                r.environment(), r.buildVersion(), r.plannedStart(), r.plannedEnd(), r.folder()));
         return ResponseEntity.created(URI.create("/api/v1/projects/" + projectKey + "/campaigns/" + campaign.getKey()))
                 .eTag(Versions.etag(campaign)).body(mapper.detail(campaign));
     }
@@ -106,7 +108,8 @@ public class CampaignController {
                                                  @RequestBody JsonNode body) {
         MergePatch f = MergePatch.of(body, UpdateCampaignRequest.class, json, validator);
         Campaign campaign = campaigns.update(projectKey, key, new CampaignPatch(f.field("name", String.class), f.field("environment", String.class),
-                f.field("buildVersion", String.class), f.field("plannedStart", LocalDate.class), f.field("plannedEnd", LocalDate.class)),
+                f.field("buildVersion", String.class), f.field("plannedStart", LocalDate.class), f.field("plannedEnd", LocalDate.class),
+                f.field("folder", String.class)),
                 Versions.parseIfMatch(ifMatch));
         return ResponseEntity.ok().eTag(Versions.etag(campaign)).body(mapper.detail(campaign));
     }
@@ -173,7 +176,7 @@ public class CampaignController {
         return mapper.detail(campaigns.reorder(projectKey, key, r.itemIds()));
     }
 
-    /** F-CMP-04 affectation ({@code assignee: null} = désaffecter). */
+    /** F-CMP-04 affectation ({@code assignee: null} = désaffecter) ; ADR-0018 ligne de jeu de données. */
     @PatchMapping(path = "/campaign-items/{id}", consumes = {"application/merge-patch+json", "application/json"})
     @PreAuthorize(WRITE)
     public ItemResponse updateItem(@PathVariable String projectKey, @PathVariable UUID id,
@@ -182,10 +185,26 @@ public class CampaignController {
                                    @RequestBody JsonNode body) {
         MergePatch f = MergePatch.of(body, ItemPatchRequest.class, json, validator);
         var assignee = f.field("assignee", String.class);
-        if (assignee == null) {
-            return mapper.item(campaigns.item(projectKey, id));
+        var dataSetName = f.field("dataSetName", String.class);
+        var dataSetRow = f.field("dataSetRow", Integer.class);
+        CampaignItem item = campaigns.item(projectKey, id);
+        if (dataSetName != null || dataSetRow != null) {
+            // champ absent : valeur actuelle ; nouveau jeu sans ligne : première ligne
+            String name = dataSetName != null ? dataSetName.orElse(null) : item.getDataSetName();
+            Integer row = dataSetRow != null ? dataSetRow.orElse(null) : dataSetName != null || name == null ? null : item.getDataSetRow();
+            item = campaigns.bindDataSet(projectKey, id, name, row);
         }
-        return mapper.item(campaigns.assign(projectKey, id, assignee.orElse(null)));
+        if (assignee != null) {
+            item = campaigns.assign(projectKey, id, assignee.orElse(null));
+        }
+        return mapper.item(item);
+    }
+
+    /** ADR-0018 décliner le test sur toutes les lignes d'un jeu de données (une ligne de campagne par ligne du jeu). */
+    @PostMapping("/campaign-items/{id}/expand-data-set")
+    @PreAuthorize(WRITE)
+    public CampaignDetail expandDataSet(@PathVariable String projectKey, @PathVariable UUID id, @Valid @RequestBody ExpandDataSetRequest r) {
+        return mapper.detail(campaigns.expandDataSet(projectKey, id, r.dataSetName()));
     }
 
     @DeleteMapping("/campaign-items/{id}")

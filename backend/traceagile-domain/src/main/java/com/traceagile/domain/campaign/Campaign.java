@@ -5,6 +5,7 @@ import com.traceagile.domain.common.AuditableEntity;
 import com.traceagile.domain.common.BusinessRuleException;
 import com.traceagile.domain.planning.Release;
 import com.traceagile.domain.planning.Sprint;
+import com.traceagile.domain.testcase.DataSetRow;
 import com.traceagile.domain.testcase.TestCase;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -61,6 +62,10 @@ public class Campaign extends AuditableEntity {
 
     @Column(name = "build_version", length = 60)
     private String buildVersion;
+
+    /** ADR-0018 dossier « a/b » de l'arbre des campagnes ; {@code null} = non rangée. */
+    @Column(length = 300)
+    private String folder;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 12)
@@ -120,6 +125,15 @@ public class Campaign extends AuditableEntity {
         this.release = release;
     }
 
+    /** ADR-0018 ranger la campagne, même terminée (archivage) ; {@code null} = racine. */
+    public void relocate(String folder) {
+        this.folder = folder == null ? null : CampaignFolder.require(folder);
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
     public void describeTarget(String environment, String buildVersion) {
         ensureOpen();
         this.environment = environment == null || environment.isBlank() ? null : environment.strip();
@@ -150,6 +164,74 @@ public class Campaign extends AuditableEntity {
         CampaignItem item = new CampaignItem(this, test, items.size() + 1, riskScore);
         items.add(item);
         return item;
+    }
+
+    /**
+     * ADR-0018 ajoute le test avec une ligne de jeu de données ({@code null} = valeurs par défaut) ;
+     * {@code null} si cette combinaison y est déjà.
+     */
+    public CampaignItem add(TestCase test, int riskScore, String dataSetName, Integer row) {
+        ensureOpen();
+        if (items.stream().anyMatch(i -> i.matches(test, dataSetName, row))) {
+            return null;
+        }
+        CampaignItem item = new CampaignItem(this, test, items.size() + 1, riskScore);
+        item.bindDataSet(dataSetName, row);
+        items.add(item);
+        return item;
+    }
+
+    /** ADR-0018 change la ligne de jeu de données d'un test pas encore exécuté dans la campagne. */
+    public void bindDataSet(CampaignItem item, String dataSetName, Integer row) {
+        ensureOpen();
+        if (!item.getExecutions().isEmpty()) {
+            throw new BusinessRuleException("CAMPAIGN_ITEM_EXECUTED", item.getTestCase().getKey()
+                    + " a déjà été exécuté avec ces données dans cette campagne : ajoutez plutôt une autre ligne.");
+        }
+        if (items.stream().anyMatch(i -> i != item && i.matches(item.getTestCase(), dataSetName, row))) {
+            throw new BusinessRuleException("CAMPAIGN_ITEM_DUPLICATE",
+                    item.getTestCase().getKey() + " est déjà prévu avec cette ligne de jeu de données dans la campagne.");
+        }
+        item.bindDataSet(dataSetName, row);
+    }
+
+    /**
+     * ADR-0018 décline le test sur toutes les lignes du jeu : l'élément prend la première ligne libre
+     * (s'il n'est pas déjà sur ce jeu) et chaque ligne absente donne un nouvel élément juste après,
+     * avec la même affectation et le même score. Renvoie les éléments ajoutés.
+     */
+    public List<CampaignItem> expandDataSet(CampaignItem item, String dataSetName) {
+        ensureOpen();
+        TestCase test = item.getTestCase();
+        int size = DataSetRow.size(test, dataSetName);
+        if (size == 0) {
+            DataSetRow.of(test, dataSetName, 0); // jeu inconnu ou vide : 422 explicite
+        }
+        if (item.getDataSetName() == null || !item.getDataSetName().equalsIgnoreCase(dataSetName)) {
+            for (int row = 0; row < size; row++) {
+                int r = row;
+                if (items.stream().noneMatch(i -> i.matches(test, dataSetName, r))) {
+                    bindDataSet(item, dataSetName, r);
+                    break;
+                }
+            }
+        }
+        List<CampaignItem> added = new ArrayList<>();
+        int at = items.indexOf(item) + 1;
+        for (int row = 0; row < size; row++) {
+            int r = row;
+            if (items.stream().noneMatch(i -> i.matches(test, dataSetName, r))) {
+                CampaignItem copy = new CampaignItem(this, test, 0, item.getRiskScore());
+                copy.bindDataSet(dataSetName, r);
+                if (item.getAssignee() != null) {
+                    copy.assign(item.getAssignee());
+                }
+                items.add(at++, copy);
+                added.add(copy);
+            }
+        }
+        renumber();
+        return added;
     }
 
     public void remove(CampaignItem item) {

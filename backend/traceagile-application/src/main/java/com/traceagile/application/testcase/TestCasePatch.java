@@ -1,5 +1,7 @@
 package com.traceagile.application.testcase;
 
+import java.util.function.Function;
+import com.traceagile.domain.testcase.StepContent;
 import com.traceagile.domain.common.BusinessRuleException;
 import com.traceagile.domain.requirement.Priority;
 import com.traceagile.domain.testcase.AutomatedTestDefinition;
@@ -57,7 +59,12 @@ public record TestCasePatch(
         Optional<List<String>> executionTags,
         Optional<Map<String, String>> environmentRequirements) {
 
-    public record StepDraft(String action, String expectedResult, String testData) {
+    /** ADR-0018 {@code calledTestKey} : pas d'appel d'un autre cas de test, avec ses valeurs de paramètres. */
+    public record StepDraft(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters) {
+
+        public StepDraft(String action, String expectedResult, String testData) {
+            this(action, expectedResult, testData, null, null);
+        }
     }
 
     public static final TestCasePatch EMPTY = new TestCasePatch(null, null, null, null, null, null, null, null, null, null,
@@ -69,6 +76,13 @@ public record TestCasePatch(
     }
 
     public void applyTo(TestCase test) {
+        applyTo(test, key -> {
+            throw new BusinessRuleException("TEST_CALL_INVALID", "Cas de test appelé « " + key + " » introuvable.");
+        });
+    }
+
+    /** {@code callable} : cas de test appelé d'après sa clé (ADR-0018). */
+    public void applyTo(TestCase test, Function<String, TestCase> callable) {
         if (title != null) {
             test.rename(title.orElse(null));
         }
@@ -88,7 +102,10 @@ public record TestCasePatch(
         if (steps != null) {
             require(test, TestKind.MANUAL, "pas");
             test.replaceSteps(steps.orElse(List.of()).stream()
-                    .map(s -> Arrays.asList(s.action(), s.expectedResult(), s.testData())).toList());
+                    .map(s -> new StepContent(s.action(), s.expectedResult(), s.testData(),
+                            s.calledTestKey() == null || s.calledTestKey().isBlank() ? null : callable.apply(s.calledTestKey().strip()),
+                            s.callParameters()))
+                    .toList());
         }
         // Après les pas (paramètres détectés), avant les jeux (dont les colonnes inconnues sont déclarées).
         apply(parameters, test::setParameters);

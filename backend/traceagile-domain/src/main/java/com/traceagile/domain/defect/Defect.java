@@ -111,6 +111,13 @@ public class Defect extends AuditableEntity {
         }
     }
 
+    /** ADR-0018 rattache l'anomalie à une exigence trouvée par traçabilité (sans doublon). */
+    public void linkRequirement(Requirement requirement) {
+        if (requirements.stream().noneMatch(r -> r.getId().equals(requirement.getId()))) {
+            requirements.add(requirement);
+        }
+    }
+
     public void replaceRequirements(List<Requirement> linked) {
         requirements.clear();
         linked.stream().distinct().forEach(requirements::add);

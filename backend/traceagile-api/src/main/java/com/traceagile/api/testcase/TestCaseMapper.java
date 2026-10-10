@@ -67,7 +67,8 @@ public interface TestCaseMapper {
     @Mapping(target = "parameters", expression = "java(parameters(test))")
     @Mapping(target = "requirements", source = "links")
     @Mapping(target = "warnings", source = "warnings")
-    TestCaseDetail toDetail(TestCase test, List<RequirementLink> links, List<String> warnings);
+    @Mapping(target = "calledBy", source = "calledBy")
+    TestCaseDetail toDetail(TestCase test, List<RequirementLink> links, List<String> warnings, List<String> calledBy);
 
     default RequirementLinkResponse toResponse(RequirementLink link) {
         return new RequirementLinkResponse(link.linkId(), link.requirement().getKey(), link.requirement().getTitle(),

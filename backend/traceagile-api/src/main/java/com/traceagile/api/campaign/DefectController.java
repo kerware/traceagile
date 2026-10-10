@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.api.campaign.CampaignDtos.CreateDefectRequest;
 import com.traceagile.api.campaign.CampaignDtos.DefectDetail;
 import com.traceagile.api.campaign.CampaignDtos.DefectSummary;
+import com.traceagile.api.campaign.CampaignDtos.RequirementDefectResponse;
 import com.traceagile.api.campaign.CampaignDtos.UpdateDefectRequest;
 import com.traceagile.api.web.MergePatch;
 import com.traceagile.api.web.Versions;
@@ -14,6 +15,7 @@ import com.traceagile.application.defect.DefectService.DefectCommand;
 import com.traceagile.application.defect.DefectService.DefectFilter;
 import com.traceagile.application.defect.DefectService.DefectPatch;
 import com.traceagile.application.requirement.RequirementService;
+import com.traceagile.application.testcase.TestCaseService;
 import com.traceagile.domain.defect.Defect;
 import com.traceagile.domain.defect.DefectSeverity;
 import com.traceagile.domain.defect.DefectStatus;
@@ -52,13 +54,16 @@ public class DefectController {
 
     private final DefectService defects;
     private final RequirementService requirements;
+    private final TestCaseService tests;
     private final CampaignMapper mapper;
     private final ObjectMapper json;
     private final Validator validator;
 
-    public DefectController(DefectService defects, RequirementService requirements, CampaignMapper mapper, ObjectMapper json, Validator validator) {
+    public DefectController(DefectService defects, RequirementService requirements, TestCaseService tests, CampaignMapper mapper,
+                            ObjectMapper json, Validator validator) {
         this.defects = defects;
         this.requirements = requirements;
+        this.tests = tests;
         this.mapper = mapper;
         this.json = json;
         this.validator = validator;
@@ -101,10 +106,26 @@ public class DefectController {
         return ResponseEntity.ok().eTag(Versions.etag(defect)).body(mapper.defect(defect));
     }
 
-    /** §13.2 fiche exigence, onglet « Anomalies ». */
+    /** §13.2 / ADR-0018 fiche exigence, onglet « Anomalies » : rattachées, puis trouvées par traçabilité. */
     @GetMapping("/requirements/{key}/defects")
     @PreAuthorize(READ)
-    public List<DefectSummary> ofRequirement(@PathVariable String projectKey, @PathVariable String key) {
-        return defects.ofRequirement(requirements.get(projectKey, key)).stream().map(mapper::defectSummary).toList();
+    public List<RequirementDefectResponse> ofRequirement(@PathVariable String projectKey, @PathVariable String key) {
+        return defects.tracedFor(requirements.get(projectKey, key)).stream()
+                .map(t -> new RequirementDefectResponse(mapper.defectSummary(t.defect()), t.linked(), t.viaTests())).toList();
+    }
+
+    /** ADR-0018 rattacher à l'exigence une anomalie trouvée par traçabilité. */
+    @PostMapping("/requirements/{key}/defects/{defectKey}")
+    @PreAuthorize(UPDATE)
+    public ResponseEntity<DefectDetail> linkToRequirement(@PathVariable String projectKey, @PathVariable String key, @PathVariable String defectKey) {
+        Defect defect = defects.linkRequirement(projectKey, defectKey, key);
+        return ResponseEntity.ok().eTag(Versions.etag(defect)).body(mapper.defect(defect));
+    }
+
+    /** ADR-0018 fiche test, onglet « Anomalies » : anomalies liées à ses exécutions. */
+    @GetMapping("/test-cases/{key}/defects")
+    @PreAuthorize(READ)
+    public List<DefectSummary> ofTest(@PathVariable String projectKey, @PathVariable String key) {
+        return defects.ofTest(tests.get(projectKey, key)).stream().map(mapper::defectSummary).toList();
     }
 }

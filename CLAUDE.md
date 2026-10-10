@@ -14,7 +14,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | Corrections 0-2 | Défilement après panneau latéral, paramètres `${nom}` et jeux de données nommés, dossiers de tests et menus contextuels des arbres (ADR-0013) | **Fait** (branche `lot-2-corrections`) |
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | **Fait** (branche `lot-3-tracabilite`) |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
-| 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`) |
+| 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`, `lot-5-complements`) |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | À faire |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | À faire |
 | 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
@@ -27,7 +27,10 @@ Reporté (à reprendre dans le lot indiqué) :
 - Runs automatisés et import (lot 7) : réutiliser `ExecutionService.record` / `Execution.recorded`.
 - Heuristiques extensibles par projet (F-EXP-02), sessions et génération de chartes → lot 6.
 - F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
-- Choix du jeu de données (ADR-0013) : `dataSet` du job d'exécution → lot 7.
+- Choix du jeu de données (ADR-0013) : `dataSet` du job d'exécution → lot 7 (en campagne, la ligne
+  est portée par l'élément depuis l'ADR-0018).
+- Glisser-déposer des campagnes d'un dossier à l'autre dans l'arbre lui-même (aujourd'hui : depuis
+  la liste vers un dossier, ou « Ranger ») → lot 9 si besoin.
 - Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
 - F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes (dont captures des
   pas et des anomalies, F-EXE-01 / F-EXE-03), Example Mapping → lot 9.
@@ -141,6 +144,13 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
 - Duplication / génération d'une campagne depuis les résultats d'une autre (ADR-0017) :
   `CampaignService.copy`, `POST /campaigns/{key}/copy`, `CopyCampaignModal` côté front.
+- Compléments d'exécution (ADR-0018) : ligne de jeu de données portée par `CampaignItem`
+  (`Campaign.add/bindDataSet/expandDataSet`, valeurs : `DataSetRow`) ; appel de cas de test par un
+  pas (`StepContent`, `ManualStep.calledTest`, contrôle de boucle dans `TestCase`, déroulé dans
+  `Execution.unfold`) ; dossiers de campagnes (`CampaignFolder`, `CampaignFolderService`, mêmes
+  chemins « a/b » que les tests) ; anomalies d'une exigence par traçabilité
+  (`DefectService.tracedFor`). Un test peut figurer plusieurs fois dans une campagne : les
+  `data-testid` des lignes prennent le suffixe `itemSuffix` (« -2 » = ligne 2 du jeu).
 - Campagnes et exécutions (ADR-0016) : règles dans `Campaign`, `CampaignItem`, `Execution`
   (statut déduit : `ExecutionRules`), `Defect`, `DefectDraft` (domaine). Après avoir ajouté des
   éléments à une collection en cascade, `flush()` avant de renvoyer leurs identifiants.
@@ -212,6 +222,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Lot 5 : `CMP-1` « Recette SPR-1 » terminée (SPR-1 validé à 75 %, une 2ᵉ tentative), `CMP-2`
   « Recette SPR-2 » en cours (« Mes exécutions » de qa1 / qa2), `CMP-3` « Régression 2.0 »
   planifiée ; DEF-1 à DEF-6 de sévérités variées (`DemoCampaignLoader`, rejoué si aucune campagne).
+  Campagnes rangées sous « Version 2.0/Recettes de sprint » et « Version 2.0/Régression », dossier
+  « Archives » vide (`organize`, appliqué aussi à une base existante sans dossier).
 - Lot 3 : la story « Appliquer un code promo » est précisée après coup → ses tests sont
   `NEEDS_UPDATE` et leurs liens suspects (§3.3-7). Sur une base déjà chargée, la démo n'est pas
   rejouée : `docker compose down -v` pour repartir de zéro.

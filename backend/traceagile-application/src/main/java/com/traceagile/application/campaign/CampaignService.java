@@ -61,13 +61,24 @@ public class CampaignService {
 
     public static final String AUDIT_TYPE = "CAMPAIGN";
 
+    /** {@code folder} : ADR-0018 dossier de l'arbre des campagnes ({@code null} = racine). */
     public record CampaignCommand(String name, CampaignScope scopeType, String sprintKey, String releaseKey, String environment,
-                                  String buildVersion, LocalDate plannedStart, LocalDate plannedEnd) {
+                                  String buildVersion, LocalDate plannedStart, LocalDate plannedEnd, String folder) {
+
+        public CampaignCommand(String name, CampaignScope scopeType, String sprintKey, String releaseKey, String environment,
+                               String buildVersion, LocalDate plannedStart, LocalDate plannedEnd) {
+            this(name, scopeType, sprintKey, releaseKey, environment, buildVersion, plannedStart, plannedEnd, null);
+        }
     }
 
     /** Merge-patch : {@code null} = inchangé, {@link Optional#empty()} = effacé. */
     public record CampaignPatch(Optional<String> name, Optional<String> environment, Optional<String> buildVersion,
-                                Optional<LocalDate> plannedStart, Optional<LocalDate> plannedEnd) {
+                                Optional<LocalDate> plannedStart, Optional<LocalDate> plannedEnd, Optional<String> folder) {
+
+        public CampaignPatch(Optional<String> name, Optional<String> environment, Optional<String> buildVersion,
+                             Optional<LocalDate> plannedStart, Optional<LocalDate> plannedEnd) {
+            this(name, environment, buildVersion, plannedStart, plannedEnd, null);
+        }
     }
 
     /** F-CMP-02 moyens de sélection, cumulables. */
@@ -222,6 +233,7 @@ public class CampaignService {
                 : release != null ? release.getEndDate() : null;
         Campaign campaign = campaigns.save(new Campaign(project, keys.next(project, "CMP"), command.name(), command.scopeType(), sprint,
                 release, command.environment(), command.buildVersion(), start, end));
+        campaign.relocate(command.folder());
         record(campaign, AuditAction.CREATED, Map.of());
         return campaign;
     }
@@ -239,8 +251,18 @@ public class CampaignService {
         if (patch.plannedStart() != null || patch.plannedEnd() != null) {
             campaign.schedule(merge(patch.plannedStart(), campaign.getPlannedStart()), merge(patch.plannedEnd(), campaign.getPlannedEnd()));
         }
+        if (patch.folder() != null) {
+            campaign.relocate(patch.folder().orElse(null));
+        }
         record(campaign, AuditAction.UPDATED, before);
         return campaign;
+    }
+
+    /** ADR-0018 reclassement d'une campagne lors du renommage d'un dossier. */
+    void relocate(Campaign campaign, String folder) {
+        Map<String, Object> before = snapshot(campaign);
+        campaign.relocate(folder);
+        record(campaign, AuditAction.UPDATED, before);
     }
 
     public Campaign start(String projectKey, String key) {
@@ -356,6 +378,30 @@ public class CampaignService {
         return item;
     }
 
+    /** ADR-0018 ligne de jeu de données prévue ({@code dataSetName} {@code null} = valeurs par défaut). */
+    public CampaignItem bindDataSet(String projectKey, UUID itemId, String dataSetName, Integer row) {
+        CampaignItem item = item(projectKey, itemId);
+        if (dataSetName == null && row != null) {
+            throw new BusinessRuleException("EXECUTION_DATASET_UNKNOWN", "Choisissez le jeu de données de cette ligne.");
+        }
+        Campaign campaign = item.getCampaign();
+        Map<String, Object> before = snapshot(campaign);
+        campaign.bindDataSet(item, dataSetName, row);
+        record(campaign, AuditAction.UPDATED, before);
+        return item;
+    }
+
+    /** ADR-0018 décline le test sur toutes les lignes du jeu de données. */
+    public Campaign expandDataSet(String projectKey, UUID itemId, String dataSetName) {
+        CampaignItem item = item(projectKey, itemId);
+        Campaign campaign = item.getCampaign();
+        Map<String, Object> before = snapshot(campaign);
+        campaign.expandDataSet(item, dataSetName);
+        campaigns.flush();
+        record(campaign, AuditAction.UPDATED, before);
+        return campaign;
+    }
+
     /** Membres du projet qui peuvent exécuter (choix de l'affectation). */
     @Transactional(readOnly = true)
     public List<User> testers(String projectKey) {
@@ -444,7 +490,7 @@ public class CampaignService {
                 sameScope ? (source.getRelease() == null ? null : source.getRelease().getKey()) : command.releaseKey(),
                 command.environment() != null ? command.environment() : source.getEnvironment(),
                 command.buildVersion() != null ? command.buildVersion() : source.getBuildVersion(),
-                sameScope ? source.getPlannedStart() : null, sameScope ? source.getPlannedEnd() : null));
+                sameScope ? source.getPlannedStart() : null, sameScope ? source.getPlannedEnd() : null, source.getFolder()));
         Map<String, Object> before = snapshot(target);
         Set<ExecutionStatus> statuses = command.statuses() == null ? Set.of() : command.statuses();
         List<String> copied = new ArrayList<>();
@@ -458,7 +504,10 @@ public class CampaignService {
                 skipped.add(new Skipped(test.getKey(), "NOT_READY_" + test.getStatus().name()));
                 continue;
             }
-            CampaignItem added = target.add(test, item.getRiskScore());
+            CampaignItem added = target.add(test, item.getRiskScore(), item.getDataSetName(), item.getDataSetRow());
+            if (added == null) {
+                continue;
+            }
             User assignee = item.getAssignee();
             if (command.keepAssignees() && assignee != null && !added.isExecutedByServer()
                     && projectService.isAllowed(assignee.getLogin(), projectKey, Permission.EXECUTION_WRITE)) {
@@ -531,7 +580,9 @@ public class CampaignService {
         s.put("environment", campaign.getEnvironment());
         s.put("buildVersion", campaign.getBuildVersion());
         s.put("status", campaign.getStatus().name());
-        s.put("tests", campaign.getItems().stream().map(i -> i.getTestCase().getKey()).toList());
+        s.put("folder", campaign.getFolder());
+        s.put("tests", campaign.getItems().stream().map(i -> i.getTestCase().getKey()
+                + (i.getDataSetName() == null ? "" : " [" + i.getDataSetName() + " #" + (i.getDataSetRow() + 1) + "]")).toList());
         return s;
     }
 }

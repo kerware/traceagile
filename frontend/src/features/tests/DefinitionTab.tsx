@@ -64,7 +64,7 @@ export function DefinitionTab({ project, test, canWrite }: { project: string; te
 
       {test.kind === 'MANUAL' && (
         <>
-          <ManualStepsEditor draft={draft} onChange={change} readOnly={readOnly} />
+          <ManualStepsEditor project={project} testKey={test.key} draft={draft} onChange={change} readOnly={readOnly} />
           <Group align="flex-end">
             <Checkbox
               label={t('test.automationCandidate')}

@@ -683,7 +683,11 @@
     "workload": "Charge par testeur",
     "workloadDetail": "{{tests}} tests · manuels {{manual}} · exploratoires {{exploratory}}",
     "unestimated_one": "{{count}} sans durée",
-    "unestimated_other": "{{count}} sans durée"
+    "unestimated_other": "{{count}} sans durée",
+    "dataSet": "Données",
+    "expandDataSet": "Décliner sur toutes les lignes",
+    "expandRows_one": "{{name}} ({{count}} ligne)",
+    "expandRows_other": "{{name}} ({{count}} lignes)"
   },
   "executions": {
     "overridden": "statut forcé",
@@ -739,7 +743,14 @@
   },
   "requirementRuns": {
     "noExecution": "Aucune exécution des tests liés.",
-    "noDefect": "Aucune anomalie liée."
+    "noDefect": "Aucune anomalie rattachée ni trouvée par les tests liés.",
+    "via": "via {{tests}}",
+    "linked": "Rattachée",
+    "traced": "Par traçabilité",
+    "tracedHint": "Révélée par l'exécution d'un test lié, sans être rattachée à l'exigence.",
+    "link": "Rattacher",
+    "noTestExecution": "Ce test n'a encore jamais été exécuté.",
+    "noTestDefect": "Aucune anomalie liée aux exécutions de ce test."
   },
   "planning": {
     "title": "Planification",
@@ -848,7 +859,8 @@
       "requirements": "Exigences liées",
       "executions": "Exécutions",
       "versions": "Versions",
-      "history": "Historique"
+      "history": "Historique",
+      "defects": "Anomalies"
     },
     "laterLot": "Disponible au lot {{lot}}.",
     "changeStatus": "Changer le statut",
@@ -860,7 +872,8 @@
     "versionBumped": "Modification significative : version {{number}} (F-AUT-10)",
     "warnings": "Avertissements",
     "notFound": "Test introuvable.",
-    "readOnly": "Lecture seule : vos droits sur ce projet ne permettent pas de modifier ce test."
+    "readOnly": "Lecture seule : vos droits sur ce projet ne permettent pas de modifier ce test.",
+    "calledBy": "Appelé par"
   },
   "steps": {
     "title": "Pas du test",
@@ -873,7 +886,15 @@
     "up": "Monter",
     "down": "Descendre",
     "empty": "Aucun pas. Un test manuel prêt comporte au moins un pas.",
-    "parametersHint": "Écrivez ${nom-parametre} dans une action, un résultat attendu ou une donnée : le paramètre est créé automatiquement (voir « Paramètres et jeux de données »)."
+    "parametersHint": "Écrivez ${nom-parametre} dans une action, un résultat attendu ou une donnée : le paramètre est créé automatiquement (voir « Paramètres et jeux de données »).",
+    "call": "Appel d'un cas de test",
+    "addCall": "Appeler un cas de test",
+    "calledTest": "Cas de test appelé",
+    "calledTestPlaceholder": "Rechercher un test manuel…",
+    "openCalled": "Ouvrir",
+    "inherit": "valeur héritée ou par défaut",
+    "calledSteps_one": "{{count}} pas joué à la place de cet appel, avec ces valeurs.",
+    "calledSteps_other": "{{count}} pas joués à la place de cet appel, avec ces valeurs."
   },
   "grid": {
     "addRow": "Ajouter une ligne",
@@ -1019,5 +1040,24 @@
     "done_one": "{{key}} créée avec {{count}} test.",
     "done_other": "{{key}} créée avec {{count}} tests.",
     "skipped": "Ignorés (plus prêts) : {{list}}."
+  },
+  "campaignFolders": {
+    "all": "Toutes les campagnes",
+    "root": "la racine",
+    "newCampaign": "Nouvelle campagne ici",
+    "deleteNotEmpty": "Supprimer (dossier non vide)",
+    "unclassified_one": "{{count}} campagne non rangée",
+    "unclassified_other": "{{count}} campagnes non rangées",
+    "dragHint": "Glissez une campagne de la liste sur un dossier pour l'y ranger.",
+    "campaignMoved": "{{key}} rangée dans « {{folder}} »",
+    "folderMoved_one": "Dossier « {{path}} » : {{count}} campagne reclassée",
+    "folderMoved_other": "Dossier « {{path}} » : {{count}} campagnes reclassées",
+    "current": "Dossier « {{path}} » et ses sous-dossiers",
+    "emptyFolder": "Aucune campagne dans ce dossier.",
+    "folder": "Dossier",
+    "folderHint": "Chemin « a/b » ; vide = racine. Un nouveau chemin crée le dossier.",
+    "file": "Ranger",
+    "fileTitle": "Ranger {{key}} dans un dossier",
+    "fileHint": "Dossier existant ou nouveau chemin ; vide = racine. Possible même campagne terminée."
   }
 }

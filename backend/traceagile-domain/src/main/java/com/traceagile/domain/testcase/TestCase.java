@@ -230,15 +230,57 @@ public class TestCase extends AuditableEntity {
 
     public ManualStep addStep(String action, String expectedResult, String testData) {
         ensureManual();
-        ManualStep step = new ManualStep(this, steps.size() + 1, action, expectedResult, testData);
+        return addStep(StepContent.of(action, expectedResult, testData));
+    }
+
+    /** ADR-0018 pas ordinaire ou appel d'un autre cas de test manuel (sans cycle). */
+    public ManualStep addStep(StepContent content) {
+        ensureManual();
+        if (content.calledTest() != null) {
+            checkCall(content.calledTest());
+        }
+        ManualStep step = new ManualStep(this, steps.size() + 1, content);
         steps.add(step);
         return step;
+    }
+
+    /**
+     * ADR-0018 un test appelé est un test manuel non obsolète du même projet ; l'appel ne doit pas
+     * revenir, directement ou non, vers ce test.
+     */
+    private void checkCall(TestCase called) {
+        boolean sameProject = called.project == project || (called.project.getId() != null && called.project.getId().equals(project.getId()));
+        if (called.kind != TestKind.MANUAL || called.status == TestCaseStatus.OBSOLETE || !sameProject) {
+            throw new BusinessRuleException("TEST_CALL_INVALID",
+                    called.key + " ne peut pas être appelé : seul un test manuel non obsolète du projet peut l'être.");
+        }
+        if (same(called, this) || called.calls(this, new HashSet<>())) {
+            throw new BusinessRuleException("TEST_CALL_CYCLE", "Appeler " + called.key + " depuis " + key + " créerait une boucle d'appels.");
+        }
+    }
+
+    /** Ce test appelle-t-il {@code target}, directement ou par ses appelés ? */
+    private boolean calls(TestCase target, Set<TestCase> visited) {
+        if (!visited.add(this)) {
+            return false;
+        }
+        for (ManualStep step : steps) {
+            TestCase called = step.getCalledTest();
+            if (called != null && (same(called, target) || called.calls(target, visited))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean same(TestCase a, TestCase b) {
+        return a == b || (a.getId() != null && a.getId().equals(b.getId()));
     }
 
     public ManualStep duplicateStep(ManualStep step) {
         ensureManual();
         int index = indexOf(step);
-        ManualStep copy = new ManualStep(this, 0, step.getAction(), step.getExpectedResult(), step.getTestData());
+        ManualStep copy = new ManualStep(this, 0, step.toContent());
         steps.add(index + 1, copy);
         renumber();
         return copy;
@@ -261,10 +303,10 @@ public class TestCase extends AuditableEntity {
     }
 
     /** Remplace tous les pas (édition en bloc depuis l'interface). */
-    public void replaceSteps(List<List<String>> contents) {
+    public void replaceSteps(List<StepContent> contents) {
         ensureManual();
         steps.clear();
-        contents.forEach(c -> addStep(c.get(0), c.size() > 1 ? c.get(1) : null, c.size() > 2 ? c.get(2) : null));
+        contents.forEach(this::addStep);
     }
 
     /** F-MAN-01 variables ${nom} utilisées dans les pas, dans l'ordre d'apparition. */

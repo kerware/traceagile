@@ -1,6 +1,6 @@
 import { ActionIcon, Alert, Anchor, Badge, Button, Card, Group, Loader, MultiSelect, Select, SimpleGrid, Stack, Table, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconArrowDown, IconArrowUp, IconCheck, IconCopy, IconPlayerPlay, IconPlayerStop, IconSortDescending, IconTrash, IconX } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconCheck, IconCopy, IconFolderShare, IconPlayerPlay, IconPlayerStop, IconSortDescending, IconTrash, IconX } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -8,6 +8,8 @@ import {
   useAssign,
   useCampaign,
   useCampaignAction,
+  useCampaignFolders,
+  useMoveCampaign,
   useCampaigns,
   useRemoveItem,
   useReorderItems,
@@ -21,6 +23,7 @@ import {
   type Strategy,
 } from '../../api/campaigns';
 import { errorMessage } from '../../api/errors';
+import { PromptModal } from '../../components/Dialogs';
 import { useSprints } from '../../api/planning';
 import { useRequirementTree } from '../../api/requirements';
 import { useTestList } from '../../api/testcases';
@@ -28,7 +31,8 @@ import { flatten } from '../requirements/model';
 import { KindBadge } from '../tests/Badges';
 import { CampaignStatusBadge, ExecutionStatusBadge, ProgressBar } from './CampaignBadges';
 import { CopyCampaignModal } from './CopyCampaignModal';
-import { minutes, RESULT_STATUSES, STRATEGIES } from './model';
+import { ItemDataSetCell } from './ItemDataSetCell';
+import { itemSuffix, minutes, RESULT_STATUSES, STRATEGIES } from './model';
 import { useCanExecute, useCanManageCampaigns } from './permissions';
 
 /**
@@ -42,6 +46,9 @@ export function CampaignPage() {
   const canManage = useCanManageCampaigns(project);
   const action = useCampaignAction(project, ck);
   const [copying, setCopying] = useState(false);
+  const [filing, setFiling] = useState(false);
+  const { data: folders } = useCampaignFolders(project);
+  const moveCampaign = useMoveCampaign(project);
   const fail = (e: unknown) => notifications.show({ color: 'red', message: errorMessage(e, t('errors.generic')) });
 
   if (isLoading) return <Loader />;
@@ -60,6 +67,11 @@ export function CampaignPage() {
             <Title order={2}>{c.name}</Title>
             <CampaignStatusBadge status={c.status} />
           </Group>
+          {c.folder && (
+            <Anchor component={Link} to={`/p/${project}/campaigns`} size="xs" c="dimmed" data-testid="campaign-folder-path">
+              {c.folder.split('/').join(' › ')}
+            </Anchor>
+          )}
           <Text size="sm" c="dimmed">
             {t(`campaignScope.${c.scopeType}`)}
             {c.sprintKey ? ` ${c.sprintKey}` : c.releaseKey ? ` ${c.releaseKey}` : ''} · {t('campaigns.environment')} : {c.environment ?? '—'} ·{' '}
@@ -69,6 +81,9 @@ export function CampaignPage() {
         </Stack>
         {canManage && (
           <Group>
+            <Button leftSection={<IconFolderShare size={16} />} variant="subtle" onClick={() => setFiling(true)} data-testid="campaign-file">
+              {t('campaignFolders.file')}
+            </Button>
             <Button leftSection={<IconCopy size={16} />} variant="default" onClick={() => setCopying(true)} data-testid="campaign-copy">
               {t('copy.action')}
             </Button>
@@ -95,6 +110,19 @@ export function CampaignPage() {
       <ItemsTable project={project} detail={data} editable={canManage && open} />
       <Workload detail={data} />
       {canManage && <CopyCampaignModal project={project} detail={data} opened={copying} onClose={() => setCopying(false)} />}
+      <PromptModal
+        opened={filing}
+        title={t('campaignFolders.fileTitle', { key: c.key })}
+        label={t('tree.folderPath')}
+        description={t('campaignFolders.fileHint')}
+        initialValue={c.folder ?? ''}
+        suggestions={folders ?? []}
+        submitLabel={t('tree.apply')}
+        onClose={() => setFiling(false)}
+        onSubmit={async (folder) => {
+          await moveCampaign.mutateAsync({ key: c.key, folder: folder.trim() || null });
+        }}
+      />
     </Stack>
   );
 }
@@ -250,6 +278,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                 <span>{t('campaigns.risk')}</span>
               </Tooltip>
             </Table.Th>
+            <Table.Th>{t('campaigns.dataSet')}</Table.Th>
             <Table.Th>{t('campaigns.assignee')}</Table.Th>
             <Table.Th>{t('campaigns.lastResult')}</Table.Th>
             <Table.Th />
@@ -257,7 +286,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
         </Table.Thead>
         <Table.Tbody>
           {items.map((item, index) => (
-            <Table.Tr key={item.id} data-testid={`item-${item.test.key}`}>
+            <Table.Tr key={item.id} data-testid={`item-${item.test.key}${itemSuffix(item)}`}>
               <Table.Td>
                 <Group gap={2} wrap="nowrap">
                   <Text size="sm" w={22}>
@@ -265,7 +294,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                   </Text>
                   {editable && (
                     <>
-                      <ActionIcon size="sm" variant="subtle" disabled={index === 0} onClick={() => move(index, -1)} aria-label={t('steps.up')} data-testid={`item-up-${item.test.key}`}>
+                      <ActionIcon size="sm" variant="subtle" disabled={index === 0} onClick={() => move(index, -1)} aria-label={t('steps.up')} data-testid={`item-up-${item.test.key}${itemSuffix(item)}`}>
                         <IconArrowUp size={14} />
                       </ActionIcon>
                       <ActionIcon size="sm" variant="subtle" disabled={index === items.length - 1} onClick={() => move(index, 1)} aria-label={t('steps.down')}>
@@ -295,6 +324,9 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                 <Badge variant="default">{item.riskScore}</Badge>
               </Table.Td>
               <Table.Td>
+                <ItemDataSetCell project={project} campaignKey={detail.campaign.key} item={item} editable={editable} />
+              </Table.Td>
+              <Table.Td>
                 {item.executedByServer ? (
                   <Text size="sm" c="dimmed">
                     {t('campaigns.server')}
@@ -308,7 +340,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                     value={item.assignee?.login ?? null}
                     onChange={(login) => assign.mutate({ id: item.id, assignee: login }, { onError: fail })}
                     clearable
-                    data-testid={`assignee-${item.test.key}`}
+                    data-testid={`assignee-${item.test.key}${itemSuffix(item)}`}
                   />
                 ) : (
                   <Text size="sm">{item.assignee?.displayName ?? t('campaigns.unassigned')}</Text>
@@ -318,10 +350,10 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                 <Group gap={4} wrap="nowrap">
                   {item.latestExecutionId ? (
                     <Anchor component={Link} to={`/p/${project}/executions/${item.latestExecutionId}`}>
-                      <ExecutionStatusBadge status={item.lastStatus} testId={`last-status-${item.test.key}`} />
+                      <ExecutionStatusBadge status={item.lastStatus} testId={`last-status-${item.test.key}${itemSuffix(item)}`} />
                     </Anchor>
                   ) : (
-                    <ExecutionStatusBadge status={item.lastStatus} testId={`last-status-${item.test.key}`} />
+                    <ExecutionStatusBadge status={item.lastStatus} testId={`last-status-${item.test.key}${itemSuffix(item)}`} />
                   )}
                   {item.attempts > 1 && (
                     <Text size="xs" c="dimmed">
@@ -334,13 +366,13 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                 <Group gap={4} justify="flex-end" wrap="nowrap">
                   {canExecute && open && item.test.kind === 'MANUAL' && (
                     <Button size="xs" variant="light" leftSection={<IconPlayerPlay size={14} />} onClick={() => execute(item)} loading={start.isPending}
-                      data-testid={`execute-${item.test.key}`}>
+                      data-testid={`execute-${item.test.key}${itemSuffix(item)}`}>
                       {item.lastStatus === 'RUNNING' ? t('campaigns.resume') : item.attempts > 0 ? t('campaigns.rerun') : t('campaigns.execute')}
                     </Button>
                   )}
                   {editable && item.attempts === 0 && (
                     <ActionIcon variant="subtle" color="red" onClick={() => remove.mutate(item.id, { onError: fail })} aria-label={t('campaigns.remove')}
-                      data-testid={`remove-${item.test.key}`}>
+                      data-testid={`remove-${item.test.key}${itemSuffix(item)}`}>
                       <IconTrash size={16} />
                     </ActionIcon>
                   )}

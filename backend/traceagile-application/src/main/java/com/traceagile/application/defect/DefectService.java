@@ -15,6 +15,9 @@ import com.traceagile.domain.defect.DefectSeverity;
 import com.traceagile.domain.defect.DefectStatus;
 import com.traceagile.domain.execution.Execution;
 import com.traceagile.domain.requirement.Requirement;
+import com.traceagile.domain.testcase.TestCase;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -82,6 +85,49 @@ public class DefectService {
     @Transactional(readOnly = true)
     public List<Defect> ofRequirement(Requirement requirement) {
         return defects.findByRequirements_IdOrderByKeyNumberDesc(requirement.getId());
+    }
+
+    /** ADR-0018 anomalies d'un test : celles liées à l'une de ses exécutions. */
+    @Transactional(readOnly = true)
+    public List<Defect> ofTest(TestCase test) {
+        return defects.findDistinctByExecutions_TestCase_IdInOrderByKeyNumberDesc(List.of(test.getId()));
+    }
+
+    /** ADR-0018 anomalie vue depuis une exigence : rattachée ou non, et les tests liés qui l'ont révélée. */
+    public record TracedDefect(Defect defect, boolean linked, List<String> viaTests) {
+    }
+
+    /**
+     * ADR-0018 anomalies d'une exigence : celles qui lui sont rattachées, puis celles trouvées par
+     * traçabilité (exécutions des tests qui la vérifient), de la plus récente à la plus ancienne.
+     */
+    @Transactional(readOnly = true)
+    public List<TracedDefect> tracedFor(Requirement requirement) {
+        Map<UUID, TestCase> tests = new LinkedHashMap<>();
+        links.testsOf(requirement).forEach(l -> tests.put(l.testCase().getId(), l.testCase()));
+        Map<UUID, Defect> all = new LinkedHashMap<>();
+        defects.findByRequirements_IdOrderByKeyNumberDesc(requirement.getId()).forEach(d -> all.put(d.getId(), d));
+        if (!tests.isEmpty()) {
+            defects.findDistinctByExecutions_TestCase_IdInOrderByKeyNumberDesc(tests.keySet()).forEach(d -> all.putIfAbsent(d.getId(), d));
+        }
+        return all.values().stream().sorted(Comparator.comparingInt(Defect::getKeyNumber).reversed())
+                .map(d -> new TracedDefect(d, d.getRequirements().stream().anyMatch(r -> r.getId().equals(requirement.getId())),
+                        d.getExecutions().stream().map(e -> e.getTestCase()).filter(t -> tests.containsKey(t.getId()))
+                                .map(TestCase::getKey).distinct().sorted(Comparator.comparingInt(DefectService::number)).toList()))
+                .toList();
+    }
+
+    /** ADR-0018 rattacher une anomalie à une exigence. */
+    public Defect linkRequirement(String projectKey, String defectKey, String requirementKey) {
+        Defect defect = get(projectKey, defectKey);
+        Map<String, Object> before = defect.snapshot();
+        defect.linkRequirement(requirements.get(projectKey, requirementKey));
+        audit.record(defect.getProject().getId(), AUDIT_TYPE, defect.getId(), defectKey, AuditAction.UPDATED, before, defect.snapshot());
+        return defect;
+    }
+
+    private static int number(String key) {
+        return Integer.parseInt(key.substring(key.lastIndexOf('-') + 1));
     }
 
     @Transactional(readOnly = true)

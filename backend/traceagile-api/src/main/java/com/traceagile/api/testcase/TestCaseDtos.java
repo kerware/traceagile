@@ -52,9 +52,17 @@ public interface TestCaseDtos {
     record StepResponse(
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int position,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String action,
+            @Schema(description = "Facultative pour un pas d'appel") String action,
             String expectedResult,
-            String testData) {
+            String testData,
+            @Schema(description = "ADR-0018 cas de test appelé par ce pas") CalledTestRef calledTest,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0018 valeurs des paramètres de l'appelé") Map<String, String> callParameters) {
+    }
+
+    record CalledTestRef(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String key,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String title,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TestCaseStatus status) {
     }
 
     record CharterResponse(
@@ -143,7 +151,8 @@ public interface TestCaseDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
             String createdBy,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt,
-            String updatedBy) {
+            String updatedBy,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0018 tests dont un pas appelle celui-ci") List<String> calledBy) {
     }
 
     /** Onglet « Tests liés » d'une exigence. */
@@ -169,7 +178,8 @@ public interface TestCaseDtos {
 
     // ---------------------------------------------------------------- écriture
 
-    record StepRequest(@NotBlank String action, String expectedResult, String testData) {
+    /** F-MAN-01 pas ; ADR-0018 {@code calledTestKey} : appel d'un autre cas de test (action alors facultative). */
+    record StepRequest(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters) {
     }
 
     record LinkRequest(@NotBlank String requirementKey, @NotNull LinkType linkType, List<Integer> criterionPositions) {

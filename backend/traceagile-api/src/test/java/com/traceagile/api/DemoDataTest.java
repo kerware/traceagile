@@ -161,6 +161,9 @@ class DemoDataTest extends AbstractApiTest {
         // Lot 5 : CMP-1 terminée (tout exécuté, une 2ᵉ tentative), CMP-2 en cours, CMP-3 planifiée ; 6 anomalies.
         Campaign cmp1 = campaigns.get("SHOP", "CMP-1");
         assertThat(cmp1.getStatus()).isEqualTo(CampaignStatus.COMPLETED);
+        // ADR-0018 campagnes rangées
+        assertThat(cmp1.getFolder()).isEqualTo("Version 2.0/Recettes de sprint");
+        assertThat(campaigns.get("SHOP", "CMP-3").getFolder()).isEqualTo("Version 2.0/Régression");
         assertThat(cmp1.getItems()).isNotEmpty().allSatisfy(i -> assertThat(i.lastStatus()).isIn(ExecutionStatus.PASSED, ExecutionStatus.FAILED));
         assertThat(cmp1.getItems()).anySatisfy(i -> assertThat(i.getExecutions()).hasSize(2));
         assertThat(campaigns.get("SHOP", "CMP-2").getStatus()).isEqualTo(CampaignStatus.IN_PROGRESS);

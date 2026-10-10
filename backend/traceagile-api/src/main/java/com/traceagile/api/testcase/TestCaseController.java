@@ -327,7 +327,7 @@ public class TestCaseController {
     // ---------------------------------------------------------------- outils
 
     TestCaseDetail detail(TestCase test, List<String> warnings) {
-        return mapper.toDetail(test, links.requirementsOf(test), warnings);
+        return mapper.toDetail(test, links.requirementsOf(test), warnings, tests.calledBy(test));
     }
 
     /** Merge-patch → commande ; à la création, le titre est déjà porté par la commande. */
@@ -340,7 +340,8 @@ public class TestCaseController {
                 f.field("automationJustification", String.class),
                 f.field("steps", new TypeReference<List<TestCaseDtos.StepRequest>>() { }) == null ? null
                         : f.field("steps", new TypeReference<List<TestCaseDtos.StepRequest>>() { })
-                        .map(list -> list.stream().map(s -> new StepDraft(s.action(), s.expectedResult(), s.testData())).toList()),
+                        .map(list -> list.stream().map(s -> new StepDraft(s.action(), s.expectedResult(), s.testData(), s.calledTestKey(),
+                                s.callParameters())).toList()),
                 f.field("parameters", new TypeReference<List<TestCaseDtos.ParameterRequest>>() { }) == null ? null
                         : f.field("parameters", new TypeReference<List<TestCaseDtos.ParameterRequest>>() { })
                         .map(list -> list.stream().map(p -> new TestParameter(p.name(), p.defaultValue(), p.description())).toList()),

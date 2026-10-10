@@ -16,6 +16,7 @@ import com.traceagile.application.defect.DefectService.DefectCommand;
 import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.application.execution.ExecutionService;
 import com.traceagile.application.requirement.RequirementService;
+import com.traceagile.application.testcase.TestCaseService;
 import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.domain.defect.Defect;
 import com.traceagile.domain.defect.DefectDraft;
@@ -55,16 +56,19 @@ public class ExecutionController {
     private final DefectService defects;
     private final RequirementService requirements;
     private final TraceLinkService links;
+    private final TestCaseService tests;
     private final CampaignMapper mapper;
 
     public ExecutionController(ExecutionService executions, ExecutionRepository executionRepository, CampaignService campaigns,
-                               DefectService defects, RequirementService requirements, TraceLinkService links, CampaignMapper mapper) {
+                               DefectService defects, RequirementService requirements, TraceLinkService links, TestCaseService tests,
+                               CampaignMapper mapper) {
         this.executions = executions;
         this.executionRepository = executionRepository;
         this.campaigns = campaigns;
         this.defects = defects;
         this.requirements = requirements;
         this.links = links;
+        this.tests = tests;
         this.mapper = mapper;
     }
 
@@ -147,5 +151,13 @@ public class ExecutionController {
             return List.of();
         }
         return executionRepository.findByTestCase_IdInOrderByStartedAtDesc(testIds).stream().map(mapper::requirementExecution).toList();
+    }
+
+    /** ADR-0018 fiche test, onglet « Exécutions » : toutes ses tentatives, toutes campagnes, de la plus récente à la plus ancienne. */
+    @GetMapping("/test-cases/{key}/executions")
+    @PreAuthorize(READ)
+    public List<RequirementExecutionResponse> ofTest(@PathVariable String projectKey, @PathVariable String key) {
+        return executionRepository.findByTestCase_IdInOrderByStartedAtDesc(List.of(tests.get(projectKey, key).getId())).stream()
+                .map(mapper::requirementExecution).toList();
     }
 }

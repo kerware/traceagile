@@ -1,6 +1,7 @@
 package com.traceagile.application.defect;
 
 import com.traceagile.domain.defect.Defect;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,8 @@ public interface DefectRepository {
     List<Defect> findByRequirements_IdOrderByKeyNumberDesc(UUID requirementId);
 
     List<Defect> findByExecutions_Id(UUID executionId);
+
+    List<Defect> findDistinctByExecutions_TestCase_IdInOrderByKeyNumberDesc(Collection<UUID> testIds);
 
     boolean existsByProject_Key(String projectKey);
 

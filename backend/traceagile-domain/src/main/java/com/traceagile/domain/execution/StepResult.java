@@ -42,15 +42,24 @@ public class StepResult extends AuditableEntity {
     @Column(name = "actual_result", columnDefinition = "text")
     private String actualResult;
 
+    /** ADR-0018 pas déroulé depuis un test appelé : « TC-5 Se connecter » ; {@code null} = pas du test lui-même. */
+    @Column(name = "called_from", columnDefinition = "text")
+    private String calledFrom;
+
     protected StepResult() {
     }
 
-    StepResult(Execution execution, int position, String action, String expectedResult, String testData) {
+    StepResult(Execution execution, int position, String action, String expectedResult, String testData, String calledFrom) {
         this.execution = Objects.requireNonNull(execution);
         this.position = position;
         this.action = action;
         this.expectedResult = expectedResult;
         this.testData = testData;
+        this.calledFrom = calledFrom;
+    }
+
+    public String getCalledFrom() {
+        return calledFrom;
     }
 
     void record(ExecutionStatus status, String actualResult) {

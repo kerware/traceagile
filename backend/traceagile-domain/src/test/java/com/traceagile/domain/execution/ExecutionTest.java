@@ -14,6 +14,7 @@ import com.traceagile.domain.campaign.Campaign;
 import com.traceagile.domain.campaign.CampaignItem;
 import com.traceagile.domain.campaign.CampaignScope;
 import com.traceagile.domain.testcase.DataSet;
+import com.traceagile.domain.testcase.StepContent;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestCaseStatus;
 import com.traceagile.domain.testcase.TestParameter;
@@ -126,5 +127,33 @@ class ExecutionTest {
         assertThat(ParameterResolver.resolve("Payer ${montant} avec ${carte}", Map.of("montant", "12 €")))
                 .isEqualTo("Payer 12 € avec ${carte}");
         assertThat(ParameterResolver.resolve(null, Map.of())).isNull();
+    }
+
+    @Test
+    @DisplayName("ADR-0018 appels imbriqués : pas déroulés dans l'ordre, chaîne d'appels, valeurs de l'appel puis paramètres de même nom")
+    void nestedCalls() {
+        TestCase login = TestCase.manual(shop, "TC-5", "Se connecter");
+        login.addStep("Saisir ${login} / ${langue}", "Connecté", null);
+        login.setParameters(List.of(new TestParameter("login", "invité", null), new TestParameter("langue", "fr", null)));
+        TestCase cart = TestCase.manual(shop, "TC-6", "Ouvrir son panier");
+        cart.addStep(new StepContent(null, null, null, login, Map.of("login", "${client}")));
+        cart.addStep("Ouvrir le panier", "Panier de ${client}", null);
+        TestCase order = TestCase.manual(shop, "TC-7", "Commander");
+        order.addStep(new StepContent(null, null, null, cart, Map.of()));
+        order.addStep("Payer", "Payé", null);
+        order.setParameters(List.of(new TestParameter("client", "alice", null), new TestParameter("langue", "en", null)));
+        order.changeStatus(TestCaseStatus.READY);
+        Campaign campaign = new Campaign(shop, "CMP-1", "Régression", CampaignScope.REGRESSION, null, null, null, null, null, null);
+
+        Execution execution = Execution.manual(campaign.add(order, 1), "qa1", t0, null, null);
+
+        assertThat(execution.getSteps()).extracting(StepResult::getAction).containsExactly("Saisir alice / en", "Ouvrir le panier", "Payer");
+        assertThat(execution.getSteps()).extracting(StepResult::getExpectedResult).containsExactly("Connecté", "Panier de alice", "Payé");
+        assertThat(execution.getSteps()).extracting(StepResult::getCalledFrom)
+                .containsExactly("TC-6 Ouvrir son panier › TC-5 Se connecter", "TC-6 Ouvrir son panier", null);
+        assertThat(execution.getSteps()).extracting(StepResult::getPosition).containsExactly(1, 2, 3);
+        // la boucle est refusée dès l'édition
+        assertThatThrownBy(() -> login.addStep(new StepContent(null, null, null, order, Map.of())))
+                .hasFieldOrPropertyWithValue("code", "TEST_CALL_CYCLE");
     }
 }

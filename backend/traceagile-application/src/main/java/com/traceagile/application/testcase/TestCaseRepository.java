@@ -22,6 +22,9 @@ public interface TestCaseRepository {
 
     boolean existsByProject_Key(String projectKey);
 
+    /** ADR-0018 tests dont un pas appelle ce test. */
+    List<TestCase> findDistinctBySteps_CalledTest_Id(UUID calledTestId);
+
     /** Liste filtrée, paginée et triée (§12 GET /test-cases). */
     Page<TestCase> search(String projectKey, TestCaseFilter filter, Pageable pageable);
 

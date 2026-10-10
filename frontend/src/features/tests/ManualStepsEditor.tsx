@@ -1,10 +1,20 @@
 import { ActionIcon, Badge, Button, Fieldset, Group, Paper, Stack, Text, Textarea, Tooltip } from '@mantine/core';
-import { IconArrowDown, IconArrowUp, IconCopy, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconCopy, IconCornerDownRight, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { CalledTestStep } from './CalledTestStep';
 import type { StepDraft, TestDraft } from './draft';
 
-/** F-MAN-01 pas ordonnés (réordonner, dupliquer) ; les ${nom} deviennent des paramètres du test (ADR-0013). */
-export function ManualStepsEditor({ draft, onChange, readOnly }: { draft: TestDraft; onChange: (patch: Partial<TestDraft>) => void; readOnly: boolean }) {
+/**
+ * F-MAN-01 pas ordonnés (réordonner, dupliquer) ; les ${nom} deviennent des paramètres du test (ADR-0013).
+ * ADR-0018 un pas peut appeler un autre cas de test manuel (réutilisation).
+ */
+export function ManualStepsEditor({ project, testKey, draft, onChange, readOnly }: {
+  project: string;
+  testKey: string | null;
+  draft: TestDraft;
+  onChange: (patch: Partial<TestDraft>) => void;
+  readOnly: boolean;
+}) {
   const { t } = useTranslation();
   const steps = draft.steps;
   const setSteps = (next: StepDraft[]) => onChange({ steps: next });
@@ -27,9 +37,15 @@ export function ManualStepsEditor({ draft, onChange, readOnly }: { draft: TestDr
                 <Badge variant="default" mt={28}>
                   {position}
                 </Badge>
-                <Textarea flex={2} label={t('steps.action')} autosize minRows={1} value={step.action} onChange={(e) => updateStep(index, { action: e.currentTarget.value })} disabled={readOnly} data-testid={`step-action-${position}`} />
-                <Textarea flex={2} label={t('steps.expected')} autosize minRows={1} value={step.expectedResult} onChange={(e) => updateStep(index, { expectedResult: e.currentTarget.value })} disabled={readOnly} data-testid={`step-expected-${position}`} />
-                <Textarea flex={1} label={t('steps.data')} autosize minRows={1} value={step.testData} onChange={(e) => updateStep(index, { testData: e.currentTarget.value })} disabled={readOnly} data-testid={`step-data-${position}`} />
+                {step.calledTestKey !== undefined ? (
+                  <CalledTestStep project={project} testKey={testKey} step={step} position={position} onChange={(patch) => updateStep(index, patch)} readOnly={readOnly} />
+                ) : (
+                  <>
+                    <Textarea flex={2} label={t('steps.action')} autosize minRows={1} value={step.action} onChange={(e) => updateStep(index, { action: e.currentTarget.value })} disabled={readOnly} data-testid={`step-action-${position}`} />
+                    <Textarea flex={2} label={t('steps.expected')} autosize minRows={1} value={step.expectedResult} onChange={(e) => updateStep(index, { expectedResult: e.currentTarget.value })} disabled={readOnly} data-testid={`step-expected-${position}`} />
+                    <Textarea flex={1} label={t('steps.data')} autosize minRows={1} value={step.testData} onChange={(e) => updateStep(index, { testData: e.currentTarget.value })} disabled={readOnly} data-testid={`step-data-${position}`} />
+                  </>
+                )}
                 {!readOnly && (
                   <Group gap={2} wrap="nowrap" mt={26}>
                     <Tooltip label={t('steps.up')}>
@@ -43,7 +59,7 @@ export function ManualStepsEditor({ draft, onChange, readOnly }: { draft: TestDr
                       </ActionIcon>
                     </Tooltip>
                     <Tooltip label={t('steps.duplicate')}>
-                      <ActionIcon variant="subtle" onClick={() => setSteps([...steps.slice(0, index + 1), { ...step }, ...steps.slice(index + 1)])} aria-label={t('steps.duplicate')} data-testid={`step-duplicate-${position}`}>
+                      <ActionIcon variant="subtle" onClick={() => setSteps([...steps.slice(0, index + 1), { ...step, callParameters: { ...step.callParameters } }, ...steps.slice(index + 1)])} aria-label={t('steps.duplicate')} data-testid={`step-duplicate-${position}`}>
                         <IconCopy size={16} />
                       </ActionIcon>
                     </Tooltip>
@@ -62,6 +78,10 @@ export function ManualStepsEditor({ draft, onChange, readOnly }: { draft: TestDr
           <Group>
             <Button variant="light" leftSection={<IconPlus size={16} />} onClick={() => setSteps([...steps, { action: '', expectedResult: '', testData: '' }])} data-testid="step-add">
               {t('steps.add')}
+            </Button>
+            <Button variant="subtle" color="grape" leftSection={<IconCornerDownRight size={16} />}
+              onClick={() => setSteps([...steps, { action: '', expectedResult: '', testData: '', calledTestKey: '', callParameters: {} }])} data-testid="step-add-call">
+              {t('steps.addCall')}
             </Button>
           </Group>
         )}

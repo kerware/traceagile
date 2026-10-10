@@ -57,14 +57,15 @@ public class CampaignMapper {
         return new CampaignSummary(c.getKey(), c.getName(), c.getScopeType(), c.getSprint() == null ? null : c.getSprint().getKey(),
                 c.getRelease() == null ? null : c.getRelease().getKey(), c.getEnvironment(), c.getBuildVersion(), c.getStatus(),
                 c.getPlannedStart(), c.getPlannedEnd(),
-                new ProgressResponse(p.total(), p.byStatus(), p.executed(), p.executedPercent(), p.passRate()), c.getVersion());
+                new ProgressResponse(p.total(), p.byStatus(), p.executed(), p.executedPercent(), p.passRate()), c.getVersion(), c.getFolder());
     }
 
     ItemResponse item(CampaignItem i) {
         Execution latest = i.latest();
         return new ItemResponse(i.getId(), i.getPosition(), test(i.getTestCase()), i.getTestCaseVersion(), user(i.getAssignee()),
                 i.isExecutedByServer(), i.getRiskScore(), i.lastStatus(), i.getExecutions().size(), latest == null ? null : latest.getId(),
-                latest == null ? null : latest.getEndedAt() != null ? latest.getEndedAt() : latest.getStartedAt());
+                latest == null ? null : latest.getEndedAt() != null ? latest.getEndedAt() : latest.getStartedAt(),
+                i.getDataSetName(), i.getDataSetRow(), i.dataSetValues(), dataSets(i.getTestCase()));
     }
 
     CampaignDetail detail(Campaign c) {
@@ -76,11 +77,12 @@ public class CampaignMapper {
     MyExecutionResponse mine(CampaignItem i) {
         Execution latest = i.latest();
         return new MyExecutionResponse(i.getId(), ref(i.getCampaign()), test(i.getTestCase()), i.getPosition(), i.lastStatus(),
-                i.getExecutions().size(), latest == null ? null : latest.getId(), dataSets(i.getTestCase()));
+                i.getExecutions().size(), latest == null ? null : latest.getId(), dataSets(i.getTestCase()), i.getDataSetName(), i.getDataSetRow());
     }
 
     AttemptResponse attempt(Execution e) {
-        return new AttemptResponse(e.getId(), e.getAttempt(), e.getStatus(), e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin());
+        return new AttemptResponse(e.getId(), e.getAttempt(), e.getStatus(), e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin(),
+                e.getDataSetName(), e.getDataSetRow());
     }
 
     DefectRef defectRef(Defect d) {
@@ -95,7 +97,7 @@ public class CampaignMapper {
                 e.getDurationMs(), e.getComment(), e.getExecutedBy(), e.getOrigin(), e.getDataSetName(), e.getDataSetRow(),
                 e.getParameterValues(),
                 e.getSteps().stream().map(s -> new StepResultResponse(s.getPosition(), s.getAction(), s.getExpectedResult(), s.getTestData(),
-                        s.getStatus(), s.getActualResult())).toList(),
+                        s.getStatus(), s.getActualResult(), s.getCalledFrom())).toList(),
                 defects.stream().map(this::defectRef).toList(),
                 item.getExecutions().stream().map(this::attempt).toList(),
                 latest && !item.getCampaign().getStatus().isClosed(),
@@ -104,7 +106,7 @@ public class CampaignMapper {
 
     RequirementExecutionResponse requirementExecution(Execution e) {
         return new RequirementExecutionResponse(e.getId(), test(e.getTestCase()), ref(e.getItem().getCampaign()), e.getAttempt(), e.getStatus(),
-                e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin());
+                e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin(), e.getDataSetName(), e.getDataSetRow());
     }
 
     DefectSummary defectSummary(Defect d) {

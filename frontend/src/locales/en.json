@@ -683,7 +683,11 @@
     "workload": "Workload per tester",
     "workloadDetail": "{{tests}} tests · manual {{manual}} · exploratory {{exploratory}}",
     "unestimated_one": "{{count}} without estimate",
-    "unestimated_other": "{{count}} without estimate"
+    "unestimated_other": "{{count}} without estimate",
+    "dataSet": "Data",
+    "expandDataSet": "Expand to every row",
+    "expandRows_one": "{{name}} ({{count}} row)",
+    "expandRows_other": "{{name}} ({{count}} rows)"
   },
   "executions": {
     "overridden": "status forced",
@@ -739,7 +743,14 @@
   },
   "requirementRuns": {
     "noExecution": "No execution of linked tests.",
-    "noDefect": "No linked defect."
+    "noDefect": "No defect linked or found by the linked tests.",
+    "via": "via {{tests}}",
+    "linked": "Linked",
+    "traced": "Through traceability",
+    "tracedHint": "Found by the execution of a linked test, not linked to the requirement.",
+    "link": "Link",
+    "noTestExecution": "This test has never been executed.",
+    "noTestDefect": "No defect linked to this test's executions."
   },
   "planning": {
     "title": "Planning",
@@ -848,7 +859,8 @@
       "requirements": "Linked requirements",
       "executions": "Executions",
       "versions": "Versions",
-      "history": "History"
+      "history": "History",
+      "defects": "Defects"
     },
     "laterLot": "Available in batch {{lot}}.",
     "changeStatus": "Change status",
@@ -860,7 +872,8 @@
     "versionBumped": "Significant change: version {{number}} (F-AUT-10)",
     "warnings": "Warnings",
     "notFound": "Test not found.",
-    "readOnly": "Read only: your permissions on this project do not allow editing this test."
+    "readOnly": "Read only: your permissions on this project do not allow editing this test.",
+    "calledBy": "Called by"
   },
   "steps": {
     "title": "Test steps",
@@ -873,7 +886,15 @@
     "up": "Move up",
     "down": "Move down",
     "empty": "No step. A ready manual test has at least one step.",
-    "parametersHint": "Write ${parameter-name} in an action, expected result or data: the parameter is created automatically (see “Parameters and data sets”)."
+    "parametersHint": "Write ${parameter-name} in an action, expected result or data: the parameter is created automatically (see “Parameters and data sets”).",
+    "call": "Test case call",
+    "addCall": "Call a test case",
+    "calledTest": "Called test case",
+    "calledTestPlaceholder": "Search a manual test…",
+    "openCalled": "Open",
+    "inherit": "inherited or default value",
+    "calledSteps_one": "{{count}} step played instead of this call, with these values.",
+    "calledSteps_other": "{{count}} steps played instead of this call, with these values."
   },
   "grid": {
     "addRow": "Add a row",
@@ -1019,5 +1040,24 @@
     "done_one": "{{key}} created with {{count}} test.",
     "done_other": "{{key}} created with {{count}} tests.",
     "skipped": "Skipped (no longer ready): {{list}}."
+  },
+  "campaignFolders": {
+    "all": "All campaigns",
+    "root": "the root",
+    "newCampaign": "New campaign here",
+    "deleteNotEmpty": "Delete (folder not empty)",
+    "unclassified_one": "{{count}} campaign not filed",
+    "unclassified_other": "{{count}} campaigns not filed",
+    "dragHint": "Drag a campaign from the list onto a folder to file it.",
+    "campaignMoved": "{{key}} filed in “{{folder}}”",
+    "folderMoved_one": "Folder “{{path}}”: {{count}} campaign moved",
+    "folderMoved_other": "Folder “{{path}}”: {{count}} campaigns moved",
+    "current": "Folder “{{path}}” and its subfolders",
+    "emptyFolder": "No campaign in this folder.",
+    "folder": "Folder",
+    "folderHint": "Path “a/b”; empty = root. A new path creates the folder.",
+    "file": "File",
+    "fileTitle": "File {{key}} in a folder",
+    "fileHint": "Existing folder or new path; empty = root. Allowed even for a completed campaign."
   }
 }
