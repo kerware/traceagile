@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /** §12 Campagnes (§8.3), exécutions (§8.4) et anomalies (§8.6). */
@@ -132,7 +133,24 @@ public final class CampaignDtos {
 
     /** F-CMP-02 sélection cumulable : paramètres selon la stratégie. */
     public record SelectRequest(@NotNull Strategy strategy, String sprintKey, String tag, List<String> testKeys,
-                                List<String> requirementKeys, String campaignKey) {
+                                List<String> requirementKeys, String campaignKey,
+                                @Schema(description = "FROM_CAMPAIGN : derniers résultats retenus (défaut : FAILED, ERROR)") Set<ExecutionStatus> statuses) {
+    }
+
+    /**
+     * ADR-0017 copie d'une campagne : champs absents repris de la source ; {@code statuses} absent ou
+     * vide = tous les tests (duplication), sinon les tests dont la dernière tentative a ce statut.
+     */
+    public record CopyCampaignRequest(@NotBlank @Size(max = 120) String name, CampaignScope scopeType, String sprintKey, String releaseKey,
+                                      @Size(max = 60) String environment, @Size(max = 60) String buildVersion,
+                                      Set<ExecutionStatus> statuses,
+                                      @Schema(description = "Conserver les testeurs affectés (défaut : oui)") Boolean keepAssignees) {
+    }
+
+    public record CopyCampaignResponse(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> copied,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<SkippedResponse> skipped,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) CampaignDetail campaign) {
     }
 
     public record SkippedResponse(

@@ -628,6 +628,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/campaigns/{key}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["copy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/campaigns/{key}/complete": {
         parameters: {
             query?: never;
@@ -2311,12 +2327,14 @@ export interface components {
         };
         SelectRequest: {
             /** @enum {string} */
-            strategy: "SPRINT_REQUIREMENTS" | "TAG" | "IMPACT" | "MANUAL" | "FAILED_IN_CAMPAIGN";
+            strategy: "SPRINT_REQUIREMENTS" | "TAG" | "IMPACT" | "MANUAL" | "FROM_CAMPAIGN";
             sprintKey?: string;
             tag?: string;
             testKeys?: string[];
             requirementKeys?: string[];
             campaignKey?: string;
+            /** @description FROM_CAMPAIGN : derniers résultats retenus (défaut : FAILED, ERROR) */
+            statuses?: ("NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR")[];
         };
         SelectionResponse: {
             added: string[];
@@ -2327,6 +2345,23 @@ export interface components {
             testKey: string;
             /** @description ALREADY_SELECTED, NOT_READY_<statut> */
             reason: string;
+        };
+        CopyCampaignRequest: {
+            name: string;
+            /** @enum {string} */
+            scopeType?: "SPRINT" | "RELEASE" | "REGRESSION";
+            sprintKey?: string;
+            releaseKey?: string;
+            environment?: string;
+            buildVersion?: string;
+            statuses?: ("NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR")[];
+            /** @description Conserver les testeurs affectés (défaut : oui) */
+            keepAssignees?: boolean;
+        };
+        CopyCampaignResponse: {
+            copied: string[];
+            skipped: components["schemas"]["SkippedResponse"][];
+            campaign: components["schemas"]["CampaignDetail"];
         };
         StartExecutionRequest: {
             dataSetName?: string;
@@ -4248,6 +4283,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SelectionResponse"];
+                };
+            };
+        };
+    };
+    copy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopyCampaignRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CopyCampaignResponse"];
                 };
             };
         };

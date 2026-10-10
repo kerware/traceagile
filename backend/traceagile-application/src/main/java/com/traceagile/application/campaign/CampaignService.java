@@ -71,10 +71,29 @@ public class CampaignService {
     }
 
     /** F-CMP-02 moyens de sélection, cumulables. */
-    public enum Strategy { SPRINT_REQUIREMENTS, TAG, IMPACT, MANUAL, FAILED_IN_CAMPAIGN }
+    public enum Strategy { SPRINT_REQUIREMENTS, TAG, IMPACT, MANUAL, FROM_CAMPAIGN }
 
-    public record SelectionParams(String sprintKey, String tag, List<String> testKeys, List<String> requirementKeys, String campaignKey) {
+    /** {@code statuses} (FROM_CAMPAIGN) : derniers résultats retenus ; vide = échecs (FAILED, ERROR). */
+    public record SelectionParams(String sprintKey, String tag, List<String> testKeys, List<String> requirementKeys, String campaignKey,
+                                  Set<ExecutionStatus> statuses) {
+
+        public SelectionParams(String sprintKey, String tag, List<String> testKeys, List<String> requirementKeys, String campaignKey) {
+            this(sprintKey, tag, testKeys, requirementKeys, campaignKey, null);
+        }
     }
+
+    /**
+     * ADR-0017 nouvelle campagne à partir d'une autre. Champs {@code null} : repris de la source.
+     * {@code statuses} vide : tous les tests (duplication) ; sinon ceux dont la dernière tentative a ce statut.
+     */
+    public record CopyCommand(String name, CampaignScope scopeType, String sprintKey, String releaseKey, String environment,
+                              String buildVersion, Set<ExecutionStatus> statuses, boolean keepAssignees) {
+    }
+
+    public record CopyResult(Campaign campaign, List<String> copied, List<Skipped> skipped) {
+    }
+
+    static final Set<ExecutionStatus> FAILURES = Set.of(ExecutionStatus.FAILED, ExecutionStatus.ERROR);
 
     public record Skipped(String testKey, String reason) {
     }
@@ -267,7 +286,7 @@ public class CampaignService {
                     .map(testKey -> tests.findByProject_KeyAndKey(projectKey, testKey)
                             .orElseThrow(() -> new NotFoundException("TEST_NOT_FOUND", "Test « " + testKey + " » introuvable.")))
                     .toList();
-            case FAILED_IN_CAMPAIGN -> failedIn(projectKey, p.campaignKey());
+            case FROM_CAMPAIGN -> fromCampaign(projectKey, p.campaignKey(), p.statuses());
         };
         Map<UUID, Integer> scores = riskScores(projectKey);
         List<String> added = new ArrayList<>();
@@ -399,13 +418,59 @@ public class CampaignService {
         return result;
     }
 
-    private List<TestCase> failedIn(String projectKey, String campaignKey) {
+    /** F-CMP-02 / ADR-0017 tests d'une autre campagne selon leur dernier résultat (par défaut : les échecs). */
+    private List<TestCase> fromCampaign(String projectKey, String campaignKey, Set<ExecutionStatus> statuses) {
         if (campaignKey == null) {
-            throw new BusinessRuleException("SELECTION_CAMPAIGN_REQUIRED", "Indiquez la campagne dont reprendre les tests en échec.");
+            throw new BusinessRuleException("SELECTION_CAMPAIGN_REQUIRED", "Indiquez la campagne dont reprendre les tests.");
         }
-        return get(projectKey, campaignKey).getItems().stream()
-                .filter(i -> i.lastStatus() == ExecutionStatus.FAILED || i.lastStatus() == ExecutionStatus.ERROR)
+        Set<ExecutionStatus> wanted = statuses == null || statuses.isEmpty() ? FAILURES : statuses;
+        return get(projectKey, campaignKey).getItems().stream().filter(i -> wanted.contains(i.lastStatus()))
                 .map(CampaignItem::getTestCase).toList();
+    }
+
+    // ---------------------------------------------------------------- copie (ADR-0017)
+
+    /**
+     * Duplique une campagne, ou en génère une avec les tests dont le dernier résultat est dans
+     * {@code statuses} : même ordre, même score, affectations conservées si demandé et encore
+     * possibles ; seuls les tests READY sont repris. La source peut être terminée.
+     */
+    public CopyResult copy(String projectKey, String sourceKey, CopyCommand command) {
+        Campaign source = get(projectKey, sourceKey);
+        boolean sameScope = command.scopeType() == null;
+        Campaign target = create(projectKey, new CampaignCommand(command.name(),
+                sameScope ? source.getScopeType() : command.scopeType(),
+                sameScope ? (source.getSprint() == null ? null : source.getSprint().getKey()) : command.sprintKey(),
+                sameScope ? (source.getRelease() == null ? null : source.getRelease().getKey()) : command.releaseKey(),
+                command.environment() != null ? command.environment() : source.getEnvironment(),
+                command.buildVersion() != null ? command.buildVersion() : source.getBuildVersion(),
+                sameScope ? source.getPlannedStart() : null, sameScope ? source.getPlannedEnd() : null));
+        Map<String, Object> before = snapshot(target);
+        Set<ExecutionStatus> statuses = command.statuses() == null ? Set.of() : command.statuses();
+        List<String> copied = new ArrayList<>();
+        List<Skipped> skipped = new ArrayList<>();
+        for (CampaignItem item : source.getItems()) {
+            if (!statuses.isEmpty() && !statuses.contains(item.lastStatus())) {
+                continue;
+            }
+            TestCase test = item.getTestCase();
+            if (test.getStatus() != TestCaseStatus.READY) {
+                skipped.add(new Skipped(test.getKey(), "NOT_READY_" + test.getStatus().name()));
+                continue;
+            }
+            CampaignItem added = target.add(test, item.getRiskScore());
+            User assignee = item.getAssignee();
+            if (command.keepAssignees() && assignee != null && !added.isExecutedByServer()
+                    && projectService.isAllowed(assignee.getLogin(), projectKey, Permission.EXECUTION_WRITE)) {
+                added.assign(assignee);
+            }
+            copied.add(test.getKey());
+        }
+        campaigns.flush();
+        if (!copied.isEmpty()) {
+            record(target, AuditAction.UPDATED, before);
+        }
+        return new CopyResult(target, copied, skipped);
     }
 
     /** F-CMP-03 score de chaque test : risque maximal de ses exigences couvertes × sa priorité. */

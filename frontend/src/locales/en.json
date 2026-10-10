@@ -618,14 +618,14 @@
     "TAG": "Tests by tag",
     "IMPACT": "Changed requirements (impact)",
     "MANUAL": "Manual selection",
-    "FAILED_IN_CAMPAIGN": "Failures of a previous campaign"
+    "FROM_CAMPAIGN": "Results of another campaign"
   },
   "strategyHint": {
     "SPRINT_REQUIREMENTS": "Tests verifying the requirements of the campaign's sprint (or its release's sprints), or of the chosen sprint.",
     "TAG": "Tests with this tag or execution tag (smoke, regression…).",
     "IMPACT": "Tests to review for the chosen requirements; none chosen: tests with a suspect link.",
     "MANUAL": "Pick tests one by one.",
-    "FAILED_IN_CAMPAIGN": "Tests whose last attempt failed in the chosen campaign."
+    "FROM_CAMPAIGN": "Tests of a chosen campaign by their latest result (default: failed or in error)."
   },
   "skipReason": {
     "ALREADY_SELECTED": "already selected",
@@ -1001,5 +1001,23 @@
     "add": "Add",
     "save": "Save",
     "saved": "List saved"
+  },
+  "copy": {
+    "action": "Duplicate / generate",
+    "title": "New campaign from {{key}}",
+    "modeAll": "All tests (duplicate)",
+    "modeResults": "By latest result",
+    "statuses": "Latest results to include",
+    "keepAssignees": "Keep assigned testers",
+    "defaultName": "Copy of {{name}}",
+    "defaultRerunName": "Failure rerun — {{name}}",
+    "count_one": "{{count}} test will be included.",
+    "count_other": "{{count}} tests will be included.",
+    "hint": "Same order, no executions; tests no longer ready are skipped.",
+    "submitAll": "Duplicate",
+    "submitResults": "Generate campaign",
+    "done_one": "{{key}} created with {{count}} test.",
+    "done_other": "{{key}} created with {{count}} tests.",
+    "skipped": "Skipped (no longer ready): {{list}}."
   }
 }

@@ -2280,6 +2280,49 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/campaigns/{key}/copy" : {
+      "post" : {
+        "tags" : [ "Campagnes" ],
+        "operationId" : "copy",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CopyCampaignRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CopyCampaignResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/campaigns/{key}/complete" : {
       "post" : {
         "tags" : [ "Campagnes" ],
@@ -7148,7 +7191,7 @@
         "properties" : {
           "strategy" : {
             "type" : "string",
-            "enum" : [ "SPRINT_REQUIREMENTS", "TAG", "IMPACT", "MANUAL", "FAILED_IN_CAMPAIGN" ]
+            "enum" : [ "SPRINT_REQUIREMENTS", "TAG", "IMPACT", "MANUAL", "FROM_CAMPAIGN" ]
           },
           "sprintKey" : {
             "type" : "string"
@@ -7170,6 +7213,15 @@
           },
           "campaignKey" : {
             "type" : "string"
+          },
+          "statuses" : {
+            "type" : "array",
+            "description" : "FROM_CAMPAIGN : derniers résultats retenus (défaut : FAILED, ERROR)",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+            },
+            "uniqueItems" : true
           }
         },
         "required" : [ "strategy" ]
@@ -7207,6 +7259,70 @@
           }
         },
         "required" : [ "reason", "testKey" ]
+      },
+      "CopyCampaignRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "scopeType" : {
+            "type" : "string",
+            "enum" : [ "SPRINT", "RELEASE", "REGRESSION" ]
+          },
+          "sprintKey" : {
+            "type" : "string"
+          },
+          "releaseKey" : {
+            "type" : "string"
+          },
+          "environment" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "buildVersion" : {
+            "type" : "string",
+            "maxLength" : 60,
+            "minLength" : 0
+          },
+          "statuses" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+            },
+            "uniqueItems" : true
+          },
+          "keepAssignees" : {
+            "type" : "boolean",
+            "description" : "Conserver les testeurs affectés (défaut : oui)"
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "CopyCampaignResponse" : {
+        "type" : "object",
+        "properties" : {
+          "copied" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "skipped" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SkippedResponse"
+            }
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignDetail"
+          }
+        },
+        "required" : [ "campaign", "copied", "skipped" ]
       },
       "StartExecutionRequest" : {
         "type" : "object",

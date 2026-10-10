@@ -618,14 +618,14 @@
     "TAG": "Tests par tag",
     "IMPACT": "Exigences modifiées (impact)",
     "MANUAL": "Sélection manuelle",
-    "FAILED_IN_CAMPAIGN": "Échecs d'une campagne précédente"
+    "FROM_CAMPAIGN": "Résultats d'une autre campagne"
   },
   "strategyHint": {
     "SPRINT_REQUIREMENTS": "Tests qui vérifient les exigences du sprint de la campagne (ou de ses sprints pour une release), ou du sprint choisi.",
     "TAG": "Tests portant ce tag ou ce tag d'exécution (smoke, regression…).",
     "IMPACT": "Tests à revoir pour les exigences choisies ; sans choix : tests dont un lien est suspect.",
     "MANUAL": "Choisissez les tests un par un.",
-    "FAILED_IN_CAMPAIGN": "Tests dont la dernière tentative a échoué dans la campagne choisie."
+    "FROM_CAMPAIGN": "Tests d'une campagne choisie selon leur dernier résultat (par défaut : en échec ou en erreur)."
   },
   "skipReason": {
     "ALREADY_SELECTED": "déjà sélectionné",
@@ -1001,5 +1001,23 @@
     "add": "Ajouter",
     "save": "Enregistrer",
     "saved": "Liste enregistrée"
+  },
+  "copy": {
+    "action": "Dupliquer / générer",
+    "title": "Nouvelle campagne à partir de {{key}}",
+    "modeAll": "Tous les tests (duplication)",
+    "modeResults": "Selon le dernier résultat",
+    "statuses": "Derniers résultats retenus",
+    "keepAssignees": "Conserver les testeurs affectés",
+    "defaultName": "Copie de {{name}}",
+    "defaultRerunName": "Rejeu des échecs — {{name}}",
+    "count_one": "{{count}} test sera repris.",
+    "count_other": "{{count}} tests seront repris.",
+    "hint": "Même ordre, sans exécution ; les tests qui ne sont plus prêts sont ignorés.",
+    "submitAll": "Dupliquer",
+    "submitResults": "Générer la campagne",
+    "done_one": "{{key}} créée avec {{count}} test.",
+    "done_other": "{{key}} créée avec {{count}} tests.",
+    "skipped": "Ignorés (plus prêts) : {{list}}."
   }
 }

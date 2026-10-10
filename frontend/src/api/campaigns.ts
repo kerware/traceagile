@@ -103,6 +103,16 @@ export function useCampaignAction(project: string, key: string) {
   });
 }
 
+/** ADR-0017 dupliquer une campagne ou en générer une selon les derniers résultats. */
+export function useCopyCampaign(project: string, key: string) {
+  const invalidate = useInvalidate(project);
+  return useMutation({
+    mutationFn: async (body: Schemas['CopyCampaignRequest']) =>
+      unwrap(await api.POST('/api/v1/projects/{projectKey}/campaigns/{key}/copy', { params: { path: { projectKey: project, key } }, body })),
+    onSuccess: invalidate,
+  });
+}
+
 /** F-CMP-02 sélection cumulable. */
 export function useSelectTests(project: string, key: string) {
   const invalidate = useInvalidate(project);

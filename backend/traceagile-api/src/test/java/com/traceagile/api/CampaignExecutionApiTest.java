@@ -183,8 +183,12 @@ class CampaignExecutionApiTest extends AbstractApiTest {
                 .content(toJson(Map.of("status", "FAILED")))).andExpect(status().isOk());
         send(qa, P + "/campaigns", Map.of("name", "Régression", "scopeType", "REGRESSION"));
         mvc.perform(post(P + "/campaigns/CMP-2/items/select").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(Map.of("strategy", "FAILED_IN_CAMPAIGN", "campaignKey", "CMP-1"))))
+                        .content(toJson(Map.of("strategy", "FROM_CAMPAIGN", "campaignKey", "CMP-1"))))
                 .andExpect(jsonPath("$.added", contains("TC-2")));
+        // ADR-0017 n'importe quels résultats : ici, les tests jamais exécutés
+        mvc.perform(post(P + "/campaigns/CMP-2/items/select").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Map.of("strategy", "FROM_CAMPAIGN", "campaignKey", "CMP-1", "statuses", List.of("NOT_RUN")))))
+                .andExpect(jsonPath("$.added", contains("TC-1", "TC-3")));
         mvc.perform(post(P + "/campaigns/CMP-2/items/select").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Map.of("strategy", "SPRINT_REQUIREMENTS"))))
                 .andExpect(status().isUnprocessableEntity())
@@ -335,5 +339,77 @@ class CampaignExecutionApiTest extends AbstractApiTest {
         mvc.perform(patch(P + "/campaigns/CMP-1").header("Authorization", qa).header("If-Match", "\"5\"")
                 .contentType("application/merge-patch+json").content(toJson(Map.of("buildVersion", "2.0.0")))).andExpect(status().isPreconditionFailed());
         mvc.perform(get(P + "/campaigns/CMP-9").header("Authorization", qa)).andExpect(status().isNotFound());
+    }
+
+    /** CMP-1 : TC-1 affecté à qa2 et en échec, TC-2 réussi, TC-3 (automatisé) jamais exécuté. */
+    void campaignWithResults() throws Exception {
+        campaign();
+        select(Map.of("strategy", "MANUAL", "testKeys", List.of("TC-1", "TC-2", "TC-3")));
+        mvc.perform(patch(P + "/campaign-items/" + itemId("TC-1")).header("Authorization", qa).contentType("application/merge-patch+json")
+                .content(toJson(Map.of("assignee", "qa2")))).andExpect(status().isOk());
+        String failed = startExecution(itemId("TC-1"), Map.of());
+        mvc.perform(put(P + "/executions/" + failed + "/steps/1").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("status", "FAILED")))).andExpect(status().isOk());
+        String passed = startExecution(itemId("TC-2"), Map.of());
+        mvc.perform(put(P + "/executions/" + passed + "/steps/1").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("status", "PASSED")))).andExpect(status().isOk());
+    }
+
+    ResultActions copy(Map<String, Object> body) throws Exception {
+        return mvc.perform(post(P + "/campaigns/CMP-1/copy").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(body)));
+    }
+
+    @Test
+    @DisplayName("ADR-0017 dupliquer une campagne : mêmes tests dans le même ordre, affectations conservées, sans exécution")
+    void duplicate() throws Exception {
+        campaignWithResults();
+        copy(Map.of("name", "Recette SPR-1 bis", "buildVersion", "2.0.0-rc2"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.campaign.campaign.key", is("CMP-2")))
+                .andExpect(jsonPath("$.campaign.campaign.status", is("PLANNED")))
+                .andExpect(jsonPath("$.campaign.campaign.sprintKey", is("SPR-1")))
+                .andExpect(jsonPath("$.campaign.campaign.environment", is("recette")))
+                .andExpect(jsonPath("$.campaign.campaign.buildVersion", is("2.0.0-rc2")))
+                // ordre de la source (sélection triée par score de risque), pas l'ordre des cles
+                .andExpect(jsonPath("$.copied", contains("TC-1", "TC-3", "TC-2")))
+                .andExpect(jsonPath("$.campaign.items[*].test.key", contains("TC-1", "TC-3", "TC-2")))
+                .andExpect(jsonPath("$.campaign.items[0].assignee.login", is("qa2")))
+                .andExpect(jsonPath("$.campaign.items[*].lastStatus", contains("NOT_RUN", "NOT_RUN", "NOT_RUN")))
+                .andExpect(jsonPath("$.campaign.items[0].id").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("ADR-0017 générer une campagne selon les résultats : tests en échec ou non exécutés, nouveau périmètre, sans affectation")
+    void generateFromResults() throws Exception {
+        campaignWithResults();
+        copy(Map.of("name", "Reprise des échecs", "scopeType", "REGRESSION", "statuses", List.of("FAILED", "BLOCKED"), "keepAssignees", false))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.campaign.campaign.scopeType", is("REGRESSION")))
+                .andExpect(jsonPath("$.campaign.campaign.sprintKey").doesNotExist())
+                .andExpect(jsonPath("$.copied", contains("TC-1")))
+                .andExpect(jsonPath("$.campaign.items[0].assignee").doesNotExist());
+        copy(Map.of("name", "Non exécutés", "statuses", List.of("NOT_RUN")))
+                .andExpect(jsonPath("$.copied", contains("TC-3")));
+    }
+
+    @Test
+    @DisplayName("ADR-0017 copie : tests qui ne sont plus prêts signalés, source terminée acceptée ; validation et droits")
+    void copyRules() throws Exception {
+        campaignWithResults();
+        mvc.perform(post(P + "/campaigns/CMP-1/complete").header("Authorization", qa)).andExpect(status().isOk());
+        send(qa, P + "/test-cases/TC-2/status", Map.of("status", "OBSOLETE"));
+        copy(Map.of("name", "Après clôture"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.copied", contains("TC-1", "TC-3")))
+                .andExpect(jsonPath("$.skipped[0].testKey", is("TC-2")))
+                .andExpect(jsonPath("$.skipped[0].reason", is("NOT_READY_OBSOLETE")));
+        copy(Map.of("buildVersion", "x")).andExpect(status().isBadRequest());
+        copy(Map.of("name", "X", "scopeType", "SPRINT")).andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("CAMPAIGN_SCOPE_INVALID")));
+        mvc.perform(post(P + "/campaigns/CMP-1/copy").header("Authorization", bearer("viewer")).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("name", "X")))).andExpect(status().isForbidden());
+        mvc.perform(post(P + "/campaigns/CMP-9/copy").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                .content(toJson(Map.of("name", "X")))).andExpect(status().isNotFound());
     }
 }

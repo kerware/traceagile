@@ -21,3 +21,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0014](0014-tracabilite-et-couverture.md) | Traçabilité et couverture avant les exécutions | 3 |
 | [0015](0015-planification.md) | Releases, sprints et planification | 4 |
 | [0016](0016-campagnes-execution-anomalies.md) | Campagnes, exécution manuelle et anomalies | 5 |
+| [0017](0017-duplication-campagnes.md) | Dupliquer une campagne ou la générer depuis les résultats d'une autre | 5 |

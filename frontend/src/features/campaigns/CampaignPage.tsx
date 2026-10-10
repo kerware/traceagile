@@ -1,6 +1,6 @@
 import { ActionIcon, Alert, Anchor, Badge, Button, Card, Group, Loader, MultiSelect, Select, SimpleGrid, Stack, Table, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconArrowDown, IconArrowUp, IconCheck, IconPlayerPlay, IconPlayerStop, IconSortDescending, IconTrash, IconX } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconCheck, IconCopy, IconPlayerPlay, IconPlayerStop, IconSortDescending, IconTrash, IconX } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -17,6 +17,7 @@ import {
   useTesters,
   type CampaignDetail,
   type CampaignItem,
+  type ExecutionStatus,
   type Strategy,
 } from '../../api/campaigns';
 import { errorMessage } from '../../api/errors';
@@ -26,7 +27,8 @@ import { useTestList } from '../../api/testcases';
 import { flatten } from '../requirements/model';
 import { KindBadge } from '../tests/Badges';
 import { CampaignStatusBadge, ExecutionStatusBadge, ProgressBar } from './CampaignBadges';
-import { minutes, STRATEGIES } from './model';
+import { CopyCampaignModal } from './CopyCampaignModal';
+import { minutes, RESULT_STATUSES, STRATEGIES } from './model';
 import { useCanExecute, useCanManageCampaigns } from './permissions';
 
 /**
@@ -39,6 +41,7 @@ export function CampaignPage() {
   const { data, isLoading, error } = useCampaign(project, ck);
   const canManage = useCanManageCampaigns(project);
   const action = useCampaignAction(project, ck);
+  const [copying, setCopying] = useState(false);
   const fail = (e: unknown) => notifications.show({ color: 'red', message: errorMessage(e, t('errors.generic')) });
 
   if (isLoading) return <Loader />;
@@ -64,19 +67,26 @@ export function CampaignPage() {
             {c.plannedStart ? ` · ${c.plannedStart} → ${c.plannedEnd ?? ''}` : ''}
           </Text>
         </Stack>
-        {canManage && open && (
+        {canManage && (
           <Group>
-            {c.status === 'PLANNED' && (
+            <Button leftSection={<IconCopy size={16} />} variant="default" onClick={() => setCopying(true)} data-testid="campaign-copy">
+              {t('copy.action')}
+            </Button>
+            {open && c.status === 'PLANNED' && (
               <Button leftSection={<IconPlayerPlay size={16} />} variant="light" onClick={() => action.mutate('start', { onError: fail })} data-testid="campaign-start">
                 {t('campaigns.start')}
               </Button>
             )}
-            <Button leftSection={<IconCheck size={16} />} onClick={() => action.mutate('complete', { onError: fail })} data-testid="campaign-complete">
-              {t('campaigns.complete')}
-            </Button>
-            <Button leftSection={<IconPlayerStop size={16} />} color="red" variant="subtle" onClick={() => action.mutate('abort', { onError: fail })} data-testid="campaign-abort">
-              {t('campaigns.abort')}
-            </Button>
+            {open && (
+              <>
+                <Button leftSection={<IconCheck size={16} />} onClick={() => action.mutate('complete', { onError: fail })} data-testid="campaign-complete">
+                  {t('campaigns.complete')}
+                </Button>
+                <Button leftSection={<IconPlayerStop size={16} />} color="red" variant="subtle" onClick={() => action.mutate('abort', { onError: fail })} data-testid="campaign-abort">
+                  {t('campaigns.abort')}
+                </Button>
+              </>
+            )}
           </Group>
         )}
       </Group>
@@ -84,6 +94,7 @@ export function CampaignPage() {
       {canManage && open && <SelectionPanel project={project} detail={data} />}
       <ItemsTable project={project} detail={data} editable={canManage && open} />
       <Workload detail={data} />
+      {canManage && <CopyCampaignModal project={project} detail={data} opened={copying} onClose={() => setCopying(false)} />}
     </Stack>
   );
 }
@@ -103,6 +114,7 @@ function SelectionPanel({ project, detail }: { project: string; detail: Campaign
   const [testKeys, setTestKeys] = useState<string[]>([]);
   const [requirementKeys, setRequirementKeys] = useState<string[]>([]);
   const [campaignKey, setCampaignKey] = useState<string | null>(null);
+  const [statuses, setStatuses] = useState<string[]>(['FAILED', 'ERROR']);
   const [result, setResult] = useState<{ added: string[]; skipped: { testKey: string; reason: string }[] } | null>(null);
 
   const submit = () =>
@@ -113,7 +125,8 @@ function SelectionPanel({ project, detail }: { project: string; detail: Campaign
         tag: strategy === 'TAG' ? tag : undefined,
         testKeys: strategy === 'MANUAL' ? testKeys : undefined,
         requirementKeys: strategy === 'IMPACT' ? requirementKeys : undefined,
-        campaignKey: strategy === 'FAILED_IN_CAMPAIGN' ? campaignKey ?? undefined : undefined,
+        campaignKey: strategy === 'FROM_CAMPAIGN' ? campaignKey ?? undefined : undefined,
+        statuses: strategy === 'FROM_CAMPAIGN' ? (statuses as ExecutionStatus[]) : undefined,
       },
       {
         onSuccess: (r) => {
@@ -162,9 +175,13 @@ function SelectionPanel({ project, detail }: { project: string; detail: Campaign
           <MultiSelect label={t('campaigns.requirements')} placeholder={t('campaigns.impactHint')} data={flatten(tree ?? []).map((n) => ({ value: n.key, label: `${n.key} — ${n.title}` }))}
             value={requirementKeys} onChange={setRequirementKeys} searchable w={420} data-testid="selection-requirements" />
         )}
-        {strategy === 'FAILED_IN_CAMPAIGN' && (
-          <Select label={t('campaigns.previousCampaign')} data={(campaigns ?? []).filter((c) => c.key !== detail.campaign.key).map((c) => ({ value: c.key, label: `${c.key} — ${c.name}` }))}
-            value={campaignKey} onChange={setCampaignKey} w={300} data-testid="selection-campaign" />
+        {strategy === 'FROM_CAMPAIGN' && (
+          <>
+            <Select label={t('campaigns.previousCampaign')} data={(campaigns ?? []).filter((c) => c.key !== detail.campaign.key).map((c) => ({ value: c.key, label: `${c.key} — ${c.name}` }))}
+              value={campaignKey} onChange={setCampaignKey} w={300} data-testid="selection-campaign" />
+            <MultiSelect label={t('copy.statuses')} data={RESULT_STATUSES.map((s) => ({ value: s, label: t(`executionStatus.${s}`) }))}
+              value={statuses} onChange={setStatuses} w={320} data-testid="selection-statuses" />
+          </>
         )}
         <Button onClick={submit} loading={select.isPending} data-testid="selection-submit">
           {t('campaigns.add')}

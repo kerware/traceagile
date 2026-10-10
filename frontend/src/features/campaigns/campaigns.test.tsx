@@ -111,6 +111,71 @@ describe('§13.2 /p/:key/campaigns/:ck — campagne (F-CMP-02 à F-CMP-05)', () 
     await waitFor(() => expect(calls).toEqual([{ assignee: 'qa2' }, 'sort']));
   });
 
+  it('ADR-0017 générer une campagne avec les échecs : statuts proposés avec leurs nombres, requête, ouverture de la nouvelle campagne', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    serveCampaign();
+    let body: unknown;
+    const created = { ...CAMPAIGN, campaign: { ...CAMPAIGN.campaign, key: 'CMP-2', name: 'Rejeu des échecs — Recette SPR-1', status: 'PLANNED' as const } };
+    server.use(
+      http.get(`${P}/releases`, () => HttpResponse.json([])),
+      http.get(`${P}/campaigns/CMP-2`, () => HttpResponse.json(created)),
+      http.post(`${P}/campaigns/CMP-1/copy`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ copied: ['TC-3'], skipped: [], campaign: created }, { status: 201 });
+      }),
+    );
+    renderRoutes(routes, '/p/SHOP/campaigns/CMP-1');
+
+    await userEvent.click(await screen.findByTestId('campaign-copy'));
+    expect(await screen.findByTestId('copy-name')).toHaveValue('Rejeu des échecs — Recette SPR-1');
+    expect(screen.getByTestId('copy-status-FAILED')).toBeChecked();
+    expect(screen.getByTestId('copy-statuses')).toHaveTextContent('(1)');
+    expect(screen.getByTestId('copy-count')).toHaveTextContent('1 test sera repris.');
+    await userEvent.click(screen.getByTestId('copy-status-NOT_RUN'));
+    expect(screen.getByTestId('copy-count')).toHaveTextContent('2 tests seront repris.');
+    await userEvent.click(screen.getByTestId('copy-status-NOT_RUN'));
+    await userEvent.clear(screen.getByTestId('copy-build'));
+    await userEvent.type(screen.getByTestId('copy-build'), '2.0.0-rc2');
+    await userEvent.click(screen.getByTestId('copy-submit'));
+
+    await waitFor(() =>
+      expect(body).toEqual({
+        name: 'Rejeu des échecs — Recette SPR-1', scopeType: 'SPRINT', sprintKey: 'SPR-1', environment: 'recette', buildVersion: '2.0.0-rc2',
+        statuses: ['FAILED', 'ERROR'], keepAssignees: true,
+      }),
+    );
+    expect(await screen.findByText('Rejeu des échecs — Recette SPR-1')).toBeInTheDocument();
+  });
+
+  it('ADR-0017 dupliquer une campagne terminée : tous les tests, sans affectation', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    const done = { ...CAMPAIGN, campaign: { ...CAMPAIGN.campaign, status: 'COMPLETED' as const } };
+    serveCampaign();
+    let body: Record<string, unknown> = {};
+    server.use(
+      http.get(`${P}/campaigns/CMP-1`, () => HttpResponse.json(done)),
+      http.get(`${P}/releases`, () => HttpResponse.json([])),
+      http.post(`${P}/campaigns/CMP-1/copy`, async ({ request }) => {
+        body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ copied: ['TC-1', 'TC-3'], skipped: [], campaign: { ...CAMPAIGN, campaign: { ...CAMPAIGN.campaign, key: 'CMP-2' } } }, { status: 201 });
+      }),
+    );
+    renderRoutes(routes, '/p/SHOP/campaigns/CMP-1');
+
+    await userEvent.click(await screen.findByTestId('campaign-copy'));
+    expect(screen.queryByTestId('selection-panel')).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByText('Tous les tests (duplication)'));
+    expect(screen.getByTestId('copy-count')).toHaveTextContent('2 tests seront repris.');
+    await userEvent.clear(screen.getByTestId('copy-name'));
+    await userEvent.type(screen.getByTestId('copy-name'), 'Recette bis');
+    await userEvent.click(screen.getByTestId('copy-keep-assignees'));
+    await userEvent.click(screen.getByTestId('copy-submit'));
+
+    await waitFor(() => expect(body.name).toBe('Recette bis'));
+    expect(body.statuses).toBeUndefined();
+    expect(body.keepAssignees).toBe(false);
+  });
+
   it('§2.2 le lecteur consulte sans sélectionner ni exécuter', async () => {
     useAuthStore.getState().setSession('jwt', VIEWER);
     serveCampaign();
@@ -118,6 +183,7 @@ describe('§13.2 /p/:key/campaigns/:ck — campagne (F-CMP-02 à F-CMP-05)', () 
 
     await screen.findByTestId('item-TC-1');
     expect(screen.queryByTestId('selection-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('campaign-copy')).not.toBeInTheDocument();
     expect(screen.queryByTestId('execute-TC-1')).not.toBeInTheDocument();
   });
 });

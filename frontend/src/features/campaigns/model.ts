@@ -20,7 +20,10 @@ export const STEP_STATUSES: ExecutionStatus[] = ['PASSED', 'FAILED', 'BLOCKED', 
 /** Statuts qu'on peut forcer (F-EXE-02). */
 export const FINAL_STATUSES: ExecutionStatus[] = ['PASSED', 'FAILED', 'BLOCKED', 'SKIPPED', 'ERROR'];
 
-export const STRATEGIES: Strategy[] = ['SPRINT_REQUIREMENTS', 'TAG', 'IMPACT', 'MANUAL', 'FAILED_IN_CAMPAIGN'];
+export const STRATEGIES: Strategy[] = ['SPRINT_REQUIREMENTS', 'TAG', 'IMPACT', 'MANUAL', 'FROM_CAMPAIGN'];
+
+/** ADR-0017 derniers résultats qu'on peut reprendre d'une campagne. */
+export const RESULT_STATUSES: ExecutionStatus[] = ['FAILED', 'ERROR', 'BLOCKED', 'SKIPPED', 'NOT_RUN', 'PASSED'];
 
 export const SEVERITIES: DefectSeverity[] = ['BLOCKER', 'CRITICAL', 'MAJOR', 'MINOR', 'TRIVIAL'];
 export const SEVERITY_COLORS: Record<DefectSeverity, string> = { BLOCKER: 'red', CRITICAL: 'orange', MAJOR: 'yellow', MINOR: 'blue', TRIVIAL: 'gray' };

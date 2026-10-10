@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.api.campaign.CampaignDtos.CampaignDetail;
 import com.traceagile.api.campaign.CampaignDtos.CampaignSummary;
+import com.traceagile.api.campaign.CampaignDtos.CopyCampaignRequest;
+import com.traceagile.api.campaign.CampaignDtos.CopyCampaignResponse;
 import com.traceagile.api.campaign.CampaignDtos.CreateCampaignRequest;
 import com.traceagile.api.campaign.CampaignDtos.ItemPatchRequest;
 import com.traceagile.api.campaign.CampaignDtos.ItemResponse;
@@ -19,6 +21,8 @@ import com.traceagile.api.web.Versions;
 import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.campaign.CampaignService.CampaignCommand;
 import com.traceagile.application.campaign.CampaignService.CampaignPatch;
+import com.traceagile.application.campaign.CampaignService.CopyCommand;
+import com.traceagile.application.campaign.CampaignService.CopyResult;
 import com.traceagile.application.campaign.CampaignService.SelectionParams;
 import com.traceagile.application.campaign.CampaignService.SelectionResult;
 import com.traceagile.domain.campaign.Campaign;
@@ -131,14 +135,28 @@ public class CampaignController {
         return mapper.summary(campaigns.get(projectKey, key)).progress();
     }
 
-    /** F-CMP-02 sélection cumulable : SPRINT_REQUIREMENTS, TAG, IMPACT, MANUAL, FAILED_IN_CAMPAIGN. */
+    /** F-CMP-02 sélection cumulable : SPRINT_REQUIREMENTS, TAG, IMPACT, MANUAL, FROM_CAMPAIGN. */
     @PostMapping("/campaigns/{key}/items/select")
     @PreAuthorize(WRITE)
     public SelectionResponse select(@PathVariable String projectKey, @PathVariable String key, @Valid @RequestBody SelectRequest r) {
         SelectionResult result = campaigns.select(projectKey, key, r.strategy(),
-                new SelectionParams(r.sprintKey(), r.tag(), r.testKeys(), r.requirementKeys(), r.campaignKey()));
+                new SelectionParams(r.sprintKey(), r.tag(), r.testKeys(), r.requirementKeys(), r.campaignKey(), r.statuses()));
         return new SelectionResponse(result.added(), result.skipped().stream().map(s -> new SkippedResponse(s.testKey(), s.reason())).toList(),
                 mapper.detail(result.campaign()));
+    }
+
+    /** ADR-0017 dupliquer une campagne, ou en générer une selon les derniers résultats de ses tests. */
+    @PostMapping("/campaigns/{key}/copy")
+    @PreAuthorize(WRITE)
+    public ResponseEntity<CopyCampaignResponse> copy(@PathVariable String projectKey, @PathVariable String key,
+                                                     @Valid @RequestBody CopyCampaignRequest r) {
+        CopyResult result = campaigns.copy(projectKey, key, new CopyCommand(r.name(), r.scopeType(), r.sprintKey(), r.releaseKey(),
+                r.environment(), r.buildVersion(), r.statuses(), r.keepAssignees() == null || r.keepAssignees()));
+        Campaign campaign = result.campaign();
+        return ResponseEntity.created(URI.create("/api/v1/projects/" + projectKey + "/campaigns/" + campaign.getKey()))
+                .eTag(Versions.etag(campaign))
+                .body(new CopyCampaignResponse(result.copied(),
+                        result.skipped().stream().map(s -> new SkippedResponse(s.testKey(), s.reason())).toList(), mapper.detail(campaign)));
     }
 
     /** F-CMP-03 ordre proposé : score de risque décroissant. */

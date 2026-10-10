@@ -14,7 +14,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | Corrections 0-2 | Défilement après panneau latéral, paramètres `${nom}` et jeux de données nommés, dossiers de tests et menus contextuels des arbres (ADR-0013) | **Fait** (branche `lot-2-corrections`) |
 | 3. Traçabilité | Liens, statut de vérification, couverture, matrice, orphelins, impact | **Fait** (branche `lot-3-tracabilite`) |
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
-| 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branche `lot-5-campagnes`) |
+| 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`) |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | À faire |
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | À faire |
 | 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
@@ -139,6 +139,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `projects`/`users`, plus les tables sans clé étrangère comme `audit_events`). Chaque contrôleur :
   nominal, 400, 403, 412 si PATCH, 422 pour les règles métier.
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
+- Duplication / génération d'une campagne depuis les résultats d'une autre (ADR-0017) :
+  `CampaignService.copy`, `POST /campaigns/{key}/copy`, `CopyCampaignModal` côté front.
 - Campagnes et exécutions (ADR-0016) : règles dans `Campaign`, `CampaignItem`, `Execution`
   (statut déduit : `ExecutionRules`), `Defect`, `DefectDraft` (domaine). Après avoir ajouté des
   éléments à une collection en cascade, `flush()` avant de renvoyer leurs identifiants.
