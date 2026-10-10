@@ -1,0 +1,27 @@
+[
+  {
+    "uri": "features/panier.feature",
+    "name": "Panier",
+    "elements": [
+      {
+        "name": "Livraison gratuite au seuil",
+        "type": "scenario",
+        "tags": [{ "name": "@REQ-12" }, { "name": "@smoke" }],
+        "steps": [
+          { "name": "un panier de 50 €", "result": { "status": "passed", "duration": 1500000000 } },
+          { "name": "les frais sont nuls", "result": { "status": "passed", "duration": 500000000 } }
+        ]
+      },
+      {
+        "name": "Code promo expiré",
+        "type": "scenario",
+        "tags": [{ "name": "@REQ-7" }],
+        "steps": [
+          { "name": "un code expiré", "result": { "status": "passed", "duration": 100000000 } },
+          { "name": "il est refusé", "result": { "status": "failed", "duration": 200000000, "error_message": "Expected refusal" } }
+        ]
+      },
+      { "name": "Contexte", "type": "background", "steps": [] }
+    ]
+  }
+]

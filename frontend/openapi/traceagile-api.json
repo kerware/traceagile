@@ -1660,6 +1660,72 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/runs/{runKey}/rerun-failed" : {
+      "post" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "rerunFailed",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs/{runKey}/cancel" : {
+      "post" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "cancel",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/requirements" : {
       "get" : {
         "tags" : [ "Exigences" ],
@@ -2751,6 +2817,156 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/campaigns/{campaignKey}/runs" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "ofCampaign",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "campaignKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RunSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "launch",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "campaignKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LaunchRunRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/campaigns/{campaignKey}/imports" : {
+      "post" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "importReport",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "campaignKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "format",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "JUNIT", "CUCUMBER", "ROBOT", "PLAYWRIGHT" ]
+          }
+        }, {
+          "name" : "apply",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "createUnknown",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReportImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/campaign-items/{id}/sessions" : {
       "post" : {
         "tags" : [ "Exploratoire" ],
@@ -3088,6 +3304,185 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/GherkinValidationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/execution-servers" : {
+      "get" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "list_9",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ServerResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "create_9",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateServerRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/execution-servers/{id}/unpair" : {
+      "post" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "unpair",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/execution-servers/{id}/test-connection" : {
+      "post" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "testConnection",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/execution-servers/{id}/pair" : {
+      "post" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "pair",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PairServerRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/execution-callbacks" : {
+      "post" : {
+        "tags" : [ "Runs automatisés" ],
+        "summary" : "Webhook du serveur d'exécution (signature X-TraceAgile-Signature)",
+        "operationId" : "receive",
+        "parameters" : [ {
+          "name" : "X-TraceAgile-Signature",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string",
+                "format" : "byte"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
                 }
               }
             }
@@ -4207,10 +4602,65 @@
         }
       }
     },
+    "/api/v1/execution-servers/{id}" : {
+      "delete" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "delete_6",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "update_8",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateServerRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/reference/frameworks" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "list_9",
+        "operationId" : "list_10",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -4705,7 +5155,7 @@
     "/api/v1/projects/{projectKey}/sessions" : {
       "get" : {
         "tags" : [ "Exploratoire" ],
-        "operationId" : "list_10",
+        "operationId" : "list_11",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -4778,6 +5228,134 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/DefectDraftResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "ofProject",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RunSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs/{runKey}" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "get_7",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs/{runKey}/logs" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "logs",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{projectKey}/runs/{runKey}/events" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "events",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SseEmitter"
                 }
               }
             }
@@ -5446,6 +6024,35 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/execution-servers" : {
+      "get" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "choices",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ServerChoice"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{projectKey}/coverage" : {
       "get" : {
         "tags" : [ "Traçabilité" ],
@@ -5482,7 +6089,7 @@
     "/api/v1/projects/{projectKey}/checklists" : {
       "get" : {
         "tags" : [ "Exigences" ],
-        "operationId" : "get_7",
+        "operationId" : "get_8",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -5538,10 +6145,43 @@
         }
       }
     },
+    "/api/v1/projects/{projectKey}/campaigns/{campaignKey}/run-events" : {
+      "get" : {
+        "tags" : [ "Runs automatisés" ],
+        "operationId" : "campaignEvents",
+        "parameters" : [ {
+          "name" : "projectKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "campaignKey",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SseEmitter"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{key}" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "get_8",
+        "operationId" : "get_9",
         "parameters" : [ {
           "name" : "key",
           "in" : "path",
@@ -6420,6 +7060,10 @@
             "type" : "integer",
             "format" : "int32",
             "description" : "Durée estimée (manuel) ou timebox (charte), en minutes"
+          },
+          "flaky" : {
+            "type" : "boolean",
+            "description" : "F-EXE-11 test instable"
           }
         },
         "required" : [ "currentVersion", "key", "kind", "priority", "status", "title" ]
@@ -7460,6 +8104,10 @@
           "automationCandidate" : {
             "type" : "boolean"
           },
+          "flaky" : {
+            "type" : "boolean",
+            "description" : "F-EXE-11 test instable"
+          },
           "automationJustification" : {
             "type" : "string"
           },
@@ -8163,6 +8811,171 @@
         },
         "required" : [ "feelings" ]
       },
+      "RunCounts" : {
+        "type" : "object",
+        "properties" : {
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pending" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "running" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "passed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "failed" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "error" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "skipped" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "error", "failed", "passed", "pending", "running", "skipped", "total" ]
+      },
+      "RunDetail" : {
+        "type" : "object",
+        "properties" : {
+          "run" : {
+            "$ref" : "#/components/schemas/RunSummaryResponse"
+          },
+          "executions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RunExecutionResponse"
+            }
+          },
+          "cancellable" : {
+            "type" : "boolean",
+            "description" : "Annulable (non terminé)"
+          }
+        },
+        "required" : [ "cancellable", "executions", "run" ]
+      },
+      "RunExecutionResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "itemId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "test" : {
+            "$ref" : "#/components/schemas/TestRef"
+          },
+          "technique" : {
+            "type" : "string",
+            "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+          },
+          "testIdentifier" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "endedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "durationMs" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "flaky" : {
+            "type" : "boolean",
+            "description" : "F-EXE-11 test instable"
+          }
+        },
+        "required" : [ "flaky", "id", "itemId", "startedAt", "status", "technique", "test" ]
+      },
+      "RunSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "QUEUED", "DISPATCHED", "RUNNING", "COMPLETED", "FAILED", "CANCELLED", "TIMEOUT" ]
+          },
+          "campaign" : {
+            "$ref" : "#/components/schemas/CampaignRef"
+          },
+          "serverName" : {
+            "type" : "string"
+          },
+          "requestedBy" : {
+            "type" : "string"
+          },
+          "requestedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "startedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "endedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "environment" : {
+            "type" : "string"
+          },
+          "buildVersion" : {
+            "type" : "string"
+          },
+          "agent" : {
+            "type" : "string"
+          },
+          "externalJobId" : {
+            "type" : "string"
+          },
+          "rerunOf" : {
+            "type" : "string"
+          },
+          "errorCode" : {
+            "type" : "string"
+          },
+          "errorMessage" : {
+            "type" : "string"
+          },
+          "reportUrl" : {
+            "type" : "string"
+          },
+          "timeoutMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "counts" : {
+            "$ref" : "#/components/schemas/RunCounts"
+          }
+        },
+        "required" : [ "campaign", "counts", "key", "requestedAt", "serverName", "status", "timeoutMinutes" ]
+      },
       "CreateCriterionRequest" : {
         "type" : "object",
         "properties" : {
@@ -8621,6 +9434,93 @@
         },
         "required" : [ "campaign", "copied", "skipped" ]
       },
+      "LaunchRunRequest" : {
+        "type" : "object",
+        "properties" : {
+          "serverId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "itemIds" : {
+            "type" : "array",
+            "description" : "Éléments de campagne à lancer ; absent ou vide : tous les tests automatisés",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "timeoutMinutes" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 1440,
+            "minimum" : 1
+          }
+        },
+        "required" : [ "serverId" ]
+      },
+      "ReportImportLine" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "identifier" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NOT_RUN", "RUNNING", "PASSED", "FAILED", "BLOCKED", "SKIPPED", "ERROR" ]
+          },
+          "durationMs" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "requirementKeys" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "testKey" : {
+            "type" : "string",
+            "description" : "Test rapproché (absent : inconnu)"
+          },
+          "matchedBy" : {
+            "type" : "string",
+            "enum" : [ "IDENTIFIER", "REQUIREMENT_TAG", "CREATED" ]
+          }
+        },
+        "required" : [ "identifier", "name", "requirementKeys", "status" ]
+      },
+      "ReportImportResponse" : {
+        "type" : "object",
+        "properties" : {
+          "lines" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ReportImportLine"
+            }
+          },
+          "created" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "recorded" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "applied" : {
+            "type" : "boolean",
+            "description" : "false : aperçu"
+          }
+        },
+        "required" : [ "applied", "created", "lines", "recorded" ]
+      },
       "ExpandDataSetRequest" : {
         "type" : "object",
         "properties" : {
@@ -8742,6 +9642,116 @@
           }
         },
         "required" : [ "errors", "language", "valid" ]
+      },
+      "CreateServerRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "baseUrl" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "baseUrl", "name" ]
+      },
+      "ServerResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "baseUrl" : {
+            "type" : "string"
+          },
+          "authType" : {
+            "type" : "string"
+          },
+          "paired" : {
+            "type" : "boolean",
+            "description" : "Jeton émis par le serveur enregistré"
+          },
+          "tokenHint" : {
+            "type" : "string",
+            "description" : "Quatre derniers caractères du jeton (le jeton n'est jamais renvoyé)"
+          },
+          "tokenId" : {
+            "type" : "string"
+          },
+          "pairedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "UNPAIRED", "UNKNOWN", "ONLINE", "OFFLINE", "UNAUTHORIZED" ]
+          },
+          "lastHeartbeat" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "lastError" : {
+            "type" : "string"
+          },
+          "serverVersion" : {
+            "type" : "string"
+          },
+          "techniques" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+            }
+          },
+          "frameworks" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "environments" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "agents" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "agents", "authType", "baseUrl", "enabled", "environments", "frameworks", "id", "name", "paired", "status", "techniques" ]
+      },
+      "PairServerRequest" : {
+        "type" : "object",
+        "properties" : {
+          "adminUser" : {
+            "type" : "string"
+          },
+          "adminPassword" : {
+            "type" : "string"
+          },
+          "token" : {
+            "type" : "string"
+          },
+          "webhookSecret" : {
+            "type" : "string"
+          },
+          "tokenId" : {
+            "type" : "string"
+          }
+        }
       },
       "MeResponse" : {
         "type" : "object",
@@ -9128,6 +10138,24 @@
           }
         }
       },
+      "UpdateServerRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "baseUrl" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          },
+          "enabled" : {
+            "type" : "boolean"
+          }
+        }
+      },
       "PageResponseUserResponse" : {
         "type" : "object",
         "properties" : {
@@ -9462,6 +10490,10 @@
             "type" : "integer",
             "format" : "int64",
             "description" : "F-MAN-02 nombre d'exécutions (toutes tentatives)"
+          },
+          "flaky" : {
+            "type" : "boolean",
+            "description" : "F-EXE-11 test instable"
           }
         },
         "required" : [ "automationCandidate", "currentVersion", "executionCount", "key", "kind", "missingInRepository", "priority", "status", "tags", "title" ]
@@ -9700,6 +10732,15 @@
           }
         },
         "required" : [ "description", "requirementKeys", "severity", "title" ]
+      },
+      "SseEmitter" : {
+        "type" : "object",
+        "properties" : {
+          "timeout" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          }
+        }
       },
       "PageResponseRequirementSummary" : {
         "type" : "object",
@@ -10280,6 +11321,33 @@
           }
         },
         "required" : [ "bugPct", "setupPct", "testPct" ]
+      },
+      "ServerChoice" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "UNPAIRED", "UNKNOWN", "ONLINE", "OFFLINE", "UNAUTHORIZED" ]
+          },
+          "techniques" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "BDD", "UNIT", "UI", "API", "KEYWORD", "DATA_DRIVEN", "PERFORMANCE", "CONTRACT" ]
+            }
+          },
+          "usable" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "id", "name", "status", "techniques", "usable" ]
       },
       "CoverageResponse" : {
         "type" : "object",

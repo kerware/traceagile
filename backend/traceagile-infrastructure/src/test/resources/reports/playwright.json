@@ -1,0 +1,30 @@
+{
+  "config": {},
+  "suites": [
+    {
+      "title": "panier.spec.ts",
+      "file": "panier.spec.ts",
+      "specs": [],
+      "suites": [
+        {
+          "title": "Panier",
+          "file": "panier.spec.ts",
+          "specs": [
+            {
+              "title": "ajoute un produit",
+              "tags": ["@REQ-12"],
+              "file": "panier.spec.ts",
+              "tests": [{ "results": [{ "status": "failed", "duration": 900, "error": { "message": "timeout" } }, { "status": "passed", "duration": 1200 }] }]
+            },
+            {
+              "title": "vide le panier @REQ-13",
+              "tags": [],
+              "file": "panier.spec.ts",
+              "tests": [{ "results": [{ "status": "timedOut", "duration": 30000, "error": { "message": "Test timeout of 30000ms exceeded." } }] }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

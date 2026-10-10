@@ -33,8 +33,9 @@
         <archunit.version>1.4.2</archunit.version>
         <gherkin.version>42.0.1</gherkin.version>
         <jacoco.version>0.8.13</jacoco.version>
-        <!-- Windows : le TEMP en nom court 8.3 casse les sockets unix de la JVM (voir CLAUDE.md) -->
-        <argLine>-Djdk.net.unixdomain.tmpdir=${java.io.tmpdir}</argLine>
+        <!-- Windows : un TEMP en nom court 8.3 casse les sockets unix de la JVM (Pipe NIO : WireMock,
+             Jetty…) ; le dossier personnel, toujours présent, convient (voir CLAUDE.md) -->
+        <argLine>-Djdk.net.unixdomain.tmpdir=${user.home}</argLine>
     </properties>
 
     <dependencyManagement>

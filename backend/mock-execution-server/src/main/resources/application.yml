@@ -5,6 +5,18 @@ spring:
   application:
     name: mock-execution-server
 
+# §10.5 réglages du simulateur ; ADR-0020 l'administrateur du serveur émet les jetons (POST /api/v1/tokens).
+simulator:
+  admin-user: ${SIMULATOR_ADMIN_USER:admin}
+  admin-password: ${SIMULATOR_ADMIN_PASSWORD:simulateur}
+  pass-rate: ${SIMULATOR_PASS_RATE:0.8}
+  error-rate: ${SIMULATOR_ERROR_RATE:0.05}
+  min-delay-ms: ${SIMULATOR_MIN_DELAY_MS:1000}
+  max-delay-ms: ${SIMULATOR_MAX_DELAY_MS:3000}
+  frameworks: [cucumber-jvm, playwright, rest-assured, junit5, robot-framework, gatling, pact]
+  environments: [recette, preprod]
+  agents: 2
+
 management:
   endpoints:
     web:

@@ -44,7 +44,8 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TestCaseStatus status,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Priority priority,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int currentVersion,
-            @Schema(description = "Durée estimée (manuel) ou timebox (charte), en minutes") Integer durationMin) {
+            @Schema(description = "Durée estimée (manuel) ou timebox (charte), en minutes") Integer durationMin,
+            @Schema(description = "F-EXE-11 test instable") Boolean flaky) {
     }
 
     public record CampaignRef(

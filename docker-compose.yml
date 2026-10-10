@@ -29,16 +29,27 @@ services:
       TRACEAGILE_DB_USER: traceagile
       TRACEAGILE_DB_PASSWORD: traceagile
       TRACEAGILE_JWT_SECRET: ${TRACEAGILE_JWT_SECRET:-compose-demo-secret-please-change-0123456789}
+      # ADR-0020 chiffrement des jetons des serveurs d'exécution
+      TRACEAGILE_ENCRYPTION_KEY: ${TRACEAGILE_ENCRYPTION_KEY:-compose-demo-encryption-key-please-change}
+      # §10 webhooks : URL de l'API vue depuis le simulateur ; simulateur appairé au démarrage (profil demo)
+      TRACEAGILE_CALLBACK_URL: http://backend:8085/api/v1/execution-callbacks
+      TRACEAGILE_SIMULATOR_URL: http://mock-execution-server:8090
+      SIMULATOR_ADMIN_USER: ${SIMULATOR_ADMIN_USER:-admin}
+      SIMULATOR_ADMIN_PASSWORD: ${SIMULATOR_ADMIN_PASSWORD:-simulateur}
     ports:
       - "8085:8085"
     depends_on:
       postgres:
         condition: service_healthy
 
+  # §10.5 simulateur du serveur d'exécution ; ADR-0020 son administrateur émet les jetons (POST /api/v1/tokens)
   mock-execution-server:
     build:
       context: ./backend
       target: mock-execution-server
+    environment:
+      SIMULATOR_ADMIN_USER: ${SIMULATOR_ADMIN_USER:-admin}
+      SIMULATOR_ADMIN_PASSWORD: ${SIMULATOR_ADMIN_PASSWORD:-simulateur}
     ports:
       - "8090:8090"
 

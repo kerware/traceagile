@@ -30,6 +30,8 @@ import { useTestList } from '../../api/testcases';
 import { flatten } from '../requirements/model';
 import { KindBadge } from '../tests/Badges';
 import { CampaignStatusBadge, ExecutionStatusBadge, ProgressBar } from './CampaignBadges';
+import { CampaignRunsPanel } from '../automation/CampaignRunsPanel';
+import { FlakyBadge } from '../automation/RunBadges';
 import { CopyCampaignModal } from './CopyCampaignModal';
 import { ItemDataSetCell } from './ItemDataSetCell';
 import { useStartSession } from '../../api/exploratory';
@@ -108,6 +110,7 @@ export function CampaignPage() {
       </Group>
       <ProgressBar progress={c.progress} />
       {canManage && open && <SelectionPanel project={project} detail={data} />}
+      <CampaignRunsPanel project={project} detail={data} />
       <ItemsTable project={project} detail={data} editable={canManage && open} />
       <Workload detail={data} />
       {canManage && <CopyCampaignModal project={project} detail={data} opened={copying} onClose={() => setCopying(false)} />}
@@ -317,6 +320,7 @@ function ItemsTable({ project, detail, editable }: { project: string; detail: Ca
                   </Anchor>
                   <KindBadge kind={item.test.kind} />
                   <Text size="sm">{item.test.title}</Text>
+                  {item.test.flaky && <FlakyBadge />}
                   {item.testCaseVersion !== item.test.currentVersion && (
                     <Tooltip label={t('campaigns.versionChanged', { selected: item.testCaseVersion, current: item.test.currentVersion })}>
                       <Badge size="xs" color="orange" variant="light">

@@ -1,5 +1,6 @@
 package com.traceagile.domain.execution;
 
+import com.traceagile.domain.automation.AutomatedRun;
 import com.traceagile.domain.campaign.CampaignItem;
 import com.traceagile.domain.common.AuditableEntity;
 import com.traceagile.domain.common.BusinessRuleException;
@@ -86,6 +87,11 @@ public class Execution extends AuditableEntity {
 
     @Column(name = "data_set_row")
     private Integer dataSetRow;
+
+    /** F-EXE-06 run automatisé qui porte cette tentative ({@code null} : manuelle, session ou import). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "run_id")
+    private AutomatedRun run;
 
     /** Valeurs des paramètres utilisées (défauts, puis ligne du jeu de données). */
     @JdbcTypeCode(SqlTypes.JSON)
@@ -208,6 +214,53 @@ public class Execution extends AuditableEntity {
         this.status = status;
         this.endedAt = endedAt;
         this.durationMs = activeMs;
+    }
+
+    /** F-EXE-06 tentative d'un test automatisé envoyée dans un run : en attente (NOT_RUN) jusqu'à TEST_STARTED. */
+    public static Execution automated(CampaignItem item, AutomatedRun run, Instant now) {
+        TestCase test = item.getTestCase();
+        if (test.getKind() != TestKind.AUTOMATED) {
+            throw new BusinessRuleException("RUN_TEST_NOT_AUTOMATED", test.getKey() + " n'est pas un test automatisé.");
+        }
+        Execution latest = item.latest();
+        if (latest != null && !latest.isFinal()) {
+            throw new BusinessRuleException("EXECUTION_IN_PROGRESS", test.getKey() + " a déjà une tentative en cours.");
+        }
+        Execution execution = new Execution(item, ExecutionOrigin.AUTOMATED, run.getServer().getName(), now);
+        execution.status = ExecutionStatus.NOT_RUN;
+        execution.run = run;
+        item.attach(execution);
+        return execution;
+    }
+
+    /** §10.4 TEST_STARTED. */
+    public void automatedStarted(Instant at) {
+        if (status == ExecutionStatus.NOT_RUN) {
+            status = ExecutionStatus.RUNNING;
+            startedAt = at;
+        }
+    }
+
+    /** §10.4 TEST_FINISHED : statut final, durée, message d'erreur (tronqué). */
+    public void automatedFinished(ExecutionStatus result, Long duration, String message, Instant endedAt) {
+        if (result == null || result == ExecutionStatus.RUNNING || result == ExecutionStatus.NOT_RUN) {
+            throw new BusinessRuleException("EXECUTION_STATUS_INVALID", "Un test se termine réussi, échoué, ignoré ou en erreur.");
+        }
+        this.status = result;
+        this.comment = message == null || message.length() <= 2000 ? message : message.substring(0, 1999) + "…";
+        this.endedAt = endedAt;
+        this.durationMs = duration != null ? Math.max(0, duration) : Math.max(0, Duration.between(startedAt, endedAt).toMillis());
+    }
+
+    /** F-EXE-08 / §10.4 tentative close sans résultat du serveur (run annulé, en échec ou expiré). */
+    public void abandon(ExecutionStatus result, String reason, Instant at) {
+        if (!isFinal()) {
+            automatedFinished(result, Duration.between(startedAt, at).toMillis(), reason, at);
+        }
+    }
+
+    public AutomatedRun getRun() {
+        return run;
     }
 
     /** Résultat enregistré sans saisie pas à pas (run automatisé, import de rapport, démonstration). */

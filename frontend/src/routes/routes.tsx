@@ -80,6 +80,10 @@ export const appRoutes: RouteObject[] = [
             lazy: () => import('../features/campaigns/ExecutionPage').then((m) => ({ Component: m.ExecutionPage })),
           },
           {
+            path: 'runs/:rk',
+            lazy: () => import('../features/automation/RunPage').then((m) => ({ Component: m.RunPage })),
+          },
+          {
             path: 'exploratory',
             lazy: () => import('../features/exploratory/ExploratoryPage').then((m) => ({ Component: m.ExploratoryPage })),
           },
@@ -122,6 +126,10 @@ export const appRoutes: RouteObject[] = [
           {
             path: 'references',
             lazy: () => import('../features/admin/AdminReferencesPage').then((m) => ({ Component: m.AdminReferencesPage })),
+          },
+          {
+            path: 'execution-servers',
+            lazy: () => import('../features/admin/AdminExecutionServersPage').then((m) => ({ Component: m.AdminExecutionServersPage })),
           },
         ],
       },

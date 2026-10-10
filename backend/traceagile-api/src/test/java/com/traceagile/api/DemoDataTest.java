@@ -37,6 +37,9 @@ import com.traceagile.domain.defect.Defect;
 import com.traceagile.domain.defect.DefectSeverity;
 import com.traceagile.domain.execution.ExecutionStatus;
 import com.traceagile.api.demo.DemoCampaignLoader;
+import com.traceagile.api.demo.DemoAutomationLoader;
+import com.traceagile.application.automation.AutomatedRunService;
+import com.traceagile.application.automation.ExecutionServerService;
 import com.traceagile.application.exploratory.ExploratoryService;
 import com.traceagile.domain.exploratory.ExploratoryMetrics;
 import com.traceagile.domain.exploratory.SessionState;
@@ -84,10 +87,16 @@ class DemoDataTest extends AbstractApiTest {
     TraceabilityService traceability;
     @Autowired
     ExploratoryService exploratory;
+    @Autowired
+    DemoAutomationLoader automationLoader;
+    @Autowired
+    AutomatedRunService runs;
+    @Autowired
+    ExecutionServerService executionServers;
 
     DemoDataLoader loader() {
         return new DemoDataLoader(userService, projectService, users, projects, requirements, requirementRepository, objectMapper,
-                testsLoader, planningLoader, campaignLoader);
+                testsLoader, planningLoader, campaignLoader, automationLoader);
     }
 
     @Test
@@ -201,5 +210,10 @@ class DemoDataTest extends AbstractApiTest {
         assertThat(sprint1.sessions()).isEqualTo(4);
         assertThat(sprint1.chartersExecuted()).isEqualTo(sprint1.chartersPlanned());
         assertThat(sprint1.averageConfidence()).isNotNull();
+
+        // Lot 7 (§15.1) : simulateur déclaré (appairé dès qu'il répond) ; 3 runs sur CMP-2 ; 2 tests instables
+        assertThat(executionServers.list()).extracting(s -> s.getName()).containsExactly("Simulateur");
+        assertThat(runs.ofCampaign("SHOP", "CMP-2")).hasSize(3).allSatisfy(r -> assertThat(r.getStatus()).hasToString("COMPLETED"));
+        assertThat(testCases.all("SHOP")).filteredOn(t -> t.isFlaky()).hasSize(2);
     }
 }

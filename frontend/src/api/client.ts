@@ -61,6 +61,11 @@ async function authFetch(request: Request): Promise<Response> {
   return fetch(retry);
 }
 
+/** fetch authentifié hors du client typé (texte, flux SSE) : même jeton et même rafraîchissement. */
+export function authorizedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  return authFetch(new Request(`${window.location.origin}${path}`, { ...init, credentials: 'same-origin' }));
+}
+
 /** Client typé généré depuis l'OpenAPI du back-end (§11.1, ADR-0007). */
 export const api = createClient<paths>({
   baseUrl: window.location.origin,

@@ -99,6 +99,10 @@ public class TestCase extends AuditableEntity {
     @Column(name = "automation_candidate", nullable = false)
     private boolean automationCandidate;
 
+    /** F-EXE-11 instable : recalculé après chaque résultat automatisé (ADR-0020). */
+    @Column(nullable = false)
+    private boolean flaky;
+
     @Column(name = "automation_justification", length = 1000)
     private String automationJustification;
 
@@ -455,6 +459,14 @@ public class TestCase extends AuditableEntity {
         if (status == TestCaseStatus.READY) {
             status = TestCaseStatus.NEEDS_UPDATE;
         }
+    }
+
+    public boolean isFlaky() {
+        return flaky;
+    }
+
+    public void markFlaky(boolean flaky) {
+        this.flaky = flaky;
     }
 
     public boolean isExecutable() {

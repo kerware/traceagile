@@ -38,13 +38,13 @@ public class CampaignMapper {
         return user == null ? null : new UserRef(user.getLogin(), user.getDisplayName());
     }
 
-    TestRef test(TestCase test) {
+    public TestRef test(TestCase test) {
         Integer duration = test.getKind() == TestKind.EXPLORATORY ? Integer.valueOf(test.getCharter().getTimeboxMin()) : test.getEstimatedDurationMin();
         return new TestRef(test.getKey(), test.getTitle(), test.getKind(), test.getAutomation() == null ? null : test.getAutomation().getTechnique(),
-                test.getStatus(), test.getPriority(), test.getCurrentVersion(), duration);
+                test.getStatus(), test.getPriority(), test.getCurrentVersion(), duration, test.isFlaky() ? Boolean.TRUE : null);
     }
 
-    CampaignRef ref(Campaign c) {
+    public CampaignRef ref(Campaign c) {
         return new CampaignRef(c.getKey(), c.getName(), c.getEnvironment(), c.getBuildVersion(), c.getStatus());
     }
 

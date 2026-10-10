@@ -69,11 +69,13 @@ public class DemoCampaignLoader {
     private final TraceLinkService links;
     private final CampaignFolderService folders;
     private final ExploratorySessionRepository sessions;
+    private final DemoAutomationLoader automation;
 
     public DemoCampaignLoader(CampaignService campaigns, CampaignRepository campaignRepository, ExecutionRepository executions,
                               ExecutionService executionService, DefectService defects, PlanningService planning, TraceLinkService links,
-                              CampaignFolderService folders, ExploratorySessionRepository sessions) {
+                              CampaignFolderService folders, ExploratorySessionRepository sessions, DemoAutomationLoader automation) {
         this.sessions = sessions;
+        this.automation = automation;
         this.links = links;
         this.folders = folders;
         this.campaigns = campaigns;
@@ -199,12 +201,13 @@ public class DemoCampaignLoader {
         // test manuel de chacun est exécuté, pour que « Mes exécutions » en garde à faire pour les deux.
         Map<TestKind, Integer> turns = new EnumMap<>(TestKind.class);
         Set<String> executedBy = new HashSet<>();
-        int automated = 0;
+        List<CampaignItem> automated = new java.util.ArrayList<>();
+        Instant runsStart = clock;
         for (CampaignItem item : campaign.getItems()) {
             TestKind kind = item.getTestCase().getKind();
             if (kind == TestKind.AUTOMATED) {
-                if (automated++ < 4) {
-                    executionService.record(item, ExecutionOrigin.AUTOMATED, ExecutionStatus.PASSED, "ci", clock, clock.plusSeconds(25), null);
+                if (automated.size() < 4) {
+                    automated.add(item);
                 }
                 continue;
             }
@@ -234,6 +237,8 @@ public class DemoCampaignLoader {
                 }
             }
         }
+        // Lot 7 : 3 runs automatisés sur les premiers tests automatisés (deux deviennent instables)
+        automation.history(campaign, automated, runsStart);
     }
 
     private record DemoNote(NoteType type, long offsetSeconds, String text) {

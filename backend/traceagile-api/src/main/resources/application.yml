@@ -31,6 +31,19 @@ traceagile:
     jwt-secret: ${TRACEAGILE_JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
     access-token-ttl: 15m
     refresh-cookie-secure: ${TRACEAGILE_COOKIE_SECURE:false}
+  # §10 / ADR-0020 exécution automatisée
+  automation:
+    # Clé de chiffrement des jetons des serveurs d'exécution : surchargée hors du poste local.
+    encryption-key: ${TRACEAGILE_ENCRYPTION_KEY:dev-only-encryption-key-change-me}
+    # URL des webhooks telle que le serveur d'exécution la voit.
+    callback-url: ${TRACEAGILE_CALLBACK_URL:http://localhost:8085/api/v1/execution-callbacks}
+    # Heartbeat des serveurs et contrôle des timeouts (toutes les 60 s).
+    scheduler-enabled: ${TRACEAGILE_AUTOMATION_SCHEDULER:true}
+  demo:
+    # Simulateur déclaré et appairé au démarrage du profil demo (§15.1).
+    simulator-url: ${TRACEAGILE_SIMULATOR_URL:http://localhost:8090}
+    simulator-admin-user: ${SIMULATOR_ADMIN_USER:admin}
+    simulator-admin-password: ${SIMULATOR_ADMIN_PASSWORD:simulateur}
 
 management:
   endpoints:

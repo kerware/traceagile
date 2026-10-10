@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 6.1" generated="20261012 09:00:00.000">
+  <suite name="Shop">
+    <suite name="Compte">
+      <test name="Connexion valide">
+        <tags><tag>REQ-21</tag><tag>smoke</tag></tags>
+        <status status="PASS" starttime="20261012 09:00:01.000" endtime="20261012 09:00:03.500"/>
+      </test>
+      <test name="Mot de passe faible refusé">
+        <status status="FAIL" starttime="20261012 09:00:04.000" endtime="20261012 09:00:05.000">Le formulaire a été accepté</status>
+      </test>
+      <test name="Inscription">
+        <status status="SKIP" start="2026-10-12T09:00:06.000" elapsed="0.250"/>
+      </test>
+    </suite>
+  </suite>
+</robot>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CartApiTest" tests="4" failures="1" errors="1" skipped="1" time="2.5">
+    <testcase classname="com.shop.CartApiTest" name="add" time="0.812"/>
+    <testcase classname="com.shop.CartApiTest" name="remove" time="0.300">
+      <failure message="expected: 0 but was: 1" type="org.opentest4j.AssertionFailedError">stack</failure>
+    </testcase>
+    <testcase classname="com.shop.CartApiTest" name="checkout" time="1.1">
+      <error message="Connection refused" type="java.net.ConnectException"/>
+    </testcase>
+    <testcase classname="com.shop.CartApiTest" name="coupon" time="0">
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>

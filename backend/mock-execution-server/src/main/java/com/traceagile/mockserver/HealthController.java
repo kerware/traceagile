@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthController {
 
     static final String NAME = "mock-execution-server";
-    static final String VERSION = "0.1.0";
+    static final String VERSION = "1.0.0";
 
     @GetMapping("/health")
     public Map<String, String> health() {

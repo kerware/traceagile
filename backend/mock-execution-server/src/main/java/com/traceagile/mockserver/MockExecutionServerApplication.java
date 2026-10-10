@@ -2,9 +2,11 @@ package com.traceagile.mockserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /** §10.5 Simulateur du serveur d'exécution distant (port 8090). */
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class MockExecutionServerApplication {
 
     public static void main(String[] args) {

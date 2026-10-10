@@ -1,0 +1,297 @@
+openapi: 3.0.3
+info:
+  title: TraceAgile — contrat du serveur d'exécution
+  version: 1.0.0
+  description: |
+    Contrat entre TraceAgile et un serveur d'exécution distant (§10 de la spécification, ADR-0020).
+
+    **Authentification**
+    - Le serveur **émet** les jetons : un administrateur du serveur appelle `POST /api/v1/tokens`
+      (authentification HTTP Basic de l'administrateur du serveur) et obtient un jeton d'accès et un
+      secret de signature des webhooks. Ils sont saisis dans TraceAgile, ou demandés par TraceAgile
+      avec les identifiants de l'administrateur du serveur, qui ne sont pas conservés.
+    - TraceAgile appelle ensuite tous les endpoints (sauf `/health`) avec `Authorization: Bearer <jeton>`.
+      Un jeton inconnu ou révoqué renvoie 401.
+    - Le serveur signe chaque webhook en HMAC-SHA256 avec le secret associé au jeton :
+      `X-TraceAgile-Signature: sha256=<hex>` calculé sur le corps brut de la requête.
+
+    **Asynchrone et idempotent** : `POST /jobs` répond 202 avec un `jobId` ; les résultats arrivent par
+    webhooks sur `callbackUrl`. Renvoyer un job avec le même `runId` renvoie le même `jobId`.
+servers:
+  - url: http://localhost:8090
+security:
+  - bearerToken: []
+paths:
+  /api/v1/health:
+    get:
+      summary: État et version (heartbeat toutes les 60 s)
+      security: []
+      responses:
+        '200':
+          description: Serveur disponible
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+  /api/v1/tokens:
+    post:
+      summary: Émettre un jeton d'accès et un secret de signature (administrateur du serveur)
+      security:
+        - serverAdmin: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label: { type: string, description: 'Client destinataire, ex. « TraceAgile production »' }
+      responses:
+        '201':
+          description: Jeton émis ; le jeton et le secret ne sont plus jamais renvoyés ensuite
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IssuedToken' }
+        '401': { description: Identifiants d'administration invalides }
+    get:
+      summary: Jetons émis (sans les secrets)
+      security:
+        - serverAdmin: []
+      responses:
+        '200':
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TokenInfo' }
+  /api/v1/tokens/{tokenId}:
+    delete:
+      summary: Révoquer un jeton
+      security:
+        - serverAdmin: []
+      parameters:
+        - { name: tokenId, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Révoqué }
+        '404': { description: Inconnu }
+  /api/v1/capabilities:
+    get:
+      summary: Techniques, frameworks, environnements et agents disponibles
+      responses:
+        '200':
+          description: Capacités
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Capabilities' }
+        '401': { description: Jeton absent, inconnu ou révoqué }
+  /api/v1/jobs:
+    post:
+      summary: Soumettre un job (§10.3)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+      responses:
+        '202':
+          description: Accepté (idempotent par runId)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobAccepted' }
+        '400': { description: Requête invalide }
+        '401': { description: Jeton absent, inconnu ou révoqué }
+  /api/v1/jobs/{jobId}:
+    get:
+      summary: Statut et résultats partiels (mode polling)
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Statut
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobStatus' }
+        '404': { description: Job inconnu }
+  /api/v1/jobs/{jobId}/cancel:
+    post:
+      summary: Annuler
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        '202': { description: Annulation prise en compte }
+        '404': { description: Job inconnu }
+  /api/v1/jobs/{jobId}/logs:
+    get:
+      summary: Journaux (texte)
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Journaux
+          content:
+            text/plain:
+              schema: { type: string }
+  /api/v1/jobs/{jobId}/artifacts/{name}:
+    get:
+      summary: Rapports, captures, vidéos
+      parameters:
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+        - { name: name, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Contenu de l'artefact
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '404': { description: Artefact inconnu }
+components:
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      description: Jeton émis par le serveur (POST /api/v1/tokens)
+    serverAdmin:
+      type: http
+      scheme: basic
+      description: Administrateur du serveur d'exécution
+  schemas:
+    Health:
+      type: object
+      required: [status, name, version]
+      properties:
+        status: { type: string, enum: [UP, DOWN] }
+        name: { type: string }
+        version: { type: string }
+    IssuedToken:
+      type: object
+      required: [tokenId, token, webhookSecret, createdAt]
+      properties:
+        tokenId: { type: string }
+        token: { type: string, description: Jeton Bearer, à conserver chiffré }
+        webhookSecret: { type: string, description: Secret HMAC des webhooks }
+        label: { type: string }
+        createdAt: { type: string, format: date-time }
+    TokenInfo:
+      type: object
+      required: [tokenId, createdAt]
+      properties:
+        tokenId: { type: string }
+        label: { type: string }
+        hint: { type: string, description: Quatre derniers caractères }
+        createdAt: { type: string, format: date-time }
+        lastUsedAt: { type: string, format: date-time }
+    Capabilities:
+      type: object
+      required: [techniques, frameworks, environments, agents]
+      properties:
+        techniques:
+          type: array
+          items: { type: string, enum: [API, BDD, UNIT, UI, KEYWORD, DATA_DRIVEN, PERFORMANCE, CONTRACT] }
+        frameworks: { type: array, items: { type: string } }
+        environments: { type: array, items: { type: string } }
+        agents: { type: integer }
+    JobRequest:
+      type: object
+      required: [runId, project, callbackUrl, tests]
+      properties:
+        runId: { type: string, example: RUN-102 }
+        project: { type: string, example: SHOP }
+        campaign: { type: string, example: CMP-8 }
+        environment: { type: string }
+        buildVersion: { type: string }
+        callbackUrl: { type: string, format: uri }
+        repository:
+          type: object
+          properties:
+            url: { type: string }
+            branch: { type: string }
+        tests:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/JobTest' }
+        options:
+          type: object
+          properties:
+            timeoutMinutes: { type: integer }
+            parallelism: { type: integer }
+            retryFailed: { type: integer }
+    JobTest:
+      type: object
+      required: [executionId, testKey, technique]
+      properties:
+        executionId: { type: string }
+        testKey: { type: string }
+        technique: { type: string }
+        framework: { type: string }
+        path: { type: string }
+        testIdentifier: { type: string, description: 'Contient « @fail » : échec garanti ; « @flaky » : alterne (simulateur)' }
+        gherkinSource: { type: string }
+        dataSet: { type: object, nullable: true }
+        parameters: { type: object, additionalProperties: true }
+        tags: { type: array, items: { type: string } }
+    JobAccepted:
+      type: object
+      required: [jobId, status]
+      properties:
+        jobId: { type: string }
+        status: { type: string, enum: [ACCEPTED] }
+    JobStatus:
+      type: object
+      required: [jobId, runId, status, results]
+      properties:
+        jobId: { type: string }
+        runId: { type: string }
+        status: { type: string, enum: [ACCEPTED, RUNNING, COMPLETED, FAILED, CANCELLED] }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/WebhookEvent' }
+    WebhookEvent:
+      description: |
+        Corps des webhooks envoyés en POST sur callbackUrl (§10.4), signés par X-TraceAgile-Signature.
+        Champs selon l'événement : JOB_STARTED (agent, startedAt), TEST_STARTED (executionId, startedAt),
+        TEST_FINISHED (executionId, status, durationMs, message, stackTrace, steps, metrics, artifacts),
+        JOB_FINISHED (status, endedAt, summary, reportUrl, logsUrl), JOB_ERROR (errorCode, message).
+      type: object
+      required: [eventId, event, runId, jobId, occurredAt]
+      properties:
+        eventId: { type: string, description: Clé d'idempotence }
+        event: { type: string, enum: [JOB_STARTED, TEST_STARTED, TEST_FINISHED, JOB_FINISHED, JOB_ERROR] }
+        runId: { type: string }
+        jobId: { type: string }
+        occurredAt: { type: string, format: date-time }
+        agent: { type: string }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time }
+        executionId: { type: string }
+        status: { type: string, enum: [PASSED, FAILED, ERROR, SKIPPED, COMPLETED, CANCELLED] }
+        durationMs: { type: integer, format: int64 }
+        message: { type: string }
+        stackTrace: { type: string }
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              status: { type: string }
+        metrics: { type: object, additionalProperties: { type: number } }
+        artifacts:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              type: { type: string }
+              url: { type: string }
+        summary:
+          type: object
+          properties:
+            total: { type: integer }
+            passed: { type: integer }
+            failed: { type: integer }
+            error: { type: integer }
+            skipped: { type: integer }
+        reportUrl: { type: string }
+        logsUrl: { type: string }
+        errorCode: { type: string }

@@ -26,7 +26,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * Base des tests d'intégration (§15.2) : PostgreSQL 16 réel via Testcontainers, partagé par toutes
  * les classes ; la base est vidée avant chaque test.
  */
-@SpringBootTest
+@SpringBootTest(properties = "traceagile.automation.scheduler-enabled=false")
 @AutoConfigureMockMvc
 public abstract class AbstractApiTest {
 
@@ -53,7 +53,7 @@ public abstract class AbstractApiTest {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.execute("truncate table audit_events, refresh_tokens, project_members, projects, users cascade");
+        jdbc.execute("truncate table audit_events, refresh_tokens, project_members, projects, users, execution_servers cascade");
         jdbc.execute("delete from automation_frameworks where created_by <> 'system'");
     }
 

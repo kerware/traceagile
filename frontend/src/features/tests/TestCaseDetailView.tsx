@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, errorMessage } from '../../api/errors';
 import { useChangeTestStatus, useDeleteTest, useTestCase, type TestCaseDetail } from '../../api/testcases';
 import { Forbidden } from '../../components/Forbidden';
+import { FlakyBadge } from '../automation/RunBadges';
 import { KindBadge, TechniqueBadge, TestStatusBadge } from './Badges';
 import { DefinitionTab } from './DefinitionTab';
 import { useTestWriteKinds } from './permissions';
@@ -51,6 +52,7 @@ export function TestCaseDetailView({ project, testKey }: { project: string; test
             <Badge variant="default" data-testid="test-version">
               {t('test.version', { number: test.currentVersion })}
             </Badge>
+            {test.flaky && <FlakyBadge />}
           </Group>
           <Title order={3} data-testid="test-title">
             {test.title}

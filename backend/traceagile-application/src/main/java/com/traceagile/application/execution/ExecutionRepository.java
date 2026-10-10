@@ -19,5 +19,11 @@ public interface ExecutionRepository {
     /** §3.3-6 un test exécuté ne se supprime plus. */
     boolean existsByTestCase_IdIn(Collection<UUID> testIds);
 
+    /** F-EXE-11 historique d'un test, du plus ancien au plus récent. */
+    List<Execution> findByTestCase_IdOrderByStartedAtAsc(UUID testId);
+
+    /** F-EXE-06 tentatives d'un run automatisé. */
+    List<Execution> findByRun_Id(UUID runId);
+
     Execution save(Execution execution);
 }

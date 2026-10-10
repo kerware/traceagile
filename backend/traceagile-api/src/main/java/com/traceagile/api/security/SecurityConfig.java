@@ -37,7 +37,9 @@ public class SecurityConfig {
     static final String[] PUBLIC_PATHS = {
             "/api/v1/auth/**",
             "/actuator/health/**", "/actuator/info",
-            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+            // §10.4 webhooks du serveur d'exécution : sans JWT, authentifiés par signature HMAC
+            "/api/v1/execution-callbacks"
     };
 
     @Bean

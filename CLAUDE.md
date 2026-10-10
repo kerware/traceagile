@@ -16,25 +16,27 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 4. Planification | Releases, sprints, planification, démarrage / clôture | **Fait** (branche `lot-4-planification`) |
 | 5. Campagnes et exécution manuelle | Campagnes, sélection, affectation, exécution pas à pas, anomalies | **Fait** (branches `lot-5-campagnes`, `lot-5-duplication`, `lot-5-complements`) |
 | 6. Exploratoire | Chartes, sessions, TBS, PROOF, métriques | **Fait** (branche `lot-6-exploratoire`) |
-| 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | À faire |
+| 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports | **Fait** (branche `lot-7-execution-automatisee`) |
 | 8. Bilans | Tableau de bord, burndown, bilans, verdict, exports | À faire |
 | 9. Atelier et finitions | Example Mapping, Ctrl+K, raccourcis, accessibilité, démo complète, NF | À faire |
 
 Reporté (à reprendre dans le lot indiqué) :
 - Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
   des tests à NEEDS_UPDATE (non sélectionnables) ; cache des statuts si §14 l'exige.
-- Runs automatisés et import (lot 7) : réutiliser `ExecutionService.record` / `Execution.recorded`.
 - F-EXP-08 captures de session (collage, téléversement) et commentaires sur une session → lot 9
   (pièces jointes) ; widget « sessions de la semaine » du tableau de bord (F-RPT-01) → lot 8.
-- F-AUT-09 annotations reconnues à l'import des **résultats** → lot 7 (la découverte les accepte déjà).
-- Choix du jeu de données (ADR-0013) : `dataSet` du job d'exécution → lot 7 (en campagne, la ligne
-  est portée par l'élément depuis l'ADR-0018).
+- F-AUT-09 annotations (`@REQ-n`) : l'import des résultats rapproche par tag d'exigence (ADR-0020) ;
+  autres annotations → lot 9 si besoin.
+- Jeu de données d'un test automatisé : le job transmet le premier jeu du test ; choix d'une ligne
+  pour un run → lot 9 si besoin.
+- Métriques de performance des webhooks (`metrics{}`) et F-REQ-18 valeur mesurée d'une ENF → lot 8
+  (bilans) ; signalement des tests instables dans le bilan (F-EXE-11) → lot 8 ; artefacts du
+  serveur (captures, vidéos) seulement référencés par URL ; widget « derniers runs » → lot 8.
 - Glisser-déposer des campagnes d'un dossier à l'autre dans l'arbre lui-même (aujourd'hui : depuis
   la liste vers un dossier, ou « Ranger ») → lot 9 si besoin.
 - Filtre `verification` de la liste du backlog (§12) → lot 9 (statut calculé, non stocké).
-- F-REQ-18 valeur mesurée d'une ENF → lot 7. Commentaires, pièces jointes (dont captures des
-  pas et des anomalies, F-EXE-01 / F-EXE-03), Example Mapping → lot 9.
-- `docs/execution-server-api.yaml` (contrat §10) → lot 7.
+- Commentaires, pièces jointes (dont captures des pas et des anomalies, F-EXE-01 / F-EXE-03),
+  Example Mapping → lot 9.
 - Seuil JaCoCo bloquant (NF-12), SpotBugs (NF-13), axe-core (NF-10) → lot 9 ; le rapport JaCoCo est
   déjà produit par `mvn verify`.
 
@@ -80,8 +82,15 @@ cd e2e && npm ci && npx playwright install chromium
 npx playwright test            # E2E_BASE_URL=http://localhost:5173 pour viser le serveur Vite
 ```
 
-Windows : si une JVM échoue avec `Unable to establish loopback connection`, le TEMP en nom court
-8.3 est en cause ; le pom passe déjà `-Djdk.net.unixdomain.tmpdir` aux tests.
+Windows : si une JVM échoue avec `Unable to establish loopback connection` (sockets unix des
+`Pipe` NIO : WireMock, Jetty, client HTTP du JDK), le TEMP en nom court 8.3 est en cause ; le pom
+passe `-Djdk.net.unixdomain.tmpdir=${user.home}` aux tests. Les clients HTTP du code (webhooks du
+simulateur, `HttpExecutionServerClient`) utilisent `SimpleClientHttpRequestFactory` pour l'éviter.
+
+Exécution automatisée (ADR-0020) : `docker compose up` démarre le simulateur (port 8090) ; l'API
+l'appaire seule (profil demo) avec les identifiants `SIMULATOR_ADMIN_USER` / `SIMULATOR_ADMIN_PASSWORD`
+(`admin` / `simulateur` par défaut). Contrat : `docs/execution-server-api.yaml`. Jeton à la main :
+`curl -u admin:simulateur -X POST http://localhost:8090/api/v1/tokens`.
 
 ## Architecture (§11, ADR-0002)
 
@@ -144,6 +153,15 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Ports : API **8085**, simulateur 8090, PostgreSQL 5433 (hôte). Voir ADR-0008.
 - Duplication / génération d'une campagne depuis les résultats d'une autre (ADR-0017) :
   `CampaignService.copy`, `POST /campaigns/{key}/copy`, `CopyCampaignModal` côté front.
+- Exécution automatisée (ADR-0020) : domaine `automation` (`ExecutionServer`, `AutomatedRun`,
+  `FlakyDetector`, `WebhookSignature`) ; une tentative automatisée référence son run
+  (`Execution.automated`, `automatedFinished`, `abandon`). Port `ExecutionServerClient` (adaptateur
+  `HttpExecutionServerClient`), secrets chiffrés par `SecretCipher` (`AesGcmSecretCipher`), rapports
+  par `ReportParser` (`ReportParsers`). L'envoi d'un job se fait **hors transaction**
+  (`AutomatedRunService.dispatch`, `TransactionTemplate`) ; les changements de run publient
+  `RunChanged`, diffusé en SSE après commit (`RunEventStreams`). Les dépôts Spring Data doivent être
+  des interfaces de premier niveau (pas imbriquées). Tests d'API : `@MockitoBean ExecutionServerClient`
+  et webhooks signés avec `WebhookSignature.sign`.
 - Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
   `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
   `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :
@@ -224,6 +242,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   stories non couvertes. Tous `READY`.
 - Lot 4 : `REL-1` « Version 2.0 », 3 sprints de 2 semaines calés sur la date du jour — `SPR-1` clos
   (une story reportée), `SPR-2` actif, `SPR-3` planifié (`DemoPlanningLoader`, rejoué si aucune release).
+- Lot 7 : serveur « Simulateur » appairé dès qu'il répond (jeton émis par le simulateur) ; 3 runs
+  passés sur CMP-2 (RUN-1 à RUN-3), deux tests automatisés instables.
 - Lot 6 : 5 sessions exploratoires débriefées et approuvées par le PO (2 par charte de CMP-1, la
   première bloquée ; 1 de qa1 dans CMP-2), une session de qa2 à approuver dans CMP-2.
 - Lot 5 : `CMP-1` « Recette SPR-1 » terminée (SPR-1 validé à 75 %, une 2ᵉ tentative), `CMP-2`

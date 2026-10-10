@@ -23,7 +23,8 @@ class EndpointSecurityTest extends AbstractApiTest {
             "AuthController.login",     // public
             "AuthController.refresh",   // public, authentifié par le cookie de rafraîchissement
             "AuthController.logout",    // public, idem
-            "MeController.me");         // tout utilisateur authentifié
+            "MeController.me",          // tout utilisateur authentifié
+            "ExecutionCallbackController.receive"); // §10.4 webhook sans JWT, authentifié par signature HMAC
 
     @Autowired
     @Qualifier("requestMappingHandlerMapping")

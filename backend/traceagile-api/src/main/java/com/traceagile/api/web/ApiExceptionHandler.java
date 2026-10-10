@@ -2,6 +2,7 @@ package com.traceagile.api.web;
 
 import com.traceagile.application.common.AuthenticationFailedException;
 import com.traceagile.application.common.ConflictException;
+import com.traceagile.application.automation.AutomatedRunService;
 import com.traceagile.application.common.ForbiddenException;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.common.UnprocessableException;
@@ -47,6 +48,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = Problems.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getCode(), e.getMessage());
         e.getDetails().forEach(problem::setProperty);
         return problem;
+    }
+
+    /** §10.4 webhook dont la signature HMAC ne correspond pas au secret du serveur. */
+    @ExceptionHandler(AutomatedRunService.InvalidSignatureException.class)
+    ProblemDetail invalidSignature(AutomatedRunService.InvalidSignatureException e) {
+        return Problems.of(HttpStatus.UNAUTHORIZED, "WEBHOOK_SIGNATURE_INVALID", e.getMessage());
     }
 
     @ExceptionHandler(ForbiddenException.class)

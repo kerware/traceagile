@@ -40,7 +40,8 @@ public interface TestCaseDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int currentVersion,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean automationCandidate,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean missingInRepository,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-MAN-02 nombre d'exécutions (toutes tentatives)") long executionCount) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "F-MAN-02 nombre d'exécutions (toutes tentatives)") long executionCount,
+            @Schema(description = "F-EXE-11 test instable") Boolean flaky) {
     }
 
     /** §13.2 référentiel « par dossier » ou « par feature ». */
@@ -139,6 +140,7 @@ public interface TestCaseDtos {
             String folder,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int currentVersion,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean automationCandidate,
+            @Schema(description = "F-EXE-11 test instable") Boolean flaky,
             String automationJustification,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<StepResponse> steps,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0013 paramètres déclarés et détectés (${nom} des pas)") List<ParameterResponse> parameters,

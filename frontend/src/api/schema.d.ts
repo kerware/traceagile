@@ -484,6 +484,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/runs/{runKey}/rerun-failed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["rerunFailed"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/runs/{runKey}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/requirements": {
         parameters: {
             query?: never;
@@ -804,6 +836,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/campaigns/{campaignKey}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ofCampaign"];
+        put?: never;
+        post: operations["launch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/campaigns/{campaignKey}/imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["importReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/campaign-items/{id}/sessions": {
         parameters: {
             query?: never;
@@ -910,6 +974,87 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["validate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/execution-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_9"];
+        put?: never;
+        post: operations["create_9"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/execution-servers/{id}/unpair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["unpair"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/execution-servers/{id}/test-connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["testConnection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/execution-servers/{id}/pair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pair"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/execution-callbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Webhook du serveur d'exécution (signature X-TraceAgile-Signature) */
+        post: operations["receive"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1156,6 +1301,22 @@ export interface paths {
         patch: operations["update_7"];
         trace?: never;
     };
+    "/api/v1/execution-servers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_6"];
+        options?: never;
+        head?: never;
+        patch: operations["update_8"];
+        trace?: never;
+    };
     "/api/v1/reference/frameworks": {
         parameters: {
             query?: never;
@@ -1163,7 +1324,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_9"];
+        get: operations["list_10"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1355,7 +1516,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_10"];
+        get: operations["list_11"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1372,6 +1533,70 @@ export interface paths {
             cookie?: never;
         };
         get: operations["defectDraft"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ofProject"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/runs/{runKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_7"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/runs/{runKey}/logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["logs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectKey}/runs/{runKey}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["events"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1636,6 +1861,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/execution-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["choices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectKey}/coverage": {
         parameters: {
             query?: never;
@@ -1659,7 +1900,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_7"];
+        get: operations["get_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1684,6 +1925,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectKey}/campaigns/{campaignKey}/run-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["campaignEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{key}": {
         parameters: {
             query?: never;
@@ -1691,7 +1948,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_8"];
+        get: operations["get_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2057,6 +2314,8 @@ export interface components {
              * @description Durée estimée (manuel) ou timebox (charte), en minutes
              */
             durationMin?: number;
+            /** @description F-EXE-11 test instable */
+            flaky?: boolean;
         };
         ChecklistItemRequest: {
             /** Format: uuid */
@@ -2437,6 +2696,8 @@ export interface components {
             /** Format: int32 */
             currentVersion: number;
             automationCandidate: boolean;
+            /** @description F-EXE-11 test instable */
+            flaky?: boolean;
             automationJustification?: string;
             steps: components["schemas"]["StepResponse"][];
             /** @description ADR-0013 paramètres déclarés et détectés (${nom} des pas) */
@@ -2678,6 +2939,74 @@ export interface components {
             /** Format: int32 */
             feelings: number;
         };
+        RunCounts: {
+            /** Format: int32 */
+            total: number;
+            /** Format: int32 */
+            pending: number;
+            /** Format: int32 */
+            running: number;
+            /** Format: int32 */
+            passed: number;
+            /** Format: int32 */
+            failed: number;
+            /** Format: int32 */
+            error: number;
+            /** Format: int32 */
+            skipped: number;
+        };
+        RunDetail: {
+            run: components["schemas"]["RunSummaryResponse"];
+            executions: components["schemas"]["RunExecutionResponse"][];
+            /** @description Annulable (non terminé) */
+            cancellable: boolean;
+        };
+        RunExecutionResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: string;
+            test: components["schemas"]["TestRef"];
+            /** @enum {string} */
+            technique: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
+            testIdentifier?: string;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt?: string;
+            /** Format: int64 */
+            durationMs?: number;
+            message?: string;
+            /** @description F-EXE-11 test instable */
+            flaky: boolean;
+        };
+        RunSummaryResponse: {
+            key: string;
+            /** @enum {string} */
+            status: "QUEUED" | "DISPATCHED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED" | "TIMEOUT";
+            campaign: components["schemas"]["CampaignRef"];
+            serverName: string;
+            requestedBy?: string;
+            /** Format: date-time */
+            requestedAt: string;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: date-time */
+            endedAt?: string;
+            environment?: string;
+            buildVersion?: string;
+            agent?: string;
+            externalJobId?: string;
+            rerunOf?: string;
+            errorCode?: string;
+            errorMessage?: string;
+            reportUrl?: string;
+            /** Format: int32 */
+            timeoutMinutes: number;
+            counts: components["schemas"]["RunCounts"];
+        };
         CreateCriterionRequest: {
             /** @enum {string} */
             format: "TEXT" | "GHERKIN";
@@ -2836,6 +3165,36 @@ export interface components {
             skipped: components["schemas"]["SkippedResponse"][];
             campaign: components["schemas"]["CampaignDetail"];
         };
+        LaunchRunRequest: {
+            /** Format: uuid */
+            serverId: string;
+            /** @description Éléments de campagne à lancer ; absent ou vide : tous les tests automatisés */
+            itemIds?: string[];
+            /** Format: int32 */
+            timeoutMinutes?: number;
+        };
+        ReportImportLine: {
+            name: string;
+            identifier: string;
+            /** @enum {string} */
+            status: "NOT_RUN" | "RUNNING" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "ERROR";
+            /** Format: int64 */
+            durationMs?: number;
+            message?: string;
+            requirementKeys: string[];
+            /** @description Test rapproché (absent : inconnu) */
+            testKey?: string;
+            /** @enum {string} */
+            matchedBy?: "IDENTIFIER" | "REQUIREMENT_TAG" | "CREATED";
+        };
+        ReportImportResponse: {
+            lines: components["schemas"]["ReportImportLine"][];
+            created: string[];
+            /** Format: int32 */
+            recorded: number;
+            /** @description false : aperçu */
+            applied: boolean;
+        };
         ExpandDataSetRequest: {
             dataSetName: string;
         };
@@ -2876,6 +3235,43 @@ export interface components {
             valid: boolean;
             language: string;
             errors: components["schemas"]["GherkinErrorResponse"][];
+        };
+        CreateServerRequest: {
+            name: string;
+            baseUrl: string;
+        };
+        ServerResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            baseUrl: string;
+            authType: string;
+            /** @description Jeton émis par le serveur enregistré */
+            paired: boolean;
+            /** @description Quatre derniers caractères du jeton (le jeton n'est jamais renvoyé) */
+            tokenHint?: string;
+            tokenId?: string;
+            /** Format: date-time */
+            pairedAt?: string;
+            /** @enum {string} */
+            status: "UNPAIRED" | "UNKNOWN" | "ONLINE" | "OFFLINE" | "UNAUTHORIZED";
+            /** Format: date-time */
+            lastHeartbeat?: string;
+            lastError?: string;
+            serverVersion?: string;
+            techniques: ("BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT")[];
+            frameworks: string[];
+            environments: string[];
+            /** Format: int32 */
+            agents: number;
+            enabled: boolean;
+        };
+        PairServerRequest: {
+            adminUser?: string;
+            adminPassword?: string;
+            token?: string;
+            webhookSecret?: string;
+            tokenId?: string;
         };
         MeResponse: {
             /** Format: uuid */
@@ -3000,6 +3396,11 @@ export interface components {
             /** @enum {string} */
             format?: "TEXT" | "GHERKIN";
             content?: string;
+        };
+        UpdateServerRequest: {
+            name?: string;
+            baseUrl?: string;
+            enabled?: boolean;
         };
         PageResponseUserResponse: {
             content: components["schemas"]["UserResponse"][];
@@ -3127,6 +3528,8 @@ export interface components {
              * @description F-MAN-02 nombre d'exécutions (toutes tentatives)
              */
             executionCount: number;
+            /** @description F-EXE-11 test instable */
+            flaky?: boolean;
         };
         TestVersionResponse: {
             /** Format: int32 */
@@ -3221,6 +3624,10 @@ export interface components {
             severity: "BLOCKER" | "CRITICAL" | "MAJOR" | "MINOR" | "TRIVIAL";
             /** @description Exigences couvertes par le test (liées par défaut) */
             requirementKeys: string[];
+        };
+        SseEmitter: {
+            /** Format: int64 */
+            timeout?: number | null;
         };
         PageResponseRequirementSummary: {
             content: components["schemas"]["RequirementSummary"][];
@@ -3444,6 +3851,15 @@ export interface components {
             bugPct: number;
             /** Format: double */
             setupPct: number;
+        };
+        ServerChoice: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            status: "UNPAIRED" | "UNKNOWN" | "ONLINE" | "OFFLINE" | "UNAUTHORIZED";
+            techniques: ("BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT")[];
+            usable: boolean;
         };
         CoverageResponse: {
             scope: string;
@@ -4519,6 +4935,52 @@ export interface operations {
             };
         };
     };
+    rerunFailed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+        };
+    };
     list_4: {
         parameters: {
             query?: {
@@ -5185,6 +5647,90 @@ export interface operations {
             };
         };
     };
+    ofCampaign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                campaignKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunSummaryResponse"][];
+                };
+            };
+        };
+    };
+    launch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                campaignKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LaunchRunRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+        };
+    };
+    importReport: {
+        parameters: {
+            query: {
+                format: "JUNIT" | "CUCUMBER" | "ROBOT" | "PLAYWRIGHT";
+                apply?: boolean;
+                createUnknown?: boolean;
+            };
+            header?: never;
+            path: {
+                projectKey: string;
+                campaignKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportImportResponse"];
+                };
+            };
+        };
+    };
     start_2: {
         parameters: {
             query?: never;
@@ -5424,6 +5970,148 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GherkinValidationResponse"];
+                };
+            };
+        };
+    };
+    list_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerResponse"][];
+                };
+            };
+        };
+    };
+    create_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateServerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerResponse"];
+                };
+            };
+        };
+    };
+    unpair: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerResponse"];
+                };
+            };
+        };
+    };
+    testConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerResponse"];
+                };
+            };
+        };
+    };
+    pair: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PairServerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerResponse"];
+                };
+            };
+        };
+    };
+    receive: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-TraceAgile-Signature"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
         };
@@ -6158,7 +6846,53 @@ export interface operations {
             };
         };
     };
-    list_9: {
+    delete_6: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_8: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateServerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerResponse"];
+                };
+            };
+        };
+    };
+    list_10: {
         parameters: {
             query?: never;
             header?: never;
@@ -6448,7 +7182,7 @@ export interface operations {
             };
         };
     };
-    list_10: {
+    list_11: {
         parameters: {
             query?: {
                 state?: ("RUNNING" | "PAUSED" | "FINISHED" | "DEBRIEFED")[];
@@ -6492,6 +7226,97 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DefectDraftResponse"];
+                };
+            };
+        };
+    };
+    ofProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunSummaryResponse"][];
+                };
+            };
+        };
+    };
+    get_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunDetail"];
+                };
+            };
+        };
+    };
+    logs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                runKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["SseEmitter"];
                 };
             };
         };
@@ -6882,6 +7707,28 @@ export interface operations {
             };
         };
     };
+    choices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerChoice"][];
+                };
+            };
+        };
+    };
     coverage: {
         parameters: {
             query?: {
@@ -6906,7 +7753,7 @@ export interface operations {
             };
         };
     };
-    get_7: {
+    get_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -6951,7 +7798,30 @@ export interface operations {
             };
         };
     };
-    get_8: {
+    campaignEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectKey: string;
+                campaignKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["SseEmitter"];
+                };
+            };
+        };
+    };
+    get_9: {
         parameters: {
             query?: never;
             header?: never;

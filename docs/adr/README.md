@@ -24,3 +24,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0017](0017-duplication-campagnes.md) | Dupliquer une campagne ou la générer depuis les résultats d'une autre | 5 |
 | [0018](0018-complements-execution.md) | Jeux de données en campagne, appel de cas de test, dossiers de campagnes, traçabilité des anomalies | 5 |
 | [0019](0019-sessions-exploratoires.md) | Sessions exploratoires, débriefing PROOF et métriques | 6 |
+| [0020](0020-execution-automatisee.md) | Exécution automatisée : jeton émis par le serveur, runs, webhooks, import, tests instables | 7 |
