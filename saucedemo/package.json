@@ -1,0 +1,18 @@
+{
+  "name": "traceagile-saucedemo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Jeu de données du guide d'utilisation : tests réels de www.saucedemo.com et scénario TraceAgile qui capture les écrans",
+  "scripts": {
+    "test": "playwright test",
+    "guide": "playwright test -c guide.config.ts",
+    "tout": "node scripts/tout.mjs",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.18.0",
+    "typescript": "5.9.2"
+  }
+}

@@ -184,7 +184,7 @@
   "outcome": {
     "SATISFIED": "Satisfied",
     "UNSATISFIED": "Not satisfied",
-    "NOT_EVALUATED": "Not evaluated (later batch)"
+    "NOT_EVALUATED": "Not evaluated"
   },
   "backlog": {
     "title": "Backlog",
@@ -553,7 +553,7 @@
       "impact": "Impact analysis"
     },
     "scope": "Scope",
-    "scopeHint": "Project, epic or feature (releases and sprints in lot 4)",
+    "scopeHint": "Project, epic or feature",
     "wholeProject": "Whole project",
     "kinds": "Test kinds",
     "allTests": "Show all tests",
@@ -596,7 +596,7 @@
     "tests": "Tests without requirement",
     "neverExecuted": "Automated tests never run",
     "defects": "Defects without requirement",
-    "defectsLater": "Defects come with campaigns (lot 5).",
+    "defectsLater": "None.",
     "none": "None."
   },
   "impact": {
@@ -609,7 +609,7 @@
     "via": "Linked through",
     "status": "State",
     "campaigns": "Running campaigns concerned",
-    "noCampaigns": "No running campaign (campaigns come in lot 5)."
+    "noCampaigns": "No running campaign."
   },
   "planningStatus": {
     "PLANNED": "Planned",
@@ -866,7 +866,7 @@
     "tests": "Linked tests and last executions",
     "neverExecuted": "never run",
     "defects": "Defects",
-    "noDefects": "No defect (defects come in lot 5)."
+    "noDefects": "No defect."
   },
   "test": {
     "kind": "Kind",

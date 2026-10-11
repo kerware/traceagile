@@ -16,7 +16,8 @@ info:
       `X-TraceAgile-Signature: sha256=<hex>` calculé sur le corps brut de la requête.
 
     **Asynchrone et idempotent** : `POST /jobs` répond 202 avec un `jobId` ; les résultats arrivent par
-    webhooks sur `callbackUrl`. Renvoyer un job avec le même `runId` renvoie le même `jobId`.
+    webhooks sur `callbackUrl`. Renvoyer un job avec le même `runId` renvoie le même `jobId` ; TraceAgile
+    qualifie le `runId` par le projet (`SHOP/RUN-102`) pour qu'un serveur partagé distingue les projets.
 servers:
   - url: http://localhost:8090
 security:
@@ -216,7 +217,7 @@ components:
       type: object
       required: [runId, project, callbackUrl, tests]
       properties:
-        runId: { type: string, example: RUN-102 }
+        runId: { type: string, example: SHOP/RUN-102, description: 'Projet / clé du run, unique pour le serveur' }
         project: { type: string, example: SHOP }
         campaign: { type: string, example: CMP-8 }
         environment: { type: string }

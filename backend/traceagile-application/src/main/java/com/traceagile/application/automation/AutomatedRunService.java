@@ -276,8 +276,16 @@ public class AutomatedRunService {
                     def.getPath(), def.getTestIdentifier(), def.getGherkinSource(), dataSet, def.getParameters(), tags.stream().distinct().toList()));
         }
         Campaign campaign = run.getCampaign();
-        return new JobRequest(run.getKey(), run.getProject().getKey(), campaign.getKey(), run.getEnvironment(), run.getBuildVersion(), callbackUrl,
+        return new JobRequest(runId(run), run.getProject().getKey(), campaign.getKey(), run.getEnvironment(), run.getBuildVersion(), callbackUrl,
                 repository, branch, tests, run.getTimeoutMinutes(), 4, 0);
+    }
+
+    /**
+     * ADR-0020 identifiant du run pour le serveur, qualifié par le projet (« SHOP/RUN-1 ») : un serveur
+     * partagé par plusieurs projets rend le même job pour le même runId (idempotence §10.1).
+     */
+    static String runId(AutomatedRun run) {
+        return run.getProject().getKey() + "/" + run.getKey();
     }
 
     // ---------------------------------------------------------------- webhooks (§10.4)
@@ -288,7 +296,10 @@ public class AutomatedRunService {
      */
     @Transactional
     public void receive(RunEvent event, byte[] body, String signature) {
-        List<AutomatedRun> candidates = runs.findByKey(event.runId());
+        int slash = event.runId().indexOf('/');
+        List<AutomatedRun> candidates = slash < 0
+                ? runs.findByKey(event.runId()) // runId d'avant la qualification par le projet
+                : runs.findByProject_KeyAndKey(event.runId().substring(0, slash), event.runId().substring(slash + 1)).stream().toList();
         if (candidates.isEmpty()) {
             throw new NotFoundException("RUN_NOT_FOUND", "Run « " + event.runId() + " » inconnu.");
         }
@@ -346,12 +357,13 @@ public class AutomatedRunService {
 
     /**
      * ADR-0021 artefacts du run : ceux annoncés par les webhooks, complétés par la liste du serveur
-     * (s'il répond) ; dans l'ordre : copies d'écran, puis traces, résultats et rapports.
+     * (s'il répond) une fois le run terminé — avant, un webhook pourrait enregistrer le même artefact
+     * en même temps ; dans l'ordre : copies d'écran, puis traces, résultats et rapports.
      */
     @Transactional
     public List<RunArtifact> artifactsOf(String projectKey, String runKey) {
         AutomatedRun run = get(projectKey, runKey);
-        if (run.getExternalJobId() != null && run.getServer().isPaired()) {
+        if (run.isFinal() && run.getExternalJobId() != null && run.getServer().isPaired()) {
             try {
                 client.artifacts(servers.connection(run.getServer()), run.getExternalJobId()).forEach(ref -> remember(run, ref));
             } catch (RuntimeException e) {

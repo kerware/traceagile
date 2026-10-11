@@ -1,0 +1,5 @@
+[
+  { "utilisateur": "standard_user", "resultat": "catalogue", "message": "" },
+  { "utilisateur": "locked_out_user", "resultat": "refus", "message": "Epic sadface: Sorry, this user has been locked out." },
+  { "utilisateur": "problem_user", "resultat": "catalogue", "message": "" }
+]

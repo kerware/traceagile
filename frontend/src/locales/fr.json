@@ -184,7 +184,7 @@
   "outcome": {
     "SATISFIED": "Satisfait",
     "UNSATISFIED": "Non satisfait",
-    "NOT_EVALUATED": "Non évalué (lot à venir)"
+    "NOT_EVALUATED": "Non évalué"
   },
   "backlog": {
     "title": "Backlog",
@@ -553,7 +553,7 @@
       "impact": "Analyse d'impact"
     },
     "scope": "Périmètre",
-    "scopeHint": "Projet, épic ou feature (releases et sprints au lot 4)",
+    "scopeHint": "Projet, épic ou feature",
     "wholeProject": "Tout le projet",
     "kinds": "Natures de test",
     "allTests": "Afficher tous les tests",
@@ -596,7 +596,7 @@
     "tests": "Tests sans exigence",
     "neverExecuted": "Tests automatisés jamais exécutés",
     "defects": "Anomalies sans exigence",
-    "defectsLater": "Les anomalies arrivent avec les campagnes (lot 5).",
+    "defectsLater": "Aucune.",
     "none": "Aucun."
   },
   "impact": {
@@ -609,7 +609,7 @@
     "via": "Lié par",
     "status": "État",
     "campaigns": "Campagnes en cours concernées",
-    "noCampaigns": "Aucune campagne en cours (les campagnes arrivent au lot 5)."
+    "noCampaigns": "Aucune campagne en cours."
   },
   "planningStatus": {
     "PLANNED": "Planifié",
@@ -866,7 +866,7 @@
     "tests": "Tests liés et dernières exécutions",
     "neverExecuted": "jamais exécuté",
     "defects": "Anomalies",
-    "noDefects": "Aucune anomalie (les anomalies arrivent au lot 5)."
+    "noDefects": "Aucune anomalie."
   },
   "test": {
     "kind": "Nature",

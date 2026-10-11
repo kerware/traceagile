@@ -54,6 +54,9 @@ services:
     environment:
       SIMULATOR_ADMIN_USER: ${SIMULATOR_ADMIN_USER:-admin}
       SIMULATOR_ADMIN_PASSWORD: ${SIMULATOR_ADMIN_PASSWORD:-simulateur}
+      # parts des tests réussis / en erreur hors @fail / @flaky (1 et 0 pour un résultat reproductible : guide saucedemo)
+      SIMULATOR_PASS_RATE: ${SIMULATOR_PASS_RATE:-0.8}
+      SIMULATOR_ERROR_RATE: ${SIMULATOR_ERROR_RATE:-0.05}
     ports:
       - "8090:8090"
 

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -225,7 +226,8 @@ class AutomatedRunApiTest extends AbstractApiTest {
         assertThat(run.at("/run/counts/pending").asInt()).isEqualTo(2);
         ArgumentCaptor<JobRequest> job = ArgumentCaptor.forClass(JobRequest.class);
         verify(client).submit(any(), job.capture());
-        assertThat(job.getValue().runId()).isEqualTo("RUN-1");
+        // ADR-0020 runId qualifié par le projet : un même serveur sert plusieurs projets, chacun a son RUN-1
+        assertThat(job.getValue().runId()).isEqualTo("SHOP/RUN-1");
         assertThat(job.getValue().buildVersion()).isEqualTo("2.0.0");
         assertThat(job.getValue().callbackUrl()).endsWith("/api/v1/execution-callbacks");
         assertThat(job.getValue().repositoryUrl()).isEqualTo("https://git.example.com/shop.git");
@@ -233,7 +235,7 @@ class AutomatedRunApiTest extends AbstractApiTest {
         mvc.perform(get(P + "/runs/RUN-1/events").header("Authorization", qa)).andExpect(request().asyncStarted());
 
         webhook(event("JOB_STARTED", "RUN-1", Map.of("agent", "agent-1")), SECRET).andExpect(status().isOk());
-        Map<String, Object> started = event("TEST_STARTED", "RUN-1", Map.of("executionId", executionOf(run, "TC-1")));
+        Map<String, Object> started = event("TEST_STARTED", "SHOP/RUN-1", Map.of("executionId", executionOf(run, "TC-1")));
         webhook(started, SECRET).andExpect(status().isOk());
         mvc.perform(get(P + "/runs/RUN-1").header("Authorization", qa))
                 .andExpect(jsonPath("$.run.status", is("RUNNING")))
@@ -379,6 +381,10 @@ class AutomatedRunApiTest extends AbstractApiTest {
         webhook(event("TEST_FINISHED", "RUN-1", Map.of("executionId", failed, "status", "FAILED", "durationMs", 640, "message", "AssertionError",
                 "artifacts", List.of(Map.of("name", "screenshot-TC-2.png", "type", "image/png", "kind", "SCREENSHOT", "size", 3198,
                         "executionId", failed)))), SECRET).andExpect(status().isOk());
+        // run en cours : seuls les artefacts annoncés ; la liste du serveur n'est lue qu'à la fin (sinon course avec les webhooks)
+        mvc.perform(get(P + "/runs/RUN-1/artifacts").header("Authorization", qa))
+                .andExpect(jsonPath("$[*].name", contains("screenshot-TC-2.png")));
+        verify(client, never()).artifacts(any(), any());
         webhook(event("JOB_FINISHED", "RUN-1", Map.of("status", "COMPLETED", "artifacts", List.of(
                 Map.of("name", "system.log", "type", "text/plain", "kind", "SYSTEM_TRACE"),
                 Map.of("name", "junit.xml", "type", "application/xml", "kind", "JUNIT"),

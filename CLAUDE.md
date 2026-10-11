@@ -19,6 +19,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 7. Exécution automatisée | `ExecutionServerClient`, simulateur, webhooks, SSE, import de rapports, artefacts (traces, JUnit, Jest, copies d'écran) | **Fait** (branches `lot-7-execution-automatisee`, `lot-7-artefacts`) |
 | 8. Bilans | Tableau de bord, burndown / burnup, bilans de sprint et de release, verdict, rapports configurables, exports HTML / PDF / Word / Excel / Markdown / CSV / JSON | **Fait** (branche `lot-8-bilans`) |
 | 9. Atelier et finitions | Example Mapping, commentaires, pièces jointes, Ctrl+K, aperçus des clés, raccourcis, notifications, accessibilité (axe-core), SpotBugs, seuil JaCoCo, banc NF-01 à NF-03 | **Fait** (branche `lot-9-finitions`) |
+| Guide saucedemo | Guide d'utilisation illustré (`docs/guide/`), jeu de données Swag Labs (`saucedemo/`) : vrais tests Playwright, Gherkin, API, performance ; runId qualifié par le projet (ADR-0025) | **Fait** (branche `saucedemo-guide`) |
 
 Reporté (hors périmètre du prototype à l'issue du lot 9, ADR-0024) :
 - Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
@@ -71,6 +72,11 @@ cd e2e && npm ci && npx playwright install chromium
 npx playwright test            # E2E_BASE_URL=http://localhost:5173 pour viser le serveur Vite
 # après `docker compose up --build -d`, attendre l'état « healthy » de backend avant Playwright
 # (accessibilite.spec.ts : contrôle axe-core WCAG 2.1 AA des écrans principaux, NF-10)
+
+# Guide d'utilisation (docs/guide/) : jeu de données saucedemo et captures, ADR-0025 (~2 min)
+SIMULATOR_PASS_RATE=1 SIMULATOR_ERROR_RATE=0 docker compose up -d
+cd saucedemo && npm ci && npm run tout   # npm test (vrais tests saucedemo) puis npm run guide (projet SWAG)
+# rejouer sur la même base : GUIDE_PROJET=SWAGB npm run guide (pas de suppression de projet dans l'API)
 
 # §14 vérification des NF-01 à NF-16 : docs/nf-verification.md
 # §14 banc de performance NF-01 à NF-03 (5 000 exigences, 10 000 tests ; ~10 min) → target/nf-benchmark.md
@@ -157,12 +163,15 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   (`AutomatedRunService.dispatch`, `TransactionTemplate`) ; les changements de run publient
   `RunChanged`, diffusé en SSE après commit (`RunEventStreams`). Les dépôts Spring Data doivent être
   des interfaces de premier niveau (pas imbriquées). Tests d'API : `@MockitoBean ExecutionServerClient`
-  et webhooks signés avec `WebhookSignature.sign`.
+  et webhooks signés avec `WebhookSignature.sign`. Le `runId` envoyé au serveur est qualifié par le projet
+  (`SHOP/RUN-1`, `AutomatedRunService.runId`) : le serveur est idempotent par `runId` et peut servir
+  plusieurs projets (ADR-0025).
 - Artefacts (ADR-0021) : références dans `RunArtifact` (annoncées par `TEST_FINISHED` / `JOB_FINISHED`,
   complétées par `ExecutionServerClient.artifacts`), contenu relayé sans stockage
   (`AutomatedRunService.artifact` → `ExecutionServerClient.download`). Simulateur : `system.log`,
   `junit.xml`, `jest.json`, `report.json`, `screenshot-<test>.png` par échec (`ResultFormats`, `Screenshots`).
-  Côté front, contenu par `fetchArtifact` (Bearer + URL d'objet), jamais par lien direct.
+  Côté front, contenu par `fetchArtifact` (Bearer + URL d'objet), jamais par lien direct. La liste du
+  serveur ne complète les artefacts qu'une fois le run terminé (sinon course avec `JOB_FINISHED`).
 - « Open in view » est enregistré par `OpenInViewConfig` (et non `spring.jpa.open-in-view`) pour
   en exclure les flux SSE : une requête asynchrone garderait sa connexion JDBC tant que le flux est
   ouvert. Tout nouveau flux SSE s'ajoute à `OpenInViewConfig.STREAMS` (test
@@ -302,6 +311,15 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   `NEEDS_UPDATE` et leurs liens suspects (§3.3-7). Sur une base déjà chargée, la démo n'est pas
   rejouée : `docker compose down -v` pour repartir de zéro.
 - À compléter à chaque lot (sprints, campagnes…).
+
+### Guide et jeu saucedemo (ADR-0025)
+`saucedemo/` est un projet npm autonome : `app-tests/` (vrais tests de www.saucedemo.com, rapport
+`results/junit-saucedemo.xml`, un échec attendu `@fail`), `features/` + `support/gherkin.ts` (Gherkin
+joué par Playwright), `guide/NN-*.spec.ts` (scénario TraceAgile qui crée le projet `SWAG` et capture
+dans `docs/guide/images/` avec `capturer()`). Les clés REQ-n / TC-n sont déterministes sur un projet
+neuf : ne pas réordonner les créations sans mettre à jour les tags `@REQ-n` du dépôt et le guide. Les
+sorties Playwright vont dans le TEMP (OneDrive verrouille les traces). Après un changement d'écran :
+régénérer, puis relire `docs/guide/README.md`.
 
 ### Bout en bout (§15.3)
 Un fichier `e2e/tests/parcours-N-*.spec.ts` par parcours, étapes en `test.step` lisibles par un

@@ -58,7 +58,7 @@ export function ImportReportModal({ project, campaignKey, opened, onClose }: { p
   const recordable = (preview?.lines.length ?? 0) - (createUnknown ? 0 : unknown);
 
   return (
-    <Modal opened={opened} onClose={onClose} title={t('import.title', { key: campaignKey })} size="xl">
+    <Modal opened={opened} onClose={onClose} title={t('import.title', { key: campaignKey })} size="70rem">
       <Stack>
         {error && (
           <Alert color="red" role="alert">

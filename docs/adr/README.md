@@ -29,3 +29,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0022](0022-selection-jeux-de-donnees.md) | Un test manuel à jeu de données est sélectionné avec ses lignes | 5 |
 | [0023](0023-bilans-et-rapports-configurables.md) | Bilans, tableau de bord et générateur de rapports configurables (HTML, PDF, Word, Excel, Markdown, CSV, JSON) | 8 |
 | [0024](0024-atelier-et-finitions.md) | Atelier Example Mapping, commentaires, pièces jointes, recherche, raccourcis, finitions et vérification des NF | 9 |
+| [0025](0025-guide-et-jeu-saucedemo.md) | Guide d'utilisation et jeu de données saucedemo ; runId qualifié par le projet, artefacts du serveur lus en fin de run | — |
