@@ -20,6 +20,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 8. Bilans | Tableau de bord, burndown / burnup, bilans de sprint et de release, verdict, rapports configurables, exports HTML / PDF / Word / Excel / Markdown / CSV / JSON | **Fait** (branche `lot-8-bilans`) |
 | 9. Atelier et finitions | Example Mapping, commentaires, pièces jointes, Ctrl+K, aperçus des clés, raccourcis, notifications, accessibilité (axe-core), SpotBugs, seuil JaCoCo, banc NF-01 à NF-03 | **Fait** (branche `lot-9-finitions`) |
 | Guide saucedemo | Guide d'utilisation illustré (`docs/guide/`), jeu de données Swag Labs (`saucedemo/`) : vrais tests Playwright, Gherkin, API, performance ; runId qualifié par le projet (ADR-0025) | **Fait** (branche `saucedemo-guide`) |
+| 10. Serveur d'exécution | Serveur réel (Spring Boot + React, jar autonome Windows / Linux / macOS, image Docker) : jetons, installation des outils, exécution parallèle par framework, webhooks, statistiques (ADR-0026) | **Fait** (branche `lot-10-serveur-execution`) |
 
 Reporté (hors périmètre du prototype à l'issue du lot 9, ADR-0024) :
 - Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
@@ -89,6 +90,12 @@ Windows : si une JVM échoue avec `Unable to establish loopback connection` (soc
 `Pipe` NIO : WireMock, Jetty, client HTTP du JDK), le TEMP en nom court 8.3 est en cause ; le pom
 passe `-Djdk.net.unixdomain.tmpdir=${user.home}` aux tests. Les clients HTTP du code (webhooks du
 simulateur, `HttpExecutionServerClient`) utilisent `SimpleClientHttpRequestFactory` pour l'éviter.
+
+Serveur d'exécution réel (ADR-0026, [backend/execution-server/README.md](backend/execution-server/README.md)) :
+`docker compose up` le démarre aussi (port 8091, interface `admin` / `executeur`) et le profil demo l'appaire
+(« Serveur d'exécution ») ; jar autonome : `cd backend && mvn -pl execution-server -am package -DskipTests`
+→ `execution-server/target/execution-server.jar`, lancé par `java -jar` sur toute machine (Java 21).
+`-DskipUi` saute la construction de son interface (`execution-server/ui`, npm : `lint`, `typecheck`, `test`).
 
 Exécution automatisée (ADR-0020) : `docker compose up` démarre le simulateur (port 8090) ; l'API
 l'appaire seule (profil demo) avec les identifiants `SIMULATOR_ADMIN_USER` / `SIMULATOR_ADMIN_PASSWORD`
@@ -202,6 +209,16 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
 - Qualité : `mvn verify` échoue sous 70 % de lignes couvertes (agrégat JaCoCo vérifié dans
   `traceagile-api`, NF-12) ou sur une anomalie SpotBugs « High » (NF-13 ; exclusions justifiées dans
   `backend/spotbugs-exclude.xml`).
+- Serveur d'exécution réel (ADR-0026) : module autonome `execution-server` (aucune dépendance aux
+  modules de TraceAgile, seul le contrat est partagé) ; H2 + Flyway + `JdbcClient`. Processus externes
+  par le port `ProcessRunner` (tests : `FakeProcessRunner` scripté, qui écrit les rapports des
+  frameworks) ; `Platform` (cmd / PowerShell sous Windows, bash ailleurs) ; outils dans `ToolCatalog`
+  (recette Windows et Unix, versions figées, prérequis seulement détectés) et `ToolService` (une
+  installation à la fois, journal) ; un `TestExecutor` par framework, choisi par `ExecutorRegistry`,
+  résultat lu dans le JUnit XML (`JUnitReports`) ; `JobRunner` orchestre (parallélisme job / agents,
+  préparation une fois par projet, verrou des projets Maven, reprises, échéance, annulation, webhooks).
+  Les tests d'API figent la plateforme à LINUX (`AbstractServerTest`). Sous Windows, `main` fixe
+  `jdk.net.unixdomain.tmpdir` (TEMP 8.3).
 - Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
   `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
   `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :

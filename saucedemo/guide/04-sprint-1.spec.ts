@@ -97,6 +97,9 @@ test('Sprint 1 : planification, recette manuelle et automatisée, clôture', asy
     await connexion(page, 'dev');
     await page.goto(`/p/${P}/campaigns/CMP-1`);
     await page.getByTestId('launch-open').click();
+    // résultats reproductibles : le simulateur, pas le serveur d'exécution réel (ADR-0026)
+    await page.getByTestId('launch-server').click();
+    await page.getByRole('option', { name: /^Simulateur/ }).click();
     await expect(page.getByTestId('launch-submit')).toContainText('Lancer 5 tests');
     await capturer(page, 'run-lancer', page.getByRole('dialog'), { marge: 10 });
     await page.getByTestId('launch-submit').click();

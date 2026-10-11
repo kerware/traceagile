@@ -1,0 +1,37 @@
+server:
+  port: 8091
+  shutdown: graceful
+
+spring:
+  application:
+    name: execution-server
+  datasource:
+    url: jdbc:h2:file:${execution-server.data-dir}/db/execution-server;AUTO_SERVER=FALSE
+    username: sa
+    password: ""
+  flyway:
+    locations: classpath:db/migration
+
+# ADR-0026 réglages du serveur d'exécution réel
+execution-server:
+  admin-user: ${EXECUTION_SERVER_ADMIN_USER:admin}
+  admin-password: ${EXECUTION_SERVER_ADMIN_PASSWORD:executeur}
+  data-dir: ${EXECUTION_SERVER_DATA_DIR:./data}
+  tools-dir: ${EXECUTION_SERVER_TOOLS_DIR:./tools}
+  agents: ${EXECUTION_SERVER_AGENTS:4}
+  retention-days: ${EXECUTION_SERVER_RETENTION_DAYS:14}
+  server-name: ${EXECUTION_SERVER_NAME:executeur}
+
+logging:
+  file:
+    name: ${execution-server.data-dir}/logs/execution-server.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

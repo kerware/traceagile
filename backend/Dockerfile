@@ -7,9 +7,11 @@ COPY traceagile-application/pom.xml traceagile-application/
 COPY traceagile-infrastructure/pom.xml traceagile-infrastructure/
 COPY traceagile-api/pom.xml traceagile-api/
 COPY mock-execution-server/pom.xml mock-execution-server/
+COPY execution-server/pom.xml execution-server/
 RUN mvn -B -q dependency:go-offline -DexcludeReactor=true || true
 COPY . .
-RUN mvn -B -q package -DskipTests
+# -DskipUi : l'interface du serveur d'exécution n'est construite que par son image (execution-server/Dockerfile)
+RUN mvn -B -q package -DskipTests -DskipUi
 
 FROM eclipse-temurin:21-jre-alpine AS api
 WORKDIR /app

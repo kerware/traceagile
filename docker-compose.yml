@@ -34,6 +34,10 @@ services:
       # §10 webhooks : URL de l'API vue depuis le simulateur ; simulateur appairé au démarrage (profil demo)
       TRACEAGILE_CALLBACK_URL: http://backend:8085/api/v1/execution-callbacks
       TRACEAGILE_SIMULATOR_URL: http://mock-execution-server:8090
+      # ADR-0026 serveur d'exécution réel, appairé au démarrage du profil demo (vide : non déclaré)
+      TRACEAGILE_EXECUTION_SERVER_URL: ${TRACEAGILE_EXECUTION_SERVER_URL-http://execution-server:8091}
+      EXECUTION_SERVER_ADMIN_USER: ${EXECUTION_SERVER_ADMIN_USER:-admin}
+      EXECUTION_SERVER_ADMIN_PASSWORD: ${EXECUTION_SERVER_ADMIN_PASSWORD:-executeur}
       SIMULATOR_ADMIN_USER: ${SIMULATOR_ADMIN_USER:-admin}
       SIMULATOR_ADMIN_PASSWORD: ${SIMULATOR_ADMIN_PASSWORD:-simulateur}
       # ADR-0024 contenu des pièces jointes (FileStorage disque)
@@ -60,6 +64,23 @@ services:
     ports:
       - "8090:8090"
 
+  # ADR-0026 serveur d'exécution réel (jar autonome aussi utilisable hors de Docker) : interface sur
+  # http://localhost:8091 ; outils installés à chaud dans le volume execution-tools.
+  execution-server:
+    build:
+      context: ./backend
+      dockerfile: execution-server/Dockerfile
+    environment:
+      EXECUTION_SERVER_ADMIN_USER: ${EXECUTION_SERVER_ADMIN_USER:-admin}
+      EXECUTION_SERVER_ADMIN_PASSWORD: ${EXECUTION_SERVER_ADMIN_PASSWORD:-executeur}
+      EXECUTION_SERVER_NAME: ${EXECUTION_SERVER_NAME:-executeur-docker}
+      EXECUTION_SERVER_AGENTS: ${EXECUTION_SERVER_AGENTS:-4}
+    volumes:
+      - execution-data:/data
+      - execution-tools:/opt/tools
+    ports:
+      - "8091:8091"
+
   frontend:
     build:
       context: ./frontend
@@ -72,3 +93,5 @@ services:
 volumes:
   pgdata:
   attachments:
+  execution-data:
+  execution-tools:

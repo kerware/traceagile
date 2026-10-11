@@ -23,6 +23,7 @@
         <module>traceagile-infrastructure</module>
         <module>traceagile-api</module>
         <module>mock-execution-server</module>
+        <module>execution-server</module>
     </modules>
 
     <properties>

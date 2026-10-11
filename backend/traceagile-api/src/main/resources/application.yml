@@ -54,6 +54,10 @@ traceagile:
     simulator-url: ${TRACEAGILE_SIMULATOR_URL:http://localhost:8090}
     simulator-admin-user: ${SIMULATOR_ADMIN_USER:admin}
     simulator-admin-password: ${SIMULATOR_ADMIN_PASSWORD:simulateur}
+    # ADR-0026 serveur d'exécution réel, déclaré et appairé s'il est configuré (vide : aucun).
+    execution-server-url: ${TRACEAGILE_EXECUTION_SERVER_URL:}
+    execution-server-admin-user: ${EXECUTION_SERVER_ADMIN_USER:admin}
+    execution-server-admin-password: ${EXECUTION_SERVER_ADMIN_PASSWORD:executeur}
 
 management:
   endpoints:

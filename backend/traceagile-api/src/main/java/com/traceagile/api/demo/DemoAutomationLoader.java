@@ -32,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DemoAutomationLoader {
 
     static final String SERVER_NAME = "Simulateur";
+    /** ADR-0026 serveur d'exécution réel, déclaré seulement si son URL est configurée. */
+    static final String EXECUTION_SERVER_NAME = "Serveur d'exécution";
     private static final Logger LOG = LoggerFactory.getLogger(DemoAutomationLoader.class);
 
     private final ExecutionServerService servers;
@@ -42,11 +44,17 @@ public class DemoAutomationLoader {
     private final String simulatorUrl;
     private final String adminUser;
     private final String adminPassword;
+    private final String executionServerUrl;
+    private final String executionServerUser;
+    private final String executionServerPassword;
 
     public DemoAutomationLoader(ExecutionServerService servers, AutomatedRunRepository runs, ExecutionRepository executions, FlakyService flaky,
                                 KeyGenerator keys, @Value("${traceagile.demo.simulator-url}") String simulatorUrl,
                                 @Value("${traceagile.demo.simulator-admin-user}") String adminUser,
-                                @Value("${traceagile.demo.simulator-admin-password}") String adminPassword) {
+                                @Value("${traceagile.demo.simulator-admin-password}") String adminPassword,
+                                @Value("${traceagile.demo.execution-server-url:}") String executionServerUrl,
+                                @Value("${traceagile.demo.execution-server-admin-user:admin}") String executionServerUser,
+                                @Value("${traceagile.demo.execution-server-admin-password:executeur}") String executionServerPassword) {
         this.servers = servers;
         this.runs = runs;
         this.executions = executions;
@@ -55,26 +63,45 @@ public class DemoAutomationLoader {
         this.simulatorUrl = simulatorUrl;
         this.adminUser = adminUser;
         this.adminPassword = adminPassword;
+        this.executionServerUrl = executionServerUrl;
+        this.executionServerUser = executionServerUser;
+        this.executionServerPassword = executionServerPassword;
     }
 
     @Transactional
     public ExecutionServer ensureServer() {
-        return servers.list().stream().filter(s -> s.getName().equals(SERVER_NAME)).findFirst()
-                .orElseGet(() -> servers.create(SERVER_NAME, simulatorUrl));
+        return ensure(SERVER_NAME, simulatorUrl);
+    }
+
+    private ExecutionServer ensure(String name, String url) {
+        return servers.list().stream().filter(s -> s.getName().equals(name)).findFirst().orElseGet(() -> servers.create(name, url));
     }
 
     /** ADR-0020 demande un jeton au simulateur s'il n'y en a pas (ou s'il a été refusé). */
     @Transactional
     public void pair() {
-        ExecutionServer server = ensureServer();
+        pair(SERVER_NAME, simulatorUrl, adminUser, adminPassword);
+    }
+
+    /** ADR-0026 serveur d'exécution réel (TRACEAGILE_EXECUTION_SERVER_URL) : déclaré et appairé comme le simulateur. */
+    @Transactional
+    public void pairExecutionServer() {
+        if (executionServerUrl == null || executionServerUrl.isBlank()) {
+            return;
+        }
+        pair(EXECUTION_SERVER_NAME, executionServerUrl.strip(), executionServerUser, executionServerPassword);
+    }
+
+    private void pair(String name, String url, String user, String password) {
+        ExecutionServer server = ensure(name, url);
         if (server.isPaired() && server.getStatus() != ServerStatus.UNAUTHORIZED) {
             return;
         }
         try {
-            servers.pairWithCredentials(server.getId(), adminUser, adminPassword);
-            LOG.info("Simulateur appairé : jeton émis par {}", simulatorUrl);
+            servers.pairWithCredentials(server.getId(), user, password);
+            LOG.info("{} appairé : jeton émis par {}", name, url);
         } catch (BusinessRuleException e) {
-            LOG.info("Simulateur pas encore appairé ({}) : nouvel essai dans 30 s", e.getMessage());
+            LOG.info("{} pas encore appairé ({}) : nouvel essai dans 30 s", name, e.getMessage());
         }
     }
 

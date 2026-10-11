@@ -24,7 +24,7 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Build et tests (unitaires, intégration PostgreSQL, ArchUnit)
+      - name: Build et tests (unitaires, intégration PostgreSQL, ArchUnit ; jar du serveur d'exécution avec son interface)
         run: mvn -B verify
       - name: Contrat OpenAPI à jour
         working-directory: .
@@ -37,6 +37,11 @@ jobs:
           path: |
             backend/**/target/surefire-reports/
             backend/**/target/site/jacoco/
+      - name: Jar autonome du serveur d'exécution (ADR-0026)
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-server-jar
+          path: backend/execution-server/target/execution-server.jar
 
   frontend:
     name: Front-end (lint, tsc, Vitest, build)
@@ -59,10 +64,28 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  execution-server-ui:
+    name: Interface du serveur d'exécution (lint, tsc, Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/execution-server/ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/execution-server/ui/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
   e2e:
     name: Bout en bout (Docker Compose + Playwright, §15.3)
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend, frontend, execution-server-ui]
     steps:
       - uses: actions/checkout@v4
       - name: Démarrage de la pile (NF-14)

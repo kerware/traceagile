@@ -59,6 +59,9 @@ test('Parcours 4 : run automatisé sur le simulateur, résultats en temps réel,
     await page.goto(`/p/SHOP/campaigns/${campagne.campaign.key}`);
     await page.getByTestId('launch-open').click();
     await expect(page.getByTestId('launch-submit')).toHaveText('Lancer 2 tests');
+    // deux serveurs déclarés (simulateur et serveur réel, ADR-0026) : le simulateur est choisi
+    await page.getByTestId('launch-server').click();
+    await page.getByRole('option', { name: /^Simulateur/ }).click();
     await expect(page.getByTestId('launch-server')).toHaveValue(/Simulateur/);
     await page.getByTestId('launch-submit').click();
     await expect(page.getByTestId('run-page')).toBeVisible();
