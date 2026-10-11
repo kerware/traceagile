@@ -47,8 +47,11 @@ test('Exécution manuelle : un échec crée une anomalie liée au test et à l�
     await page.getByTestId('selection-submit').click();
     await expect(page.getByTestId('selection-result')).toContainText('1 test ajouté');
     await page.getByTestId(`assignee-${cas.key}`).click();
+    // attendre l'enregistrement : la navigation suivante annulerait la requête en cours
+    const affectation = page.waitForResponse((r) => r.url().includes('/campaign-items/') && r.request().method() === 'PATCH');
     await page.getByRole('option', { name: /Quentin/ }).click();
-    await expect(page.getByTestId('workload')).toContainText('5 min');
+    expect((await affectation).status()).toBe(200);
+    await expect(page.getByTestId('workload-qa1')).toContainText('5 min');
   });
 
   await test.step('Dans « Mes exécutions », il lance le test : le paramètre ${carte} est remplacé', async () => {

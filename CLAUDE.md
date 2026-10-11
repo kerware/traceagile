@@ -76,6 +76,7 @@ npx playwright test            # E2E_BASE_URL=http://localhost:5173 pour viser l
 # Guide d'utilisation (docs/guide/) : jeu de données saucedemo et captures, ADR-0025 (~2 min)
 SIMULATOR_PASS_RATE=1 SIMULATOR_ERROR_RATE=0 docker compose up -d
 cd saucedemo && npm ci && npm run tout   # npm test (vrais tests saucedemo) puis npm run guide (projet SWAG)
+npm run publier                          # docs/guide/guide-traceagile.html (autonome) et .docx (Word)
 # rejouer sur la même base : GUIDE_PROJET=SWAGB npm run guide (pas de suppression de projet dans l'API)
 
 # §14 vérification des NF-01 à NF-16 : docs/nf-verification.md
@@ -258,6 +259,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   toujours un bouton équivalent (clavier, tests) ; en Playwright, `glisser()` de `e2e/tests/support.ts`.
 - Mutation optimiste suivie d'une navigation : dans un test bout en bout, attendre la réponse
   (`page.waitForResponse`) avant de quitter la page.
+- Redéploiement : `index.html` est servi en `no-cache` (nginx) et `staleBuild.ts` recharge une fois la
+  page, sur l'écran demandé, quand un morceau chargé à la demande a disparu (`vite:preloadError`).
 - Éditeurs de code : `components/code/CodeEditor` (Monaco local, chargé à la demande ; grammaire
   Gherkin et autocomplétion dans `monacoSetup.ts`). En test (jsdom), il devient une zone de texte.
 - user-event : « {{ » saisit une accolade littérale (`'${{nom}'` pour taper `${nom}`).

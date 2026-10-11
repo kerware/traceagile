@@ -9,12 +9,17 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './i18n';
 import { appRoutes, routerFuture } from './routes/routes';
+import { installStaleChunkReload } from './staleBuild';
 import { theme } from './theme';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
 });
 const router = createBrowserRouter(appRoutes, { future: routerFuture });
+installStaleChunkReload(() => {
+  const target = router.state.navigation.location;
+  return target ? `${target.pathname}${target.search}${target.hash}` : null;
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -8,11 +8,14 @@
     "test": "playwright test",
     "guide": "playwright test -c guide.config.ts",
     "tout": "node scripts/tout.mjs",
+    "publier": "node scripts/publier-guide.mjs",
     "typecheck": "tsc"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "@types/node": "22.18.0",
+    "docx": "9.5.1",
+    "marked": "15.0.12",
     "typescript": "5.9.2"
   }
 }
