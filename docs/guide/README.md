@@ -682,6 +682,8 @@ Les **règles de verdict** du projet fixent les seuils du « Go » et du « Go s
 
 ![Thème sombre](images/theme-sombre.png)
 
+**Documentation** : l'entrée du menu latéral, sous Rapports, ouvre ce guide dans un nouvel onglet.
+
 **Lecture seule** : un lecteur consulte tout, sans pouvoir modifier.
 
 ![Fiche en lecture seule](images/lecteur-lecture-seule.png)

@@ -1,5 +1,6 @@
 // Publie le guide d'utilisation (docs/guide/README.md) en deux formats autonomes :
-// - docs/guide/guide-traceagile.html : page unique, captures intégrées (data URI), thème clair et sombre ;
+// - docs/guide/guide-traceagile.html : page unique, captures intégrées (data URI), thème clair et sombre,
+//   copiée dans frontend/public/guide/index.html (menu « Documentation » de l'application, /guide/) ;
 // - docs/guide/guide-traceagile.docx : document Word, captures, sommaire cliquable, pied de page numéroté.
 // Option --fragment <fichier> : même page sans <!doctype>/<head>, pour la publier comme Artifact.
 import {
@@ -318,7 +319,11 @@ async function documentWord() {
 // ----------------------------------------------------------------------------------------- sorties
 
 const page = pageHtml();
-writeFileSync(join(GUIDE, 'guide-traceagile.html'), `<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${page.slice(0, page.indexOf('<div class="page">'))}</head>\n<body>\n${page.slice(page.indexOf('<div class="page">'))}</body>\n</html>\n`);
+const complete = `<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${page.slice(0, page.indexOf('<div class="page">'))}</head>\n<body>\n${page.slice(page.indexOf('<div class="page">'))}</body>\n</html>\n`;
+writeFileSync(join(GUIDE, 'guide-traceagile.html'), complete);
+// servi par l'application à /guide/ (menu « Documentation »)
+mkdirSync(join(RACINE, 'frontend', 'public', 'guide'), { recursive: true });
+writeFileSync(join(RACINE, 'frontend', 'public', 'guide', 'index.html'), complete);
 const fragment = process.argv.indexOf('--fragment');
 if (fragment > 0) {
   mkdirSync(dirname(resolve(process.argv[fragment + 1])), { recursive: true });

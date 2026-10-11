@@ -30,6 +30,8 @@
     "traceability": "Traceability",
     "defects": "Defects",
     "reports": "Reports",
+    "documentation": "Documentation",
+    "newTab": "new tab",
     "administration": "Administration"
   },
   "projects": {

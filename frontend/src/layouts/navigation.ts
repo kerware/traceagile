@@ -11,6 +11,7 @@ export type NavId =
   | 'traceability'
   | 'defects'
   | 'reports'
+  | 'documentation'
   | 'administration';
 
 /** §13.2 Écrans d'un projet, dans l'ordre du menu §13.1, avec le lot qui les livre (§16.2). */
@@ -30,13 +31,19 @@ export const PROJECT_SCREENS: ReadonlyArray<{ id: NavId; path: string; lot: numb
 export interface NavItem {
   id: NavId;
   to: string;
+  /** Page hors de l'application, ouverte dans un nouvel onglet. */
+  external?: boolean;
 }
 
-/** §13.1 Menu latéral : entrées du projet courant, puis Administration selon le rôle. */
+/** Guide d'utilisation HTML autonome (docs/guide, publié dans public/guide par `npm run publier`). */
+export const GUIDE_URL = '/guide/';
+
+/** §13.1 Menu latéral : entrées du projet courant, la documentation, puis Administration selon le rôle. */
 export function navigationFor(projectKey: string | null, user: Me): NavItem[] {
   const items: NavItem[] = projectKey
     ? PROJECT_SCREENS.map((s) => ({ id: s.id, to: `/p/${projectKey}/${s.path}` }))
     : [];
+  items.push({ id: 'documentation', to: GUIDE_URL, external: true });
   if (user.systemAdmin) {
     items.push({ id: 'administration', to: '/admin' });
   }

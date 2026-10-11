@@ -17,9 +17,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { useEffect } from 'react';
 import {
   IconBell,
+  IconBook,
   IconBug,
   IconChartBar,
   IconChecklist,
+  IconExternalLink,
   IconCompass,
   IconFileAnalytics,
   IconFlask,
@@ -59,6 +61,7 @@ const ICONS: Record<NavId, Icon> = {
   traceability: IconRoute,
   defects: IconBug,
   reports: IconFileAnalytics,
+  documentation: IconBook,
   administration: IconSettings,
 };
 
@@ -117,6 +120,21 @@ export function AppLayout() {
       <AppShell.Navbar p="xs" aria-label="Menu principal">
         {navigationFor(projectKey, user).map((item) => {
           const Icon = ICONS[item.id];
+          if (item.external) {
+            return (
+              <NavLink
+                key={item.id}
+                component="a"
+                href={item.to}
+                target="_blank"
+                rel="noopener"
+                label={t(`nav.${item.id}`)}
+                leftSection={<Icon size={18} />}
+                rightSection={<IconExternalLink size={14} aria-label={t('nav.newTab')} />}
+                data-testid={`nav-${item.id}`}
+              />
+            );
+          }
           return (
             <NavLink
               key={item.id}

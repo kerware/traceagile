@@ -8,7 +8,7 @@ describe('§13.1 menu latéral', () => {
 
     expect(items.map((i) => i.id)).toEqual([
       'dashboard', 'backlog', 'tests', 'exploratory', 'planning', 'campaigns',
-      'myExecutions', 'traceability', 'defects', 'reports',
+      'myExecutions', 'traceability', 'defects', 'reports', 'documentation',
     ]);
     expect(items[0]?.to).toBe('/p/SHOP/dashboard');
     expect(items.find((i) => i.id === 'myExecutions')?.to).toBe('/p/SHOP/my-executions');
@@ -20,7 +20,14 @@ describe('§13.1 menu latéral', () => {
   });
 
   it('sans projet sélectionné, seules les entrées globales restent', () => {
-    expect(navigationFor(null, ADMIN).map((i) => i.id)).toEqual(['administration']);
-    expect(navigationFor(null, TESTER)).toEqual([]);
+    expect(navigationFor(null, ADMIN).map((i) => i.id)).toEqual(['documentation', 'administration']);
+    expect(navigationFor(null, TESTER).map((i) => i.id)).toEqual(['documentation']);
+  });
+
+  it('Documentation, sous Rapports, ouvre le guide d’utilisation HTML dans un nouvel onglet', () => {
+    const items = navigationFor('SHOP', ADMIN);
+    const documentation = items.find((i) => i.id === 'documentation');
+    expect(documentation).toEqual({ id: 'documentation', to: '/guide/', external: true });
+    expect(items.map((i) => i.id).slice(-3)).toEqual(['reports', 'documentation', 'administration']);
   });
 });
