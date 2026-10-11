@@ -26,6 +26,9 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends nodejs \
  && npx -y playwright@1.63.0 install-deps chromium \
  && rm -rf /var/lib/apt/lists/* /root/.npm
+# dépôts montés en lecture seule (fichiers d'un autre utilisateur) : Git ne lit safe.directory que dans sa
+# configuration système ou globale, pas dans l'environnement
+RUN git config --system --add safe.directory '*'
 RUN useradd --create-home --uid 10001 runner && mkdir -p /data /opt/tools && chown runner:runner /data /opt/tools
 WORKDIR /app
 COPY --from=build /workspace/execution-server/target/execution-server.jar app.jar

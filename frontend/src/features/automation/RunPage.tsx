@@ -124,10 +124,11 @@ function RunView({ project, detail }: { project: string; detail: RunDetail }) {
                   {e.testIdentifier ?? '—'}
                 </Text>
               </Table.Td>
-              <Table.Td>
+              {/* l'identifiant, long, ne doit pas tronquer le statut */}
+              <Table.Td miw={110}>
                 <ExecutionStatusBadge status={e.status} testId={`run-status-${e.test.key}`} />
               </Table.Td>
-              <Table.Td>
+              <Table.Td style={{ whiteSpace: 'nowrap' }}>
                 <Text size="sm">{duration(e.durationMs)}</Text>
               </Table.Td>
             </Table.Tr>

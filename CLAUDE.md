@@ -75,7 +75,7 @@ npx playwright test            # E2E_BASE_URL=http://localhost:5173 pour viser l
 # (accessibilite.spec.ts : contrôle axe-core WCAG 2.1 AA des écrans principaux, NF-10)
 
 # Guide d'utilisation (docs/guide/) : jeu de données saucedemo et captures, ADR-0025 (~2 min)
-SIMULATOR_PASS_RATE=1 SIMULATOR_ERROR_RATE=0 docker compose up -d
+docker compose up -d   # runs du guide exécutés par le serveur d'exécution réel (branche courante committée)
 cd saucedemo && npm ci && npm run tout   # npm test (vrais tests saucedemo) puis npm run guide (projet SWAG)
 npm run publier                          # docs/guide/guide-traceagile.html et .docx ; copie servie à /guide/ (menu Documentation)
 # rejouer sur la même base : GUIDE_PROJET=SWAGB npm run guide (pas de suppression de projet dans l'API)

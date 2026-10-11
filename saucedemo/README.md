@@ -15,11 +15,18 @@ release 1.0 couvre la connexion, le catalogue et le panier en deux sprints. Le p
 ## Lancer
 
 Prérequis :
-- la pile TraceAgile démarrée sur un projet sans clé `SWAG` ;
-- un simulateur dont les résultats sont reproductibles.
+- la pile TraceAgile démarrée sur un projet sans clé `SWAG`, avec le serveur d'exécution réel
+  (service `execution-server`). Les runs du guide exécutent réellement les tests de ce dossier : le
+  serveur clone ce dépôt, monté en lecture seule (`file:///depots/traceagile`), sur la **branche
+  courante**, qu'il faut donc committer avant de lancer ;
+- un accès à Internet depuis le conteneur (npm, Chromium, www.saucedemo.com).
+
+`GUIDE_DEPOT`, `GUIDE_BRANCHE` et `GUIDE_SERVEUR` changent le dépôt, la branche ou le serveur. Avec
+`GUIDE_SERVEUR=Simulateur`, les runs sont simulés ; ils sont alors reproductibles avec
+`SIMULATOR_PASS_RATE=1` et `SIMULATOR_ERROR_RATE=0`.
 
 ```bash
-SIMULATOR_PASS_RATE=1 SIMULATOR_ERROR_RATE=0 docker compose up -d --build
+docker compose up -d --build
 cd saucedemo
 npm ci
 npx playwright install chromium
@@ -53,5 +60,6 @@ qui permet l'import :
 | `Panier › problem_user retire un produit depuis le catalogue @fail` | TC-10 (UI) | REQ-12 |
 | `Performance › temps de chargement du catalogue` | TC-11 (performance) | REQ-16 (ENF) |
 
-Le tag `@fail` fait aussi échouer TC-10 sur le simulateur de TraceAgile, comme le vrai test : le run
-du sprint 2 montre ainsi un échec avec ses artefacts.
+Sur le serveur d'exécution, TC-10 échoue réellement (défaut de `problem_user`) avec la copie d'écran
+de Playwright. Le tag `@fail` le fait aussi échouer sur le simulateur. Le test de performance dépose
+son p95 dans `TRACEAGILE_OUTPUT_DIR/metrics.json`, qui devient la valeur mesurée de l'ENF REQ-16.

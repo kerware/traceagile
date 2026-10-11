@@ -6,7 +6,9 @@ jusqu'à la visualisation du panier.
 
 Chaque écran a été capturé par un scénario automatisé (`saucedemo/guide/`). Ce scénario crée le
 projet, joue les deux sprints et produit les données que vous voyez. Les tests automatisés sont de
-vrais tests Playwright de saucedemo (`saucedemo/app-tests/`), et leur rapport JUnit est importé dans
+vrais tests Playwright de saucedemo (`saucedemo/app-tests/`). Ils sont **réellement exécutés** par le
+serveur d'exécution de TraceAgile, qui clone le dépôt, lance Playwright et renvoie résultats, copies
+d'écran et mesures. Leur rapport JUnit, produit par la chaîne d'intégration, est aussi importé dans
 TraceAgile. Pour rejouer le tout, voir [saucedemo/README.md](../../saucedemo/README.md).
 
 ## Sommaire
@@ -25,7 +27,8 @@ TraceAgile. Pour rejouer le tout, voir [saucedemo/README.md](../../saucedemo/REA
 12. [Anomalies](#12-anomalies)
 13. [Tableau de bord, bilans et rapports](#13-tableau-de-bord-bilans-et-rapports)
 14. [Se repérer vite](#14-se-repérer-vite)
-15. [Annexe : le jeu de données](#15-annexe--le-jeu-de-données)
+15. [Le serveur d'exécution](#15-le-serveur-dexécution)
+16. [Annexe : le jeu de données](#16-annexe--le-jeu-de-données)
 
 ---
 
@@ -97,9 +100,13 @@ Il affecte ensuite un rôle à chaque membre (**Administration › Projets**).
 
 ![Membres du projet et leurs rôles](images/admin-membres.png)
 
-L'onglet **Utilisateurs** liste les comptes. L'onglet **Serveurs d'exécution** montre le serveur
-qui joue les tests automatisés. Ici, c'est le simulateur fourni avec TraceAgile. Il est **appairé**
-par un jeton qu'il a lui-même émis et apparaît **en ligne**.
+L'onglet **Utilisateurs** liste les comptes. L'onglet **Serveurs d'exécution** montre les serveurs
+qui jouent les tests automatisés :
+- le **serveur d'exécution** réel, qui exécute vraiment les tests (voir le [chapitre 15](#15-le-serveur-dexécution)) ;
+- le **simulateur**, qui imite un serveur pour les démonstrations.
+
+Chacun est **appairé** par un jeton qu'il a lui-même émis et apparaît **en ligne**, avec les
+techniques qu'il sait exécuter.
 
 ![Serveurs d'exécution](images/admin-serveurs-execution.png)
 
@@ -335,14 +342,15 @@ marquent le pas courant réussi, en échec ou bloqué.
 
 ### Run automatisé
 
-Le développeur lance les cinq tests automatisés de la campagne sur le serveur d'exécution :
+Le développeur lance les cinq tests automatisés de la campagne sur le **serveur d'exécution** :
 
 ![Lancer un run](images/run-lancer.png)
 
-Les résultats arrivent **en temps réel** :
+Le serveur clone le dépôt, installe les dépendances du projet (`npm ci`, navigateur Chromium) et lance
+chaque test Playwright, quatre à la fois. Les résultats arrivent **en temps réel** :
 - les webhooks signés du serveur sont relayés au navigateur en SSE ;
-- chaque test a son identifiant, son résultat et sa durée ;
-- les **artefacts** sont consultables : traces système, JUnit XML, Jest JSON, rapport.
+- chaque test a son identifiant (le nom du test Playwright), son résultat et sa durée réelle ;
+- les **artefacts** sont consultables : journal de chaque test, traces système, JUnit XML, rapport.
 
 ![Run du sprint 1](images/run-sprint-1.png)
 
@@ -458,8 +466,8 @@ Le PO relit le débriefing et l'**approuve** : la session est « Débriefée ».
 
 ## 9. Exécution automatisée
 
-Le développeur lance les quatre tests automatisés du sprint 2. TC-10 échoue, comme le vrai test
-Playwright : c'est le défaut de `problem_user`. Le run affiche :
+Le développeur lance les quatre tests automatisés du sprint 2 sur le serveur d'exécution. TC-10
+échoue pour de vrai : c'est le défaut de `problem_user`. Le run affiche :
 
 - le **message d'erreur** du test ;
 - les **journaux** du serveur ;
@@ -467,8 +475,9 @@ Playwright : c'est le défaut de `problem_user`. Le run affiche :
 
 ![Run du sprint 2 avec un échec](images/run-sprint-2-echec.png)
 
-Pour chaque test en échec, la **copie d'écran** s'ouvre en un clic. Les artefacts se téléchargent :
-traces système, JUnit XML, Jest JSON et rapport du serveur.
+Pour chaque test en échec, la **copie d'écran** prise par Playwright au moment de l'échec s'ouvre en
+un clic : le bouton « Remove » est toujours affiché et le badge du panier reste à 1. Les artefacts se
+téléchargent : journal de chaque test, traces système, JUnit XML et rapport du serveur.
 
 ![Artefacts du run](images/run-artefacts.png)
 
@@ -476,14 +485,15 @@ traces système, JUnit XML, Jest JSON et rapport du serveur.
 
 ### Valeur mesurée d'une ENF
 
-Le test de performance TC-11 est lié à l'ENF « Temps de chargement du catalogue ». Sa métrique
-`p95Ms` devient une **valeur mesurée**, comparée au seuil et à la cible. Une mesure peut aussi être
-saisie à la main.
+Le test de performance TC-11 est lié à l'ENF « Temps de chargement du catalogue ». Exécuté par le
+serveur, il mesure le p95 de cinq connexions et dépose sa métrique `p95Ms` dans un fichier
+`metrics.json`. Elle devient une **valeur mesurée**, comparée au seuil et à la cible. Une mesure peut
+aussi être saisie à la main.
 
 ![Valeurs mesurées de l'ENF](images/enf-mesures.png)
 
-> Le vrai test de performance de `saucedemo/app-tests` mesure le p95 de cinq connexions. Il échoue
-> au-delà du seuil de 3 000 ms et joint ses mesures au rapport.
+> Le test échoue au-delà du seuil de 3 000 ms. Le serveur d'exécution lit les métriques que tout test
+> dépose dans le dossier `TRACEAGILE_OUTPUT_DIR`.
 
 ---
 
@@ -690,7 +700,92 @@ Les **règles de verdict** du projet fixent les seuils du « Go » et du « Go s
 
 ---
 
-## 15. Annexe : le jeu de données
+## 15. Le serveur d'exécution
+
+Le serveur d'exécution est livré à part : un jar autonome, lançable sur toute machine Windows, Linux
+ou macOS, ou dans Docker (service `execution-server`, http://localhost:8091). Il a sa propre
+interface ; on s'y connecte avec l'administrateur du serveur.
+
+![Connexion au serveur d'exécution](images/es-connexion.png)
+
+### Suivi
+
+Le tableau de bord montre :
+- l'activité en direct : jobs en cours, agents occupés ;
+- le taux de réussite et les volumes sur 7 jours ;
+- les tests exécutés par jour ;
+- les résultats par framework ;
+- les tests les plus en échec ;
+- la part des outils installés.
+
+![Tableau de bord du serveur d'exécution](images/es-tableau-de-bord.png)
+
+### Jobs
+
+Chaque run lancé depuis TraceAgile devient un **job**. La liste se filtre par statut et par texte.
+
+![Jobs reçus de TraceAgile](images/es-jobs.png)
+
+Le détail d'un job montre :
+- le dépôt et la branche clonés ;
+- l'agent, la durée, le parallélisme ;
+- chaque test avec son framework, son fichier, son résultat et ses métriques (ici `p95Ms` pour le
+  test de performance).
+
+Le job se suit en direct et peut être annulé.
+
+![Détail du job du sprint 2](images/es-job.png)
+
+Le **journal** retrace chaque commande : clone, `npm ci`, installation de Chromium, `npx playwright
+test` filtré sur le titre du test.
+
+![Journal du job](images/es-job-journal.png)
+
+Les **artefacts** sont ceux que TraceAgile affiche : copies d'écran, journaux, JUnit XML, rapport.
+
+![Copie d'écran de l'échec, côté serveur](images/es-copie-ecran.png)
+
+### Outils
+
+Le serveur **détecte** les prérequis de la machine : Java, Node.js, Python, Git. Il **installe sans
+droits d'administrateur**, dans son dossier d'outils :
+- les JDK et Maven ;
+- JUnit et Gatling ;
+- Playwright, Cypress, Selenium ;
+- Robot Framework et ses bibliothèques SeleniumLibrary et Browser.
+
+Ici, Playwright apparaît absent comme outil du serveur. Le serveur n'en a pas besoin : chaque job
+utilise la version de Playwright du dépôt, installée par `npm ci`.
+
+![Outils du serveur](images/es-outils.png)
+
+Chaque outil a son aide :
+- les prérequis ;
+- les commandes exactes de l'installation, pour Windows (PowerShell) ou Linux et macOS (bash) ;
+- le journal de la dernière installation.
+
+![Aide et commandes d'installation](images/es-outil-aide.png)
+
+L'**assistant d'installation** part des frameworks utilisés par les tests. Il propose le plan dans
+l'ordre, dépendances d'abord, et l'installe en un clic.
+
+![Assistant d'installation](images/es-assistant.png)
+
+### Jetons de sécurité
+
+Le serveur émet les **jetons** qui autorisent une instance de TraceAgile, avec le secret de signature
+des webhooks. Il ne les affiche qu'une fois et peut les révoquer. Ici, TraceAgile a demandé lui-même
+son jeton, avec les identifiants de l'administrateur.
+
+![Jetons du serveur](images/es-jetons.png)
+
+> Mode d'emploi complet (lancement du jar, réglages, appairage, frameworks pris en charge) :
+> [backend/execution-server/README.md](../../backend/execution-server/README.md).
+
+
+---
+
+## 16. Annexe : le jeu de données
 
 | Élément | Contenu |
 | --- | --- |
@@ -698,7 +793,7 @@ Les **règles de verdict** du projet fixent les seuils du « Go » et du « Go s
 | Tests | TC-1, TC-2 manuels ; TC-3 à TC-11 automatisés (dont TC-8 BDD) ; TC-12 exploratoire |
 | Planification | REL-1 « Swag Labs 1.0 » ; SPR-1 clos ; SPR-2 actif |
 | Campagnes | CMP-1 « Recette sprint 1 » (terminée) ; CMP-2 « Recette sprint 2 » ; CMP-3 « Intégration continue — main » (import JUnit) |
-| Runs | RUN-1 (5/5 réussis) ; RUN-2 (TC-10 en échec) |
+| Runs | RUN-1 (5/5 réussis) ; RUN-2 (TC-10 en échec), exécutés par le serveur d'exécution |
 | Anomalies | DEF-1 (échec manuel de TC-2) ; DEF-2 (bogue de la session exploratoire) |
 | Rapports | RPT-1 bilan figé du sprint 1 ; RPT-2 bilan du sprint 2 (verdict tranché par le PO) |
 
