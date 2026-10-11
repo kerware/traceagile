@@ -4,14 +4,15 @@ import { join } from 'node:path';
 
 /**
  * Scénario du guide d'utilisation : construit le projet SWAG dans TraceAgile (pile Docker Compose
- * démarrée, simulateur avec SIMULATOR_PASS_RATE=1 et SIMULATOR_ERROR_RATE=0) et capture les écrans
+ * démarrée ; les runs sont joués par le serveur d'exécution réel, ADR-0026) et capture les écrans
  * dans docs/guide/images. Les fichiers de guide/ s'exécutent dans l'ordre de leur numéro.
  */
 export default defineConfig({
   // hors du dossier synchronisé (OneDrive verrouille les traces en cours d'écriture)
   outputDir: join(tmpdir(), 'traceagile-saucedemo', 'guide'),
   testDir: './guide',
-  timeout: 300_000,
+  // les runs réels (npm ci, navigateurs, tests de saucedemo) prennent plusieurs minutes
+  timeout: 1_200_000,
   expect: { timeout: 15_000 },
   workers: 1,
   fullyParallel: false,

@@ -52,8 +52,8 @@ public class RobotExecutor implements TestExecutor {
             command.append(" --test ").append(ExecutionContext.quote(test.testIdentifier()));
         }
         variables(test).forEach((name, value) -> command.append(" --variable ").append(ExecutionContext.quote(name + ":" + value)));
-        command.append(' ').append(ExecutionContext.quote(TestExecutor.exists(project, test.path())
-                ? ExecutionContext.relative(project, project.resolve(test.path()).normalize()) : "."));
+        command.append(' ').append(ExecutionContext.quote(TestExecutor.exists(context.workspace(), test.path())
+                ? ExecutionContext.relative(project, context.workspace().resolve(test.path()).normalize()) : "."));
         ProcessRunner.Result result = context.run(command.toString(), project);
         return TestExecutor.outcome(result, JUnitReports.read(output.resolve("junit.xml")), test.testIdentifier(),
                 TestExecutor.files(output, ".png", ".jpg"), List.of(output.resolve("log.html"), output.resolve("report.html")), Map.of());

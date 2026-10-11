@@ -58,8 +58,8 @@ public class PytestExecutor implements TestExecutor {
         if (identifier != null && identifier.contains("::")) {
             command.append(' ').append(ExecutionContext.quote(identifier));
         } else {
-            if (TestExecutor.exists(project, test.path())) {
-                command.append(' ').append(ExecutionContext.quote(ExecutionContext.relative(project, project.resolve(test.path()).normalize())));
+            if (TestExecutor.exists(context.workspace(), test.path())) {
+                command.append(' ').append(ExecutionContext.quote(ExecutionContext.relative(project, context.workspace().resolve(test.path()).normalize())));
             }
             if (identifier != null) {
                 command.append(" -k ").append(ExecutionContext.quote(JUnitReports.lastSegment(identifier)));

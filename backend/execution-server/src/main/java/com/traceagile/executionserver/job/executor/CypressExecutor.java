@@ -44,11 +44,11 @@ public class CypressExecutor implements TestExecutor {
 
     @Override
     public TestOutcome execute(ExecutionContext context, TestSpec test, Path project, Path output) {
-        if (!TestExecutor.exists(project, test.path())) {
+        if (!TestExecutor.exists(context.workspace(), test.path())) {
             return TestOutcome.error("Fichier de test Cypress introuvable dans le dépôt : " + test.path());
         }
         Path screenshots = output.resolve("screenshots");
-        String command = "npx cypress run --spec " + ExecutionContext.quote(ExecutionContext.relative(project, project.resolve(test.path()).normalize()))
+        String command = "npx cypress run --spec " + ExecutionContext.quote(ExecutionContext.relative(project, context.workspace().resolve(test.path()).normalize()))
                 + " --reporter junit --reporter-options " + ExecutionContext.quote("mochaFile=" + output.resolve("junit-[hash].xml"))
                 + " --config " + ExecutionContext.quote("screenshotsFolder=" + screenshots + ",video=false");
         ProcessRunner.Result result = context.run(command, project);

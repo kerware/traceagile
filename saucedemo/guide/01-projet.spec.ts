@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { Api, capturer, connexion, noterEtat, P } from './outils';
+import { Api, capturer, connexion, noterEtat, P, SERVEUR } from './outils';
 
 /**
  * Guide § 2 — l'administrateur crée le projet SWAG, y affecte l'équipe (un rôle par membre) et
@@ -44,13 +44,13 @@ test('Administration : projet SWAG, membres et serveur d’exécution', async ({
     await capturer(page, 'admin-utilisateurs');
   });
 
-  await test.step('Le serveur d’exécution « Simulateur » est appairé et en ligne', async () => {
+  await test.step('Les serveurs d’exécution (réel et simulateur) sont appairés et en ligne', async () => {
     await expect.poll(async () => {
       const serveurs = (await admin.get('/execution-servers')) as { name: string; usable: boolean; status: string }[];
-      return serveurs.some((s) => s.name === 'Simulateur' && s.usable && s.status === 'ONLINE');
-    }, { timeout: 90_000, intervals: [3_000] }).toBe(true);
+      return [SERVEUR, 'Simulateur'].every((nom) => serveurs.some((s) => s.name === nom && s.usable && s.status === 'ONLINE'));
+    }, { timeout: 120_000, intervals: [3_000] }).toBe(true);
     await page.goto('/admin/execution-servers');
-    await expect(page.getByTestId('server-status-Simulateur')).toBeVisible();
+    await expect(page.getByTestId(`server-status-${SERVEUR}`)).toBeVisible();
     await capturer(page, 'admin-serveurs-execution');
   });
 

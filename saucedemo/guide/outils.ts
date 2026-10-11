@@ -1,4 +1,5 @@
 import { expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
+import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,6 +7,16 @@ import { fileURLToPath } from 'node:url';
 /** Projet créé par le scénario (autre clé possible pour rejouer sur la même base : GUIDE_PROJET=SWAG2). */
 export const P = process.env.GUIDE_PROJET ?? 'SWAG';
 export const MOT_DE_PASSE = 'demo';
+
+/**
+ * ADR-0026 les runs du guide sont exécutés pour de vrai par le serveur d'exécution (Docker), qui clone ce
+ * dépôt monté en lecture seule (docker-compose.yml) sur la branche courante : la committer avant de lancer.
+ */
+export const DEPOT = process.env.GUIDE_DEPOT ?? 'file:///depots/traceagile';
+export const BRANCHE = process.env.GUIDE_BRANCHE ?? execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+export const SERVEUR = process.env.GUIDE_SERVEUR ?? "Serveur d'exécution";
+export const EXECUTEUR_URL = process.env.GUIDE_EXECUTEUR_URL ?? 'http://localhost:8091';
+export const EXECUTEUR_MOT_DE_PASSE = process.env.EXECUTION_SERVER_ADMIN_PASSWORD ?? 'executeur';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 export const RACINE_SAUCEDEMO = join(ICI, '..');

@@ -53,8 +53,8 @@ public class CucumberJsExecutor implements TestExecutor {
                 feature = project.resolve("features").resolve("traceagile").resolve(MavenExecutor.safe(test.testKey()) + ".feature");
                 Files.createDirectories(feature.getParent());
                 Files.writeString(feature, test.gherkinSource());
-            } else if (TestExecutor.exists(project, test.path())) {
-                feature = project.resolve(test.path()).normalize();
+            } else if (TestExecutor.exists(context.workspace(), test.path())) {
+                feature = context.workspace().resolve(test.path()).normalize();
             } else {
                 return TestOutcome.error("Scénario Gherkin absent : ni source transmise ni fichier .feature dans le dépôt.");
             }

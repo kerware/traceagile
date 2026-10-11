@@ -1,10 +1,13 @@
 import { expect, test } from '@playwright/test';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { seConnecter } from '../support/swaglabs';
 
 /**
  * ENF « Temps de chargement du catalogue » (SWAG REQ-16) : seuil 3 000 ms, cible 1 000 ms au p95.
  * Mesure légère (5 connexions successives) : délai entre le clic « Login » et l'affichage des six
- * produits. Les métriques sont jointes au rapport (p95Ms, comme celles du serveur d'exécution).
+ * produits. Les métriques sont jointes au rapport et, sur le serveur d'exécution de TraceAgile, écrites
+ * dans TRACEAGILE_OUTPUT_DIR/metrics.json : p95Ms alimente la valeur mesurée de l'ENF (ADR-0026).
  */
 const ITERATIONS = 5;
 const SEUIL_MS = 3_000;
@@ -25,6 +28,9 @@ test.describe('Performance', () => {
       body: JSON.stringify({ p95Ms, medianeMs: tries[Math.floor(tries.length / 2)], mesures }),
       contentType: 'application/json',
     });
+    if (process.env.TRACEAGILE_OUTPUT_DIR) {
+      writeFileSync(join(process.env.TRACEAGILE_OUTPUT_DIR, 'metrics.json'), JSON.stringify({ p95Ms }));
+    }
     console.log(`p95 du chargement du catalogue : ${p95Ms} ms (${mesures.join(', ')})`);
     expect(p95Ms, `p95 ${p95Ms} ms`).toBeLessThan(SEUIL_MS);
   });

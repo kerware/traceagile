@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 @Order(10)
 public class PlaywrightExecutor implements TestExecutor {
 
+    private static final String SPEC = ".*\\.(spec|test)\\.(ts|js|mjs|cjs|tsx)$";
+
     @Override
     public String name() {
         return "Playwright";
@@ -54,8 +56,9 @@ public class PlaywrightExecutor implements TestExecutor {
     @Override
     public TestOutcome execute(ExecutionContext context, TestSpec test, Path project, Path output) {
         StringBuilder command = new StringBuilder("npx playwright test");
-        if (TestExecutor.exists(project, test.path())) {
-            command.append(' ').append(ExecutionContext.quote(ExecutionContext.relative(project, project.resolve(test.path()).normalize())));
+        // un scénario .feature (BDD joué par un exécuteur Gherkin dans Playwright) n'est pas un fichier de test : filtre par titre seul
+        if (TestExecutor.exists(context.workspace(), test.path()) && test.path().matches(SPEC)) {
+            command.append(' ').append(ExecutionContext.quote(ExecutionContext.relative(project, context.workspace().resolve(test.path()).normalize())));
         }
         if (test.testIdentifier() != null) {
             command.append(" --grep ").append(ExecutionContext.quote(grep(test.testIdentifier())));

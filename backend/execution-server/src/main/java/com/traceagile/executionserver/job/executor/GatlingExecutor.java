@@ -68,7 +68,7 @@ public class GatlingExecutor implements TestExecutor {
             result = context.run(MavenExecutor.MVN + " gatling:test -Dgatling.simulationClass=" + ExecutionContext.quote(test.testIdentifier()), project);
         } else {
             results = output.resolve("gatling");
-            Path simulations = test.path() == null ? project : project.resolve(test.path()).normalize();
+            Path simulations = test.path() == null ? project : context.workspace().resolve(test.path()).normalize();
             if (!Files.isDirectory(simulations)) {
                 simulations = simulations.getParent();
             }

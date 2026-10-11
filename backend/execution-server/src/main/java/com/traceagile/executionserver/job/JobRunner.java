@@ -263,7 +263,12 @@ public class JobRunner {
                 } catch (IOException e) {
                     return TestOutcome.error("Dossier de résultats impossible : " + e.getMessage());
                 }
-                outcome = executor.execute(context, spec, project, out);
+                // ADR-0026 convention : tout test peut déposer captures et metrics.json dans TRACEAGILE_OUTPUT_DIR
+                Map<String, String> env = new LinkedHashMap<>(context.environment());
+                env.put("TRACEAGILE_OUTPUT_DIR", out.toString());
+                ExecutionContext attemptContext = new ExecutionContext(context.workspace(), env, context.platform(), context.processes(),
+                        context.cancellation(), context.deadline(), context.log());
+                outcome = withMetrics(executor.execute(attemptContext, spec, project, out), out.resolve("metrics.json"));
                 if (outcome.passed() || context.cancellation().cancelled() || "SKIPPED".equals(outcome.status())) {
                     break;
                 }
@@ -274,6 +279,25 @@ public class JobRunner {
                 lock.unlock();
             }
         }
+    }
+
+    /** Métriques numériques déposées par le test (metrics.json), sans remplacer celles de l'adaptateur. */
+    private TestOutcome withMetrics(TestOutcome outcome, Path file) {
+        if (!Files.isRegularFile(file)) {
+            return outcome;
+        }
+        Map<String, Double> metrics = new LinkedHashMap<>();
+        try {
+            json.readTree(file.toFile()).fields().forEachRemaining(field -> {
+                if (field.getValue().isNumber()) {
+                    metrics.put(field.getKey(), field.getValue().asDouble());
+                }
+            });
+        } catch (IOException e) {
+            return outcome;
+        }
+        metrics.putAll(outcome.metrics());
+        return new TestOutcome(outcome.status(), outcome.message(), outcome.stackTrace(), metrics, outcome.screenshots(), outcome.attachments());
     }
 
     /** Paramètres et ligne de jeu de données du test : variables TRACEAGILE_PARAM_NOM ; « jdk » choisit le JDK. */

@@ -257,6 +257,36 @@ class JobApiTest extends AbstractServerTest {
     }
 
     @Test
+    @DisplayName("ADR-0026 convention : un test écrit metrics.json dans TRACEAGILE_OUTPUT_DIR (métriques remontées) ; un scénario .feature filtré par son titre")
+    @SuppressWarnings("unchecked")
+    void metricsAndFeatures() throws Exception {
+        repository(Map.of("saucedemo/package.json", "{\"devDependencies\":{\"@playwright/test\":\"1.63.0\"}}",
+                "saucedemo/app-tests/performance.spec.ts", "", "saucedemo/features/panier.feature", "Scénario: Ajouter"));
+        processes.when("npx playwright test", (command, line, output, cancellation) -> {
+            Path junit = Path.of(command.environment().get("PLAYWRIGHT_JUNIT_OUTPUT_NAME"));
+            Files.createDirectories(junit.getParent());
+            boolean perf = line.contains("performance.spec.ts");
+            Files.writeString(junit, junit(perf ? "performance.spec.ts" : "panier-bdd.spec.ts",
+                    perf ? "Performance › temps de chargement du catalogue" : "Ajouter un produit au panier depuis le catalogue", true));
+            if (perf) {
+                Files.writeString(Path.of(command.environment().get("TRACEAGILE_OUTPUT_DIR")).resolve("metrics.json"), "{\"p95Ms\": 812, \"mesures\": [1, 2]}");
+            }
+            return FakeProcessRunner.ok("1 passed");
+        });
+        String bearer = bearer();
+        String jobId = submit(bearer, job("SWAG/RUN-5", List.of(
+                test("e-1", "TC-11", "PERFORMANCE", "Playwright", "saucedemo/app-tests/performance.spec.ts", "Performance › temps de chargement du catalogue"),
+                test("e-2", "TC-8", "BDD", "Playwright", "saucedemo/features/panier.feature", "Ajouter un produit au panier depuis le catalogue")),
+                Map.of()));
+        await(bearer, jobId, "COMPLETED");
+        assertThat((Map<String, Object>) finished("e-1").get("metrics")).containsEntry("p95Ms", 812.0).doesNotContainKey("mesures");
+        assertThat(finished("e-2")).containsEntry("status", "PASSED");
+        assertThat(processes.executed()).anyMatch(l -> l.startsWith("npx playwright test --grep \"Ajouter un produit au panier depuis le catalogue\""));
+        assertThat(processes.commands()).filteredOn(c -> c.arguments().getLast().startsWith("npx playwright test"))
+                .allSatisfy(c -> assertThat(c.directory().toString().replace('\\', '/')).endsWith("workspace/saucedemo"));
+    }
+
+    @Test
     @DisplayName("F-EXE-08 annulation : le processus est arrêté, le test est ignoré, JOB_FINISHED CANCELLED")
     void cancel() throws Exception {
         repository(Map.of("package.json", "{\"devDependencies\":{\"@playwright/test\":\"1.63.0\"}}", "tests/long.spec.ts", ""));

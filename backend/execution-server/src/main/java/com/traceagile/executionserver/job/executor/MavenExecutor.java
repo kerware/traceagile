@@ -79,7 +79,7 @@ public class MavenExecutor implements TestExecutor {
         clear(surefire);
         String command;
         if (cucumber(test)) {
-            Path feature = feature(test, project);
+            Path feature = feature(test, project, context.workspace());
             if (feature == null) {
                 return TestOutcome.error("Scénario Gherkin absent : ni source transmise ni fichier .feature dans le dépôt.");
             }
@@ -113,7 +113,7 @@ public class MavenExecutor implements TestExecutor {
     }
 
     /** Scénario à jouer : Gherkin transmis par TraceAgile (écrit dans le projet) ou fichier du dépôt. */
-    static Path feature(TestSpec test, Path project) {
+    static Path feature(TestSpec test, Path project, Path workspace) {
         try {
             if (test.gherkinSource() != null) {
                 Path file = project.resolve("target").resolve("traceagile-features").resolve(safe(test.testKey()) + ".feature");
@@ -124,7 +124,7 @@ public class MavenExecutor implements TestExecutor {
         } catch (IOException e) {
             return null;
         }
-        Path file = test.path() == null ? null : project.resolve(test.path()).normalize();
+        Path file = test.path() == null ? null : workspace.resolve(test.path()).normalize();
         return file != null && Files.exists(file) ? file : null;
     }
 

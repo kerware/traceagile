@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { Api, calendrier, capturer, connexion, elements, fermerNotifications, noterEtat, P } from './outils';
+import { Api, calendrier, capturer, connexion, elements, fermerNotifications, noterEtat, P, SERVEUR } from './outils';
 
 /**
  * Guide § 5 et § 6 — sprint 1 « Connexion et catalogue » : release de deux sprints, planification,
@@ -97,14 +97,14 @@ test('Sprint 1 : planification, recette manuelle et automatisée, clôture', asy
     await connexion(page, 'dev');
     await page.goto(`/p/${P}/campaigns/CMP-1`);
     await page.getByTestId('launch-open').click();
-    // résultats reproductibles : le simulateur, pas le serveur d'exécution réel (ADR-0026)
+    // ADR-0026 exécution réelle des tests Playwright de saucedemo par le serveur d'exécution
     await page.getByTestId('launch-server').click();
-    await page.getByRole('option', { name: /^Simulateur/ }).click();
+    await page.getByRole('option', { name: new RegExp(`^${SERVEUR}`) }).click();
     await expect(page.getByTestId('launch-submit')).toContainText('Lancer 5 tests');
     await capturer(page, 'run-lancer', page.getByRole('dialog'), { marge: 10 });
     await page.getByTestId('launch-submit').click();
     await expect(page.getByTestId('run-page')).toBeVisible();
-    await expect(page.getByTestId('run-status')).toHaveAttribute('data-status', 'COMPLETED', { timeout: 90_000 });
+    await expect(page.getByTestId('run-status')).toHaveAttribute('data-status', 'COMPLETED', { timeout: 600_000 });
     await fermerNotifications(page);
     await capturer(page, 'run-sprint-1');
   });

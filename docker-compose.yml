@@ -75,9 +75,15 @@ services:
       EXECUTION_SERVER_ADMIN_PASSWORD: ${EXECUTION_SERVER_ADMIN_PASSWORD:-executeur}
       EXECUTION_SERVER_NAME: ${EXECUTION_SERVER_NAME:-executeur-docker}
       EXECUTION_SERVER_AGENTS: ${EXECUTION_SERVER_AGENTS:-4}
+      # le dépôt local, monté en lecture seule, est clonable par file:///depots/traceagile (guide saucedemo) ;
+      # ses fichiers appartiennent à un autre utilisateur : Git doit l'accepter (safe.directory)
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
     volumes:
       - execution-data:/data
       - execution-tools:/opt/tools
+      - .:/depots/traceagile:ro
     ports:
       - "8091:8091"
 

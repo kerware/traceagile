@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { Api, capturer, connexion, elements, fermerNotifications, IMAGES, P, RACINE_SAUCEDEMO } from './outils';
+import { Api, capturer, connexion, elements, fermerNotifications, IMAGES, P, RACINE_SAUCEDEMO, SERVEUR } from './outils';
 
 /**
  * Guide § 7 à § 10 — sprint 2 « Panier » (sprint actif) : exécution manuelle en échec et anomalie
@@ -134,13 +134,13 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await connexion(page, 'dev');
     await page.goto(`/p/${P}/campaigns/CMP-2`);
     await page.getByTestId('launch-open').click();
-    // résultats reproductibles : le simulateur, pas le serveur d'exécution réel (ADR-0026)
+    // ADR-0026 exécution réelle des tests Playwright de saucedemo par le serveur d'exécution
     await page.getByTestId('launch-server').click();
-    await page.getByRole('option', { name: /^Simulateur/ }).click();
+    await page.getByRole('option', { name: new RegExp(`^${SERVEUR}`) }).click();
     await expect(page.getByTestId('launch-submit')).toContainText('Lancer 4 tests');
     await page.getByTestId('launch-submit').click();
     await expect(page.getByTestId('run-page')).toBeVisible();
-    await expect(page.getByTestId('run-status')).toHaveAttribute('data-status', 'COMPLETED', { timeout: 90_000 });
+    await expect(page.getByTestId('run-status')).toHaveAttribute('data-status', 'COMPLETED', { timeout: 600_000 });
     await expect(page.getByTestId('run-status-TC-10')).toHaveAttribute('data-status', 'FAILED');
     await page.getByTestId('run-logs-load').click();
     await expect(page.getByTestId('run-logs')).toContainText('TC-10');

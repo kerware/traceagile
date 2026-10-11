@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import comptes from '../data/comptes.json' with { type: 'json' };
-import { Api, capturer, connexion, fermerNotifications, P } from './outils';
+import { Api, BRANCHE, capturer, connexion, DEPOT, fermerNotifications, P } from './outils';
 
 /**
  * Guide § 4 — le référentiel de tests : un exemple de chaque nature et de chaque technique.
@@ -11,13 +11,12 @@ import { Api, capturer, connexion, fermerNotifications, P } from './outils';
  * - exploratoire : TC-12, charte sur le panier.
  * Les identifiants des tests automatisés sont les noms des tests du rapport JUnit de Playwright.
  */
-const DEPOT = 'https://github.com/traceagile/traceagile.git';
 
 type Lien = { requirementKey: string; linkType: 'VERIFIES' | 'PARTIALLY_VERIFIES' | 'RELATES_TO' };
 const verifie = (...cles: string[]): Lien[] => cles.map((requirementKey) => ({ requirementKey, linkType: 'VERIFIES' }));
 
 const automatise = (titre: string, technique: string, fichier: string, identifiant: string, liens: Lien[], extra: Record<string, unknown> = {}) => ({
-  kind: 'AUTOMATED', title: titre, technique, framework: 'Playwright', language: 'TypeScript', repositoryUrl: DEPOT, branch: 'main',
+  kind: 'AUTOMATED', title: titre, technique, framework: 'Playwright', language: 'TypeScript', repositoryUrl: DEPOT, branch: BRANCHE,
   path: `saucedemo/app-tests/${fichier}`, testIdentifier: identifiant, links: liens, executionTags: ['saucedemo'], ...extra,
 });
 
@@ -89,7 +88,9 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
     await page.getByTestId('criterion-generate-1').click();
     await expect(page.getByText('Test BDD généré : TC-8')).toBeVisible();
     await qa.post('/test-cases/TC-8/status', { status: 'READY' });
-    await qa.patch('/test-cases/TC-8', { folder: 'Panier', framework: 'Playwright' });
+    // le scénario est joué par Playwright (exécuteur Gherkin de saucedemo/app-tests/panier-bdd.spec.ts)
+    await qa.patch('/test-cases/TC-8', { folder: 'Panier', framework: 'Playwright', repositoryUrl: DEPOT, branch: BRANCHE,
+      path: 'saucedemo/features/panier.feature' });
     await page.goto(`/p/${P}/tests/TC-8`);
     await expect(page.getByTestId('gherkin-editor').locator('.monaco-editor')).toBeVisible();
     await expect(page.getByTestId('gherkin-valid')).toBeVisible();
