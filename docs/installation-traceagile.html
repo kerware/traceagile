@@ -827,6 +827,7 @@ d&#39;un écran, préférer le serveur hors Docker (§7).</p>
 n&#39;est visible qu&#39;après l&#39;avoir monté dans le conteneur. Exemple, à ajouter sous <code>volumes</code> du service
 dans <code>docker-compose.yml</code> :</p>
 <pre><code class="language-yaml">      - /srv/depots:/depots:ro     # puis file:///depots/&lt;projet&gt; dans la fiche des tests
+      # Docker Desktop sous Windows : - C:/Depots/projet:/depots/projet:ro
 </code></pre>
 <h2 id="9-relier-traceagile-et-le-serveur-dexécution">9. Relier TraceAgile et le serveur d&#39;exécution</h2>
 <h3 id="91-appairage">9.1 Appairage</h3>
@@ -1001,7 +1002,7 @@ avant : une version antérieure ne peut pas rouvrir une base migrée.</p>
 </tr>
 <tr>
 <td>Avertissement <code>a network with name traceagile-reseau exists but was not created for project …</code></td>
-<td>Normal quand les deux logiciels sont en conteneur sur la même machine : le second rejoint le réseau créé par le premier. De même, <code>docker compose down</code> de l&#39;un signale que le réseau est encore utilisé par l&#39;autre.</td>
+<td>Normal quand les deux logiciels sont en conteneur sur la même machine : le second rejoint le réseau créé par le premier.</td>
 </tr>
 <tr>
 <td><code>depends_on … required</code> refusé</td>

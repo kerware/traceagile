@@ -483,6 +483,7 @@ dans `docker-compose.yml` :
 
 ```yaml
       - /srv/depots:/depots:ro     # puis file:///depots/<projet> dans la fiche des tests
+      # Docker Desktop sous Windows : - C:/Depots/projet:/depots/projet:ro
 ```
 
 ## 9. Relier TraceAgile et le serveur d'exécution
@@ -590,7 +591,7 @@ Changer de mode plus tard ne demande que de transporter les données :
 | Run bloqué « En cours » | Le serveur ne joint pas `TRACEAGILE_CALLBACK_URL`. Tester depuis la machine ou le conteneur du serveur : `curl <url>` ou `docker compose exec serveur-execution curl <url>`. |
 | Serveur « Non autorisé » | Jeton révoqué côté serveur, ou `TRACEAGILE_ENCRYPTION_KEY` changée : appairer à nouveau. |
 | `host.docker.internal` introuvable | Docker trop ancien (option `host-gateway` : Docker 20.10+), ou le service a été lancé sans le `docker-compose.yml` fourni. |
-| Avertissement `a network with name traceagile-reseau exists but was not created for project …` | Normal quand les deux logiciels sont en conteneur sur la même machine : le second rejoint le réseau créé par le premier. De même, `docker compose down` de l'un signale que le réseau est encore utilisé par l'autre. |
+| Avertissement `a network with name traceagile-reseau exists but was not created for project …` | Normal quand les deux logiciels sont en conteneur sur la même machine : le second rejoint le réseau créé par le premier. |
 | `depends_on … required` refusé | Docker Compose antérieur à 2.20 : le mettre à jour. |
 | Windows : `Unable to establish loopback connection` | Dossier TEMP en nom court 8.3 ; les deux jars le contournent au démarrage. Si l'erreur persiste, ajouter `-Djdk.net.unixdomain.tmpdir=C:\TraceAgile\tmp` à `JAVA_OPTS`. |
 | Construction : `npm ci` échoue avec `EBUSY` (Windows) | Le dépôt est dans un dossier synchronisé (OneDrive) qui verrouille `node_modules` : relancer, ou ajouter `-Ddistribution.npm.install=install` à la commande Maven. |
