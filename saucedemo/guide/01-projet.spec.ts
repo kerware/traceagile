@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { Api, capturer, connexion, noterEtat, P, SERVEUR } from './outils';
+import { Api, capturer, connexion, EXECUTEUR_MOT_DE_PASSE, EXECUTEUR_URL_DEPUIS_TRACEAGILE, MOT_DE_PASSE, noterEtat, P, SERVEUR } from './outils';
+
+const EQUIPE: [string, string][] = [
+  ['po', 'Paula Owner'], ['qa1', 'Quentin Testeur'], ['qa2', 'Quitterie Testeuse'], ['dev', 'Dev Eloppeur'], ['viewer', 'Victor Lecteur'],
+];
 
 /**
  * Guide § 2 — l'administrateur crée le projet SWAG, y affecte l'équipe (un rôle par membre) et
@@ -11,6 +15,15 @@ test('Administration : projet SWAG, membres et serveur d’exécution', async ({
   const projets = (Array.isArray(reponse) ? reponse : reponse.content) as { key: string }[];
   expect(projets.map((p) => p.key), `le projet ${P} existe déjà : docker compose down -v, ou GUIDE_PROJET=<autre clé>`).not.toContain(P);
   noterEtat({ projet: P });
+
+  await test.step('Comptes de l’équipe (instance installée hors profil demo : créés s’ils manquent)', async () => {
+    const existants = ((await admin.get('/api/v1/users?size=200')).content as { login: string }[]).map((u) => u.login);
+    for (const [login, nom] of EQUIPE) {
+      if (!existants.includes(login)) {
+        await admin.post('/api/v1/users', { login, email: `${login}@traceagile.demo`, displayName: nom, password: MOT_DE_PASSE, systemAdmin: false });
+      }
+    }
+  });
 
   await test.step('L’administrateur crée le projet depuis la page Projets', async () => {
     await connexion(page, 'admin');
@@ -44,10 +57,19 @@ test('Administration : projet SWAG, membres et serveur d’exécution', async ({
     await capturer(page, 'admin-utilisateurs');
   });
 
-  await test.step('Les serveurs d’exécution (réel et simulateur) sont appairés et en ligne', async () => {
+  await test.step('Les serveurs d’exécution déclarés sont appairés et en ligne', async () => {
+    type Serveur = { id: string; name: string; usable: boolean; status: string; paired: boolean };
+    let declares = (await admin.get('/api/v1/execution-servers')) as Serveur[];
+    if (!declares.some((s) => s.name === SERVEUR)) {
+      // instance sans profil demo : le serveur d'exécution est déclaré et appairé avec les identifiants de son administrateur
+      const cree = (await admin.post('/api/v1/execution-servers', { name: SERVEUR, baseUrl: EXECUTEUR_URL_DEPUIS_TRACEAGILE })) as Serveur;
+      await admin.post(`/api/v1/execution-servers/${cree.id}/pair`, { adminUser: 'admin', adminPassword: EXECUTEUR_MOT_DE_PASSE });
+      declares = (await admin.get('/api/v1/execution-servers')) as Serveur[];
+    }
+    const attendus = declares.map((s) => s.name);
     await expect.poll(async () => {
-      const serveurs = (await admin.get('/execution-servers')) as { name: string; usable: boolean; status: string }[];
-      return [SERVEUR, 'Simulateur'].every((nom) => serveurs.some((s) => s.name === nom && s.usable && s.status === 'ONLINE'));
+      const serveurs = (await admin.get('/execution-servers')) as Serveur[];
+      return attendus.every((nom) => serveurs.some((s) => s.name === nom && s.usable && s.status === 'ONLINE'));
     }, { timeout: 120_000, intervals: [3_000] }).toBe(true);
     await page.goto('/admin/execution-servers');
     await expect(page.getByTestId(`server-status-${SERVEUR}`)).toBeVisible();

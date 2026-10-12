@@ -15,6 +15,8 @@ public interface UserRepository {
 
     boolean existsByLogin(String login);
 
+    long count();
+
     Page<User> findAll(Pageable pageable);
 
     User save(User user);

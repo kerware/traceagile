@@ -6,7 +6,11 @@ import { fileURLToPath } from 'node:url';
 
 /** Projet créé par le scénario (autre clé possible pour rejouer sur la même base : GUIDE_PROJET=SWAG2). */
 export const P = process.env.GUIDE_PROJET ?? 'SWAG';
-export const MOT_DE_PASSE = 'demo';
+export const MOT_DE_PASSE = process.env.GUIDE_MOT_DE_PASSE ?? 'demo';
+/** Génération de la démo distribuable (install/base-de-donnees/generer-demo-swaglabs.sh) : données sans captures. */
+export const SANS_CAPTURES = process.env.GUIDE_SANS_CAPTURES === '1';
+/** Adresse du serveur d'exécution vue par TraceAgile, s'il faut le déclarer (instance sans profil demo). */
+export const EXECUTEUR_URL_DEPUIS_TRACEAGILE = process.env.GUIDE_EXECUTEUR_URL_DEPUIS_TRACEAGILE ?? 'http://execution-server:8091';
 
 /**
  * ADR-0026 les runs du guide sont exécutés pour de vrai par le serveur d'exécution (Docker), qui clone ce
@@ -113,6 +117,9 @@ export async function connexion(page: Page, login: string) {
  * (locator). Les animations sont figées et le curseur de saisie masqué.
  */
 export async function capturer(page: Page, nom: string, cible?: Locator, options: { pleinePage?: boolean; marge?: number } = {}) {
+  if (SANS_CAPTURES) {
+    return;
+  }
   await page.waitForLoadState('load');
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(400);

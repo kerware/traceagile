@@ -36,6 +36,11 @@ spring:
       max-request-size: 12MB
 
 traceagile:
+  # Installation hors Docker : premier administrateur créé sur une base sans utilisateur (hors profil demo)
+  bootstrap:
+    admin-login: ${TRACEAGILE_ADMIN_LOGIN:admin}
+    admin-password: ${TRACEAGILE_ADMIN_PASSWORD:}
+    admin-email: ${TRACEAGILE_ADMIN_EMAIL:admin@traceagile.local}
   security:
     # Secret de développement uniquement : surchargé par TRACEAGILE_JWT_SECRET en dehors du poste local.
     jwt-secret: ${TRACEAGILE_JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}

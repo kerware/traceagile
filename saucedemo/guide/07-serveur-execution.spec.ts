@@ -1,11 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { capturer, EXECUTEUR_MOT_DE_PASSE, EXECUTEUR_URL, lireEtat } from './outils';
+import { capturer, EXECUTEUR_MOT_DE_PASSE, EXECUTEUR_URL, lireEtat, SANS_CAPTURES } from './outils';
 
 /**
  * Guide § 15 — le serveur d'exécution réel (ADR-0026) : tableau de bord de suivi, jobs reçus de
  * TraceAgile (le run du sprint 2), outils installés à chaud et assistant d'installation, jetons.
  */
 test.use({ baseURL: EXECUTEUR_URL });
+// étape de captures seulement
+test.skip(SANS_CAPTURES, 'génération de la démo sans captures');
 
 test('Serveur d’exécution : suivi, jobs, outils, jetons', async ({ page }) => {
   await test.step('Connexion de l’administrateur du serveur', async () => {

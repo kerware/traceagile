@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { capturer } from './outils';
+import { capturer, SANS_CAPTURES } from './outils';
 
 /**
  * Guide § 1 — l'application testée, Swag Labs (www.saucedemo.com), jusqu'au panier. La capture du
@@ -9,6 +9,9 @@ const SAUCE = 'https://www.saucedemo.com';
 
 test.use({ testIdAttribute: 'data-test', viewport: { width: 1280, height: 720 } });
 
+
+// étape de captures seulement
+test.skip(SANS_CAPTURES, 'génération de la démo sans captures');
 test('Swag Labs : connexion, catalogue, fiche produit, panier et défaut de problem_user', async ({ page }) => {
   const seConnecter = async (utilisateur: string) => {
     await page.context().clearCookies();
