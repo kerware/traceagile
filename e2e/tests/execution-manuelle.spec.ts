@@ -22,6 +22,8 @@ test('Exécution manuelle : un échec crée une anomalie liée au test et à l�
       kind: 'MANUAL', title: `Paiement refusé ${suffixe}`, estimatedDurationMin: 5,
       steps: [{ action: 'Payer avec la carte ${carte}', expectedResult: 'Le paiement est refusé' }, { action: 'Lire le message', expectedResult: 'Le message explique le refus' }],
       parameters: [{ name: 'carte', defaultValue: '4000 0000 0000 0002' }],
+      // ADR-0028 un test manuel paramétré prêt a un jeu de données ; sélectionné, il devient la ligne 1
+      dataSets: [{ name: 'Cartes refusées', rows: [{ carte: '4000 0000 0000 0002' }] }],
       links: [{ requirementKey: story.key, linkType: 'VERIFIES' }],
     },
   })).json();
@@ -46,7 +48,7 @@ test('Exécution manuelle : un échec crée une anomalie liée au test et à l�
     await page.getByRole('option', { name: new RegExp(`^${cas.key} —`) }).click();
     await page.getByTestId('selection-submit').click();
     await expect(page.getByTestId('selection-result')).toContainText('1 test ajouté');
-    await page.getByTestId(`assignee-${cas.key}`).click();
+    await page.getByTestId(`assignee-${cas.key}-1`).click();
     // attendre l'enregistrement : la navigation suivante annulerait la requête en cours
     const affectation = page.waitForResponse((r) => r.url().includes('/campaign-items/') && r.request().method() === 'PATCH');
     await page.getByRole('option', { name: /Quentin/ }).click();

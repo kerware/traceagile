@@ -451,6 +451,12 @@ public class TestCase extends AuditableEntity {
                 case AUTOMATED -> "Un test automatisé prêt a un identifiant (et une source Gherkin en BDD).";
             });
         }
+        // ADR-0028 un test manuel paramétré se joue avec les valeurs d'au moins un jeu de données
+        if (target == TestCaseStatus.READY && kind == TestKind.MANUAL && !getParameters().isEmpty()
+                && dataSets.stream().allMatch(d -> d.rows().isEmpty())) {
+            throw new BusinessRuleException("TEST_DATASET_REQUIRED",
+                    "Un test manuel à paramètres prêt a au moins un jeu de données avec une ligne.");
+        }
         status = target;
     }
 

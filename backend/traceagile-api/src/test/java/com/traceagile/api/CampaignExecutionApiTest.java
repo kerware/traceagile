@@ -49,11 +49,13 @@ class CampaignExecutionApiTest extends AbstractApiTest {
         send(po, P + "/sprints", Map.of("name", "Sprint 1", "startDate", "2026-10-12", "endDate", "2026-10-25"));
         mvc.perform(put(P + "/sprints/SPR-1/scope").header("Authorization", po).contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(Map.of("requirementKeys", List.of("REQ-2"))))).andExpect(status().isOk());
-        // TC-1 manuel MUST paramétré (jeu « Recette » ajouté par les tests qui en ont besoin : ADR-0022), lié ; TC-2 manuel « smoke » non lié ; TC-3 automatisé lié ; TC-4 brouillon smoke
+        // TC-1 manuel MUST paramétré, jeu « Recette » d'une ligne (ADR-0028 ; deux lignes pour les tests qui en ont besoin : ADR-0022),
+        // lié ; TC-2 manuel « smoke » non lié ; TC-3 automatisé lié ; TC-4 brouillon smoke
         send(qa, P + "/test-cases", Map.of("kind", "MANUAL", "title", "Ajouter un produit", "priority", "MUST", "estimatedDurationMin", 10,
                 "steps", List.of(Map.of("action", "Ouvrir ${produit}", "expectedResult", "La fiche s'affiche"),
                         Map.of("action", "Ajouter au panier", "expectedResult", "Total ${prix}")),
                 "parameters", List.of(Map.of("name", "prix", "defaultValue", "2,50 €")),
+                "dataSets", List.of(Map.of("name", "Recette", "rows", List.of(Map.of("produit", "Stylo")))),
                 "links", List.of(Map.of("requirementKey", "REQ-2", "linkType", "VERIFIES"))));
         send(qa, P + "/test-cases", Map.of("kind", "MANUAL", "title", "Accueil", "priority", "COULD", "tags", List.of("smoke"),
                 "steps", List.of(Map.of("action", "Ouvrir l'accueil", "expectedResult", "OK"))));
@@ -118,7 +120,8 @@ class CampaignExecutionApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$.campaign.items[0].riskScore", is(16)))
                 .andExpect(jsonPath("$.campaign.items[1].executedByServer", is(true)))
                 .andExpect(jsonPath("$.campaign.items[0].id").isNotEmpty());
-        // jeu ajouté au test après sa sélection : la ligne se choisit au lancement de l'exécution
+        // ADR-0022 sélectionné, TC-1 est décliné sur la ligne « Stylo » de son jeu ; le jeu complété ensuite
+        // (deux lignes) ne change pas la ligne de l'élément
         recetteDataSet();
         String tc1 = itemId("TC-1");
         mvc.perform(patch(P + "/campaign-items/" + tc1).header("Authorization", qa).contentType("application/merge-patch+json")
@@ -129,11 +132,11 @@ class CampaignExecutionApiTest extends AbstractApiTest {
                 .andExpect(jsonPath("$[*].test.key", contains("TC-1")))
                 .andExpect(jsonPath("$[0].dataSets[0].rows", is(2)));
 
-        String execution = startExecution(tc1, Map.of("dataSetName", "Recette", "row", 1));
+        String execution = startExecution(tc1, Map.of());
         mvc.perform(get(P + "/executions/" + execution).header("Authorization", qa))
                 .andExpect(jsonPath("$.status", is("RUNNING")))
-                .andExpect(jsonPath("$.steps[0].action", is("Ouvrir Cahier")))
-                .andExpect(jsonPath("$.steps[1].expectedResult", is("Total 3,90 €")));
+                .andExpect(jsonPath("$.steps[0].action", is("Ouvrir Stylo")))
+                .andExpect(jsonPath("$.steps[1].expectedResult", is("Total 2,50 €")));
         mvc.perform(put(P + "/executions/" + execution + "/steps/1").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(Map.of("status", "PASSED")))).andExpect(status().isOk());
         mvc.perform(put(P + "/executions/" + execution + "/steps/2").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
@@ -556,7 +559,9 @@ class CampaignExecutionApiTest extends AbstractApiTest {
                                 "steps", List.of(Map.of("calledTestKey", "TC-5", "callParameters", Map.of("login", "${client}")),
                                         Map.of("action", "Payer ${montant}", "expectedResult", "Payé")),
                                 "parameters", List.of(Map.of("name", "client", "defaultValue", "alice"),
-                                        Map.of("name", "montant", "defaultValue", "10 €"))))))
+                                        Map.of("name", "montant", "defaultValue", "10 €")),
+                                // ADR-0028 un test manuel paramétré prêt a un jeu de données
+                                "dataSets", List.of(Map.of("name", "Clients", "rows", List.of(Map.of("client", "alice", "montant", "10 €"))))))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.key", is("TC-6")))
                 .andExpect(jsonPath("$.steps[0].calledTest.key", is("TC-5")))

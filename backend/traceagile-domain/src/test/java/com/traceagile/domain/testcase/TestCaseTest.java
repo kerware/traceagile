@@ -155,6 +155,26 @@ class TestCaseTest {
     }
 
     @Test
+    @DisplayName("ADR-0028 un test manuel à paramètres ne passe à READY qu'avec au moins un jeu de données non vide")
+    void readinessRequiresDataSetForParameters() {
+        TestCase test = manual();
+        test.addStep("Se connecter avec ${login}", "Le catalogue s'affiche", null);
+        assertThatThrownBy(() -> test.changeStatus(TestCaseStatus.READY))
+                .extracting("code").isEqualTo("TEST_DATASET_REQUIRED");
+        test.setDataSets(List.of(DataSet.of("Vide", List.of())));
+        assertThatThrownBy(() -> test.changeStatus(TestCaseStatus.READY))
+                .extracting("code").isEqualTo("TEST_DATASET_REQUIRED");
+        test.setDataSets(List.of(DataSet.of("Comptes", List.of(Map.of("login", "alice")))));
+        test.changeStatus(TestCaseStatus.READY);
+        assertThat(test.getStatus()).isEqualTo(TestCaseStatus.READY);
+
+        TestCase sansParametre = manual();
+        sansParametre.addStep("Ouvrir", "OK", null);
+        sansParametre.changeStatus(TestCaseStatus.READY);
+        assertThat(sansParametre.getStatus()).isEqualTo(TestCaseStatus.READY);
+    }
+
+    @Test
     @DisplayName("§3.3-6 un test OBSOLETE ne se modifie plus")
     void obsolete() {
         TestCase test = manual();

@@ -181,6 +181,23 @@ class TestCaseApiTest extends AbstractApiTest {
     }
 
     @Test
+    @DisplayName("ADR-0028 422 TEST_DATASET_REQUIRED : test manuel à paramètres sans jeu de données passé à READY")
+    void readyRequiresDataSet() throws Exception {
+        String key = create("qa1", Map.of("kind", "MANUAL", "title", "Connexion",
+                "steps", List.of(Map.of("action", "Se connecter avec ${login}"))));
+        mvc.perform(post(BASE + "/" + key + "/status").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"READY\"}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_DATASET_REQUIRED")));
+        mvc.perform(patch(BASE + "/" + key).header("Authorization", qa).contentType("application/merge-patch+json")
+                .content(toJson(Map.of("dataSets", List.of(Map.of("name", "Comptes", "rows", List.of(Map.of("login", "alice"))))))));
+        mvc.perform(post(BASE + "/" + key + "/status").header("Authorization", qa).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"READY\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("READY")));
+    }
+
+    @Test
     @DisplayName("§12 filtres kind, technique, tag, requirement, orphan, candidats (F-MAN-02) ; arbre par dossier")
     void filters() throws Exception {
         create("qa1", Map.of("kind", "MANUAL", "title", "Ajout panier", "folder", "Panier", "tags", List.of("smoke"),

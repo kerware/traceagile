@@ -246,6 +246,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   (`DefectService.tracedFor`). Un test peut figurer plusieurs fois dans une campagne : les
   `data-testid` des lignes prennent le suffixe `itemSuffix` (« -2 » = ligne 2 du jeu). La sélection
   décline d'office un test manuel à jeu de données sur les lignes de son premier jeu (`Campaign.select`, ADR-0022).
+  Un test manuel à paramètres ne passe à READY qu'avec un jeu de données non vide (`TEST_DATASET_REQUIRED`,
+  ADR-0028) : dans les tests et les données de démo, donner un jeu à tout test manuel paramétré.
 - Campagnes et exécutions (ADR-0016) : règles dans `Campaign`, `CampaignItem`, `Execution`
   (statut déduit : `ExecutionRules`), `Defect`, `DefectDraft` (domaine). Après avoir ajouté des
   éléments à une collection en cascade, `flush()` avant de renvoyer leurs identifiants.

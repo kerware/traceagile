@@ -32,3 +32,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0025](0025-guide-et-jeu-saucedemo.md) | Guide d'utilisation et jeu de données saucedemo ; runId qualifié par le projet, artefacts du serveur lus en fin de run | — |
 | [0026](0026-serveur-execution.md) | Serveur d'exécution réel : jar autonome multiplateforme, outils installés à chaud, adaptateurs de frameworks, parallélisme, interface de suivi | 10 |
 | [0027](0027-installation-hors-docker.md) | Installation hors Docker ou en conteneur par logiciel : jar de TraceAgile avec interface, administrateur initial, script de base, démo SwagLabs en export SQL | — |
+| [0028](0028-jeu-de-donnees-obligatoire.md) | Un test manuel à paramètres ne passe à « Prêt » qu'avec un jeu de données non vide | — |

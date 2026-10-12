@@ -142,6 +142,8 @@ class ExecutionTest {
         order.addStep(new StepContent(null, null, null, cart, Map.of()));
         order.addStep("Payer", "Payé", null);
         order.setParameters(List.of(new TestParameter("client", "alice", null), new TestParameter("langue", "en", null)));
+        // ADR-0028 un test manuel paramétré prêt a un jeu de données
+        order.setDataSets(List.of(DataSet.of("Clients", List.of(Map.of("client", "alice", "langue", "en")))));
         order.changeStatus(TestCaseStatus.READY);
         Campaign campaign = new Campaign(shop, "CMP-1", "Régression", CampaignScope.REGRESSION, null, null, null, null, null, null);
 
