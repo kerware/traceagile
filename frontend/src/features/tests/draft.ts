@@ -112,7 +112,8 @@ export function toDraft(test: TestCaseDetail): TestDraft {
     language: a?.language ?? '',
     repositoryUrl: a?.repositoryUrl ?? '',
     gitProjectId: a?.gitProject?.id ?? '',
-    branch: a?.branch ?? '',
+    // ADR-0030 la branche par défaut du projet Git s'affiche en indication, pas comme une saisie
+    branch: a?.gitProject && a.branch === a.gitProject.defaultBranch ? '' : a?.branch ?? '',
     path: a?.path ?? '',
     testIdentifier: a?.testIdentifier ?? '',
     gherkinSource: a?.gherkinSource ?? '',
