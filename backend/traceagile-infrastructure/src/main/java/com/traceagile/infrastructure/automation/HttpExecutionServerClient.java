@@ -87,6 +87,14 @@ public class HttpExecutionServerClient implements ExecutionServerClient {
         Map<String, Object> repository = new LinkedHashMap<>();
         repository.put("url", job.repositoryUrl());
         repository.put("branch", job.branch());
+        if (job.credentials() != null) {
+            // ADR-0030 jeton ou clé SSH du dépôt déclaré : utilisé pour le clone, jamais conservé par le serveur
+            Map<String, Object> credentials = new LinkedHashMap<>();
+            credentials.put("type", job.credentials().type());
+            credentials.put("username", job.credentials().username());
+            credentials.put("secret", job.credentials().secret());
+            repository.put("credentials", credentials);
+        }
         body.put("repository", repository);
         body.put("tests", job.tests().stream().map(t -> {
             Map<String, Object> test = new LinkedHashMap<>();

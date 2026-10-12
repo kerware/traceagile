@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 /** §13.2 /admin/* — onglets de l'administration : utilisateurs, projets et membres, DoR / DoD. */
-export function AdminTabs({ value }: { value: 'users' | 'projects' | 'checklists' | 'references' | 'execution-servers' }) {
+export function AdminTabs({ value }: { value: 'users' | 'projects' | 'checklists' | 'references' | 'execution-servers' | 'git' }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
@@ -25,6 +25,9 @@ export function AdminTabs({ value }: { value: 'users' | 'projects' | 'checklists
           </Tabs.Tab>
           <Tabs.Tab value="execution-servers" data-testid="admin-tab-execution-servers">
             {t('admin.executionServers')}
+          </Tabs.Tab>
+          <Tabs.Tab value="git" data-testid="admin-tab-git">
+            {t('admin.git')}
           </Tabs.Tab>
         </Tabs.List>
       </Tabs>

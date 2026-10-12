@@ -228,6 +228,16 @@ components:
           properties:
             url: { type: string }
             branch: { type: string }
+            credentials:
+              type: object
+              description: >-
+                ADR-0030 identifiants du dépôt déclaré dans TraceAgile, utilisés pour le clone puis oubliés :
+                jamais enregistrés ni écrits dans les journaux. Absent : identifiants enregistrés sur le serveur pour l'hôte.
+              required: [type, secret]
+              properties:
+                type: { type: string, enum: [TOKEN, SSH_KEY] }
+                username: { type: string, description: 'TOKEN : utilisateur HTTPS (défaut x-access-token)' }
+                secret: { type: string, description: 'Jeton d''accès, ou clé privée SSH (format OpenSSH)' }
         tests:
           type: array
           minItems: 1

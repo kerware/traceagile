@@ -27,9 +27,14 @@ public interface ExecutionServerClient {
                    String gherkinSource, Map<String, Object> dataSet, Map<String, Object> parameters, List<String> tags) {
     }
 
+    /** ADR-0030 identifiants du dépôt (TOKEN ou SSH_KEY), transmis avec le job et jamais conservés par le serveur. */
+    record RepositoryCredentials(String type, String username, String secret) {
+    }
+
     /** §10.3 soumission d'un job. */
     record JobRequest(String runId, String project, String campaign, String environment, String buildVersion, String callbackUrl,
-                      String repositoryUrl, String branch, List<JobTest> tests, int timeoutMinutes, int parallelism, int retryFailed) {
+                      String repositoryUrl, String branch, RepositoryCredentials credentials, List<JobTest> tests, int timeoutMinutes,
+                      int parallelism, int retryFailed) {
     }
 
     /** ADR-0021 contenu d'un artefact et son type MIME. */

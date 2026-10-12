@@ -1,6 +1,7 @@
 package com.traceagile.api.testcase;
 
 import com.traceagile.api.testcase.TestCaseDtos.AutomationResponse;
+import com.traceagile.api.testcase.TestCaseDtos.GitProjectRef;
 import com.traceagile.api.testcase.TestCaseDtos.CharterResponse;
 import com.traceagile.api.testcase.TestCaseDtos.DataSetDto;
 import com.traceagile.api.testcase.TestCaseDtos.FrameworkResponse;
@@ -14,6 +15,7 @@ import com.traceagile.api.testcase.TestCaseDtos.TestVersionResponse;
 import com.traceagile.application.traceability.TraceLinkService.RequirementLink;
 import com.traceagile.application.traceability.TraceLinkService.TestLink;
 import com.traceagile.domain.requirement.AcceptanceCriterion;
+import com.traceagile.domain.git.GitProject;
 import com.traceagile.domain.testcase.AutomatedTestDefinition;
 import com.traceagile.domain.testcase.AutomationFramework;
 import com.traceagile.domain.testcase.DataSet;
@@ -46,6 +48,12 @@ public interface TestCaseMapper {
 
     @Mapping(target = "configuration", source = "parameters")
     AutomationResponse toResponse(AutomatedTestDefinition automation);
+
+    /** ADR-0030 projet Git déclaré d'un test automatisé. */
+    default GitProjectRef toRef(GitProject project) {
+        return project == null ? null
+                : new GitProjectRef(project.getId(), project.label(), project.cloneUrl(), project.webUrl(), project.getDefaultBranch());
+    }
 
     default List<ParameterResponse> parameters(TestCase test) {
         List<String> detected = test.detectedParameters();

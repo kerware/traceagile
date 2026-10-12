@@ -1,12 +1,12 @@
 package com.traceagile.application.testcase;
 
-import java.util.function.Function;
-import com.traceagile.domain.testcase.StepContent;
 import com.traceagile.domain.common.BusinessRuleException;
+import com.traceagile.domain.git.GitProject;
 import com.traceagile.domain.requirement.Priority;
 import com.traceagile.domain.testcase.AutomatedTestDefinition;
 import com.traceagile.domain.testcase.DataSet;
 import com.traceagile.domain.testcase.ExploratoryCharter;
+import com.traceagile.domain.testcase.StepContent;
 import com.traceagile.domain.testcase.TestCase;
 import com.traceagile.domain.testcase.TestKind;
 import com.traceagile.domain.testcase.TestParameter;
@@ -16,7 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * §12 merge-patch d'un cas de test : {@code null} = inchangé, {@link Optional#empty()} = effacé
@@ -57,7 +59,9 @@ public record TestCasePatch(
         Optional<List<DataSet>> dataSets,
         Optional<Map<String, Object>> configuration,
         Optional<List<String>> executionTags,
-        Optional<Map<String, String>> environmentRequirements) {
+        Optional<Map<String, String>> environmentRequirements,
+        // ADR-0030 projet d'un dépôt Git déclaré (vide : saisie libre de l'adresse)
+        Optional<UUID> gitProjectId) {
 
     /**
      * ADR-0018 {@code calledTestKey} : pas d'appel d'un autre cas de test, avec ses valeurs de paramètres ;
@@ -77,7 +81,7 @@ public record TestCasePatch(
 
     public static final TestCasePatch EMPTY = new TestCasePatch(null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            null, null, null);
+            null, null, null, null);
 
     public boolean touchesGherkin() {
         return gherkinSource != null;
@@ -91,6 +95,13 @@ public record TestCasePatch(
 
     /** {@code callable} : cas de test appelé d'après sa clé (ADR-0018). */
     public void applyTo(TestCase test, Function<String, TestCase> callable) {
+        applyTo(test, callable, id -> {
+            throw new BusinessRuleException("GIT_PROJECT_NOT_FOUND", "Projet Git introuvable.");
+        });
+    }
+
+    /** {@code gitProjects} : projet Git déclaré d'après son identifiant (ADR-0030). */
+    public void applyTo(TestCase test, Function<String, TestCase> callable, Function<UUID, GitProject> gitProjects) {
         if (title != null) {
             test.rename(title.orElse(null));
         }
@@ -134,7 +145,7 @@ public record TestCasePatch(
             apply(targetedRisk, charter::setTargetedRisk);
         }
         if (any(technique, framework, language, repositoryUrl, branch, path, testIdentifier, gherkinSource,
-                configuration, executionTags, environmentRequirements)) {
+                configuration, executionTags, environmentRequirements, gitProjectId)) {
             require(test, TestKind.AUTOMATED, "champs de test automatisé");
             AutomatedTestDefinition automation = test.getAutomation();
             if (technique != null || framework != null) {
@@ -145,8 +156,11 @@ public record TestCasePatch(
                 automation.setTechnique(newTechnique, framework == null ? automation.getFramework() : framework.orElse(null));
             }
             apply(language, automation::setLanguage);
+            if (gitProjectId != null) {
+                automation.useGitProject(gitProjectId.map(gitProjects).orElse(null));
+            }
             if (any(repositoryUrl, branch, path, testIdentifier)) {
-                automation.setLocation(merge(repositoryUrl, automation.getRepositoryUrl()), merge(branch, automation.getBranch()),
+                automation.setLocation(merge(repositoryUrl, automation.getRepositoryUrl()), merge(branch, automation.getOwnBranch()),
                         merge(path, automation.getPath()), merge(testIdentifier, automation.getTestIdentifier()));
             }
             if (gherkinSource != null && (gherkinSource.isPresent() || automation.getTechnique() == TestTechnique.BDD)) {
@@ -185,7 +199,7 @@ public record TestCasePatch(
     }
 
     public static final class Builder {
-        private final Object[] values = new Object[31];
+        private final Object[] values = new Object[32];
 
         private Builder set(int index, Object value) {
             values[index] = Optional.ofNullable(value);
@@ -217,6 +231,7 @@ public record TestCasePatch(
         public Builder configuration(Map<String, Object> v) { return set(28, v); }
         public Builder executionTags(List<String> v) { return set(29, v); }
         public Builder environmentRequirements(Map<String, String> v) { return set(30, v); }
+        public Builder gitProject(UUID v) { return set(31, v); }
 
         @SuppressWarnings("unchecked")
         public TestCasePatch build() {
@@ -232,7 +247,7 @@ public record TestCasePatch(
                     (Optional<String>) v.get(23), (Optional<String>) v.get(24), (Optional<String>) v.get(25),
                     (Optional<String>) v.get(26), (Optional<List<DataSet>>) v.get(27),
                     (Optional<Map<String, Object>>) v.get(28), (Optional<List<String>>) v.get(29),
-                    (Optional<Map<String, String>>) v.get(30));
+                    (Optional<Map<String, String>>) v.get(30), (Optional<UUID>) v.get(31));
         }
     }
 }

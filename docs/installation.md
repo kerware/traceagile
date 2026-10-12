@@ -515,8 +515,34 @@ administrateur, puis aller sur la page **Outils** :
 
 Pour rejouer la démo SwagLabs, il faut Node.js et l'outil **Playwright** avec ses navigateurs.
 
-Pour un dépôt Git privé, saisir les identifiants de son hôte dans la page **Paramètres** du serveur
-d'exécution.
+### 9.3 Dépôts Git des tests
+
+Les dépôts des tests automatisés se déclarent dans TraceAgile, **Administration › Dépôts Git** :
+
+- un dépôt est l'adresse d'un compte ou d'une organisation (`https://github.com/kerware`,
+  `git@gitlab.example.org:qa`) ;
+- on y déclare ses projets (`saucedemo-e2e`), avec leur branche par défaut ;
+- les fiches de tests automatisés proposent ces projets.
+
+Authentification d'un dépôt privé :
+
+| Mode | À saisir | Clone par le serveur d'exécution |
+| --- | --- | --- |
+| Public | rien | `https://…/projet` |
+| Jeton d'accès | jeton personnel (lecture des dépôts) ; utilisateur facultatif sur GitHub | `https://utilisateur:jeton@…/projet` |
+| Clé SSH | clé privée OpenSSH, sans phrase de passe ; la clé publique est déclarée sur le dépôt (clé de déploiement) | `git@hôte:compte/projet.git`, avec une clé écrite pour le seul clone |
+
+Le jeton ou la clé est chiffré par TraceAgile (`TRACEAGILE_ENCRYPTION_KEY`), n'est jamais réaffiché,
+et accompagne chaque job envoyé au serveur d'exécution. Le serveur l'utilise pour le clone puis
+l'oublie : il ne l'enregistre pas et le masque dans ses journaux. Servez donc le serveur
+d'exécution en HTTPS dès qu'il est sur une autre machine (§11).
+
+Un **dépôt local** se déclare avec une adresse `file:///dossier`, sans authentification : c'est le
+dossier tel que le voit le serveur d'exécution. En conteneur, il faut le monter dans le conteneur
+(§8). C'est ce que fait la démonstration (`file:///depots`, projet `traceagile`).
+
+Les identifiants par hôte de la page **Paramètres** du serveur d'exécution restent possibles. Ils
+servent aux tests saisis avec une adresse libre.
 
 ## 10. Réseau et pare-feu
 

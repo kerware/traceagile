@@ -357,7 +357,8 @@ public class TestCaseController {
                         .map(list -> list.stream().map(d -> new DataSet(d.name(), d.rows(), d.rowNames())).toList()),
                 f.field("configuration", new TypeReference<Map<String, Object>>() { }),
                 f.field("executionTags", new TypeReference<List<String>>() { }),
-                f.field("environmentRequirements", new TypeReference<Map<String, String>>() { }));
+                f.field("environmentRequirements", new TypeReference<Map<String, String>>() { }),
+                f.field("gitProjectId", java.util.UUID.class));
     }
 
     private static List<LinkDraft> linkDrafts(java.util.Optional<List<LinkRequest>> requests) {

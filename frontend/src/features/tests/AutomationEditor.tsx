@@ -2,6 +2,7 @@ import { Alert, Autocomplete, Badge, Fieldset, Group, Input, NumberInput, Select
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useGitSources } from '../../api/git';
 import { useFrameworks, type TestCaseDetail } from '../../api/testcases';
 import { CodeEditor } from '../../components/code/CodeEditor';
 import type { TestDraft } from './draft';
@@ -28,6 +29,14 @@ export function AutomationEditor({
 }) {
   const { t } = useTranslation();
   const { data: frameworks } = useFrameworks();
+  // ADR-0030 projets des dépôts Git déclarés, regroupés par dépôt ; « Autre adresse » garde la saisie libre
+  const { data: gitSources } = useGitSources();
+  const projectOptions = [
+    { group: t('git.otherUrl'), items: [{ value: '', label: t('git.otherUrl') }] },
+    ...(gitSources ?? []).filter((s) => s.projects.length > 0)
+      .map((s) => ({ group: s.name, items: s.projects.map((p) => ({ value: p.id, label: p.label })) })),
+  ];
+  const selectedProject = (gitSources ?? []).flatMap((s) => s.projects).find((p) => p.id === draft.gitProjectId);
   const [configurationText, setConfigurationText] = useState(() => JSON.stringify(draft.configuration, null, 2));
   const [configurationError, setConfigurationError] = useState(false);
   const technique = draft.technique;
@@ -82,9 +91,28 @@ export function AutomationEditor({
             <TextInput label={t('automation.language')} value={draft.language} onChange={(e) => onChange({ language: e.currentTarget.value })} disabled={readOnly} />
           </Group>
           <Group grow align="flex-start">
-            <TextInput label={t('automation.repositoryUrl')} value={draft.repositoryUrl} onChange={(e) => onChange({ repositoryUrl: e.currentTarget.value })} disabled={readOnly} />
-            <TextInput label={t('automation.branch')} value={draft.branch} onChange={(e) => onChange({ branch: e.currentTarget.value })} disabled={readOnly} />
+            <Select
+              label={t('git.testProject')}
+              description={t('git.testProjectHint')}
+              data={projectOptions}
+              value={draft.gitProjectId}
+              onChange={(id) => onChange({ gitProjectId: id ?? '' })}
+              allowDeselect={false}
+              searchable
+              disabled={readOnly}
+              data-testid="automation-git-project"
+            />
+            <TextInput label={t('automation.branch')} placeholder={selectedProject?.defaultBranch ?? undefined} value={draft.branch}
+              onChange={(e) => onChange({ branch: e.currentTarget.value })} disabled={readOnly} data-testid="automation-branch" />
           </Group>
+          {draft.gitProjectId ? (
+            <Text size="xs" c="dimmed" data-testid="automation-clone-url">
+              {t('automation.repositoryUrl')} : {selectedProject?.cloneUrl ?? draft.repositoryUrl}
+            </Text>
+          ) : (
+            <TextInput label={t('automation.repositoryUrl')} value={draft.repositoryUrl} onChange={(e) => onChange({ repositoryUrl: e.currentTarget.value })}
+              disabled={readOnly} data-testid="automation-repository-url" />
+          )}
           <Group grow align="flex-start">
             <TextInput label={t('automation.path')} value={draft.path} onChange={(e) => onChange({ path: e.currentTarget.value })} disabled={readOnly} data-testid="automation-path" />
             <TextInput

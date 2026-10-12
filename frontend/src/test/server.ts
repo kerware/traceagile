@@ -47,6 +47,7 @@ export const handlers = [
   http.get('/api/v1/projects', () => HttpResponse.json(page([SHOP]))),
   // Données de référence lues par des fenêtres toujours montées (création de test, arbre des dossiers).
   http.get('/api/v1/reference/frameworks', () => HttpResponse.json([])),
+  http.get('/api/v1/git-sources', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/test-folders', () => HttpResponse.json([])),
   http.get('/api/v1/projects/:key/test-cases', () => HttpResponse.json(page([]))),
   http.get('/api/v1/projects/:key/requirements/tree', () => HttpResponse.json([])),

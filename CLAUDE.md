@@ -233,6 +233,12 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   préparation une fois par projet, verrou des projets Maven, reprises, échéance, annulation, webhooks).
   Les tests d'API figent la plateforme à LINUX (`AbstractServerTest`). Sous Windows, `main` fixe
   `jdk.net.unixdomain.tmpdir` (TEMP 8.3).
+- Dépôts Git (ADR-0030) : domaine `git` (`GitSource` dépôt, `GitProject` projet, `GitAuthType`), service
+  `GitSourceService` (secret chiffré par `SecretCipher`, jamais renvoyé), `Administration › Dépôts Git`.
+  Une fiche automatisée référence un `GitProject` (`AutomatedTestDefinition.gitProject`, adresse et branche
+  effectives par `getRepositoryUrl()` / `getBranch()`) ou une adresse libre. Le job porte
+  `repository.credentials` ; le serveur d'exécution les garde en mémoire jusqu'au clone (`GitWorkspace`),
+  jeton dans l'URL masquée, clé SSH dans un fichier temporaire. Les tests d'API vident `git_sources`.
 - Sessions exploratoires (ADR-0019) : règles dans `ExploratorySession`, `SessionNote`, `Tbs`,
   `Proof` (domaine `exploratory`) ; une session porte une tentative (`Execution.exploratory`,
   `finishSession`) et son identifiant d'API est celui de la tentative. Métriques §5.4 :

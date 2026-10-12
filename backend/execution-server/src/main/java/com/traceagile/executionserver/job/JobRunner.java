@@ -148,7 +148,7 @@ public class JobRunner {
             Path workspace = properties.jobsDir().resolve(jobId).resolve("workspace").toAbsolutePath().normalize();
             Instant deadline = start.plus(job.timeoutMinutes(), ChronoUnit.MINUTES);
             ExecutionContext context = new ExecutionContext(workspace, environment, tools.platform(), processes, cancellation, deadline, log::line);
-            String workspaceError = git.prepare(context, job.repositoryUrl(), job.branch());
+            String workspaceError = git.prepare(context, jobId, job.repositoryUrl(), job.branch());
             if (workspaceError != null) {
                 log.line(workspaceError);
             }

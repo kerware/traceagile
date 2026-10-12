@@ -6,12 +6,14 @@ import com.traceagile.application.automation.AutomationRepositories.ProcessedWeb
 import com.traceagile.application.automation.AutomationRepositories.RunArtifactRepository;
 import com.traceagile.application.automation.ExecutionServerClient.JobRequest;
 import com.traceagile.application.automation.ExecutionServerClient.JobTest;
+import com.traceagile.application.automation.ExecutionServerClient.RepositoryCredentials;
 import com.traceagile.application.automation.ExecutionServerClient.ServerConnection;
 import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.common.KeyGenerator;
-import com.traceagile.application.requirement.NfrMeasurementService;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.execution.ExecutionRepository;
+import com.traceagile.application.git.GitSourceService;
+import com.traceagile.application.requirement.NfrMeasurementService;
 import com.traceagile.domain.audit.AuditAction;
 import com.traceagile.domain.automation.AutomatedRun;
 import com.traceagile.domain.automation.ExecutionServer;
@@ -23,6 +25,7 @@ import com.traceagile.domain.campaign.CampaignItem;
 import com.traceagile.domain.common.BusinessRuleException;
 import com.traceagile.domain.execution.Execution;
 import com.traceagile.domain.execution.ExecutionStatus;
+import com.traceagile.domain.git.GitProject;
 import com.traceagile.domain.testcase.AutomatedTestDefinition;
 import com.traceagile.domain.testcase.DataSet;
 import com.traceagile.domain.testcase.TestKind;
@@ -72,6 +75,7 @@ public class AutomatedRunService {
     private static final Logger LOG = LoggerFactory.getLogger(AutomatedRunService.class);
     private static final int DEFAULT_TIMEOUT = 30;
 
+    private final GitSourceService gitSources;
     private final AutomatedRunRepository runs;
     private final ExecutionRepository executions;
     private final ProcessedWebhookEventRepository processed;
@@ -93,7 +97,9 @@ public class AutomatedRunService {
                                RunArtifactRepository artifacts, NfrMeasurementService measurements,
                                CampaignService campaigns, ExecutionServerService servers, ExecutionServerClient client, FlakyService flaky,
                                KeyGenerator keys, AuditService audit, ApplicationEventPublisher events, PlatformTransactionManager transactions,
-                               Clock clock, @Value("${traceagile.automation.callback-url:http://localhost:8085/api/v1/execution-callbacks}") String callbackUrl) {
+                               Clock clock, GitSourceService gitSources,
+                               @Value("${traceagile.automation.callback-url:http://localhost:8085/api/v1/execution-callbacks}") String callbackUrl) {
+        this.gitSources = gitSources;
         this.runs = runs;
         this.executions = executions;
         this.processed = processed;
@@ -258,10 +264,14 @@ public class AutomatedRunService {
         List<Execution> pending = executionsOf(run);
         String repository = null;
         String branch = null;
+        GitProject gitProject = null;
         List<JobTest> tests = new ArrayList<>();
         for (Execution execution : pending) {
             AutomatedTestDefinition def = execution.getTestCase().getAutomation();
-            repository = repository == null ? def.getRepositoryUrl() : repository;
+            if (repository == null) {
+                repository = def.getRepositoryUrl();
+                gitProject = def.getGitProject();
+            }
             branch = branch == null ? def.getBranch() : branch;
             List<String> tags = new ArrayList<>(def.getExecutionTags());
             execution.getTestCase().getTags().forEach(tags::add);
@@ -277,7 +287,13 @@ public class AutomatedRunService {
         }
         Campaign campaign = run.getCampaign();
         return new JobRequest(runId(run), run.getProject().getKey(), campaign.getKey(), run.getEnvironment(), run.getBuildVersion(), callbackUrl,
-                repository, branch, tests, run.getTimeoutMinutes(), 4, 0);
+                repository, branch, credentials(gitProject), tests, run.getTimeoutMinutes(), 4, 0);
+    }
+
+    /** ADR-0030 identifiants du dépôt Git déclaré du premier test (aucun pour une adresse libre ou un dépôt public). */
+    private RepositoryCredentials credentials(GitProject project) {
+        GitSourceService.GitCredentials c = project == null ? null : gitSources.credentials(project);
+        return c == null ? null : new RepositoryCredentials(c.type().name(), c.username(), c.secret());
     }
 
     /**

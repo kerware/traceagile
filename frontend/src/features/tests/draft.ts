@@ -56,6 +56,8 @@ export interface TestDraft {
   framework: string;
   language: string;
   repositoryUrl: string;
+  /** ADR-0030 projet d'un dépôt Git déclaré ('' : saisie libre de l'adresse). */
+  gitProjectId: string;
   branch: string;
   path: string;
   testIdentifier: string;
@@ -69,7 +71,7 @@ const COMMON: (keyof TestDraft)[] = ['title', 'objective', 'description', 'prior
 const BY_KIND: Record<TestCaseDetail['kind'], (keyof TestDraft)[]> = {
   MANUAL: ['automationCandidate', 'automationJustification', 'steps'],
   EXPLORATORY: ['explore', 'with', 'toDiscover', 'areas', 'heuristics', 'timeboxMin', 'setupNotes', 'targetedRisk'],
-  AUTOMATED: ['technique', 'framework', 'language', 'repositoryUrl', 'branch', 'path', 'testIdentifier', 'gherkinSource',
+  AUTOMATED: ['technique', 'framework', 'language', 'gitProjectId', 'repositoryUrl', 'branch', 'path', 'testIdentifier', 'gherkinSource',
     'configuration', 'executionTags', 'environmentRequirements'],
 };
 
@@ -109,6 +111,7 @@ export function toDraft(test: TestCaseDetail): TestDraft {
     framework: a?.framework ?? '',
     language: a?.language ?? '',
     repositoryUrl: a?.repositoryUrl ?? '',
+    gitProjectId: a?.gitProject?.id ?? '',
     branch: a?.branch ?? '',
     path: a?.path ?? '',
     testIdentifier: a?.testIdentifier ?? '',
@@ -149,6 +152,12 @@ export function toPatch(kind: TestCaseDetail['kind'], initial: TestDraft, draft:
       patch[field] = value;
     }
   });
+  if (kind === 'AUTOMATED') {
+    // ADR-0030 un projet Git déclaré donne l'adresse : on ne l'envoie pas (elle remplacerait le projet) ;
+    // en revenant à la saisie libre, l'adresse affichée est conservée
+    if (draft.gitProjectId) delete patch.repositoryUrl;
+    else if (initial.gitProjectId) patch.repositoryUrl = draft.repositoryUrl.trim() || null;
+  }
   return patch as TestCasePatch;
 }
 

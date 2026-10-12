@@ -4177,6 +4177,90 @@
         }
       }
     },
+    "/api/v1/git-sources" : {
+      "get" : {
+        "tags" : [ "Dépôts Git" ],
+        "operationId" : "list_11",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GitSourceResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Dépôts Git" ],
+        "operationId" : "create_9",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GitSourceRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GitSourceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/git-sources/{id}/projects" : {
+      "post" : {
+        "tags" : [ "Dépôts Git" ],
+        "operationId" : "addProject",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GitProjectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GitProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/gherkin/validate" : {
       "post" : {
         "tags" : [ "Gherkin" ],
@@ -4208,7 +4292,7 @@
     "/api/v1/execution-servers" : {
       "get" : {
         "tags" : [ "Serveurs d'exécution" ],
-        "operationId" : "list_11",
+        "operationId" : "list_12",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -4227,7 +4311,7 @@
       },
       "post" : {
         "tags" : [ "Serveurs d'exécution" ],
-        "operationId" : "create_9",
+        "operationId" : "create_10",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -5496,9 +5580,9 @@
         }
       }
     },
-    "/api/v1/execution-servers/{id}" : {
+    "/api/v1/git-sources/{id}" : {
       "delete" : {
-        "tags" : [ "Serveurs d'exécution" ],
+        "tags" : [ "Dépôts Git" ],
         "operationId" : "delete_6",
         "parameters" : [ {
           "name" : "id",
@@ -5516,8 +5600,118 @@
         }
       },
       "patch" : {
-        "tags" : [ "Serveurs d'exécution" ],
+        "tags" : [ "Dépôts Git" ],
         "operationId" : "update_8",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GitSourceRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GitSourceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/git-projects/{id}" : {
+      "delete" : {
+        "tags" : [ "Dépôts Git" ],
+        "operationId" : "deleteProject",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Dépôts Git" ],
+        "operationId" : "updateProject",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GitProjectRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GitProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/execution-servers/{id}" : {
+      "delete" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "delete_7",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Serveurs d'exécution" ],
+        "operationId" : "update_9",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -5554,7 +5748,7 @@
     "/api/v1/reference/frameworks" : {
       "get" : {
         "tags" : [ "Administration" ],
-        "operationId" : "list_12",
+        "operationId" : "list_13",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -6099,7 +6293,7 @@
     "/api/v1/projects/{projectKey}/sessions" : {
       "get" : {
         "tags" : [ "Exploratoire" ],
-        "operationId" : "list_13",
+        "operationId" : "list_14",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -7012,7 +7206,7 @@
       },
       "delete" : {
         "tags" : [ "Rapports" ],
-        "operationId" : "delete_7",
+        "operationId" : "delete_8",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -7601,7 +7795,7 @@
     "/api/v1/projects/{projectKey}/attachments/{id}" : {
       "delete" : {
         "tags" : [ "Pièces jointes" ],
-        "operationId" : "delete_8",
+        "operationId" : "delete_9",
         "parameters" : [ {
           "name" : "projectKey",
           "in" : "path",
@@ -10307,6 +10501,11 @@
             "maxLength" : 500,
             "minLength" : 0
           },
+          "gitProjectId" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "ADR-0030 projet d'un dépôt Git déclaré (null : saisie libre de l'adresse)"
+          },
           "branch" : {
             "type" : "string",
             "maxLength" : 200,
@@ -10357,7 +10556,12 @@
             "type" : "string"
           },
           "repositoryUrl" : {
-            "type" : "string"
+            "type" : "string",
+            "description" : "Adresse de clonage : celle du projet Git déclaré, sinon la saisie libre"
+          },
+          "gitProject" : {
+            "$ref" : "#/components/schemas/GitProjectRef",
+            "description" : "ADR-0030 projet d'un dépôt Git déclaré"
           },
           "branch" : {
             "type" : "string"
@@ -10459,6 +10663,29 @@
           }
         },
         "required" : [ "areas", "heuristics", "missionSentence", "timeboxMin" ]
+      },
+      "GitProjectRef" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "label" : {
+            "type" : "string",
+            "description" : "« dépôt / projet »"
+          },
+          "cloneUrl" : {
+            "type" : "string"
+          },
+          "webUrl" : {
+            "type" : "string"
+          },
+          "defaultBranch" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "cloneUrl", "id", "label" ]
       },
       "ParameterResponse" : {
         "type" : "object",
@@ -12245,6 +12472,136 @@
           }
         },
         "required" : [ "contentType", "createdAt", "fileName", "id", "image", "size", "targetId", "targetType" ]
+      },
+      "GitSourceRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "baseUrl" : {
+            "type" : "string",
+            "maxLength" : 300,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          },
+          "authType" : {
+            "type" : "string",
+            "description" : "NONE, TOKEN (jeton HTTPS) ou SSH_KEY (clé privée)",
+            "enum" : [ "NONE", "TOKEN", "SSH_KEY" ]
+          },
+          "username" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "secret" : {
+            "type" : "string",
+            "description" : "Jeton ou clé privée ; vide = secret enregistré conservé",
+            "maxLength" : 20000,
+            "minLength" : 0
+          }
+        }
+      },
+      "GitProjectResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "sourceId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string",
+            "description" : "« dépôt / projet »"
+          },
+          "defaultBranch" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "cloneUrl" : {
+            "type" : "string"
+          },
+          "webUrl" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "cloneUrl", "id", "label", "name", "sourceId", "version" ]
+      },
+      "GitSourceResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "baseUrl" : {
+            "type" : "string"
+          },
+          "authType" : {
+            "type" : "string",
+            "enum" : [ "NONE", "TOKEN", "SSH_KEY" ]
+          },
+          "username" : {
+            "type" : "string"
+          },
+          "hasSecret" : {
+            "type" : "boolean",
+            "description" : "Un jeton ou une clé est enregistré (jamais renvoyé)"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GitProjectResponse"
+            }
+          }
+        },
+        "required" : [ "authType", "baseUrl", "hasSecret", "id", "name", "projects" ]
+      },
+      "GitProjectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "defaultBranch" : {
+            "type" : "string",
+            "maxLength" : 200,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 500,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "name" ]
       },
       "GherkinValidateRequest" : {
         "type" : "object",

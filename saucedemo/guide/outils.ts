@@ -17,6 +17,20 @@ export const EXECUTEUR_URL_DEPUIS_TRACEAGILE = process.env.GUIDE_EXECUTEUR_URL_D
  * dépôt monté en lecture seule (docker-compose.yml) sur la branche courante : la committer avant de lancer.
  */
 export const DEPOT = process.env.GUIDE_DEPOT ?? 'file:///depots/traceagile';
+/**
+ * ADR-0030 le dépôt des tests est déclaré dans Administration › Dépôts Git : DEPOT = adresse du dépôt
+ * (« file:///depots », dépôt local monté dans le serveur d'exécution) + « / » + projet (« traceagile »).
+ */
+export const DEPOT_GIT = { nom: 'Dépôt local', adresse: DEPOT.slice(0, DEPOT.lastIndexOf('/')), projet: DEPOT.slice(DEPOT.lastIndexOf('/') + 1) };
+export const PROJET_GIT = `${DEPOT_GIT.nom} / ${DEPOT_GIT.projet}`;
+
+/** Identifiant du projet Git déclaré, d'après son libellé « dépôt / projet ». */
+export async function projetGit(api: Api, libelle = PROJET_GIT): Promise<string> {
+  const depots = (await api.get('/api/v1/git-sources')) as { projects: { id: string; label: string }[] }[];
+  const projet = depots.flatMap((d) => d.projects).find((p) => p.label === libelle);
+  if (!projet) throw new Error(`Projet Git « ${libelle} » non déclaré (étape 01 du guide)`);
+  return projet.id;
+}
 export const BRANCHE = process.env.GUIDE_BRANCHE ?? execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 export const SERVEUR = process.env.GUIDE_SERVEUR ?? "Serveur d'exécution";
 export const EXECUTEUR_URL = process.env.GUIDE_EXECUTEUR_URL ?? 'http://localhost:8091';

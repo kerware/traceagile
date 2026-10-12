@@ -1204,6 +1204,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/git-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_11"];
+        put?: never;
+        post: operations["create_9"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/git-sources/{id}/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/gherkin/validate": {
         parameters: {
             query?: never;
@@ -1227,9 +1259,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_11"];
+        get: operations["list_12"];
         put?: never;
-        post: operations["create_9"];
+        post: operations["create_10"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1541,7 +1573,7 @@ export interface paths {
         patch: operations["update_7"];
         trace?: never;
     };
-    "/api/v1/execution-servers/{id}": {
+    "/api/v1/git-sources/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1557,6 +1589,38 @@ export interface paths {
         patch: operations["update_8"];
         trace?: never;
     };
+    "/api/v1/git-projects/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteProject"];
+        options?: never;
+        head?: never;
+        patch: operations["updateProject"];
+        trace?: never;
+    };
+    "/api/v1/execution-servers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_7"];
+        options?: never;
+        head?: never;
+        patch: operations["update_9"];
+        trace?: never;
+    };
     "/api/v1/reference/frameworks": {
         parameters: {
             query?: never;
@@ -1564,7 +1628,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_12"];
+        get: operations["list_13"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1772,7 +1836,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_13"];
+        get: operations["list_14"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2127,7 +2191,7 @@ export interface paths {
         get: operations["get_8"];
         put?: never;
         post?: never;
-        delete: operations["delete_7"];
+        delete: operations["delete_8"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2416,7 +2480,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete_8"];
+        delete: operations["delete_9"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3448,6 +3512,11 @@ export interface components {
             framework?: string;
             language?: string;
             repositoryUrl?: string;
+            /**
+             * Format: uuid
+             * @description ADR-0030 projet d'un dépôt Git déclaré (null : saisie libre de l'adresse)
+             */
+            gitProjectId?: string;
             branch?: string;
             path?: string;
             testIdentifier?: string;
@@ -3465,7 +3534,10 @@ export interface components {
             technique: "BDD" | "UNIT" | "UI" | "API" | "KEYWORD" | "DATA_DRIVEN" | "PERFORMANCE" | "CONTRACT";
             framework: string;
             language?: string;
+            /** @description Adresse de clonage : celle du projet Git déclaré, sinon la saisie libre */
             repositoryUrl?: string;
+            /** @description ADR-0030 projet d'un dépôt Git déclaré */
+            gitProject?: components["schemas"]["GitProjectRef"];
             branch?: string;
             path?: string;
             testIdentifier?: string;
@@ -3500,6 +3572,15 @@ export interface components {
             timeboxMin: number;
             setupNotes?: string;
             targetedRisk?: string;
+        };
+        GitProjectRef: {
+            /** Format: uuid */
+            id: string;
+            /** @description « dépôt / projet » */
+            label: string;
+            cloneUrl: string;
+            webUrl?: string;
+            defaultBranch?: string;
         };
         ParameterResponse: {
             name: string;
@@ -4145,6 +4226,52 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
             createdBy?: string;
+        };
+        GitSourceRequest: {
+            name?: string;
+            baseUrl?: string;
+            description?: string;
+            /**
+             * @description NONE, TOKEN (jeton HTTPS) ou SSH_KEY (clé privée)
+             * @enum {string}
+             */
+            authType?: "NONE" | "TOKEN" | "SSH_KEY";
+            username?: string;
+            /** @description Jeton ou clé privée ; vide = secret enregistré conservé */
+            secret?: string;
+        };
+        GitProjectResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sourceId: string;
+            name: string;
+            /** @description « dépôt / projet » */
+            label: string;
+            defaultBranch?: string;
+            description?: string;
+            cloneUrl: string;
+            webUrl?: string;
+            /** Format: int64 */
+            version: number;
+        };
+        GitSourceResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            baseUrl: string;
+            /** @enum {string} */
+            authType: "NONE" | "TOKEN" | "SSH_KEY";
+            username?: string;
+            /** @description Un jeton ou une clé est enregistré (jamais renvoyé) */
+            hasSecret: boolean;
+            description?: string;
+            projects: components["schemas"]["GitProjectResponse"][];
+        };
+        GitProjectRequest: {
+            name: string;
+            defaultBranch?: string;
+            description?: string;
         };
         GherkinValidateRequest: {
             source: string;
@@ -7589,6 +7716,76 @@ export interface operations {
             };
         };
     };
+    list_11: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitSourceResponse"][];
+                };
+            };
+        };
+    };
+    create_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GitSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitSourceResponse"];
+                };
+            };
+        };
+    };
+    addProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GitProjectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitProjectResponse"];
+                };
+            };
+        };
+    };
     validate: {
         parameters: {
             query?: never;
@@ -7613,7 +7810,7 @@ export interface operations {
             };
         };
     };
-    list_11: {
+    list_12: {
         parameters: {
             query?: never;
             header?: never;
@@ -7633,7 +7830,7 @@ export interface operations {
             };
         };
     };
-    create_9: {
+    create_10: {
         parameters: {
             query?: never;
             header?: never;
@@ -8516,6 +8713,98 @@ export interface operations {
         };
         requestBody: {
             content: {
+                "application/json": components["schemas"]["GitSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitSourceResponse"];
+                };
+            };
+        };
+    };
+    deleteProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GitProjectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GitProjectResponse"];
+                };
+            };
+        };
+    };
+    delete_7: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
                 "application/json": components["schemas"]["UpdateServerRequest"];
             };
         };
@@ -8531,7 +8820,7 @@ export interface operations {
             };
         };
     };
-    list_12: {
+    list_13: {
         parameters: {
             query?: never;
             header?: never;
@@ -8847,7 +9136,7 @@ export interface operations {
             };
         };
     };
-    list_13: {
+    list_14: {
         parameters: {
             query?: {
                 state?: ("RUNNING" | "PAUSED" | "FINISHED" | "DEBRIEFED")[];
@@ -9396,7 +9685,7 @@ export interface operations {
             };
         };
     };
-    delete_7: {
+    delete_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -9810,7 +10099,7 @@ export interface operations {
             };
         };
     };
-    delete_8: {
+    delete_9: {
         parameters: {
             query?: never;
             header?: never;

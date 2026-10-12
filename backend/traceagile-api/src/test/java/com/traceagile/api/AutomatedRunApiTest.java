@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -214,6 +215,25 @@ class AutomatedRunApiTest extends AbstractApiTest {
         mvc.perform(get("/api/v1/execution-servers").header("Authorization", admin))
                 .andExpect(jsonPath("$[0].tokenHint", is("1234")))
                 .andExpect(jsonPath("$[0].status", is("ONLINE")));
+    }
+
+    @Test
+    @DisplayName("ADR-0030 test d'un projet Git déclaré : le job porte l'adresse du projet et les identifiants déchiffrés du dépôt")
+    void jobCarriesGitCredentials() throws Exception {
+        String sourceId = send(admin, "/api/v1/git-sources", Map.of("name", "kerware", "baseUrl", "https://github.com/kerware",
+                "authType", "TOKEN", "username", "bot", "secret", "ghp_jeton")).get("id").asText();
+        String projectId = send(admin, "/api/v1/git-sources/" + sourceId + "/projects", Map.of("name", "shop-tests", "defaultBranch", "develop"))
+                .get("id").asText();
+        for (String key : List.of("TC-1", "TC-2")) {
+            mvc.perform(patch(P + "/test-cases/" + key).header("Authorization", dev).contentType("application/merge-patch+json")
+                    .content(toJson(Map.of("gitProjectId", projectId, "branch", "")))).andExpect(status().isOk());
+        }
+        launch(dev, Map.of("serverId", serverId, "itemIds", itemIds("TC-1", "TC-2")));
+        ArgumentCaptor<JobRequest> job = ArgumentCaptor.forClass(JobRequest.class);
+        verify(client).submit(any(), job.capture());
+        assertThat(job.getValue().repositoryUrl()).isEqualTo("https://github.com/kerware/shop-tests");
+        assertThat(job.getValue().branch()).isEqualTo("develop");
+        assertThat(job.getValue().credentials()).isEqualTo(new ExecutionServerClient.RepositoryCredentials("TOKEN", "bot", "ghp_jeton"));
     }
 
     @Test

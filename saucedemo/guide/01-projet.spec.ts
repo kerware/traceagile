@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { Api, capturer, connexion, EXECUTEUR_MOT_DE_PASSE, EXECUTEUR_URL_DEPUIS_TRACEAGILE, MOT_DE_PASSE, noterEtat, P, SERVEUR } from './outils';
+import { Api, BRANCHE, capturer, connexion, DEPOT_GIT, EXECUTEUR_MOT_DE_PASSE, EXECUTEUR_URL_DEPUIS_TRACEAGILE, MOT_DE_PASSE, noterEtat, P, PROJET_GIT, SERVEUR } from './outils';
 
 const EQUIPE: [string, string][] = [
   ['po', 'Paula Owner'], ['qa1', 'Quentin Testeur'], ['qa2', 'Quitterie Testeuse'], ['dev', 'Dev Eloppeur'], ['viewer', 'Victor Lecteur'],
@@ -74,6 +74,24 @@ test('Administration : projet SWAG, membres et serveur d’exécution', async ({
     await page.goto('/admin/execution-servers');
     await expect(page.getByTestId(`server-status-${SERVEUR}`)).toBeVisible();
     await capturer(page, 'admin-serveurs-execution');
+  });
+
+  await test.step('Il déclare les dépôts Git des tests : le dépôt local des exemples et le compte GitHub kerware', async () => {
+    type Depot = { id: string; name: string; projects: { label: string }[] };
+    const declarer = async (nom: string, adresse: string, description: string, projet: string, branche: string) => {
+      let depot = ((await admin.get('/api/v1/git-sources')) as Depot[]).find((d) => d.name === nom);
+      depot ??= (await admin.post('/api/v1/git-sources', { name: nom, baseUrl: adresse, description, authType: 'NONE' })) as Depot;
+      if (!depot.projects?.some((p) => p.label === `${nom} / ${projet}`)) {
+        await admin.post(`/api/v1/git-sources/${depot.id}/projects`, { name: projet, defaultBranch: branche });
+      }
+    };
+    // dépôt local monté en lecture seule dans le serveur d'exécution : les tests de saucedemo/ de ce dépôt
+    await declarer(DEPOT_GIT.nom, DEPOT_GIT.adresse, 'Dépôt TraceAgile monté dans le serveur d’exécution (exemples du guide)', DEPOT_GIT.projet, BRANCHE);
+    // dépôt public sur GitHub (projet de formation Playwright Java)
+    await declarer('kerware', 'https://github.com/kerware', 'Projets de formation (GitHub, public)', 'saucedemo-e2e', 'master');
+    await page.goto('/admin/git');
+    await expect(page.getByTestId(`git-project-${PROJET_GIT}`)).toBeVisible();
+    await capturer(page, 'admin-depots-git', undefined, { pleinePage: true });
   });
 
   await test.step('La page Projets montre la carte du nouveau projet', async () => {

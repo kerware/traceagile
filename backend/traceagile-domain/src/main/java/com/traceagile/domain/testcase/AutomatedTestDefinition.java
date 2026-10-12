@@ -2,11 +2,14 @@ package com.traceagile.domain.testcase;
 
 import com.traceagile.domain.common.AuditableEntity;
 import com.traceagile.domain.common.BusinessRuleException;
+import com.traceagile.domain.git.GitProject;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
@@ -45,6 +48,11 @@ public class AutomatedTestDefinition extends AuditableEntity {
 
     @Column(name = "repository_url", length = 500)
     private String repositoryUrl;
+
+    /** ADR-0030 projet d'un dépôt Git déclaré ; prioritaire sur {@code repositoryUrl} (saisie libre). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "git_project_id")
+    private GitProject gitProject;
 
     @Column(length = 200)
     private String branch;
@@ -108,13 +116,29 @@ public class AutomatedTestDefinition extends AuditableEntity {
         this.framework = framework.strip();
     }
 
-    /** Dépôt, branche, chemin et identifiant résolus par le serveur d'exécution (§6). */
+    /**
+     * Dépôt, branche, chemin et identifiant résolus par le serveur d'exécution (§6). ADR-0030 une adresse
+     * différente de celle du projet Git choisi remplace ce projet par une saisie libre.
+     */
     public void setLocation(String repositoryUrl, String branch, String path, String testIdentifier) {
         testCase.ensureEditable();
-        this.repositoryUrl = blankToNull(repositoryUrl);
+        String url = blankToNull(repositoryUrl);
+        if (gitProject != null && !Objects.equals(url, gitProject.cloneUrl())) {
+            gitProject = null;
+        }
+        this.repositoryUrl = gitProject == null ? url : null;
         this.branch = blankToNull(branch);
         this.path = blankToNull(path);
         this.testIdentifier = blankToNull(testIdentifier);
+    }
+
+    /** ADR-0030 test pris dans un projet Git déclaré ({@code null} : saisie libre de l'adresse). */
+    public void useGitProject(GitProject project) {
+        testCase.ensureEditable();
+        this.gitProject = project;
+        if (project != null) {
+            this.repositoryUrl = null;
+        }
     }
 
     public void setLanguage(String language) {
@@ -199,12 +223,23 @@ public class AutomatedTestDefinition extends AuditableEntity {
         return language;
     }
 
+    /** Adresse de clonage : celle du projet Git déclaré, sinon la saisie libre. */
     public String getRepositoryUrl() {
-        return repositoryUrl;
+        return gitProject != null ? gitProject.cloneUrl() : repositoryUrl;
     }
 
+    /** Branche saisie, sinon la branche par défaut du projet Git déclaré. */
     public String getBranch() {
+        return branch != null || gitProject == null ? branch : gitProject.getDefaultBranch();
+    }
+
+    /** Branche saisie sur le test (sans la branche par défaut du projet Git). */
+    public String getOwnBranch() {
         return branch;
+    }
+
+    public GitProject getGitProject() {
+        return gitProject;
     }
 
     public String getPath() {

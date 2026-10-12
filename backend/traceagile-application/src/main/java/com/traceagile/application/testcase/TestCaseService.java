@@ -3,14 +3,15 @@ package com.traceagile.application.testcase;
 import com.traceagile.application.administration.ProjectRepository;
 import com.traceagile.application.audit.AuditService;
 import com.traceagile.application.campaign.CampaignItemRepository;
-import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.application.common.KeyGenerator;
 import com.traceagile.application.common.NotFoundException;
 import com.traceagile.application.common.UnprocessableException;
 import com.traceagile.application.common.VersionConflictException;
+import com.traceagile.application.execution.ExecutionRepository;
+import com.traceagile.application.git.GitSourceService;
 import com.traceagile.application.requirement.GherkinValidator;
-import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.application.traceability.TraceLinkService.LinkDraft;
+import com.traceagile.application.traceability.TraceLinkService;
 import com.traceagile.domain.administration.Project;
 import com.traceagile.domain.audit.AuditAction;
 import com.traceagile.domain.common.BusinessRuleException;
@@ -23,17 +24,17 @@ import com.traceagile.domain.testcase.TestCaseVersion;
 import com.traceagile.domain.testcase.TestKind;
 import com.traceagile.domain.testcase.TestTechnique;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Sort;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +56,7 @@ public class TestCaseService {
     public record TestCaseResult(TestCase testCase, List<String> warnings) {
     }
 
+    private final GitSourceService gitSources;
     private final TestCaseRepository tests;
     private final TestCaseVersionRepository versions;
     private final ProjectRepository projects;
@@ -70,7 +72,8 @@ public class TestCaseService {
     public TestCaseService(TestCaseRepository tests, TestCaseVersionRepository versions, ProjectRepository projects,
                            AutomationFrameworkRepository frameworks, KeyGenerator keys, GherkinValidator gherkin,
                            FeatureFileParser features, TraceLinkService links, AuditService audit, ExecutionRepository executions,
-                           CampaignItemRepository campaignItems) {
+                           CampaignItemRepository campaignItems, GitSourceService gitSources) {
+        this.gitSources = gitSources;
         this.executions = executions;
         this.campaignItems = campaignItems;
         this.tests = tests;
@@ -161,7 +164,7 @@ public class TestCaseService {
             }
         };
         if (command.details() != null) {
-            command.details().applyTo(test, callable(projectKey));
+            command.details().applyTo(test, callable(projectKey), gitSources::project);
         }
         prepareGherkin(test);
         TestCase saved = tests.save(test);
@@ -180,7 +183,7 @@ public class TestCaseService {
         VersionConflictException.check(expectedVersion, test.getVersion());
         Map<String, Object> before = test.snapshot();
         Object fingerprint = test.significantFingerprint();
-        patch.applyTo(test, callable(projectKey));
+        patch.applyTo(test, callable(projectKey), gitSources::project);
         prepareGherkin(test);
         if (!Objects.equals(fingerprint, test.significantFingerprint())) {
             test.nextVersion();

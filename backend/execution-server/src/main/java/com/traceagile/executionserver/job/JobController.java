@@ -35,6 +35,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping("/api/v1")
 public class JobController {
 
+    private final GitWorkspace git;
     private final JobStore store;
     private final JobRunner runner;
     private final ArtifactStore artifacts;
@@ -42,7 +43,9 @@ public class JobController {
     private final ServerProperties properties;
     private final Clock clock;
 
-    public JobController(JobStore store, JobRunner runner, ArtifactStore artifacts, ToolService tools, ServerProperties properties, Clock clock) {
+    public JobController(JobStore store, JobRunner runner, ArtifactStore artifacts, ToolService tools, ServerProperties properties, Clock clock,
+                         GitWorkspace git) {
+        this.git = git;
         this.store = store;
         this.runner = runner;
         this.artifacts = artifacts;
@@ -75,6 +78,7 @@ public class JobController {
         }
         String jobId = "job-" + UUID.randomUUID().toString().substring(0, 8);
         store.create(jobId, token.tokenId(), spec, ServletUriComponentsBuilder.fromContextPath(http).build().toUriString(), clock.instant());
+        git.remember(jobId, spec.credentials());
         runner.start(jobId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of("jobId", jobId, "status", "ACCEPTED"));
     }

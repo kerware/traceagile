@@ -95,7 +95,8 @@
     "loginInvalid": "2 à 32 caractères parmi a-z, 0-9, . _ -",
     "checklists": "DoR / DoD",
     "references": "Référentiels",
-    "executionServers": "Serveurs d'exécution"
+    "executionServers": "Serveurs d'exécution",
+    "git": "Dépôts Git"
   },
   "comingSoon": {
     "title": "{{screen}}",
@@ -1580,5 +1581,39 @@
       "NOT_MET": "Seuil dépassé",
       "UNKNOWN": "Sans seuil chiffré"
     }
+  },
+  "git": {
+    "intro": "Déclarez ici les dépôts Git de vos tests automatisés : un compte ou une organisation (https://github.com/kerware), public ou privé, puis ses projets (saucedemo-e2e). Les fiches de tests les proposent ; le jeton ou la clé SSH, chiffré, accompagne chaque run envoyé au serveur d'exécution et n'est jamais réaffiché.",
+    "none": "Aucun dépôt déclaré.",
+    "addSource": "Déclarer un dépôt",
+    "create": "Déclarer",
+    "name": "Nom",
+    "baseUrl": "Adresse du dépôt",
+    "baseUrlHint": "https://github.com/compte, git@hôte:compte, ou file:///dossier (dépôt local du serveur d'exécution)",
+    "description": "Description",
+    "auth": "Authentification",
+    "username": "Utilisateur",
+    "usernameHint": "Facultatif pour GitHub (x-access-token)",
+    "token": "Jeton d'accès",
+    "tokenHint": "Jeton personnel avec le droit de lecture des dépôts",
+    "sshKey": "Clé privée SSH",
+    "sshKeyHint": "Clé privée au format OpenSSH, sans phrase de passe ; la clé publique est déclarée sur le dépôt (clé de déploiement)",
+    "secretKept": "Un secret est enregistré : laissez vide pour le conserver.",
+    "authType": {
+      "NONE": "Public",
+      "TOKEN": "Jeton",
+      "SSH_KEY": "Clé SSH"
+    },
+    "project": "Projet",
+    "projectName": "Nouveau projet",
+    "defaultBranch": "Branche par défaut",
+    "cloneUrl": "Adresse de clonage",
+    "noProject": "Aucun projet.",
+    "addProject": "Ajouter le projet",
+    "editSource": "Modifier le dépôt {{name}}",
+    "saved": "Dépôt {{name}} enregistré",
+    "testProject": "Projet Git",
+    "testProjectHint": "Projet d'un dépôt déclaré dans l'administration",
+    "otherUrl": "Autre adresse (saisie libre)"
   }
 }

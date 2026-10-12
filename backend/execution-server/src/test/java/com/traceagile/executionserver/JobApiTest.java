@@ -311,6 +311,39 @@ class JobApiTest extends AbstractServerTest {
     }
 
     @Test
+    @DisplayName("ADR-0030 identifiants transmis avec le job : jeton dans l'URL du clone (masqué au journal), clé SSH écrite pour le clone puis supprimée")
+    void credentialsFromTraceAgile() throws Exception {
+        List<Path> keys = new ArrayList<>();
+        processes.when("git clone", (command, line, output, cancellation) -> {
+            String ssh = command.environment().get("GIT_SSH_COMMAND");
+            if (ssh != null) {
+                Path key = command.directory().resolve("cle-ssh");
+                assertThat(Files.readString(key)).isEqualTo("-----BEGIN OPENSSH PRIVATE KEY-----\nabc\n-----END OPENSSH PRIVATE KEY-----\n");
+                keys.add(key);
+            }
+            output.accept("Cloning into 'workspace'... " + line);
+            return FakeProcessRunner.ok("");
+        });
+        String bearer = bearer();
+        Map<String, Object> withToken = job("SHOP/RUN-21", List.of(test("e-1", "TC-1", "UI", "Inconnu", "a.spec.ts", "A")), Map.of());
+        withToken.put("repository", Map.of("url", "https://github.com/kerware/saucedemo-e2e", "branch", "master",
+                "credentials", Map.of("type", "TOKEN", "username", "bot", "secret", "ghp_jeton-transmis")));
+        String tokenJob = submit(bearer, withToken);
+        await(bearer, tokenJob, "COMPLETED");
+        assertThat(processes.executed()).anyMatch(l -> l.contains("\"https://bot:ghp_jeton-transmis@github.com/kerware/saucedemo-e2e\""));
+        String logs = mvc.perform(get("/api/v1/jobs/" + tokenJob + "/logs").header("Authorization", bearer)).andReturn().getResponse().getContentAsString();
+        assertThat(logs).contains("jeton transmis par TraceAgile").doesNotContain("ghp_jeton-transmis");
+
+        Map<String, Object> withKey = job("SHOP/RUN-22", List.of(test("e-2", "TC-2", "UI", "Inconnu", "b.spec.ts", "B")), Map.of());
+        withKey.put("repository", Map.of("url", "git@github.com:kerware/saucedemo-e2e.git",
+                "credentials", Map.of("type", "SSH_KEY", "secret", "-----BEGIN OPENSSH PRIVATE KEY-----\r\nabc\r\n-----END OPENSSH PRIVATE KEY-----")));
+        await(bearer, submit(bearer, withKey), "COMPLETED");
+        assertThat(keys).hasSize(1);
+        assertThat(keys.getFirst()).doesNotExist();
+        assertThat(processes.commands()).anyMatch(c -> String.valueOf(c.environment().get("GIT_SSH_COMMAND")).contains("StrictHostKeyChecking=accept-new"));
+    }
+
+    @Test
     @DisplayName("§10.3 un clone impossible met chaque test en erreur ; une requête incomplète est refusée (400)")
     void cloneFailure() throws Exception {
         processes.when("git clone", (command, line, output, cancellation) -> {

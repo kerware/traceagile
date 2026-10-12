@@ -34,3 +34,4 @@ retenue et consignée ici. Format court : contexte, décision, conséquences.
 | [0027](0027-installation-hors-docker.md) | Installation hors Docker ou en conteneur par logiciel : jar de TraceAgile avec interface, administrateur initial, script de base, démo SwagLabs en export SQL | — |
 | [0028](0028-jeu-de-donnees-obligatoire.md) | Un test manuel à paramètres ne passe à « Prêt » qu'avec un jeu de données non vide | — |
 | [0029](0029-jeux-de-donnees-nommes.md) | Lignes de jeu de données nommées ; appel d'un test avec un jeu nommé de l'appelé, lu à l'exécution | — |
+| [0030](0030-depots-git.md) | Dépôts Git déclarés dans l'administration (public, jeton, clé SSH, file://) et leurs projets, choisis dans les fiches de tests ; identifiants transmis avec les jobs | — |

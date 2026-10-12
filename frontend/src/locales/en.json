@@ -95,7 +95,8 @@
     "loginInvalid": "2 to 32 characters among a-z, 0-9, . _ -",
     "checklists": "DoR / DoD",
     "references": "Reference data",
-    "executionServers": "Execution servers"
+    "executionServers": "Execution servers",
+    "git": "Git repositories"
   },
   "comingSoon": {
     "title": "{{screen}}",
@@ -1580,5 +1581,39 @@
       "NOT_MET": "Threshold exceeded",
       "UNKNOWN": "No numeric threshold"
     }
+  },
+  "git": {
+    "intro": "Declare the Git repositories of your automated tests here: an account or organisation (https://github.com/kerware), public or private, then its projects (saucedemo-e2e). Test forms offer them; the encrypted token or SSH key goes with each run sent to the execution server and is never shown again.",
+    "none": "No repository declared.",
+    "addSource": "Declare a repository",
+    "create": "Declare",
+    "name": "Name",
+    "baseUrl": "Repository address",
+    "baseUrlHint": "https://github.com/account, git@host:account, or file:///folder (local repository of the execution server)",
+    "description": "Description",
+    "auth": "Authentication",
+    "username": "User",
+    "usernameHint": "Optional for GitHub (x-access-token)",
+    "token": "Access token",
+    "tokenHint": "Personal token allowed to read repositories",
+    "sshKey": "SSH private key",
+    "sshKeyHint": "OpenSSH private key without passphrase; declare the public key on the repository (deploy key)",
+    "secretKept": "A secret is stored: leave empty to keep it.",
+    "authType": {
+      "NONE": "Public",
+      "TOKEN": "Token",
+      "SSH_KEY": "SSH key"
+    },
+    "project": "Project",
+    "projectName": "New project",
+    "defaultBranch": "Default branch",
+    "cloneUrl": "Clone address",
+    "noProject": "No project.",
+    "addProject": "Add project",
+    "editSource": "Edit repository {{name}}",
+    "saved": "Repository {{name}} saved",
+    "testProject": "Git project",
+    "testProjectHint": "Project of a repository declared in the administration",
+    "otherUrl": "Other address (free input)"
   }
 }

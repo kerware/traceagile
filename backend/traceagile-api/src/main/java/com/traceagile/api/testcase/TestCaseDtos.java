@@ -80,11 +80,21 @@ public interface TestCaseDtos {
             String targetedRisk) {
     }
 
+    /** ADR-0030 projet d'un dépôt Git déclaré, tel qu'une fiche de test le cite. */
+    record GitProjectRef(
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "« dépôt / projet »") String label,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String cloneUrl,
+            String webUrl,
+            String defaultBranch) {
+    }
+
     record AutomationResponse(
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) TestTechnique technique,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String framework,
             String language,
-            String repositoryUrl,
+            @Schema(description = "Adresse de clonage : celle du projet Git déclaré, sinon la saisie libre") String repositoryUrl,
+            @Schema(description = "ADR-0030 projet d'un dépôt Git déclaré") GitProjectRef gitProject,
             String branch,
             String path,
             String testIdentifier,
@@ -221,6 +231,7 @@ public interface TestCaseDtos {
             @Size(max = 60) String framework,
             @Size(max = 40) String language,
             @Size(max = 500) String repositoryUrl,
+            @Schema(description = "ADR-0030 projet d'un dépôt Git déclaré (null : saisie libre de l'adresse)") UUID gitProjectId,
             @Size(max = 200) String branch,
             @Size(max = 500) String path,
             @Size(max = 500) String testIdentifier,

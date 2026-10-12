@@ -113,6 +113,19 @@ techniques qu'il sait exécuter.
 
 ![Serveurs d'exécution](images/admin-serveurs-execution.png)
 
+L'onglet **Dépôts Git** déclare, pour toute l'instance, les dépôts où se trouvent les tests
+automatisés : un compte ou une organisation, puis ses projets. Un dépôt est public, ou authentifié par
+un **jeton d'accès** (HTTPS) ou une **clé SSH**. Le secret est chiffré, n'est jamais réaffiché, et
+accompagne chaque run envoyé au serveur d'exécution, qui l'oublie après le clone. L'exemple en
+déclare deux :
+
+- **Dépôt local** (`file:///depots`), projet `traceagile` : ce dépôt, monté dans le serveur
+  d'exécution ; les tests de SWAG y prennent leur code (`saucedemo/`) ;
+- **kerware** (`https://github.com/kerware`, public), projet `saucedemo-e2e` : un projet de tests
+  Playwright en Java, disponible pour d'autres fiches.
+
+![Dépôts Git et leurs projets](images/admin-depots-git.png)
+
 ![Utilisateurs](images/admin-utilisateurs.png)
 
 La page **Projets** résume chaque projet.
@@ -284,7 +297,8 @@ modifier, on sait quels tests seront touchés.
 Un test automatisé référence le code qui l'exécute :
 
 - **technique** et **framework** ;
-- dépôt, branche et chemin ;
+- **projet Git**, choisi parmi les dépôts déclarés (ici « Dépôt local / traceagile »), la branche
+  (par défaut, celle du projet) et le chemin ; « Autre adresse » permet encore une saisie libre ;
 - **identifiant** : le nom du test dans le rapport.
 
 L'identifiant permet de rattacher les résultats, qu'ils viennent du serveur d'exécution ou d'un

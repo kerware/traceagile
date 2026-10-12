@@ -171,6 +171,33 @@ describe('§6 test automatisé', () => {
     await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Jeu 1', rows: [{ montant: 49.99 }], rowNames: [''] }]));
   });
 
+  it('ADR-0030 choisit le projet d’un dépôt Git déclaré : le PATCH envoie le projet, pas l’adresse', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    server.use(http.get('/api/v1/git-sources', () => HttpResponse.json([{
+      id: 's1', name: 'kerware', baseUrl: 'https://github.com/kerware', authType: 'NONE', hasSecret: false, projects: [{
+        id: 'p1', sourceId: 's1', name: 'saucedemo-e2e', label: 'kerware / saucedemo-e2e', defaultBranch: 'master',
+        cloneUrl: 'https://github.com/kerware/saucedemo-e2e', webUrl: 'https://github.com/kerware/saucedemo-e2e', version: 0,
+      }],
+    }])));
+    serve(testDetail('TC-1', {
+      kind: 'AUTOMATED', steps: [],
+      automation: { technique: 'UI', framework: 'Playwright', repositoryUrl: 'https://git.example.com/ancien.git', configuration: {}, executionTags: [],
+        environmentRequirements: {}, keywords: [], missingInRepository: false },
+    }));
+    const sent = capturePatch();
+    view();
+
+    expect(await screen.findByTestId('automation-repository-url')).toHaveValue('https://git.example.com/ancien.git');
+    await userEvent.click(screen.getByTestId('automation-git-project'));
+    await userEvent.click(await screen.findByRole('option', { name: 'kerware / saucedemo-e2e' }));
+    expect(screen.getByTestId('automation-clone-url')).toHaveTextContent('https://github.com/kerware/saucedemo-e2e');
+    expect(screen.getByTestId('automation-branch')).toHaveAttribute('placeholder', 'master');
+    await userEvent.click(screen.getByTestId('test-save'));
+
+    await waitFor(() => expect(sent.body?.gitProjectId).toBe('p1'));
+    expect(sent.body).not.toHaveProperty('repositoryUrl');
+  });
+
   it('F-AUT-08 signale un test absent du dépôt', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     serve(testDetail('TC-1', {

@@ -139,6 +139,10 @@ export const appRoutes: RouteObject[] = [
             path: 'execution-servers',
             lazy: () => import('../features/admin/AdminExecutionServersPage').then((m) => ({ Component: m.AdminExecutionServersPage })),
           },
+          {
+            path: 'git',
+            lazy: () => import('../features/admin/AdminGitPage').then((m) => ({ Component: m.AdminGitPage })),
+          },
         ],
       },
       { path: '*', element: <NotFound /> },

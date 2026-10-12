@@ -12,7 +12,17 @@ import java.util.Map;
  * @param retryFailed nouvelles tentatives d'un test en échec avant de rendre son résultat
  */
 public record JobSpec(String runId, String project, String campaign, String environment, String buildVersion, String callbackUrl,
-                      String repositoryUrl, String branch, List<TestSpec> tests, int timeoutMinutes, int parallelism, int retryFailed) {
+                      String repositoryUrl, String branch, Credentials credentials, List<TestSpec> tests, int timeoutMinutes, int parallelism,
+                      int retryFailed) {
+
+    /** ADR-0030 identifiants du dépôt transmis par TraceAgile (TOKEN ou SSH_KEY) ; jamais enregistrés. */
+    public record Credentials(String type, String username, String secret) {
+
+        @Override
+        public String toString() {
+            return "Credentials[" + type + "]";
+        }
+    }
 
     /** Un test du job ; {@code parameters} et {@code dataSet} deviennent des variables d'environnement. */
     public record TestSpec(String executionId, String testKey, String technique, String framework, String path, String testIdentifier,
@@ -51,8 +61,22 @@ public record JobSpec(String runId, String project, String campaign, String envi
         }
         return new JobSpec(text(runId), text(body.get("project")), text(body.get("campaign")), text(body.get("environment")),
                 text(body.get("buildVersion")), text(callback), text(repository.getOrDefault("url", body.get("repositoryUrl"))),
-                text(repository.getOrDefault("branch", body.get("branch"))), List.copyOf(tests),
+                text(repository.getOrDefault("branch", body.get("branch"))), credentials(repository.get("credentials")), List.copyOf(tests),
                 number(options.get("timeoutMinutes"), 30, 1, 24 * 60), number(options.get("parallelism"), 1, 1, 32), number(options.get("retryFailed"), 0, 0, 3));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Credentials credentials(Object value) {
+        if (!(value instanceof Map<?, ?> m)) {
+            return null;
+        }
+        Map<String, Object> c = (Map<String, Object>) m;
+        String type = text(c.get("type"));
+        String secret = c.get("secret") == null ? null : String.valueOf(c.get("secret"));
+        if (type == null || secret == null || secret.isBlank() || !(type.equals("TOKEN") || type.equals("SSH_KEY"))) {
+            return null;
+        }
+        return new Credentials(type, text(c.get("username")), secret);
     }
 
     private static String text(Object value) {

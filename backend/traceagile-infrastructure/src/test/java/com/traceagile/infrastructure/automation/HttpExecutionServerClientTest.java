@@ -21,6 +21,7 @@ import com.traceagile.application.automation.ExecutionServerClient;
 import com.traceagile.application.automation.ExecutionServerClient.Capabilities;
 import com.traceagile.application.automation.ExecutionServerClient.IssuedToken;
 import com.traceagile.application.automation.ExecutionServerClient.JobRequest;
+import com.traceagile.application.automation.ExecutionServerClient.RepositoryCredentials;
 import com.traceagile.application.automation.ExecutionServerClient.JobTest;
 import com.traceagile.application.automation.ExecutionServerClient.ServerConnection;
 import com.traceagile.application.automation.ExecutionServerClient.UnauthorizedException;
@@ -92,7 +93,7 @@ class HttpExecutionServerClientTest {
                 .withHeader("Authorization", equalTo("Bearer ets_jeton"))
                 .willReturn(okJson("{\"jobId\":\"job-42\",\"status\":\"ACCEPTED\"}").withStatus(202)));
         JobRequest job = new JobRequest("RUN-3", "SHOP", "CMP-2", "recette", "2.0.0", "http://traceagile/api/v1/execution-callbacks",
-                "https://git/shop.git", "main", List.of(new JobTest("8f1c", "TC-45", TestTechnique.BDD, "cucumber-jvm", "features/panier.feature",
+                "https://git/shop.git", "main", new RepositoryCredentials("TOKEN", "bot", "ghp_secret"), List.of(new JobTest("8f1c", "TC-45", TestTechnique.BDD, "cucumber-jvm", "features/panier.feature",
                 "Livraison gratuite au seuil", "# language: fr", null, Map.of("browser", "chromium"), List.of("smoke", "REQ-12"))), 30, 4, 0);
 
         assertThat(client.submit(connection, job)).isEqualTo("job-42");
@@ -101,6 +102,9 @@ class HttpExecutionServerClientTest {
                 .withRequestBody(matchingJsonPath("$.runId", equalTo("RUN-3")))
                 .withRequestBody(matchingJsonPath("$.callbackUrl", equalTo("http://traceagile/api/v1/execution-callbacks")))
                 .withRequestBody(matchingJsonPath("$.repository.url", equalTo("https://git/shop.git")))
+                // ADR-0030 identifiants du dépôt joints au job
+                .withRequestBody(matchingJsonPath("$.repository.credentials.type", equalTo("TOKEN")))
+                .withRequestBody(matchingJsonPath("$.repository.credentials.secret", equalTo("ghp_secret")))
                 .withRequestBody(matchingJsonPath("$.tests[0].executionId", equalTo("8f1c")))
                 .withRequestBody(matchingJsonPath("$.tests[0].technique", equalTo("BDD")))
                 .withRequestBody(matchingJsonPath("$.options", equalToJson("{\"timeoutMinutes\":30,\"parallelism\":4,\"retryFailed\":0}"))));
