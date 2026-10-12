@@ -20,7 +20,7 @@ const JUNIT = join(RACINE_SAUCEDEMO, 'results', 'junit-saucedemo.xml');
 const SESSION_TC12 = `with s as (
     select x.id, x.execution_id from exploratory_sessions x join executions e on e.id = x.execution_id
     join test_cases t on t.id = e.test_case_id join projects p on p.id = t.project_id
-    where p.key = '${P}' and t.key = 'TC-12'),
+    where p.project_key = '${P}' and t.test_key = 'TC-12'),
   base as (select (current_date + time '15:00') at time zone 'Europe/Paris' as t0)`;
 const DECALAGES_NOTES = [252, 760, 1590, 2280, 3060]; // 04:12, 12:40, 26:30, 38:00, 51:00
 const DUREE_ACTIVE = 55 * 60;
