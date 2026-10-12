@@ -83,6 +83,8 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
       if (raccourci) await page.getByTestId('note-text').press(raccourci);
       await page.getByTestId('note-text').press('Control+Enter');
       await expect(page.getByTestId('session-notes')).toContainText(texte);
+      // sans captures, la note suivante serait saisie avant que l'ajout ne vide le champ
+      await expect(page.getByTestId('note-text')).toHaveValue('');
     };
     await noter('standard_user : 3 produits ajoutés, badge à 3, panier cohérent avec le catalogue');
     await noter('Retour arrière du navigateur depuis le panier : badge et boutons conservés');

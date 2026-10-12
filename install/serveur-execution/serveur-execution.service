@@ -1,0 +1,17 @@
+# Service systemd (docs/installation.md §7) : copier dans /etc/systemd/system/, puis
+#   sudo systemctl daemon-reload && sudo systemctl enable --now serveur-execution
+[Unit]
+Description=Serveur d'execution TraceAgile
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=executeur
+WorkingDirectory=/opt/serveur-execution
+EnvironmentFile=/opt/serveur-execution/serveur-execution.env
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /opt/serveur-execution/execution-server.jar
+SuccessExitStatus=143
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

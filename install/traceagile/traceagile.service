@@ -1,0 +1,17 @@
+# Service systemd (docs/installation.md §6) : copier dans /etc/systemd/system/, puis
+#   sudo systemctl daemon-reload && sudo systemctl enable --now traceagile
+[Unit]
+Description=TraceAgile
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+User=traceagile
+WorkingDirectory=/opt/traceagile
+EnvironmentFile=/opt/traceagile/traceagile.env
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /opt/traceagile/traceagile-api.jar
+SuccessExitStatus=143
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

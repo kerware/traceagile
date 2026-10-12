@@ -25,7 +25,7 @@ PIECES="$TRAVAIL/pieces-jointes"
 psql_docker() { docker exec -i "$CONTENEUR" psql -U traceagile "$@"; }
 
 [ -f "$JAR" ] || { echo "Jar distribuable absent : $JAR (mvn ... -Pdistribution)" >&2; exit 1; }
-unzip -l "$JAR" | grep -q "BOOT-INF/classes/static/index.html" || { echo "Le jar n'embarque pas l'interface (profil distribution)" >&2; exit 1; }
+unzip -l "$JAR" | grep "BOOT-INF/classes/static/index.html" > /dev/null || { echo "Le jar n'embarque pas l'interface (profil distribution)" >&2; exit 1; }
 
 echo "1/6 Base temporaire $BASE"
 PSQL="docker exec -i $CONTENEUR psql" "$ICI/installer-base.sh" --hote localhost --port 5432 --superutilisateur traceagile \
@@ -39,14 +39,14 @@ TRACEAGILE_CALLBACK_URL="http://host.docker.internal:$PORT/api/v1/execution-call
 PID=$!
 trap 'kill $PID 2>/dev/null || true' EXIT
 for _ in $(seq 1 90); do
-  curl -fs "http://localhost:$PORT/actuator/health" | grep -q UP && break
+  curl -fs "http://localhost:$PORT/actuator/health" 2>/dev/null | grep UP > /dev/null && break
   sleep 2
 done
-curl -fs "http://localhost:$PORT/actuator/health" | grep -q UP || { tail -40 "$TRAVAIL/traceagile.log"; exit 1; }
+curl -fs "http://localhost:$PORT/actuator/health" 2>/dev/null | grep UP > /dev/null || { tail -40 "$TRAVAIL/traceagile.log"; exit 1; }
 
 echo "3/6 Tests réels de saucedemo (rapport JUnit importé par le scénario)"
 cd "$RACINE/saucedemo"
-npx playwright test > "$TRAVAIL/app-tests.log" 2>&1 || true
+[ -f results/junit-saucedemo.xml ] || npx playwright test > "$TRAVAIL/app-tests.log" 2>&1 || true
 
 echo "4/6 Scénario du guide sans captures : projet SWAG, deux sprints, runs exécutés par le serveur d'exécution"
 TRACEAGILE_URL="http://localhost:$PORT" GUIDE_PROJET=SWAG GUIDE_MOT_DE_PASSE="$MOT_DE_PASSE_DEMO" GUIDE_SANS_CAPTURES=1 \
