@@ -29,7 +29,8 @@ test('Serveur d’exécution : suivi, jobs, outils, jetons', async ({ page }) =>
     await capturer(page, 'es-jobs');
     const projet = String(lireEtat().projet ?? 'SWAG');
     await page.getByTestId('jobs-search').fill(`${projet}/RUN-2`);
-    await page.getByRole('link', { name: `${projet}/RUN-2` }).click();
+    // le serveur garde les jobs des générations précédentes : le plus récent est en tête
+    await page.getByRole('link', { name: `${projet}/RUN-2` }).first().click();
     await expect(page.getByTestId('job-tests')).toContainText('TC-10');
     await capturer(page, 'es-job', undefined, { pleinePage: true });
     await page.getByRole('tab', { name: 'Journal' }).click();
