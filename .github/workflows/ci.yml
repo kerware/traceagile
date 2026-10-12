@@ -78,7 +78,8 @@ jobs:
           curl -fs localhost:8085/api/v1/projects -H "Authorization: Bearer $TOKEN" | jq -e '.content[] | select(.key == "SWAG")'
       - name: Journal de TraceAgile
         if: failure()
-        run: cat dist/traceagile-0.1.0/traceagile/traceagile.log
+        run: |
+          cat dist/traceagile-0.1.0/traceagile/traceagile.log 2>/dev/null || echo "Pas de journal, TraceAgile n'a pas démarré (voir l'étape en échec)."
 
   frontend:
     name: Front-end (lint, tsc, Vitest, build)
