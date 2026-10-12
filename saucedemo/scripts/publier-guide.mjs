@@ -1,7 +1,8 @@
-// Publie le guide d'utilisation (docs/guide/README.md) en deux formats autonomes :
-// - docs/guide/guide-traceagile.html : page unique, captures intégrées (data URI), thème clair et sombre,
-//   copiée dans frontend/public/guide/index.html (menu « Documentation » de l'application, /guide/) ;
-// - docs/guide/guide-traceagile.docx : document Word, captures, sommaire cliquable, pied de page numéroté.
+// Publie un document Markdown de docs/ en deux formats autonomes (option --document, « guide » par défaut) :
+// - guide : docs/guide/README.md → docs/guide/guide-traceagile.html (captures intégrées en data URI, copiée
+//   dans frontend/public/guide/index.html, menu « Documentation » de l'application, /guide/) et .docx ;
+// - installation : docs/installation.md → docs/installation-traceagile.html et .docx (ADR-0027).
+// HTML : page unique, navigation des chapitres, thème clair et sombre. Word : sommaire cliquable, pied de page numéroté.
 // Option --fragment <fichier> : même page sans <!doctype>/<head>, pour la publier comme Artifact.
 import {
   AlignmentType, BorderStyle, Bookmark, Document, ExternalHyperlink, Footer, HeadingLevel, ImageRun, InternalHyperlink,
@@ -13,9 +14,26 @@ import { dirname, join, posix, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const GUIDE = join(RACINE, 'docs', 'guide');
-const SOURCE = readFileSync(join(GUIDE, 'README.md'), 'utf-8').replace(/\r\n/g, '\n');
-const TITRE = 'Guide d’utilisation de TraceAgile';
+const DOCUMENTS = {
+  guide: {
+    dossier: join(RACINE, 'docs', 'guide'), source: 'README.md', sortie: 'guide-traceagile',
+    titre: 'Guide d’utilisation de TraceAgile', onglet: 'Guide TraceAgile', marque: 'TraceAgile · guide',
+    description: 'Guide d’utilisation de TraceAgile illustré sur le projet Swag Labs (saucedemo)',
+    surtitre: 'Exemple Swag Labs · release 1.0 · 2 sprints', chapitreParPage: true, copieApplication: true,
+  },
+  installation: {
+    dossier: join(RACINE, 'docs'), source: 'installation.md', sortie: 'installation-traceagile',
+    titre: 'Installation de TraceAgile hors Docker', onglet: 'Installation TraceAgile', marque: 'TraceAgile · installation',
+    description: 'Installation de TraceAgile et du serveur d’exécution sur des machines indépendantes, sans Docker',
+    surtitre: 'Deux jars · PostgreSQL · démo SwagLabs', chapitreParPage: false, copieApplication: false,
+  },
+};
+const option = process.argv.indexOf('--document');
+const DOC = DOCUMENTS[option > 0 ? process.argv[option + 1] : 'guide'];
+if (!DOC) throw new Error(`Document inconnu ; choix : ${Object.keys(DOCUMENTS).join(', ')}`);
+const GUIDE = DOC.dossier;
+const SOURCE = readFileSync(join(GUIDE, DOC.source), 'utf-8').replace(/\r\n/g, '\n');
+const TITRE = DOC.titre;
 
 // ------------------------------------------------------------------------------------- utilitaires
 
@@ -88,8 +106,8 @@ function pageHtml() {
   const chapitres = corps.slice(corps.indexOf('<h2'));
   const navigation = titres.filter((t) => t.niveau === 2 && t.texte !== 'Sommaire')
     .map((t) => `<li><a href="#${t.id}">${t.texte.replace(/^(\d+)\. /, '<span class="num">$1</span>')}</a></li>`).join('\n');
-  return `<title>Guide TraceAgile</title>
-<meta name="description" content="Guide d’utilisation de TraceAgile illustré sur le projet Swag Labs (saucedemo)">
+  return `<title>${DOC.onglet}</title>
+<meta name="description" content="${DOC.description}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -125,6 +143,8 @@ h3 { font: 600 1.2rem/1.3 var(--titre); margin: 2.2rem 0 .6rem; scroll-margin-to
 p, li { max-width: 68ch; }
 a { color: var(--accent); text-underline-offset: 2px; }
 code { font: .88em var(--code); background: var(--accent-doux); padding: .08em .35em; border-radius: 4px; }
+pre { overflow-x: auto; margin: 1.2rem 0 1.6rem; padding: .9rem 1.1rem; background: var(--papier); border: 1px solid var(--filet); border-radius: 8px; line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: .84rem; }
 .chemin { font-family: var(--code); font-size: .9em; border-bottom: 1px dotted var(--doux); }
 figure { margin: 1.4rem 0 1.8rem; }
 figure img, .tableau img { display: block; height: auto; border: 1px solid var(--filet); border-radius: 6px; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 6px 18px -10px rgb(0 0 0 / .25); }
@@ -143,14 +163,14 @@ th { font-weight: 600; background: var(--accent-doux); }
 </style>
 <div class="page">
 <nav aria-label="Chapitres">
-<p class="marque">TraceAgile · guide</p>
+<p class="marque">${DOC.marque}</p>
 <ol>
 ${navigation}
 </ol>
 </nav>
 <main>
 <header class="entete">
-<p class="surtitre">Exemple Swag Labs · release 1.0 · 2 sprints</p>
+<p class="surtitre">${DOC.surtitre}</p>
 <h1>${TITRE}</h1>
 ${intro}
 </header>
@@ -207,7 +227,7 @@ function blocs(tokens, options = {}) {
         const texte = texteBrut(t.tokens);
         if (t.depth === 1 || texte === 'Sommaire') break;
         const niveau = t.depth === 2 ? HeadingLevel.HEADING_1 : HeadingLevel.HEADING_2;
-        resultat.push(new Paragraph({ heading: niveau, pageBreakBefore: t.depth === 2,
+        resultat.push(new Paragraph({ heading: niveau, pageBreakBefore: t.depth === 2 && DOC.chapitreParPage,
           children: [new Bookmark({ id: signets.get(ancre(texte)), children: runs(t.tokens) })] }));
         break;
       }
@@ -254,7 +274,8 @@ function blocs(tokens, options = {}) {
         resultat.push(...blocs(t.tokens, { paragraphe: { style: 'Principe' } }));
         break;
       case 'code':
-        resultat.push(new Paragraph({ children: [new TextRun({ text: t.text, font: 'Consolas', size: 19 })] }));
+        // une ligne par saut de ligne Word, espaces conservés (schémas en texte)
+        resultat.push(new Paragraph({ style: 'Code', children: t.text.split('\n').map((ligne, i) => new TextRun({ text: ligne, break: i ? 1 : 0 })) }));
         break;
       default:
         break; // hr, espaces
@@ -281,13 +302,15 @@ async function documentWord() {
   const doc = new Document({
     creator: 'TraceAgile',
     title: TITRE,
-    description: 'Guide d’utilisation illustré sur le projet Swag Labs (saucedemo)',
+    description: DOC.description,
     styles: {
       default: { document: { run: { font: 'Calibri', size: 22, color: '15222C' }, paragraph: { spacing: { after: 120, line: 288 } } } },
       paragraphStyles: [
         { id: 'Title', name: 'Title', basedOn: 'Normal', run: { font: 'Calibri Light', size: 56, bold: true, color: '15222C' }, paragraph: { spacing: { after: 240 } } },
         { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true, run: { font: 'Calibri Light', size: 36, bold: true, color: ACCENT }, paragraph: { spacing: { before: 120, after: 200 }, keepNext: true } },
         { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true, run: { font: 'Calibri', size: 26, bold: true, color: '15222C' }, paragraph: { spacing: { before: 320, after: 120 }, keepNext: true } },
+        { id: 'Code', name: 'Code', basedOn: 'Normal', run: { font: 'Consolas', size: 17 }, paragraph: {
+          shading: { type: ShadingType.CLEAR, fill: 'F2F6F8' }, spacing: { before: 120, after: 200, line: 240 }, indent: { left: 120, right: 120 } } },
         { id: 'Legende', name: 'Légende', basedOn: 'Normal', run: { size: 18, italics: true, color: '51606B' }, paragraph: { alignment: AlignmentType.CENTER, spacing: { after: 240 } } },
         { id: 'Principe', name: 'Principe', basedOn: 'Normal', paragraph: {
           shading: { type: ShadingType.CLEAR, fill: 'EEF6F0' }, border: { left: { style: BorderStyle.SINGLE, size: 24, color: '2F855A', space: 8 } },
@@ -305,7 +328,7 @@ async function documentWord() {
       footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.RIGHT,
         children: [new TextRun({ text: `${TITRE} — page `, size: 16, color: '51606B' }), new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '51606B' })] })] }) },
       children: [
-        new Paragraph({ children: [new TextRun({ text: 'EXEMPLE SWAG LABS · RELEASE 1.0 · 2 SPRINTS', size: 18, color: ACCENT, bold: true })] }),
+        new Paragraph({ children: [new TextRun({ text: DOC.surtitre.toUpperCase(), size: 18, color: ACCENT, bold: true })] }),
         new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun(TITRE)] }),
         ...blocs(intro.filter((t) => !(t.type === 'heading'))),
         ...sommaire(),
@@ -320,14 +343,16 @@ async function documentWord() {
 
 const page = pageHtml();
 const complete = `<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${page.slice(0, page.indexOf('<div class="page">'))}</head>\n<body>\n${page.slice(page.indexOf('<div class="page">'))}</body>\n</html>\n`;
-writeFileSync(join(GUIDE, 'guide-traceagile.html'), complete);
-// servi par l'application à /guide/ (menu « Documentation »)
-mkdirSync(join(RACINE, 'frontend', 'public', 'guide'), { recursive: true });
-writeFileSync(join(RACINE, 'frontend', 'public', 'guide', 'index.html'), complete);
+writeFileSync(join(GUIDE, `${DOC.sortie}.html`), complete);
+if (DOC.copieApplication) {
+  // servi par l'application à /guide/ (menu « Documentation »)
+  mkdirSync(join(RACINE, 'frontend', 'public', 'guide'), { recursive: true });
+  writeFileSync(join(RACINE, 'frontend', 'public', 'guide', 'index.html'), complete);
+}
 const fragment = process.argv.indexOf('--fragment');
 if (fragment > 0) {
   mkdirSync(dirname(resolve(process.argv[fragment + 1])), { recursive: true });
   writeFileSync(resolve(process.argv[fragment + 1]), page);
 }
-writeFileSync(join(GUIDE, 'guide-traceagile.docx'), await documentWord());
-console.log(`Guide publié : docs/guide/guide-traceagile.html et .docx (${images.size} captures)`);
+writeFileSync(join(GUIDE, `${DOC.sortie}.docx`), await documentWord());
+console.log(`Publié : ${relative(RACINE, join(GUIDE, DOC.sortie)).split('\\').join('/')}.html et .docx (${images.size} captures)`);

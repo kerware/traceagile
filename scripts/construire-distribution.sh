@@ -22,15 +22,17 @@ rm -f "$DIST/base-de-donnees/generer-demo-swaglabs.sh"
 cp backend/traceagile-api/target/traceagile-api.jar "$DIST/traceagile/"
 cp backend/execution-server/target/execution-server.jar "$DIST/serveur-execution/"
 cp docs/installation.md "$DIST/INSTALLATION.md"
+cp docs/installation-traceagile.html "$DIST/INSTALLATION.html"
+cp docs/installation-traceagile.docx "$DIST/INSTALLATION.docx"
 
 echo "3/3 Archives"
 cd "$RACINE/dist"
 rm -f "traceagile-$VERSION.zip" "serveur-execution-$VERSION.zip"
 if command -v zip > /dev/null; then
-  zip -qr "traceagile-$VERSION.zip" "traceagile-$VERSION/traceagile" "traceagile-$VERSION/base-de-donnees" "traceagile-$VERSION/INSTALLATION.md"
-  zip -qr "serveur-execution-$VERSION.zip" "traceagile-$VERSION/serveur-execution" "traceagile-$VERSION/INSTALLATION.md"
+  zip -qr "traceagile-$VERSION.zip" "traceagile-$VERSION/traceagile" "traceagile-$VERSION/base-de-donnees" "traceagile-$VERSION"/INSTALLATION.*
+  zip -qr "serveur-execution-$VERSION.zip" "traceagile-$VERSION/serveur-execution" "traceagile-$VERSION"/INSTALLATION.*
 else
-  python3 -m zipfile -c "traceagile-$VERSION.zip" "traceagile-$VERSION/traceagile" "traceagile-$VERSION/base-de-donnees" "traceagile-$VERSION/INSTALLATION.md"
-  python3 -m zipfile -c "serveur-execution-$VERSION.zip" "traceagile-$VERSION/serveur-execution" "traceagile-$VERSION/INSTALLATION.md"
+  python3 -m zipfile -c "traceagile-$VERSION.zip" "traceagile-$VERSION/traceagile" "traceagile-$VERSION/base-de-donnees" "traceagile-$VERSION"/INSTALLATION.*
+  python3 -m zipfile -c "serveur-execution-$VERSION.zip" "traceagile-$VERSION/serveur-execution" "traceagile-$VERSION"/INSTALLATION.*
 fi
 ls -l "$RACINE/dist"

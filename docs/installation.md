@@ -7,15 +7,16 @@ démonstration SwagLabs. Pour un poste de développement, `docker compose up` re
 
 ```
  Machine A : TraceAgile                       Machine B : serveur d'exécution
- ┌──────────────────────────────┐   jobs      ┌───────────────────────────────┐
- │ traceagile-api.jar  :8085    │ ──────────▶ │ execution-server.jar  :8091   │
- │ (API + interface + guide)    │             │ (API + interface, base H2)    │
- │                              │ ◀────────── │ Java 21, Git, Node.js, Python │
- └──────────────┬───────────────┘  résultats  └───────────────────────────────┘
-                │ JDBC                (webhooks)
- ┌──────────────▼───────────────┐
- │ PostgreSQL 16+  :5432        │   (machine A ou une machine dédiée)
- └──────────────────────────────┘
+ +------------------------------+    jobs     +-------------------------------+
+ | traceagile-api.jar  :8085    | ----------> | execution-server.jar  :8091   |
+ | (API + interface + guide)    |             | (API + interface, base H2)    |
+ |                              | <---------- | Java 21, Git, Node.js, Python |
+ +--------------+---------------+  résultats  +-------------------------------+
+                |                 (webhooks)
+                | JDBC
+ +--------------v---------------+
+ | PostgreSQL 16+  :5432        |   (machine A ou une machine dédiée)
+ +------------------------------+
 ```
 
 Les deux jars peuvent aussi tourner sur la même machine, et plusieurs serveurs d'exécution peuvent

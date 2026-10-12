@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation TraceAgile</title>
+<meta name="description" content="Installation de TraceAgile et du serveur d’exécution sur des machines indépendantes, sans Docker">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : navigation des chapitres fixe à gauche, colonne de lecture d'environ 70 caractères, captures pleine colonne. */
+:root {
+  --fond: #f5f7f8; --papier: #ffffff; --encre: #15222c; --doux: #51606b; --filet: #d8e0e5;
+  --accent: #19647e; --accent-doux: #e2eef2; --valide: #2f855a; --echec: #c53030;
+  --titre: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --texte: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --code: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --fond: #0f171d; --papier: #16212a; --encre: #e3eaee; --doux: #9aabb6; --filet: #2a3a46;
+  --accent: #6cc3de; --accent-doux: #1b3340; --valide: #68d391; --echec: #fc8181; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --fond: #0f171d; --papier: #16212a; --encre: #e3eaee; --doux: #9aabb6; --filet: #2a3a46;
+  --accent: #6cc3de; --accent-doux: #1b3340; --valide: #68d391; --echec: #fc8181; color-scheme: dark }
+body { margin: 0; background: var(--fond); color: var(--encre); font: 16px/1.65 var(--texte); }
+img { max-width: 100%; height: auto; }
+.page { display: grid; grid-template-columns: 17rem minmax(0, 1fr); gap: 3rem; max-width: 76rem; margin: 0 auto; padding-inline: 1.5rem; }
+nav { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; max-height: 100vh; overflow-y: auto; padding-block: 2.5rem; }
+nav .marque { font: 700 1.05rem/1.2 var(--titre); color: var(--accent); letter-spacing: .01em; margin: 0 0 1.25rem; }
+nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .15rem; }
+nav a { display: flex; gap: .6rem; padding: .3rem .5rem; border-radius: 6px; color: var(--doux); text-decoration: none; font-size: .92rem; line-height: 1.35; }
+nav a:hover, nav a:focus-visible { background: var(--accent-doux); color: var(--encre); outline: none; }
+nav .num { font: 500 .8rem/1.6 var(--code); color: var(--accent); min-width: 1.4rem; font-variant-numeric: tabular-nums; }
+main { min-width: 0; padding-block: 2.5rem 5rem; max-width: 48rem; }
+header.entete { border-bottom: 1px solid var(--filet); padding-bottom: 1.75rem; margin-bottom: 1rem; }
+.surtitre { font: 500 .78rem/1 var(--code); text-transform: uppercase; letter-spacing: .12em; color: var(--accent); margin: 0 0 .9rem; }
+h1 { font: 700 clamp(2rem, 4.5vw, 2.9rem)/1.08 var(--titre); margin: 0 0 1rem; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font: 700 1.7rem/1.2 var(--titre); margin: 3.5rem 0 1rem; padding-top: 1.5rem; border-top: 1px solid var(--filet); text-wrap: balance; scroll-margin-top: 1rem; }
+h3 { font: 600 1.2rem/1.3 var(--titre); margin: 2.2rem 0 .6rem; scroll-margin-top: 1rem; }
+p, li { max-width: 68ch; }
+a { color: var(--accent); text-underline-offset: 2px; }
+code { font: .88em var(--code); background: var(--accent-doux); padding: .08em .35em; border-radius: 4px; }
+pre { overflow-x: auto; margin: 1.2rem 0 1.6rem; padding: .9rem 1.1rem; background: var(--papier); border: 1px solid var(--filet); border-radius: 8px; line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: .84rem; }
+.chemin { font-family: var(--code); font-size: .9em; border-bottom: 1px dotted var(--doux); }
+figure { margin: 1.4rem 0 1.8rem; }
+figure img, .tableau img { display: block; height: auto; border: 1px solid var(--filet); border-radius: 6px; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 6px 18px -10px rgb(0 0 0 / .25); }
+figcaption { font-size: .85rem; color: var(--doux); margin-top: .55rem; }
+.tableau { overflow-x: auto; margin: 1.2rem 0 1.6rem; }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+th, td { text-align: left; vertical-align: top; padding: .55rem .7rem; border-bottom: 1px solid var(--filet); }
+th { font-weight: 600; background: var(--accent-doux); }
+.principe { margin: 1.8rem 0; padding: 1rem 1.25rem; background: var(--papier); border: 1px solid var(--filet); border-left: 4px solid var(--valide); border-radius: 0 8px 8px 0; }
+.principe p { margin: 0; }
+@media (max-width: 60rem) {
+  .page { grid-template-columns: minmax(0, 1fr); gap: 0; padding-inline: 1rem; }
+  nav { position: static; max-height: none; padding-block: 1.5rem 0; border-bottom: 1px solid var(--filet); }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+</head>
+<body>
+<div class="page">
+<nav aria-label="Chapitres">
+<p class="marque">TraceAgile · installation</p>
+<ol>
+<li><a href="#1-prérequis"><span class="num">1</span>Prérequis</a></li>
+<li><a href="#2-produire-les-deux-jars-distribuables"><span class="num">2</span>Produire les deux jars distribuables</a></li>
+<li><a href="#3-créer-la-base-de-données"><span class="num">3</span>Créer la base de données</a></li>
+<li><a href="#4-configurer-traceagile"><span class="num">4</span>Configurer TraceAgile</a></li>
+<li><a href="#5-démarrer-traceagile"><span class="num">5</span>Démarrer TraceAgile</a></li>
+<li><a href="#6-démarrer-en-service"><span class="num">6</span>Démarrer en service</a></li>
+<li><a href="#7-installer-le-serveur-dexécution"><span class="num">7</span>Installer le serveur d'exécution</a></li>
+<li><a href="#8-https-et-proxy-inverse"><span class="num">8</span>HTTPS et proxy inverse</a></li>
+<li><a href="#9-sauvegarde-mise-à-jour-désinstallation"><span class="num">9</span>Sauvegarde, mise à jour, désinstallation</a></li>
+<li><a href="#10-dépannage"><span class="num">10</span>Dépannage</a></li>
+<li><a href="#11-limites-de-la-démonstration"><span class="num">11</span>Limites de la démonstration</a></li>
+</ol>
+</nav>
+<main>
+<header class="entete">
+<p class="surtitre">Deux jars · PostgreSQL · démo SwagLabs</p>
+<h1>Installation de TraceAgile hors Docker</h1>
+<p>Cette note décrit l&#39;installation de TraceAgile et de son serveur d&#39;exécution sur des machines
+indépendantes, sans Docker : deux jars Java autonomes, une base PostgreSQL, et en option le jeu de
+démonstration SwagLabs. Pour un poste de développement, <code>docker compose up</code> reste plus simple
+(voir <span class="chemin" title="Fichier du dépôt : CLAUDE.md">CLAUDE.md</span>). Les choix techniques sont dans l&#39;<span class="chemin" title="Fichier du dépôt : docs/adr/0027-installation-hors-docker.md">ADR-0027</span>.</p>
+<pre><code> Machine A : TraceAgile                       Machine B : serveur d&#39;exécution
+ +------------------------------+    jobs     +-------------------------------+
+ | traceagile-api.jar  :8085    | ----------&gt; | execution-server.jar  :8091   |
+ | (API + interface + guide)    |             | (API + interface, base H2)    |
+ |                              | &lt;---------- | Java 21, Git, Node.js, Python |
+ +--------------+---------------+  résultats  +-------------------------------+
+                |                 (webhooks)
+                | JDBC
+ +--------------v---------------+
+ | PostgreSQL 16+  :5432        |   (machine A ou une machine dédiée)
+ +------------------------------+
+</code></pre>
+<p>Les deux jars peuvent aussi tourner sur la même machine, et plusieurs serveurs d&#39;exécution peuvent
+être rattachés à un même TraceAgile.</p>
+
+</header>
+<h2 id="1-prérequis">1. Prérequis</h2>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Machine</th>
+<th>Logiciel</th>
+<th>Remarque</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TraceAgile</td>
+<td>Java 21 (JRE suffit)</td>
+<td><code>java -version</code> doit afficher 21 ou plus.</td>
+</tr>
+<tr>
+<td>Base de données</td>
+<td>PostgreSQL <strong>16 ou plus</strong>, avec <code>psql</code></td>
+<td>Le jeu de démonstration est un export PostgreSQL 16. Un superutilisateur (ex. <code>postgres</code>) est nécessaire pour la création du rôle et de la base.</td>
+</tr>
+<tr>
+<td>Serveur d&#39;exécution</td>
+<td>Java 21, Git</td>
+<td>Node.js 22, Python 3.10+ selon les frameworks utilisés (Playwright, Cypress, Robot Framework). L&#39;interface du serveur détecte ces prérequis et explique comment les installer. Les outils de test eux-mêmes s&#39;installent depuis cette interface.</td>
+</tr>
+<tr>
+<td>Construction des jars</td>
+<td>Java 21, Maven 3.9</td>
+<td>Node.js est téléchargé par Maven. À faire une fois, sur un poste de développement.</td>
+</tr>
+</tbody></table>
+</div>
+<p>Système : Windows 10/11 ou Server 2019+, Linux (x64 ou arm64), macOS. Mémoire : 1 Go pour
+TraceAgile, 512 Mo pour le serveur d&#39;exécution, plus ce que demandent les navigateurs des tests.</p>
+<h2 id="2-produire-les-deux-jars-distribuables">2. Produire les deux jars distribuables</h2>
+<p>Depuis la racine du dépôt :</p>
+<pre><code class="language-bash">scripts/construire-distribution.sh
+</code></pre>
+<p>ou, sous Windows :</p>
+<pre><code class="language-powershell">.\scripts\construire-distribution.ps1
+</code></pre>
+<p>Le script lance <code>mvn -pl traceagile-api,execution-server -am package -Pdistribution -DskipTests</code>,
+puis assemble <code>dist/traceagile-&lt;version&gt;/</code> :</p>
+<pre><code>dist/
+  traceagile-&lt;version&gt;/
+    INSTALLATION.md                 cette note
+    traceagile/
+      traceagile-api.jar            API, interface web et guide d&#39;utilisation (≈ 105 Mo)
+      traceagile.env.exemple        configuration à copier en traceagile.env
+      demarrer.sh  demarrer.ps1     lancement (lit traceagile.env)
+      traceagile.service            service systemd
+    serveur-execution/
+      execution-server.jar          serveur d&#39;exécution et son interface
+      serveur-execution.env.exemple
+      demarrer.sh  demarrer.ps1
+      serveur-execution.service
+    base-de-donnees/
+      installer-base.sh  installer-base.ps1   création du rôle et de la base, démo en option
+      creer-base.sql  apres-demo.sql
+      demo/swaglabs.sql             jeu de démonstration SwagLabs (projet SWAG)
+      demo/pieces-jointes/          captures jointes de la démo
+  traceagile-&lt;version&gt;.zip          traceagile/ + base-de-donnees/ + note
+  serveur-execution-&lt;version&gt;.zip   serveur-execution/ + note
+</code></pre>
+<p>Sans le script, les jars s&#39;obtiennent ainsi :</p>
+<pre><code class="language-bash">cd backend
+mvn -pl traceagile-api -am package -Pdistribution -DskipTests   # → traceagile-api/target/traceagile-api.jar
+mvn -pl execution-server -am package -DskipTests                # → execution-server/target/execution-server.jar
+</code></pre>
+<p>Le profil <code>distribution</code> construit l&#39;interface React (<code>frontend/</code>) et l&#39;embarque dans le jar, avec le
+guide d&#39;utilisation. Sans lui, le jar ne contient que l&#39;API (c&#39;est le cas de l&#39;image Docker, où nginx
+sert l&#39;interface).</p>
+<p>Copier <code>traceagile-&lt;version&gt;.zip</code> sur la machine A et <code>serveur-execution-&lt;version&gt;.zip</code> sur la
+machine B, puis les décompresser (ex. <code>/opt/traceagile</code>, <code>C:\TraceAgile</code>).</p>
+<h2 id="3-créer-la-base-de-données">3. Créer la base de données</h2>
+<p>Le script <code>base-de-donnees/installer-base.(sh|ps1)</code> se lance depuis toute machine qui a <code>psql</code> et
+accède au serveur PostgreSQL. Il :</p>
+<ol>
+<li>crée le rôle applicatif (ou met à jour son mot de passe) et la base, propriété de ce rôle, en UTF-8 ;</li>
+<li>avec l&#39;option démo, injecte le jeu SwagLabs ;</li>
+<li>prépare le serveur d&#39;exécution de la démo (adresse, appairage à refaire) ;</li>
+<li>copie les pièces jointes de la démo.</li>
+</ol>
+<p>Le mot de passe du superutilisateur est demandé par <code>psql</code> (ou lu dans <code>PGPASSWORD</code>, <code>~/.pgpass</code>,
+<code>%APPDATA%\postgresql\pgpass.conf</code>).</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Option (<code>.sh</code>)</th>
+<th>Option (<code>.ps1</code>)</th>
+<th>Défaut</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--mot-de-passe</code></td>
+<td><code>-MotDePasse</code></td>
+<td><em>obligatoire</em></td>
+<td>mot de passe du rôle applicatif</td>
+</tr>
+<tr>
+<td><code>--hote</code>, <code>--port</code></td>
+<td><code>-Hote</code>, <code>-Port</code></td>
+<td><code>localhost</code>, <code>5432</code></td>
+<td>serveur PostgreSQL</td>
+</tr>
+<tr>
+<td><code>--superutilisateur</code></td>
+<td><code>-Superutilisateur</code></td>
+<td><code>postgres</code></td>
+<td>compte qui crée rôle et base</td>
+</tr>
+<tr>
+<td><code>--base</code>, <code>--utilisateur</code></td>
+<td><code>-Base</code>, <code>-Utilisateur</code></td>
+<td><code>traceagile</code>, <code>traceagile</code></td>
+<td>noms de la base et du rôle</td>
+</tr>
+<tr>
+<td><code>--demo</code></td>
+<td><code>-Demo</code></td>
+<td>non</td>
+<td>injecte la démo SwagLabs (base vide uniquement)</td>
+</tr>
+<tr>
+<td><code>--remplacer</code></td>
+<td><code>-Remplacer</code></td>
+<td>non</td>
+<td><strong>supprime</strong> puis recrée la base (toutes les données sont perdues)</td>
+</tr>
+<tr>
+<td><code>--url-serveur</code></td>
+<td><code>-UrlServeur</code></td>
+<td>inchangée</td>
+<td>adresse du serveur d&#39;exécution de la démo</td>
+</tr>
+<tr>
+<td><code>--pieces-jointes</code></td>
+<td><code>-PiecesJointes</code></td>
+<td>aucune copie</td>
+<td>dossier <code>TRACEAGILE_ATTACHMENTS_DIR</code> où copier les pièces jointes de la démo</td>
+</tr>
+</tbody></table>
+</div>
+<p><code>PSQL</code> (variable d&#39;environnement) remplace la commande <code>psql</code>, par exemple
+<code>PSQL=&quot;/usr/lib/postgresql/16/bin/psql&quot;</code> ou, sous Windows,
+<code>$env:PSQL = &#39;C:\Program Files\PostgreSQL\16\bin\psql.exe&#39;</code>.</p>
+<h3 id="31-base-vide-production">3.1 Base vide (production)</h3>
+<pre><code class="language-bash">cd base-de-donnees
+./installer-base.sh --hote db.example.org --mot-de-passe &#39;motDePasseDuRole&#39;
+</code></pre>
+<pre><code class="language-powershell">cd base-de-donnees
+.\installer-base.ps1 -Hote db.example.org -MotDePasse &#39;motDePasseDuRole&#39;
+</code></pre>
+<p>La base reste vide. <strong>Au premier démarrage, TraceAgile crée lui-même le schéma</strong> (migrations
+Flyway), les données de démarrage (référentiels : statuts, types, priorités…) et le compte
+administrateur défini par <code>TRACEAGILE_ADMIN_LOGIN</code> / <code>TRACEAGILE_ADMIN_PASSWORD</code> (§4). Ce compte
+n&#39;est créé que si la base ne contient aucun utilisateur.</p>
+<h3 id="32-base-avec-la-démonstration-swaglabs">3.2 Base avec la démonstration SwagLabs</h3>
+<pre><code class="language-bash">./installer-base.sh --hote db.example.org --mot-de-passe &#39;motDePasseDuRole&#39; --demo \
+  --url-serveur http://machine-b:8091 --pieces-jointes /opt/traceagile/pieces-jointes
+</code></pre>
+<pre><code class="language-powershell">.\installer-base.ps1 -Hote db.example.org -MotDePasse &#39;motDePasseDuRole&#39; -Demo `
+  -UrlServeur http://machine-b:8091 -PiecesJointes C:\TraceAgile\pieces-jointes
+</code></pre>
+<p>La démo contient le projet <strong>SWAG</strong> (application Swag Labs, <a href="http://www.saucedemo.com">www.saucedemo.com</a>), décrit dans le
+<span class="chemin" title="Fichier du dépôt : docs/guide/README.md">guide d&#39;utilisation</span> : backlog, critères Gherkin, ENF, atelier Example Mapping,
+tests manuels, automatisés, BDD, chartes exploratoires, deux sprints joués avec campagnes, runs
+automatisés réels, session exploratoire, anomalies, bilans. Comptes (mot de passe <strong><code>SwagLabs-2026</code></strong>,
+à changer après la première connexion) :</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Compte</th>
+<th>Rôle dans SWAG</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>admin</code></td>
+<td>administrateur système</td>
+</tr>
+<tr>
+<td><code>po</code></td>
+<td>Product Owner</td>
+</tr>
+<tr>
+<td><code>qa1</code>, <code>qa2</code></td>
+<td>testeurs</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td>développeur</td>
+</tr>
+<tr>
+<td><code>viewer</code></td>
+<td>lecteur</td>
+</tr>
+</tbody></table>
+</div>
+<p>Le script refuse d&#39;injecter la démo dans une base qui contient déjà des tables : ajouter
+<code>--remplacer</code> pour repartir de zéro (après une sauvegarde si besoin).</p>
+<p>Le serveur d&#39;exécution de la démo garde son nom (« Serveur d&#39;exécution ») ; son adresse devient
+celle de <code>--url-serveur</code> et il est <strong>à appairer</strong> (§7.3). Les jetons de la machine qui a produit la
+démo ne sont jamais distribués.</p>
+<h2 id="4-configurer-traceagile">4. Configurer TraceAgile</h2>
+<p>Dans le dossier <code>traceagile/</code>, copier <code>traceagile.env.exemple</code> en <code>traceagile.env</code>, l&#39;adapter, et
+le protéger (<code>chmod 600 traceagile.env</code>, ou droits NTFS réservés au compte du service) : il contient
+des secrets.</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Défaut</th>
+<th>À renseigner</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SERVER_PORT</code></td>
+<td><code>8085</code></td>
+<td>port HTTP (interface et API)</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_DB_URL</code></td>
+<td><code>jdbc:postgresql://localhost:5433/traceagile</code></td>
+<td><code>jdbc:postgresql://&lt;hôte&gt;:5432/&lt;base&gt;</code></td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_DB_USER</code>, <code>TRACEAGILE_DB_PASSWORD</code></td>
+<td><code>traceagile</code></td>
+<td>rôle et mot de passe du §3</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_JWT_SECRET</code></td>
+<td>secret de développement</td>
+<td><strong>obligatoire</strong> : 32 caractères ou plus, aléatoire (signature des jetons de connexion)</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_ENCRYPTION_KEY</code></td>
+<td>clé de développement</td>
+<td><strong>obligatoire</strong> : aléatoire ; chiffre les jetons des serveurs d&#39;exécution. La changer oblige à réappairer les serveurs.</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_ADMIN_LOGIN</code>, <code>TRACEAGILE_ADMIN_PASSWORD</code>, <code>TRACEAGILE_ADMIN_EMAIL</code></td>
+<td><code>admin</code>, aléatoire, <code>admin@traceagile.local</code></td>
+<td>administrateur créé sur une base vide. Sans mot de passe, un mot de passe aléatoire est écrit <strong>une fois</strong> dans le journal (<code>WARN</code>).</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_COOKIE_SECURE</code></td>
+<td><code>false</code></td>
+<td><code>true</code> dès que l&#39;accès se fait en HTTPS</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_CALLBACK_URL</code></td>
+<td><code>http://localhost:8085/api/v1/execution-callbacks</code></td>
+<td>adresse de TraceAgile <strong>vue depuis le serveur d&#39;exécution</strong> (nom ou IP de la machine A, jamais <code>localhost</code> si le serveur est ailleurs)</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_ATTACHMENTS_DIR</code></td>
+<td><code>&lt;TEMP&gt;/traceagile-attachments</code></td>
+<td><strong>obligatoire</strong> : dossier persistant des pièces jointes (le dossier temporaire par défaut peut être vidé par le système)</td>
+</tr>
+<tr>
+<td><code>JAVA_OPTS</code></td>
+<td>—</td>
+<td>options de la JVM (ex. <code>-Xmx1g</code>)</td>
+</tr>
+</tbody></table>
+</div>
+<p>Générer un secret : <code>openssl rand -base64 48</code>, ou en PowerShell
+<code>[Convert]::ToBase64String((1..48 | % { Get-Random -Max 256 }) -as [byte[]])</code>.</p>
+<p>Toute propriété Spring Boot peut aussi se régler par variable d&#39;environnement ou par un fichier
+<code>config/application.yml</code> à côté du jar. <strong>Ne pas activer le profil <code>demo</code></strong> : il charge un autre jeu
+de démonstration (projet SHOP) et appaire le simulateur de développement.</p>
+<h2 id="5-démarrer-traceagile">5. Démarrer TraceAgile</h2>
+<pre><code class="language-bash">cd /opt/traceagile/traceagile &amp;&amp; ./demarrer.sh
+</code></pre>
+<pre><code class="language-powershell">cd C:\TraceAgile\traceagile; .\demarrer.ps1
+</code></pre>
+<p>Au premier démarrage sur une base vide, le journal indique les migrations Flyway puis la création
+de l&#39;administrateur. Vérifications :</p>
+<ul>
+<li><code>http://machine-a:8085/actuator/health</code> répond <code>{&quot;status&quot;:&quot;UP&quot;}</code> ;</li>
+<li><code>http://machine-a:8085/</code> affiche l&#39;écran de connexion ;</li>
+<li>le menu <strong>Documentation</strong> (<code>/guide/</code>) ouvre le guide d&#39;utilisation ;</li>
+<li><code>http://machine-a:8085/swagger-ui.html</code> décrit l&#39;API.</li>
+</ul>
+<h2 id="6-démarrer-en-service">6. Démarrer en service</h2>
+<p><strong>Linux (systemd).</strong> Créer un compte sans connexion (<code>sudo useradd -r -s /usr/sbin/nologin traceagile</code>),
+lui donner le dossier (<code>sudo chown -R traceagile: /opt/traceagile</code>), puis :</p>
+<pre><code class="language-bash">sudo cp /opt/traceagile/traceagile/traceagile.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now traceagile
+journalctl -u traceagile -f
+</code></pre>
+<p>Adapter dans le fichier <code>WorkingDirectory</code>, <code>EnvironmentFile</code> et le chemin du jar s&#39;ils diffèrent de
+<code>/opt/traceagile</code>. Les variables y sont lues par systemd : ne pas mettre de guillemets autour des
+valeurs.</p>
+<p><strong>Windows.</strong> Le plus simple est <a href="https://github.com/winsw/winsw">WinSW</a> ou
+<a href="https://nssm.cc/">NSSM</a> : service qui lance <code>powershell -ExecutionPolicy Bypass -File C:\TraceAgile\traceagile\demarrer.ps1</code>, démarrage automatique, compte de service ayant les droits sur
+le dossier. Sinon, une tâche planifiée « au démarrage du système » fait l&#39;affaire.</p>
+<p>Le serveur d&#39;exécution s&#39;installe de la même façon avec <code>serveur-execution.service</code> (compte
+<code>executeur</code>) ou son <code>demarrer.ps1</code>.</p>
+<h2 id="7-installer-le-serveur-dexécution">7. Installer le serveur d&#39;exécution</h2>
+<h3 id="71-configuration-et-démarrage">7.1 Configuration et démarrage</h3>
+<p>Dans <code>serveur-execution/</code>, copier <code>serveur-execution.env.exemple</code> en <code>serveur-execution.env</code> :</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Défaut</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SERVER_PORT</code></td>
+<td><code>8091</code></td>
+<td>port de l&#39;API et de l&#39;interface</td>
+</tr>
+<tr>
+<td><code>EXECUTION_SERVER_ADMIN_USER</code>, <code>EXECUTION_SERVER_ADMIN_PASSWORD</code></td>
+<td><code>admin</code>, <code>executeur</code></td>
+<td>compte de l&#39;interface et de l&#39;appairage : <strong>changer le mot de passe</strong></td>
+</tr>
+<tr>
+<td><code>EXECUTION_SERVER_DATA_DIR</code></td>
+<td><code>./data</code></td>
+<td>base H2, dépôts clonés, rapports, artefacts, journaux</td>
+</tr>
+<tr>
+<td><code>EXECUTION_SERVER_TOOLS_DIR</code></td>
+<td><code>./tools</code></td>
+<td>outils installés depuis l&#39;interface</td>
+</tr>
+<tr>
+<td><code>EXECUTION_SERVER_AGENTS</code></td>
+<td><code>4</code></td>
+<td>tests joués en parallèle</td>
+</tr>
+<tr>
+<td><code>EXECUTION_SERVER_RETENTION_DAYS</code></td>
+<td><code>14</code></td>
+<td>conservation des jobs et de leurs artefacts</td>
+</tr>
+<tr>
+<td><code>EXECUTION_SERVER_NAME</code></td>
+<td><code>executeur</code></td>
+<td>nom renvoyé à TraceAgile</td>
+</tr>
+</tbody></table>
+</div>
+<p>Puis <code>./demarrer.sh</code> (ou <code>.\demarrer.ps1</code>). La base H2 est créée au premier démarrage : il n&#39;y a
+pas de base à installer pour le serveur d&#39;exécution.</p>
+<h3 id="72-outils-de-test">7.2 Outils de test</h3>
+<p>Ouvrir <code>http://machine-b:8091</code>, se connecter avec le compte ci-dessus, puis la page <strong>Outils</strong> :</p>
+<ul>
+<li>les prérequis (Java, Git, Node.js, Python) sont détectés ; ceux qui manquent s&#39;installent avec les
+droits d&#39;administrateur de la machine, en suivant l&#39;aide affichée ;</li>
+<li>l&#39;<strong>assistant d&#39;installation</strong> propose, pour les frameworks choisis (Playwright, Cypress,
+Selenium, Robot Framework, JUnit, Maven, JDK, Gatling…), un plan ordonné qui s&#39;installe sans droits
+particuliers dans <code>EXECUTION_SERVER_TOOLS_DIR</code>.</li>
+</ul>
+<p>Pour rejouer la démo SwagLabs : Node.js et l&#39;outil <strong>Playwright</strong> (avec ses navigateurs).</p>
+<h3 id="73-relier-traceagile-au-serveur">7.3 Relier TraceAgile au serveur</h3>
+<ol>
+<li>Dans TraceAgile, en administrateur : <strong>Administration → Serveurs d&#39;exécution</strong>. Déclarer le
+serveur avec l&#39;adresse <code>http://machine-b:8091</code> (pour la démo, il existe déjà avec l&#39;adresse donnée
+par <code>--url-serveur</code> ; corriger l&#39;adresse si besoin).</li>
+<li><strong>Appairer</strong> en saisissant le compte administrateur du serveur d&#39;exécution : TraceAgile demande un
+jeton et un secret de signature des webhooks, les chiffre, puis ne garde plus le mot de passe.</li>
+<li>L&#39;état passe à <strong>En ligne</strong> au bout de quelques secondes (sonde de santé périodique).</li>
+</ol>
+<p>Ensuite, un run automatisé lancé dans TraceAgile envoie un job au serveur. Le serveur clone le dépôt
+Git du projet, exécute les tests et renvoie l&#39;avancement et les résultats à <code>TRACEAGILE_CALLBACK_URL</code>.
+Les journaux et artefacts (captures, traces) restent sur le serveur d&#39;exécution et sont relus par
+TraceAgile à la demande.</p>
+<h3 id="74-réseau">7.4 Réseau</h3>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Flux</th>
+<th>De → vers</th>
+<th>Port</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Navigateurs des utilisateurs</td>
+<td>postes → machine A</td>
+<td>8085 (ou 443 derrière un proxy)</td>
+</tr>
+<tr>
+<td>Connexion à la base</td>
+<td>machine A → PostgreSQL</td>
+<td>5432</td>
+</tr>
+<tr>
+<td>Jobs, santé, artefacts</td>
+<td>machine A → machine B</td>
+<td>8091</td>
+</tr>
+<tr>
+<td>Webhooks de résultats</td>
+<td>machine B → machine A</td>
+<td>8085 (<code>TRACEAGILE_CALLBACK_URL</code>)</td>
+</tr>
+<tr>
+<td>Clonage des dépôts de tests</td>
+<td>machine B → serveur Git</td>
+<td>443 / 22</td>
+</tr>
+</tbody></table>
+</div>
+<p>Ouvrir ces ports dans les pare-feu (sous Windows : <code>New-NetFirewallRule -DisplayName TraceAgile -Direction Inbound -Protocol TCP -LocalPort 8085 -Action Allow</code>, idem 8091 sur la machine B).
+Les dépôts Git privés : identifiants par hôte dans l&#39;interface du serveur d&#39;exécution (page <strong>Paramètres</strong>).</p>
+<h2 id="8-https-et-proxy-inverse">8. HTTPS et proxy inverse</h2>
+<p>En production, placer TraceAgile derrière un proxy TLS (nginx, Apache, IIS ARR, Traefik) et régler
+<code>TRACEAGILE_COOKIE_SECURE=true</code>. Le suivi des runs en direct utilise des flux SSE : désactiver la
+mise en mémoire tampon pour <code>/api/</code>. Exemple nginx :</p>
+<pre><code class="language-nginx">location / {
+    proxy_pass http://127.0.0.1:8085;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_buffering off;
+    proxy_read_timeout 1h;
+    client_max_body_size 20m;
+}
+</code></pre>
+<p><code>TRACEAGILE_CALLBACK_URL</code> prend alors l&#39;adresse HTTPS publique. Le serveur d&#39;exécution peut être
+protégé de la même façon (son adresse dans TraceAgile devient <code>https://…</code>).</p>
+<h2 id="9-sauvegarde-mise-à-jour-désinstallation">9. Sauvegarde, mise à jour, désinstallation</h2>
+<p><strong>Sauvegarde</strong> : la base (<code>pg_dump -Fc -d traceagile &gt; traceagile.dump</code>) <strong>et</strong> le dossier
+<code>TRACEAGILE_ATTACHMENTS_DIR</code>. Côté serveur d&#39;exécution, <code>EXECUTION_SERVER_DATA_DIR</code> (jetons, jobs) ;
+les outils se réinstallent.</p>
+<p><strong>Mise à jour</strong> : arrêter le service, remplacer le jar, redémarrer. Les nouvelles migrations Flyway
+s&#39;appliquent seules au démarrage. Sauvegarder avant ; une version antérieure ne peut pas rouvrir une
+base migrée.</p>
+<p><strong>Désinstallation</strong> : arrêter et retirer les services, supprimer les dossiers, puis
+<code>DROP DATABASE traceagile; DROP ROLE traceagile;</code> avec un superutilisateur.</p>
+<h2 id="10-dépannage">10. Dépannage</h2>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause et remède</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FATAL: password authentication failed</code></td>
+<td>Mot de passe ou rôle de <code>TRACEAGILE_DB_*</code> différent de celui du §3 ; ou <code>pg_hba.conf</code> n&#39;autorise pas l&#39;hôte de TraceAgile.</td>
+</tr>
+<tr>
+<td><code>traceagile.security.jwt-secret doit comporter au moins 32 octets</code></td>
+<td><code>TRACEAGILE_JWT_SECRET</code> trop court.</td>
+</tr>
+<tr>
+<td>Aucun administrateur ne peut se connecter</td>
+<td>Le compte n&#39;est créé que sur une base sans utilisateur : relire le journal du premier démarrage (mot de passe aléatoire) ; sinon le changer depuis un autre administrateur.</td>
+</tr>
+<tr>
+<td>Serveur d&#39;exécution « Hors ligne »</td>
+<td>Pare-feu ou adresse déclarée injoignable depuis la machine A.</td>
+</tr>
+<tr>
+<td>Run bloqué « En cours »</td>
+<td>Le serveur ne joint pas <code>TRACEAGILE_CALLBACK_URL</code> : tester <code>curl &lt;url&gt;</code> depuis la machine B.</td>
+</tr>
+<tr>
+<td>Serveur « Non autorisé »</td>
+<td>Jeton révoqué côté serveur ou <code>TRACEAGILE_ENCRYPTION_KEY</code> changée : appairer à nouveau.</td>
+</tr>
+<tr>
+<td>Windows : <code>Unable to establish loopback connection</code></td>
+<td>Dossier TEMP en nom court 8.3 ; les deux jars le contournent au démarrage. Si l&#39;erreur persiste, ajouter <code>-Djdk.net.unixdomain.tmpdir=C:\TraceAgile\tmp</code> à <code>JAVA_OPTS</code>.</td>
+</tr>
+<tr>
+<td>Construction : <code>npm ci</code> échoue avec <code>EBUSY</code> (Windows)</td>
+<td>Le dépôt est dans un dossier synchronisé (OneDrive) qui verrouille <code>node_modules</code> : relancer, ou ajouter <code>-Ddistribution.npm.install=install</code> à la commande Maven.</td>
+</tr>
+<tr>
+<td>Pages blanches après une mise à jour</td>
+<td>Le navigateur garde l&#39;ancienne version : recharger (Ctrl+F5).</td>
+</tr>
+</tbody></table>
+</div>
+<h2 id="11-limites-de-la-démonstration">11. Limites de la démonstration</h2>
+<ul>
+<li>Les runs automatisés de la démo ont été exécutés lors de la génération : leurs résultats, statuts
+et rapports sont dans la base, mais leurs journaux et artefacts (captures, traces) sont restés sur
+le serveur d&#39;origine. Rejouer un run sur le nouveau serveur les rend disponibles.</li>
+<li>Les dates de la démo sont celles de sa génération (sprints, campagnes, bilans).</li>
+<li>Les tests automatisés de SWAG pointent vers le dépôt Git de la génération
+(<code>file:///depots/traceagile</code>) : pour rejouer les runs, indiquer dans la fiche de chaque test
+automatisé (champs Dépôt et Branche) un dépôt accessible depuis le serveur d&#39;exécution qui contient
+le dossier <code>saucedemo/</code> de TraceAgile.</li>
+</ul>
+<p>Pour régénérer le jeu de démonstration après une évolution du schéma ou du guide (mainteneurs) :
+<code>install/base-de-donnees/generer-demo-swaglabs.sh</code> (pile Docker démarrée, jar construit avec
+<code>-Pdistribution</code>).</p>
+
+</main>
+</div>
+</body>
+</html>

@@ -27,11 +27,14 @@ Remove-Item (Join-Path $dist 'base-de-donnees\generer-demo-swaglabs.sh')
 Copy-Item 'backend\traceagile-api\target\traceagile-api.jar' (Join-Path $dist 'traceagile')
 Copy-Item 'backend\execution-server\target\execution-server.jar' (Join-Path $dist 'serveur-execution')
 Copy-Item 'docs\installation.md' (Join-Path $dist 'INSTALLATION.md')
+Copy-Item 'docs\installation-traceagile.html' (Join-Path $dist 'INSTALLATION.html')
+Copy-Item 'docs\installation-traceagile.docx' (Join-Path $dist 'INSTALLATION.docx')
 
 Write-Host '3/3 Archives'
 $zipTraceAgile = Join-Path $racine "dist\traceagile-$version.zip"
 $zipServeur = Join-Path $racine "dist\serveur-execution-$version.zip"
 Remove-Item -Force -ErrorAction SilentlyContinue $zipTraceAgile, $zipServeur
-Compress-Archive -Path (Join-Path $dist 'traceagile'), (Join-Path $dist 'base-de-donnees'), (Join-Path $dist 'INSTALLATION.md') -DestinationPath $zipTraceAgile
-Compress-Archive -Path (Join-Path $dist 'serveur-execution'), (Join-Path $dist 'INSTALLATION.md') -DestinationPath $zipServeur
+$note = @('md', 'html', 'docx' | ForEach-Object { Join-Path $dist "INSTALLATION.$_" })
+Compress-Archive -Path (@((Join-Path $dist 'traceagile'), (Join-Path $dist 'base-de-donnees')) + $note) -DestinationPath $zipTraceAgile
+Compress-Archive -Path (@(Join-Path $dist 'serveur-execution') + $note) -DestinationPath $zipServeur
 Get-ChildItem (Join-Path $racine 'dist') | Format-Table Name, Length
