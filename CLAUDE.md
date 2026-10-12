@@ -286,6 +286,8 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   (`PromptModal`, `ConfirmModal`, testids `prompt-input`, `prompt-submit`, `confirm-submit`).
 - Éditeur Markdown (`MarkdownField`) : garder `overflow={false}` (sinon le `body` reste bloqué
   après un panneau latéral, ADR-0013).
+- Backlog : vues arbre, liste et tableau (`BacklogBoard`, colonnes `BOARD_COLUMNS`, une requête par colonne ;
+  le déplacement réutilise `StatusChangeModal` de `StatusMenu`, ADR-0031).
 - Statut de vérification : `features/traceability/VerificationBadge` (pastille, `data-status`) ;
   hooks dans `src/api/traceability.ts`, qui invalident traçabilité, tests et exigences.
 - Pluriels i18next : en français, 0 est au singulier (`_one`).

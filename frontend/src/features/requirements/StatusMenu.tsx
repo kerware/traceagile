@@ -40,7 +40,7 @@ export function StatusMenu({ project, requirement, canWrite }: { project: string
   );
 }
 
-function StatusChangeModal({
+export function StatusChangeModal({
   project,
   requirement,
   target,

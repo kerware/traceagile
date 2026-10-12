@@ -229,7 +229,21 @@
     "openFull": "Open full page",
     "moved": "{{key}} moved",
     "total": "{{count}} requirement(s)",
-    "filterVerification": "Verification"
+    "filterVerification": "Verification",
+    "boardView": "Board",
+    "board": {
+      "todo": "To do",
+      "doing": "In progress",
+      "done": "Done",
+      "points_one": "{{count}} pt",
+      "points_other": "{{count}} pts",
+      "empty": "No requirement",
+      "truncated": "Only the first {{count}} are shown: filter the List view for the others.",
+      "drag": "Drag to another column",
+      "moveTo": "Move to",
+      "impossible": "{{key}}: moving from “{{from}}” to “{{to}}” is not allowed. From “{{from}}”: {{allowed}}.",
+      "intro": "User stories and non-functional requirements by progress. Drag a card (or use its ⋯ menu) to change its status: DoR and DoD are checked as on the requirement page."
+    }
   },
   "requirement": {
     "create": "Create requirement",

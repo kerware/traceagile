@@ -1,4 +1,4 @@
-import { Anchor, Button, Drawer, Group, SegmentedControl, Stack, TextInput, Title } from '@mantine/core';
+import { Anchor, Button, Drawer, Group, SegmentedControl, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconDownload, IconPlus, IconSearch, IconUpload } from '@tabler/icons-react';
@@ -9,6 +9,7 @@ import { errorMessage } from '../../api/errors';
 import { downloadCsv, type RequirementFilters, type RequirementTreeNode } from '../../api/requirements';
 import { CreateTestModal } from '../tests/CreateTestModal';
 import { useTestWriteKinds } from '../tests/permissions';
+import { BacklogBoard } from './BacklogBoard';
 import { BacklogFilters } from './BacklogFilters';
 import { CreateRequirementModal } from './CreateRequirementModal';
 import { filtersFromParams } from './filters';
@@ -21,7 +22,7 @@ import { RequirementTree } from './RequirementTree';
 import { useShortcuts } from '../../components/search/useShortcuts';
 
 /**
- * §13.2 /p/:key/backlog — vues arbre et liste (F-REQ-01), glisser-déposer (F-REQ-02/03),
+ * §13.2 /p/:key/backlog — vues arbre, liste (F-REQ-01) et tableau par avancement, glisser-déposer (F-REQ-02/03),
  * recherche (F-REQ-04), import / export CSV (F-REQ-23), fiche en panneau latéral (§13.1).
  */
 export function BacklogPage() {
@@ -38,7 +39,7 @@ export function BacklogPage() {
   // §13.3 N : nouvelle exigence
   useShortcuts({ n: createModal.open }, canWrite);
 
-  const view = params.get('view') === 'list' || params.get('q') ? 'list' : 'tree';
+  const view = params.get('view') === 'list' || params.get('q') ? 'list' : params.get('view') === 'board' ? 'board' : 'tree';
   const filters: RequirementFilters = filtersFromParams(params);
   const selected = params.get('selected');
 
@@ -86,6 +87,7 @@ export function BacklogPage() {
           data={[
             { value: 'tree', label: t('backlog.tree') },
             { value: 'list', label: t('backlog.list') },
+            { value: 'board', label: t('backlog.boardView') },
           ]}
           data-testid="backlog-view"
         />
@@ -105,7 +107,15 @@ export function BacklogPage() {
 
       {view === 'list' && <BacklogFilters filters={filters} onChange={update} />}
 
-      {view === 'list' ? (
+      {view === 'board' && (
+        <Text size="sm" c="dimmed">
+          {t('backlog.board.intro')}
+        </Text>
+      )}
+
+      {view === 'board' ? (
+        <BacklogBoard project={project} canWrite={canWrite} onSelect={(key) => update({ selected: key })} />
+      ) : view === 'list' ? (
         <RequirementList
           project={project}
           filters={filters}

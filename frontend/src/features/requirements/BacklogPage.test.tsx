@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { useAuthStore } from '../auth/authStore';
 import { renderRoutes } from '../../test/render';
-import { node, summary } from '../../test/requirements';
+import { detail, node, summary } from '../../test/requirements';
 import { ADMIN, page, problem, server } from '../../test/server';
 import { BacklogPage } from './BacklogPage';
 
@@ -117,5 +117,43 @@ describe('§13.2 /p/:key/backlog — Backlog (F-REQ-01)', () => {
     await userEvent.click(screen.getByTestId('tree-node-REQ-2-menu'));
     await userEvent.click(await screen.findByTestId('menu-add-test'));
     expect(await screen.findByTestId('test-requirement-input')).toHaveValue('REQ-2 — Recherche');
+  });
+
+  it('vue tableau : user stories et ENF en trois colonnes ; le menu « ⋯ » passe une story en sprint à « Terminée » après la DoD', async () => {
+    useAuthStore.getState().setSession('jwt', ADMIN);
+    const requests: URL[] = [];
+    let changed: unknown;
+    server.use(
+      http.get('/api/v1/projects/SHOP/requirements', ({ request }) => {
+        const url = new URL(request.url);
+        requests.push(url);
+        const statuses = url.searchParams.getAll('status');
+        if (statuses.includes('IN_SPRINT')) return HttpResponse.json(page([summary('REQ-5', { status: 'IN_SPRINT', title: 'Payer par carte', storyPoints: 5 })]));
+        if (statuses.includes('DONE')) return HttpResponse.json(page([summary('REQ-6', { status: 'ACCEPTED', type: 'NON_FUNCTIONAL', title: 'Temps de réponse' })]));
+        return HttpResponse.json(page([summary('REQ-3', { title: 'Livraison gratuite', storyPoints: 3 }), summary('REQ-4', { status: 'READY', storyPoints: 2 })]));
+      }),
+      http.get('/api/v1/projects/SHOP/requirements/REQ-5', () => HttpResponse.json(detail('REQ-5', { status: 'IN_SPRINT', allowedTransitions: ['READY', 'DONE', 'OBSOLETE'] }))),
+      http.get('/api/v1/projects/SHOP/requirements/REQ-5/checklists', () => HttpResponse.json({ dor: [], dod: [] })),
+      http.post('/api/v1/projects/SHOP/requirements/REQ-5/status', async ({ request }) => {
+        changed = await request.json();
+        return HttpResponse.json(detail('REQ-5', { status: 'DONE' }));
+      }),
+    );
+    renderRoutes(routes, '/p/SHOP/backlog?view=board');
+
+    expect(await within(await screen.findByTestId('board-column-todo')).findByTestId('board-card-REQ-3')).toBeInTheDocument();
+    expect(screen.getByTestId('board-count-todo')).toHaveTextContent('2');
+    expect(within(screen.getByTestId('board-column-todo')).getByText('5 pts')).toBeInTheDocument();
+    expect(await within(screen.getByTestId('board-column-doing')).findByTestId('board-card-REQ-5')).toBeInTheDocument();
+    expect(await within(screen.getByTestId('board-column-done')).findByTestId('board-card-REQ-6')).toBeInTheDocument();
+    expect(requests[0]?.searchParams.getAll('type')).toEqual(['USER_STORY', 'NON_FUNCTIONAL']);
+    expect(requests.map((r) => r.searchParams.getAll('status').join(','))).toEqual(
+      expect.arrayContaining(['DRAFT,TO_REFINE,READY', 'IN_SPRINT', 'DONE,ACCEPTED']));
+
+    await userEvent.click(screen.getByTestId('board-menu-REQ-5'));
+    await userEvent.click(await screen.findByTestId('board-move-REQ-5-done'));
+    await userEvent.click(await screen.findByTestId('status-confirm'));
+
+    await waitFor(() => expect(changed).toEqual({ status: 'DONE', acknowledgeUnmet: false }));
   });
 });

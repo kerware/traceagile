@@ -229,7 +229,21 @@
     "openFull": "Ouvrir en pleine page",
     "moved": "{{key}} déplacée",
     "total": "{{count}} exigence(s)",
-    "filterVerification": "Vérification"
+    "filterVerification": "Vérification",
+    "boardView": "Tableau",
+    "board": {
+      "todo": "À faire",
+      "doing": "En cours",
+      "done": "Terminée",
+      "points_one": "{{count}} pt",
+      "points_other": "{{count}} pts",
+      "empty": "Aucune exigence",
+      "truncated": "Seules les {{count}} premières sont affichées : filtrez la vue Liste pour les autres.",
+      "drag": "Glisser vers une autre colonne",
+      "moveTo": "Déplacer vers",
+      "impossible": "{{key}} : passage de « {{from}} » à « {{to}} » impossible. Depuis « {{from}} » : {{allowed}}.",
+      "intro": "User stories et exigences non fonctionnelles par avancement. Glissez une carte (ou son menu ⋯) pour changer son statut : la DoR et la DoD sont vérifiées comme sur la fiche."
+    }
   },
   "requirement": {
     "create": "Créer l'exigence",

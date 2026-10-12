@@ -151,6 +151,18 @@ La vue **liste** se filtre et se trie (statut, priorité, risque, vérification)
 
 ![Backlog en liste](images/backlog-liste.png)
 
+La vue **tableau** range les user stories et les exigences non fonctionnelles en trois colonnes :
+**À faire** (brouillon, à affiner, prête), **En cours** (dans le sprint) et **Terminée** (terminée,
+acceptée). Chaque colonne totalise ses points. Glisser une carte d'une colonne à l'autre, ou passer
+par son menu « ⋯ », change son statut avec les mêmes contrôles que la fiche :
+
+- la DoR s'affiche avant « Prête », la DoD avant « Terminée » ;
+- un passage interdit est expliqué : une story en brouillon ne passe pas directement « en sprint ».
+
+Voici le tableau en fin de sprint 2 : les stories du sprint 1 sont terminées, celles du panier en cours.
+
+![Backlog en tableau](images/backlog-tableau.png)
+
 Une story se crée depuis le backlog. La phrase « En tant que… je veux… afin de… » s'affiche pendant
 la saisie :
 

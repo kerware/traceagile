@@ -9,6 +9,14 @@ import { Api, capturer, connexion, fermerNotifications, P } from './outils';
 test('Pilotage : traçabilité, anomalies, tableau de bord, rapports, ergonomie', async ({ page, request }) => {
   const po = await Api.de(request, 'po');
 
+  await test.step('Le backlog en tableau : à faire, en cours, terminée (sprint 1 clos, sprint 2 actif)', async () => {
+    await connexion(page, 'po');
+    await page.goto(`/p/${P}/backlog?view=board`);
+    await expect(page.getByTestId('board-column-doing')).toContainText('REQ-11');
+    await expect(page.getByTestId('board-column-done')).toContainText('REQ-6');
+    await capturer(page, 'backlog-tableau', undefined, { pleinePage: true });
+  });
+
   await test.step('Matrice de traçabilité du projet : exigences × tests, statut de vérification', async () => {
     await connexion(page, 'qa1');
     await page.goto(`/p/${P}/traceability`);

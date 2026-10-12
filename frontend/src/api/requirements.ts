@@ -48,6 +48,31 @@ export const requirementKeys = {
 
 const PAGE_SIZE = 50;
 
+/** Colonnes du tableau du backlog : statuts regroupés (rejetées et obsolètes non affichées). */
+export const BOARD_COLUMNS = {
+  todo: ['DRAFT', 'TO_REFINE', 'READY'],
+  doing: ['IN_SPRINT'],
+  done: ['DONE', 'ACCEPTED'],
+} as const satisfies Record<string, readonly RequirementStatus[]>;
+export type BoardColumn = keyof typeof BOARD_COLUMNS;
+const BOARD_TYPES: RequirementType[] = ['USER_STORY', 'NON_FUNCTIONAL'];
+/** Plafond par colonne (taille de page maximale de l'API). */
+export const BOARD_LIMIT = 200;
+
+/** Vue tableau du backlog : user stories et exigences non fonctionnelles, une requête par colonne, par rang. */
+export function useRequirementBoard(project: string, column: BoardColumn) {
+  const filters: RequirementFilters = { type: BOARD_TYPES, status: [...BOARD_COLUMNS[column]] };
+  return useQuery({
+    queryKey: requirementKeys.list(project, filters, 0, 'rank,asc'),
+    queryFn: async () =>
+      unwrap(
+        await api.GET('/api/v1/projects/{projectKey}/requirements', {
+          params: { path: { projectKey: project }, query: { ...filters, page: 0, size: BOARD_LIMIT, sort: ['rank,asc'] } },
+        }),
+      ),
+  });
+}
+
 export function useRequirementList(project: string, filters: RequirementFilters, page: number, sort: string) {
   return useQuery({
     queryKey: requirementKeys.list(project, filters, page, sort),
