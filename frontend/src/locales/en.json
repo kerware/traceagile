@@ -779,7 +779,10 @@
     "summary_one": "{{count}} test · {{duration}} estimated",
     "summary_other": "{{count}} tests · {{duration}} estimated",
     "campaign": "Campaign",
-    "duration": "Duration"
+    "duration": "Duration",
+    "hidden_one": "{{count}} assigned test is already executed and is not shown in “To do”.",
+    "hidden_other": "{{count}} assigned tests are already executed and are not shown in “To do”.",
+    "showAll": "Show all"
   },
   "defects": {
     "title": "Defects",

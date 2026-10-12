@@ -779,7 +779,10 @@
     "summary_one": "{{count}} test · {{duration}} estimées",
     "summary_other": "{{count}} tests · {{duration}} estimées",
     "campaign": "Campagne",
-    "duration": "Durée"
+    "duration": "Durée",
+    "hidden_one": "{{count}} test affecté est déjà exécuté et n’apparaît pas dans « À faire ».",
+    "hidden_other": "{{count}} tests affectés sont déjà exécutés et n’apparaissent pas dans « À faire ».",
+    "showAll": "Tout afficher"
   },
   "defects": {
     "title": "Anomalies",

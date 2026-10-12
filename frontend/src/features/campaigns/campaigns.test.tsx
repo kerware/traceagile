@@ -261,6 +261,21 @@ describe('§13.2 /p/:key/executions/:id — exécution pas à pas (F-EXE-01 à F
 });
 
 describe('F-EXE-01 « Mes exécutions »', () => {
+  it('« À faire » signale les tests affectés déjà exécutés et « Tout afficher » les montre', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    const campaign = { key: 'CMP-2', name: 'Recette SPR-2', environment: 'recette', status: 'IN_PROGRESS' } as const;
+    server.use(http.get(`${P}/my-executions`, () => HttpResponse.json([
+      { itemId: 'i1', campaign, test: test1, position: 1, lastStatus: 'PASSED', attempts: 1, dataSets: [] },
+      { itemId: 'i2', campaign, test: { ...test1, key: 'TC-2' }, position: 2, lastStatus: 'FAILED', attempts: 1, dataSets: [] },
+    ] satisfies MyExecution[])));
+    renderRoutes(routes, '/p/SHOP/my-executions');
+
+    expect(await screen.findByTestId('my-hidden')).toHaveTextContent('2 tests affectés sont déjà exécutés');
+    expect(screen.queryByTestId('my-executions')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('my-show-all'));
+    expect(await screen.findByTestId('my-executions')).toHaveTextContent('TC-2');
+  });
+
   it('liste les tests affectés et lance une tentative avec une ligne du jeu de données', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     const mine: MyExecution[] = [{

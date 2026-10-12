@@ -451,6 +451,16 @@ La campagne « Recette sprint 2 » répartit le travail :
 
 ![Mes exécutions de qa2](images/mes-executions.png)
 
+« Mes exécutions » s'ouvre sur le filtre **À faire** : les tests affectés qui ne sont pas encore
+exécutés, ou en cours. Les tests déjà joués passent dans **Tout**. La page signale combien de tests
+le filtre « À faire » masque.
+
+En fin de scénario, la campagne **CMP-4 « Régression 1.0 »** confie à l'**administrateur** les tests
+manuels à rejouer avant la livraison : TC-1 sur les trois comptes, TC-2, et TC-13 sur ses deux
+produits. En se connectant en `admin`, « Mes exécutions » montre donc six tests à faire.
+
+![Mes exécutions de l'administrateur : la régression 1.0](images/mes-executions-admin.png)
+
 Les deux premiers pas sont ceux de TC-1, appelé par TC-2 avec le jeu « Comptes › problem_user » :
 la connexion se joue avec ce compte. Puis le pas 5 échoue. La testeuse :
 - saisit le **résultat obtenu** ;
@@ -869,7 +879,7 @@ son jeton, avec les identifiants de l'administrateur.
 | Exigences | REQ-1 épic ; REQ-2, 5, 9, 13 features ; REQ-3, 4, 6, 7, 8 (sprint 1) ; REQ-10, 11, 12 (sprint 2) ; REQ-14, 15 (commande, non développée) ; REQ-16, 17 ENF |
 | Tests | TC-1, TC-2, TC-13 manuels (TC-2 et TC-13 appellent TC-1) ; TC-3 à TC-11 et TC-14 automatisés (dont TC-8 BDD, TC-14 du dépôt kerware) ; TC-12 exploratoire |
 | Planification | REL-1 « Swag Labs 1.0 » ; SPR-1 clos ; SPR-2 actif |
-| Campagnes | CMP-1 « Recette sprint 1 » (terminée) ; CMP-2 « Recette sprint 2 » ; CMP-3 « Intégration continue — main » (import JUnit) |
+| Campagnes | CMP-1 « Recette sprint 1 » (terminée) ; CMP-2 « Recette sprint 2 » ; CMP-3 « Intégration continue — main » (import JUnit) ; CMP-4 « Régression 1.0 » (tests manuels confiés à `admin`, à faire) |
 | Runs | RUN-1 (6/6 réussis, deux dépôts) ; RUN-2 (TC-10 en échec), exécutés par le serveur d'exécution |
 | Anomalies | DEF-1 (échec manuel de TC-2) ; DEF-2 (bogue de la session exploratoire) |
 | Rapports | RPT-1 bilan figé du sprint 1 ; RPT-2 bilan du sprint 2 (verdict tranché par le PO) |

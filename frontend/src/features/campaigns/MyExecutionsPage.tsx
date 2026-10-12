@@ -20,6 +20,8 @@ export function MyExecutionsPage() {
   const [filter, setFilter] = useState<'todo' | 'all'>('todo');
   const items = (data ?? []).filter((i) => filter === 'all' || i.lastStatus === 'NOT_RUN' || i.lastStatus === 'RUNNING');
   const total = items.reduce((sum, i) => sum + (i.test.durationMin ?? 0), 0);
+  // tests affectés mais déjà exécutés : masqués par « À faire », on le dit plutôt qu'une liste vide muette
+  const hidden = filter === 'todo' ? (data ?? []).length - items.length : 0;
 
   return (
     <Stack>
@@ -29,7 +31,15 @@ export function MyExecutionsPage() {
           data={[{ value: 'todo', label: t('myExecutions.todo') }, { value: 'all', label: t('myExecutions.all') }]} data-testid="my-filter" />
       </Group>
       {isLoading && <Loader />}
-      {data && items.length === 0 && <Text c="dimmed">{t('myExecutions.empty')}</Text>}
+      {data && items.length === 0 && hidden === 0 && <Text c="dimmed">{t('myExecutions.empty')}</Text>}
+      {hidden > 0 && (
+        <Text size="sm" c="dimmed" data-testid="my-hidden">
+          {t('myExecutions.hidden', { count: hidden })}{' '}
+          <Anchor component="button" size="sm" onClick={() => setFilter('all')} data-testid="my-show-all">
+            {t('myExecutions.showAll')}
+          </Anchor>
+        </Text>
+      )}
       {items.length > 0 && (
         <>
           <Text size="sm" c="dimmed">

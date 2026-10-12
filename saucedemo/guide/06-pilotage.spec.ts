@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { Api, capturer, connexion, fermerNotifications, P } from './outils';
+import { Api, capturer, connexion, elements, fermerNotifications, P } from './outils';
 
 /**
  * Guide § 11 à § 14 — piloter la qualité : traçabilité (matrice, couverture, orphelins, impact et
@@ -169,4 +169,21 @@ test('Pilotage : traçabilité, anomalies, tableau de bord, rapports, ergonomie'
     await expect(page.getByTestId('test-read-only')).toBeVisible();
     await capturer(page, 'lecteur-lecture-seule', page.getByTestId('test-detail'));
   });
+
+  await test.step('Régression 1.0 : des tests manuels à rejouer sont confiés à l’administrateur', async () => {
+    // jeu de données : en se connectant en admin, « Mes exécutions » montre des tests à faire
+    const qa = await Api.de(request, 'qa1');
+    const campagne = await qa.post('/campaigns', { name: 'Régression 1.0', scopeType: 'REGRESSION', environment: 'recette',
+      buildVersion: '1.0.0', folder: 'Release 1.0/Régression' });
+    const cle = campagne.campaign.key as string;
+    await qa.post(`/campaigns/${cle}/items/select`, { strategy: 'MANUAL', testKeys: ['TC-1', 'TC-2', 'TC-13'] });
+    for (const element of await elements(qa, cle)) {
+      await qa.patch(`/campaign-items/${element.id}`, { assignee: 'admin' });
+    }
+    await connexion(page, 'admin');
+    await page.goto(`/p/${P}/my-executions`);
+    await expect(page.getByTestId('my-executions')).toContainText(cle);
+    await capturer(page, 'mes-executions-admin');
+  });
 });
+
