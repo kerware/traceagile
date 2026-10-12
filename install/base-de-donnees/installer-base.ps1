@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Installation hors Docker (docs/installation.md) : crée le rôle et la base PostgreSQL de TraceAgile et,
   avec -Demo, injecte le jeu de démonstration SwagLabs (projet SWAG, comptes de démonstration).

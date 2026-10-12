@@ -4,6 +4,7 @@ set -euo pipefail
 ICI="$(cd "$(dirname "$0")" && pwd)"
 cd "$ICI"
 [ -f traceagile.env ] || { echo "traceagile.env absent : copiez traceagile.env.exemple et adaptez-le" >&2; exit 1; }
-set -a; . ./traceagile.env; set +a
+# fichier édité sous Windows : BOM et fins de ligne CRLF ignorés
+set -a; . <(sed -e '1s/^\xEF\xBB\xBF//' -e 's/\r$//' ./traceagile.env); set +a
 # shellcheck disable=SC2086
 exec java ${JAVA_OPTS:-} -jar "$ICI/traceagile-api.jar"

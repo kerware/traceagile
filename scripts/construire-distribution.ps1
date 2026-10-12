@@ -1,4 +1,4 @@
-# Produit les deux livrables hors Docker (docs/installation.md §2), comme construire-distribution.sh :
+﻿# Produit les deux livrables hors Docker (docs/installation.md §2), comme construire-distribution.sh :
 #   dist\traceagile-<version>\traceagile\          traceagile-api.jar (API + interface + guide), configuration, démarrage
 #   dist\traceagile-<version>\serveur-execution\   execution-server.jar (serveur + interface), configuration, démarrage
 #   dist\traceagile-<version>\base-de-donnees\     création de la base, démo SwagLabs

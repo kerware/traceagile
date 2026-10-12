@@ -21,6 +21,7 @@ Prototype de gestion des exigences agiles et des tests. **La spécification fait
 | 9. Atelier et finitions | Example Mapping, commentaires, pièces jointes, Ctrl+K, aperçus des clés, raccourcis, notifications, accessibilité (axe-core), SpotBugs, seuil JaCoCo, banc NF-01 à NF-03 | **Fait** (branche `lot-9-finitions`) |
 | Guide saucedemo | Guide d'utilisation illustré (`docs/guide/`), jeu de données Swag Labs (`saucedemo/`) : vrais tests Playwright, Gherkin, API, performance ; runId qualifié par le projet (ADR-0025) | **Fait** (branche `saucedemo-guide`) |
 | 10. Serveur d'exécution | Serveur réel (Spring Boot + React, jar autonome Windows / Linux / macOS, image Docker) : jetons, installation des outils, exécution parallèle par framework, webhooks, statistiques (ADR-0026) | **Fait** (branche `lot-10-serveur-execution`) |
+| Installation hors Docker | Jar de TraceAgile avec interface (`-Pdistribution`), administrateur initial, scripts de base et démo SwagLabs, note [docs/installation.md](docs/installation.md) (ADR-0027) | **Fait** (branche `installation-hors-docker`) |
 
 Reporté (hors périmètre du prototype à l'issue du lot 9, ADR-0024) :
 - Traçabilité : suspicion « modifiée après la dernière exécution » (§7.3) couverte par le passage
@@ -96,6 +97,15 @@ Serveur d'exécution réel (ADR-0026, [backend/execution-server/README.md](backe
 (« Serveur d'exécution ») ; jar autonome : `cd backend && mvn -pl execution-server -am package -DskipTests`
 → `execution-server/target/execution-server.jar`, lancé par `java -jar` sur toute machine (Java 21).
 `-DskipUi` saute la construction de son interface (`execution-server/ui`, npm : `lint`, `typecheck`, `test`).
+
+Installation hors Docker (ADR-0027, [docs/installation.md](docs/installation.md)) :
+`scripts/construire-distribution.(sh|ps1)` → `dist/traceagile-<version>/` (deux jars, configurations
+`install/*/…env.exemple`, démarrage, scripts de base `install/base-de-donnees/installer-base.(sh|ps1)`).
+Le jar de TraceAgile n'embarque l'interface qu'avec `-Pdistribution` (`EmbeddedFrontendFilter`). Hors
+profil demo, `InitialAdministrator` crée l'administrateur sur une base sans utilisateur
+(`TRACEAGILE_ADMIN_*`). La démo SwagLabs est un export SQL (`demo/swaglabs.sql`, comptes en
+`SwagLabs-2026`) : la régénérer avec `install/base-de-donnees/generer-demo-swaglabs.sh` après toute
+nouvelle migration ou évolution du guide (pile Docker démarrée, branche committée, jar `-Pdistribution`).
 
 Exécution automatisée (ADR-0020) : `docker compose up` démarre le simulateur (port 8090) ; l'API
 l'appaire seule (profil demo) avec les identifiants `SIMULATOR_ADMIN_USER` / `SIMULATOR_ADMIN_PASSWORD`

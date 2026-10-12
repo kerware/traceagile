@@ -57,11 +57,15 @@ wait $PID 2>/dev/null || true
 trap - EXIT
 
 echo "5/6 Export : demo/swaglabs.sql et demo/pieces-jointes/"
+# ni jeton du serveur d'exécution ni session ouverte dans l'export
+docker exec -i "$CONTENEUR" psql -U traceagile -d "$BASE" -q -v url_serveur= < "$ICI/apres-demo.sql" > /dev/null
 {
   echo "-- Jeu de démonstration SwagLabs de TraceAgile (docs/installation.md) : schéma, migrations Flyway,"
   echo "-- référentiels, comptes (admin, po, qa1, qa2, dev, viewer ; mot de passe $MOT_DE_PASSE_DEMO) et projet SWAG."
   echo "-- Généré le $(date -u +%Y-%m-%d) par install/base-de-donnees/generer-demo-swaglabs.sh — PostgreSQL 16 ou plus."
-  docker exec "$CONTENEUR" pg_dump -U traceagile -d "$BASE" --no-owner --no-privileges --quote-all-identifiers
+  # \restrict (pg_dump 16.10+) est inconnu des psql plus anciens : l'export vient d'ici, on le retire
+  docker exec "$CONTENEUR" pg_dump -U traceagile -d "$BASE" --no-owner --no-privileges --quote-all-identifiers \
+    --exclude-table-data=public.refresh_tokens | grep -Ev '^[\](un)?restrict '
 } > "$ICI/demo/swaglabs.sql"
 rm -rf "$ICI/demo/pieces-jointes"
 mkdir -p "$ICI/demo/pieces-jointes"
