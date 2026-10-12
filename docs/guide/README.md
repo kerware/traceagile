@@ -247,6 +247,7 @@ nature** :
 | Automatisé API | TC-7 « Contrat HTTP : manifeste et icônes » | Vérifie l'ENF « Contrat HTTP du site » |
 | Automatisé BDD (Gherkin) | TC-8 « Ajouter un produit au panier depuis le catalogue » | **Généré** depuis le critère de REQ-10 |
 | Automatisé performance | TC-11 « Performance : chargement du catalogue » | Alimente l'ENF « Temps de chargement » |
+| Automatisé UI, autre dépôt | TC-14 « Catalogue : noms et prix (Playwright Java) » | Projet **kerware / saucedemo-e2e** (GitHub) : JUnit 5 et Maven |
 | Exploratoire | TC-12 « Explorer le panier » | Charte de session |
 
 ![Référentiel de tests](images/tests-referentiel.png)
@@ -306,6 +307,13 @@ rapport JUnit importé. Un test automatisé peut aussi avoir un jeu de données 
 comptes, comme TC-1.
 
 ![Test automatisé piloté par les données](images/test-automatise.png)
+
+Un test peut venir d'un autre dépôt. TC-14 est un test Playwright **Java** (JUnit 5, Maven) du projet
+**kerware / saucedemo-e2e** sur GitHub : son identifiant est « Classe#méthode ». Il vérifie le
+catalogue (REQ-6), comme TC-4, et il est joué dans le même run que les tests TypeScript du dépôt
+local. Le serveur d'exécution clone alors chaque dépôt dans son propre espace de travail.
+
+![TC-14 : test Java du projet kerware / saucedemo-e2e](images/test-automatise-kerware.png)
 
 ### Test BDD généré depuis un critère
 
@@ -388,12 +396,13 @@ marquent le pas courant réussi, en échec ou bloqué.
 
 ### Run automatisé
 
-Le développeur lance les cinq tests automatisés de la campagne sur le **serveur d'exécution** :
+Le développeur lance les six tests automatisés de la campagne sur le **serveur d'exécution** :
 
 ![Lancer un run](images/run-lancer.png)
 
-Le serveur clone le dépôt, installe les dépendances du projet (`npm ci`, navigateur Chromium) et lance
-chaque test Playwright, quatre à la fois. Les résultats arrivent **en temps réel** :
+Le serveur clone les deux dépôts (le dépôt local et kerware / saucedemo-e2e) et installe les
+dépendances de chaque projet : `npm ci` et Chromium pour les tests TypeScript, Maven pour le test Java.
+Il lance ensuite les tests, quatre à la fois. Les résultats arrivent **en temps réel** :
 - les webhooks signés du serveur sont relayés au navigateur en SSE ;
 - chaque test a son identifiant (le nom du test Playwright), son résultat et sa durée réelle ;
 - les **artefacts** sont consultables : journal de chaque test, traces système, JUnit XML, rapport.
@@ -846,10 +855,10 @@ son jeton, avec les identifiants de l'administrateur.
 | Élément | Contenu |
 | --- | --- |
 | Exigences | REQ-1 épic ; REQ-2, 5, 9, 13 features ; REQ-3, 4, 6, 7, 8 (sprint 1) ; REQ-10, 11, 12 (sprint 2) ; REQ-14, 15 (commande, non développée) ; REQ-16, 17 ENF |
-| Tests | TC-1, TC-2, TC-13 manuels (TC-13 appelle TC-1) ; TC-3 à TC-11 automatisés (dont TC-8 BDD) ; TC-12 exploratoire |
+| Tests | TC-1, TC-2, TC-13 manuels (TC-2 et TC-13 appellent TC-1) ; TC-3 à TC-11 et TC-14 automatisés (dont TC-8 BDD, TC-14 du dépôt kerware) ; TC-12 exploratoire |
 | Planification | REL-1 « Swag Labs 1.0 » ; SPR-1 clos ; SPR-2 actif |
 | Campagnes | CMP-1 « Recette sprint 1 » (terminée) ; CMP-2 « Recette sprint 2 » ; CMP-3 « Intégration continue — main » (import JUnit) |
-| Runs | RUN-1 (5/5 réussis) ; RUN-2 (TC-10 en échec), exécutés par le serveur d'exécution |
+| Runs | RUN-1 (6/6 réussis, deux dépôts) ; RUN-2 (TC-10 en échec), exécutés par le serveur d'exécution |
 | Anomalies | DEF-1 (échec manuel de TC-2) ; DEF-2 (bogue de la session exploratoire) |
 | Rapports | RPT-1 bilan figé du sprint 1 ; RPT-2 bilan du sprint 2 (verdict tranché par le PO) |
 

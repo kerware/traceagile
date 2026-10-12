@@ -344,6 +344,22 @@ class JobApiTest extends AbstractServerTest {
     }
 
     @Test
+    @DisplayName("ADR-0030 un job mêle plusieurs dépôts : un espace de travail par dépôt, avec les identifiants propres au test")
+    void testWithItsOwnRepository() throws Exception {
+        processes.when("git clone", (command, line, output, cancellation) -> FakeProcessRunner.ok(""));
+        String bearer = bearer();
+        Map<String, Object> other = test("e-2", "TC-14", "UI", "Inconnu", "src/test/java/A.java", "A#b");
+        other.put("repository", Map.of("url", "https://github.com/kerware/saucedemo-e2e", "branch", "master",
+                "credentials", Map.of("type", "TOKEN", "secret", "ghp_du-test")));
+        String jobId = submit(bearer, job("SHOP/RUN-23", List.of(test("e-1", "TC-1", "UI", "Inconnu", "a.spec.ts", "A"), other), Map.of()));
+        await(bearer, jobId, "COMPLETED");
+        assertThat(processes.executed()).anyMatch(l -> l.startsWith("git clone --depth 1 --branch \"main\" \"https://git.example.com/shop/tests.git\" \"workspace\""));
+        assertThat(processes.executed()).anyMatch(l -> l.startsWith("git clone --depth 1 --branch \"master\"")
+                && l.contains("\"https://x-access-token:ghp_du-test@github.com/kerware/saucedemo-e2e\" \"workspace-2\""));
+        assertThat(processes.executed().stream().filter(l -> l.startsWith("git clone"))).hasSize(2);
+    }
+
+    @Test
     @DisplayName("§10.3 un clone impossible met chaque test en erreur ; une requête incomplète est refusée (400)")
     void cloneFailure() throws Exception {
         processes.when("git clone", (command, line, output, cancellation) -> {

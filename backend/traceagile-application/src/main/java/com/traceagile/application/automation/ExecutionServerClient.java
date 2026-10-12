@@ -24,7 +24,16 @@ public interface ExecutionServerClient {
 
     /** §10.3 un test du job. */
     record JobTest(String executionId, String testKey, TestTechnique technique, String framework, String path, String testIdentifier,
-                   String gherkinSource, Map<String, Object> dataSet, Map<String, Object> parameters, List<String> tags) {
+                   String gherkinSource, Map<String, Object> dataSet, Map<String, Object> parameters, List<String> tags, TestRepository repository) {
+
+        public JobTest(String executionId, String testKey, TestTechnique technique, String framework, String path, String testIdentifier,
+                       String gherkinSource, Map<String, Object> dataSet, Map<String, Object> parameters, List<String> tags) {
+            this(executionId, testKey, technique, framework, path, testIdentifier, gherkinSource, dataSet, parameters, tags, null);
+        }
+    }
+
+    /** ADR-0030 dépôt propre à un test, quand il diffère de celui du job (un run peut mêler plusieurs dépôts). */
+    record TestRepository(String url, String branch, RepositoryCredentials credentials) {
     }
 
     /** ADR-0030 identifiants du dépôt (TOKEN ou SSH_KEY), transmis avec le job et jamais conservés par le serveur. */

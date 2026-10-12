@@ -100,7 +100,8 @@ test('Sprint 1 : planification, recette manuelle et automatisée, clôture', asy
     // ADR-0026 exécution réelle des tests Playwright de saucedemo par le serveur d'exécution
     await page.getByTestId('launch-server').click();
     await page.getByRole('option', { name: new RegExp(`^${SERVEUR}`) }).click();
-    await expect(page.getByTestId('launch-submit')).toContainText('Lancer 5 tests');
+    // TC-3 à TC-7 (dépôt local, Playwright TypeScript) et TC-14 (kerware / saucedemo-e2e, Playwright Java)
+    await expect(page.getByTestId('launch-submit')).toContainText('Lancer 6 tests');
     await capturer(page, 'run-lancer', page.getByRole('dialog'), { marge: 10 });
     await page.getByTestId('launch-submit').click();
     await expect(page.getByTestId('run-page')).toBeVisible();

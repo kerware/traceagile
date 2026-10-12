@@ -8,6 +8,7 @@ import com.traceagile.application.automation.ExecutionServerClient.JobRequest;
 import com.traceagile.application.automation.ExecutionServerClient.JobTest;
 import com.traceagile.application.automation.ExecutionServerClient.RepositoryCredentials;
 import com.traceagile.application.automation.ExecutionServerClient.ServerConnection;
+import com.traceagile.application.automation.ExecutionServerClient.TestRepository;
 import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.common.KeyGenerator;
 import com.traceagile.application.common.NotFoundException;
@@ -37,6 +38,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -262,17 +264,18 @@ public class AutomatedRunService {
 
     private JobRequest job(AutomatedRun run) {
         List<Execution> pending = executionsOf(run);
-        String repository = null;
-        String branch = null;
-        GitProject gitProject = null;
+        // ADR-0030 dépôt du job : celui du premier test qui en a un ; un test d'un autre dépôt porte le sien
+        AutomatedTestDefinition first = pending.stream().map(e -> e.getTestCase().getAutomation())
+                .filter(d -> d.getRepositoryUrl() != null).findFirst().orElse(null);
+        String repository = first == null ? null : first.getRepositoryUrl();
+        String branch = first == null ? null : first.getBranch();
+        GitProject gitProject = first == null ? null : first.getGitProject();
         List<JobTest> tests = new ArrayList<>();
         for (Execution execution : pending) {
             AutomatedTestDefinition def = execution.getTestCase().getAutomation();
-            if (repository == null) {
-                repository = def.getRepositoryUrl();
-                gitProject = def.getGitProject();
-            }
-            branch = branch == null ? def.getBranch() : branch;
+            TestRepository own = def.getRepositoryUrl() == null
+                    || Objects.equals(def.getRepositoryUrl(), repository) && Objects.equals(def.getBranch(), branch) ? null
+                    : new TestRepository(def.getRepositoryUrl(), def.getBranch(), credentials(def.getGitProject()));
             List<String> tags = new ArrayList<>(def.getExecutionTags());
             execution.getTestCase().getTags().forEach(tags::add);
             Map<String, Object> dataSet = null;
@@ -283,14 +286,14 @@ public class AutomatedRunService {
                 dataSet.put("rows", sets.getFirst().rows());
             }
             tests.add(new JobTest(execution.getId().toString(), execution.getTestCase().getKey(), def.getTechnique(), def.getFramework(),
-                    def.getPath(), def.getTestIdentifier(), def.getGherkinSource(), dataSet, def.getParameters(), tags.stream().distinct().toList()));
+                    def.getPath(), def.getTestIdentifier(), def.getGherkinSource(), dataSet, def.getParameters(), tags.stream().distinct().toList(), own));
         }
         Campaign campaign = run.getCampaign();
         return new JobRequest(runId(run), run.getProject().getKey(), campaign.getKey(), run.getEnvironment(), run.getBuildVersion(), callbackUrl,
                 repository, branch, credentials(gitProject), tests, run.getTimeoutMinutes(), 4, 0);
     }
 
-    /** ADR-0030 identifiants du dépôt Git déclaré du premier test (aucun pour une adresse libre ou un dépôt public). */
+    /** ADR-0030 identifiants du dépôt Git déclaré d'un test (aucun pour une adresse libre ou un dépôt public). */
     private RepositoryCredentials credentials(GitProject project) {
         GitSourceService.GitCredentials c = project == null ? null : gitSources.credentials(project);
         return c == null ? null : new RepositoryCredentials(c.type().name(), c.username(), c.secret());

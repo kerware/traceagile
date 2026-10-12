@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +68,7 @@ public class JobStore {
                                            parameters_json, status)
                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')""")
                     .params(jobId, ++position, test.executionId(), test.testKey(), test.technique(), test.framework(), test.path(), test.testIdentifier(),
-                            test.gherkinSource(), write(Map.of("parameters", test.parameters(), "dataSet", test.dataSet(), "tags", test.tags())))
+                            test.gherkinSource(), write(extra(test)))
                     .update();
         }
     }
@@ -167,11 +168,31 @@ public class JobStore {
                 rs.getString("error_message"));
     }
 
+    /** Paramètres, jeu de données, tags et ADR-0030 dépôt propre au test (sans ses identifiants). */
+    private static Map<String, Object> extra(TestSpec test) {
+        Map<String, Object> extra = new LinkedHashMap<>();
+        extra.put("parameters", test.parameters());
+        extra.put("dataSet", test.dataSet());
+        extra.put("tags", test.tags());
+        if (test.repositoryUrl() != null) {
+            Map<String, Object> repository = new LinkedHashMap<>();
+            repository.put("url", test.repositoryUrl());
+            repository.put("branch", test.branch());
+            extra.put("repository", repository);
+        }
+        return extra;
+    }
+
+    private static String text(Object value) {
+        return value == null ? null : String.valueOf(value);
+    }
+
     private TestRow mapTest(ResultSet rs, int row) throws SQLException {
         Map<String, Object> extra = readMap(rs.getString("parameters_json"));
         TestSpec spec = new TestSpec(rs.getString("execution_id"), rs.getString("test_key"), rs.getString("technique"), rs.getString("framework"),
                 rs.getString("path"), rs.getString("test_identifier"), rs.getString("gherkin_source"), map(extra.get("dataSet")),
-                map(extra.get("parameters")), extra.get("tags") instanceof List<?> tags ? tags.stream().map(String::valueOf).toList() : List.of());
+                map(extra.get("parameters")), extra.get("tags") instanceof List<?> tags ? tags.stream().map(String::valueOf).toList() : List.of(),
+                text(map(extra.get("repository")).get("url")), text(map(extra.get("repository")).get("branch")), null);
         long duration = rs.getLong("duration_ms");
         String metrics = rs.getString("metrics_json");
         return new TestRow(rs.getLong("id"), rs.getInt("position"), spec, rs.getString("status"), rs.getInt("attempts"), rs.wasNull() ? null : duration,

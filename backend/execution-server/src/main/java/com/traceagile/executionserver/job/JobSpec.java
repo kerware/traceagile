@@ -24,9 +24,14 @@ public record JobSpec(String runId, String project, String campaign, String envi
         }
     }
 
-    /** Un test du job ; {@code parameters} et {@code dataSet} deviennent des variables d'environnement. */
+    /**
+     * Un test du job ; {@code parameters} et {@code dataSet} deviennent des variables d'environnement.
+     * ADR-0030 {@code repositoryUrl} / {@code branch} : dépôt propre au test ({@code null} : celui du job) ;
+     * {@code credentials} n'est connu qu'en mémoire, à la réception du job.
+     */
     public record TestSpec(String executionId, String testKey, String technique, String framework, String path, String testIdentifier,
-                           String gherkinSource, Map<String, Object> dataSet, Map<String, Object> parameters, List<String> tags) {
+                           String gherkinSource, Map<String, Object> dataSet, Map<String, Object> parameters, List<String> tags,
+                           String repositoryUrl, String branch, Credentials credentials) {
 
         public String label() {
             return testKey + (testIdentifier == null || testIdentifier.isBlank() ? "" : " (" + testIdentifier + ")");
@@ -54,10 +59,12 @@ public record JobSpec(String runId, String project, String campaign, String envi
                 throw new IllegalArgumentException("Chaque test doit porter un executionId.");
             }
             Map<String, Object> test = (Map<String, Object>) t;
+            Map<String, Object> own = test.get("repository") instanceof Map<?, ?> r ? (Map<String, Object>) r : Map.of();
             tests.add(new TestSpec(text(test.get("executionId")), text(test.getOrDefault("testKey", test.get("executionId"))), text(test.get("technique")),
                     text(test.get("framework")), text(test.get("path")), text(test.get("testIdentifier")), text(test.get("gherkinSource")),
                     map(test.get("dataSet")), map(test.get("parameters")),
-                    test.get("tags") instanceof List<?> tags ? tags.stream().map(String::valueOf).toList() : List.of()));
+                    test.get("tags") instanceof List<?> tags ? tags.stream().map(String::valueOf).toList() : List.of(),
+                    text(own.get("url")), text(own.get("branch")), credentials(own.get("credentials"))));
         }
         return new JobSpec(text(runId), text(body.get("project")), text(body.get("campaign")), text(body.get("environment")),
                 text(body.get("buildVersion")), text(callback), text(repository.getOrDefault("url", body.get("repositoryUrl"))),

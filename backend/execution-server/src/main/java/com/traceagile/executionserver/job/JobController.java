@@ -78,7 +78,8 @@ public class JobController {
         }
         String jobId = "job-" + UUID.randomUUID().toString().substring(0, 8);
         store.create(jobId, token.tokenId(), spec, ServletUriComponentsBuilder.fromContextPath(http).build().toUriString(), clock.instant());
-        git.remember(jobId, spec.credentials());
+        git.remember(jobId, spec.repositoryUrl(), spec.credentials());
+        spec.tests().forEach(test -> git.remember(jobId, test.repositoryUrl(), test.credentials()));
         runner.start(jobId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of("jobId", jobId, "status", "ACCEPTED"));
     }

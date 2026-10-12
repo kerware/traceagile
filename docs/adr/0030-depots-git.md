@@ -30,4 +30,6 @@ Choix de l'utilisateur :
   que le serveur est sur une autre machine (note d'installation §11).
 - Démo SwagLabs : dépôts « Dépôt local » (`file:///depots`, projet `traceagile`, utilisé par les tests
   de SWAG) et « kerware » (`https://github.com/kerware`, projet `saucedemo-e2e`).
-- Un run mêle encore des tests d'un seul dépôt : celui du premier test (limite existante).
+- Un run peut mêler plusieurs dépôts : le job porte celui du premier test, et chaque test d'un autre
+  dépôt porte le sien (`tests[].repository`, avec ses identifiants). Le serveur d'exécution clone
+  chaque dépôt dans son propre espace de travail (`workspace`, `workspace-2`…).

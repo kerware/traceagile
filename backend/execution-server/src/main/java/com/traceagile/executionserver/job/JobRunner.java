@@ -39,6 +39,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -145,18 +146,29 @@ public class JobRunner {
             putIfPresent(environment, "TRACEAGILE_CAMPAIGN", job.campaign());
             putIfPresent(environment, "TRACEAGILE_ENVIRONMENT", job.environment());
             putIfPresent(environment, "TRACEAGILE_BUILD", job.buildVersion());
-            Path workspace = properties.jobsDir().resolve(jobId).resolve("workspace").toAbsolutePath().normalize();
             Instant deadline = start.plus(job.timeoutMinutes(), ChronoUnit.MINUTES);
-            ExecutionContext context = new ExecutionContext(workspace, environment, tools.platform(), processes, cancellation, deadline, log::line);
-            String workspaceError = git.prepare(context, jobId, job.repositoryUrl(), job.branch());
-            if (workspaceError != null) {
-                log.line(workspaceError);
-            }
+            // ADR-0030 un espace de travail par dépôt : celui du job (« workspace »), puis ceux propres à des tests
+            List<TestRow> rows = store.tests(jobId);
+            Map<String, Workspace> workspaces = new LinkedHashMap<>();
+            Function<String[], Workspace> workspace = repo -> workspaces.computeIfAbsent(repo[0] + "|" + repo[1], key -> {
+                String name = workspaces.isEmpty() ? "workspace" : "workspace-" + (workspaces.size() + 1);
+                Path dir = properties.jobsDir().resolve(jobId).resolve(name).toAbsolutePath().normalize();
+                ExecutionContext context = new ExecutionContext(dir, environment, tools.platform(), processes, cancellation, deadline, log::line);
+                String error = git.prepare(context, jobId, repo[0], repo[1]);
+                if (error != null) {
+                    log.line(error);
+                }
+                return new Workspace(context, error);
+            });
+            workspace.apply(new String[] {job.repositoryUrl(), job.branch()});
 
             Shared shared = new Shared(new Semaphore(job.parallelism()), new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
             List<Future<?>> tests = new ArrayList<>();
-            for (TestRow test : store.tests(jobId)) {
-                tests.add(pool.submit(() -> runTest(job, test, context, workspaceError, shared, log)));
+            for (TestRow test : rows) {
+                TestSpec spec = test.spec();
+                Workspace own = spec.repositoryUrl() == null ? workspace.apply(new String[] {job.repositoryUrl(), job.branch()})
+                        : workspace.apply(new String[] {spec.repositoryUrl(), spec.branch()});
+                tests.add(pool.submit(() -> runTest(job, test, own.context(), own.error(), shared, log)));
             }
             for (Future<?> test : tests) {
                 try {
@@ -172,6 +184,10 @@ public class JobRunner {
         } finally {
             running.remove(jobId);
         }
+    }
+
+    /** Espace de travail d'un dépôt du job et l'erreur de son clone ({@code null} s'il est prêt). */
+    private record Workspace(ExecutionContext context, String error) {
     }
 
     private record Shared(Semaphore slots, Map<String, CompletableFuture<ProcessRunner.Result>> prepared, Map<Path, ReentrantLock> locks) {

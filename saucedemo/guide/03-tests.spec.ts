@@ -9,7 +9,8 @@ import { Api, capturer, connexion, fermerNotifications, P, projetGit } from './o
  * - automatisés Playwright de saucedemo/app-tests : TC-3 piloté par les données (même jeu « Comptes »),
  *   TC-4 à TC-6 (UI), TC-7 (API), TC-8 (BDD généré depuis le critère Gherkin de REQ-10),
  *   TC-9 et TC-10 (UI), TC-11 (performance, lié à l'ENF REQ-16) ;
- * - exploratoire : TC-12, charte sur le panier.
+ * - exploratoire : TC-12, charte sur le panier ;
+ * - TC-14 : test Playwright Java (JUnit 5, Maven) d'un autre dépôt, kerware / saucedemo-e2e sur GitHub.
  * Tout test manuel à paramètres a au moins un jeu de données. TC-13 est créé en dernier : les clés des
  * tests précédents ne changent pas.
  * Les identifiants des tests automatisés sont les noms des tests du rapport JUnit de Playwright.
@@ -140,6 +141,16 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
     }, 'TC-13');
   });
 
+  await test.step('Le développeur référence un test Playwright Java d’un autre dépôt : kerware / saucedemo-e2e (API)', async () => {
+    // ADR-0030 projet déclaré dans Administration › Dépôts Git ; le run du sprint 1 mêle les deux dépôts
+    await creer(dev, {
+      kind: 'AUTOMATED', title: 'Catalogue : noms et prix (Playwright Java)', technique: 'UI', framework: 'JUnit 5', language: 'Java',
+      gitProjectId: await projetGit(dev, 'kerware / saucedemo-e2e'), folder: 'Catalogue',
+      path: 'src/test/java/com/kerware/e2e/saucedemo/inventaire/InventaireCatalogueTest.java',
+      testIdentifier: 'InventaireCatalogueTest#catalogueAffiche', executionTags: ['kerware', 'smoke'], links: verifie('REQ-6'),
+    }, 'TC-14');
+  });
+
   await test.step('Fiches des tests : pas et jeu de données, automatisation, charte', async () => {
     await page.goto(`/p/${P}/tests/TC-1`);
     await expect(page.getByTestId('manual-steps')).toBeVisible();
@@ -152,6 +163,9 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
     await page.goto(`/p/${P}/tests/TC-13`);
     await expect(page.getByTestId('step-called-1')).toBeVisible();
     await capturer(page, 'test-manuel-appel', page.getByTestId('manual-steps'), { marge: 8 });
+    await page.goto(`/p/${P}/tests/TC-14`);
+    await expect(page.getByTestId('automation-identifier')).toHaveValue('InventaireCatalogueTest#catalogueAffiche');
+    await capturer(page, 'test-automatise-kerware', page.getByTestId('automation-identification'), { marge: 8 });
     await page.goto(`/p/${P}/tests/TC-3`);
     await expect(page.getByTestId('automation-identifier')).toBeVisible();
     await capturer(page, 'test-automatise');
@@ -162,7 +176,7 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
 
   await test.step('Le référentiel de tests', async () => {
     await page.goto(`/p/${P}/tests`);
-    await expect(page.getByTestId('test-row-TC-13').or(page.getByTestId('tree-test-TC-13'))).toBeVisible();
+    await expect(page.getByTestId('test-row-TC-14').or(page.getByTestId('tree-test-TC-14'))).toBeVisible();
     await capturer(page, 'tests-referentiel', undefined, { pleinePage: true });
   });
 });

@@ -84,18 +84,7 @@ public class HttpExecutionServerClient implements ExecutionServerClient {
         body.put("environment", job.environment());
         body.put("buildVersion", job.buildVersion());
         body.put("callbackUrl", job.callbackUrl());
-        Map<String, Object> repository = new LinkedHashMap<>();
-        repository.put("url", job.repositoryUrl());
-        repository.put("branch", job.branch());
-        if (job.credentials() != null) {
-            // ADR-0030 jeton ou clé SSH du dépôt déclaré : utilisé pour le clone, jamais conservé par le serveur
-            Map<String, Object> credentials = new LinkedHashMap<>();
-            credentials.put("type", job.credentials().type());
-            credentials.put("username", job.credentials().username());
-            credentials.put("secret", job.credentials().secret());
-            repository.put("credentials", credentials);
-        }
-        body.put("repository", repository);
+        body.put("repository", repository(job.repositoryUrl(), job.branch(), job.credentials()));
         body.put("tests", job.tests().stream().map(t -> {
             Map<String, Object> test = new LinkedHashMap<>();
             test.put("executionId", t.executionId());
@@ -108,6 +97,10 @@ public class HttpExecutionServerClient implements ExecutionServerClient {
             test.put("dataSet", t.dataSet());
             test.put("parameters", t.parameters());
             test.put("tags", t.tags());
+            if (t.repository() != null) {
+                // ADR-0030 dépôt propre au test (autre que celui du job)
+                test.put("repository", repository(t.repository().url(), t.repository().branch(), t.repository().credentials()));
+            }
             return test;
         }).toList());
         body.put("options", Map.of("timeoutMinutes", job.timeoutMinutes(), "parallelism", job.parallelism(), "retryFailed", job.retryFailed()));
@@ -202,5 +195,20 @@ public class HttpExecutionServerClient implements ExecutionServerClient {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /** Dépôt d'un job ou d'un test ; ADR-0030 jeton ou clé SSH du dépôt déclaré, utilisé pour le clone et jamais conservé par le serveur. */
+    private static Map<String, Object> repository(String url, String branch, RepositoryCredentials credentials) {
+        Map<String, Object> repository = new LinkedHashMap<>();
+        repository.put("url", url);
+        repository.put("branch", branch);
+        if (credentials != null) {
+            Map<String, Object> secret = new LinkedHashMap<>();
+            secret.put("type", credentials.type());
+            secret.put("username", credentials.username());
+            secret.put("secret", credentials.secret());
+            repository.put("credentials", secret);
+        }
+        return repository;
     }
 }

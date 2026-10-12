@@ -26,23 +26,23 @@ import org.springframework.stereotype.Component;
 public class GitWorkspace {
 
     private final GitCredentialService credentials;
-    /** Identifiants reçus avec un job, consommés par son clone. */
+    /** Identifiants reçus avec un job, par dépôt (« job|adresse »), consommés par le clone. */
     private final Map<String, Credentials> jobCredentials = new ConcurrentHashMap<>();
 
     public GitWorkspace(GitCredentialService credentials) {
         this.credentials = credentials;
     }
 
-    /** ADR-0030 identifiants transmis par TraceAgile pour le dépôt d'un job ({@code null} : aucun). */
-    public void remember(String jobId, Credentials credentials) {
-        if (credentials != null) {
-            jobCredentials.put(jobId, credentials);
+    /** ADR-0030 identifiants transmis par TraceAgile pour un dépôt d'un job ({@code null} : aucun). */
+    public void remember(String jobId, String repositoryUrl, Credentials credentials) {
+        if (credentials != null && repositoryUrl != null) {
+            jobCredentials.put(jobId + "|" + repositoryUrl.strip(), credentials);
         }
     }
 
     /** @return null si l'espace est prêt, sinon le message d'erreur */
     public String prepare(ExecutionContext context, String jobId, String repositoryUrl, String branch) {
-        Credentials given = jobId == null ? null : jobCredentials.remove(jobId);
+        Credentials given = jobId == null || repositoryUrl == null ? null : jobCredentials.remove(jobId + "|" + repositoryUrl.strip());
         Path workspace = context.workspace();
         try {
             Files.createDirectories(workspace.getParent());

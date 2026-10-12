@@ -68,7 +68,7 @@ export function AutomationEditor({
           {t('automation.missing')}
         </Alert>
       )}
-      <Fieldset legend={t('automation.identification')}>
+      <Fieldset legend={t('automation.identification')} data-testid="automation-identification">
         <Stack>
           <Group grow align="flex-start">
             <Select

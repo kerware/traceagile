@@ -262,6 +262,15 @@ components:
         dataSet: { type: object, nullable: true }
         parameters: { type: object, additionalProperties: true }
         tags: { type: array, items: { type: string } }
+        repository:
+          type: object
+          description: >-
+            ADR-0030 dépôt propre au test quand il diffère de celui du job (un run peut mêler plusieurs dépôts) :
+            mêmes champs que JobRequest.repository ; le serveur prépare un espace de travail par dépôt.
+          properties:
+            url: { type: string }
+            branch: { type: string }
+            credentials: { type: object }
     JobAccepted:
       type: object
       required: [jobId, status]
