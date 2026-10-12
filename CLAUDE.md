@@ -101,6 +101,10 @@ Serveur d'exécution réel (ADR-0026, [backend/execution-server/README.md](backe
 Installation hors Docker (ADR-0027, [docs/installation.md](docs/installation.md)) :
 `scripts/construire-distribution.(sh|ps1)` → `dist/traceagile-<version>/` (deux jars, configurations
 `install/*/…env.exemple`, démarrage, scripts de base `install/base-de-donnees/installer-base.(sh|ps1)`).
+Chaque logiciel s'installe aussi en conteneur, indépendamment de l'autre : `install/*/Dockerfile` construit
+l'image depuis le jar, `docker-compose.yml` lit la même configuration en `.env` (TraceAgile : profil
+`base-locale` pour PostgreSQL, service `installation-demo` pour la démo ; réseau partagé `traceagile-reseau`).
+La note décrit les 8 combinaisons ; garder ses tableaux d'adresses (§1.2) à jour si un port ou un nom change.
 Le jar de TraceAgile n'embarque l'interface qu'avec `-Pdistribution` (`EmbeddedFrontendFilter`). Hors
 profil demo, `InitialAdministrator` crée l'administrateur sur une base sans utilisateur
 (`TRACEAGILE_ADMIN_*`). La démo SwagLabs est un export SQL (`demo/swaglabs.sql`, comptes en

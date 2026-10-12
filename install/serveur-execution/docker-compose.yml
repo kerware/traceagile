@@ -1,0 +1,32 @@
+# Serveur d'exécution en conteneur (docs/installation.md §8). Configuration : .env (copie de
+# serveur-execution.env.exemple).   docker compose up -d --build
+name: traceagile-serveur-execution
+
+services:
+  serveur-execution:
+    build: .
+    image: traceagile-serveur-execution:local
+    env_file: .env
+    environment:
+      # valeurs propres au conteneur (le reste vient de .env)
+      SERVER_PORT: "8091"
+      EXECUTION_SERVER_DATA_DIR: /data
+      EXECUTION_SERVER_TOOLS_DIR: /opt/tools
+    ports:
+      - "${SERVER_PORT:-8091}:8091"
+    volumes:
+      - donnees:/data
+      - outils:/opt/tools
+    extra_hosts:
+      # TraceAgile installé hors Docker sur la même machine : TRACEAGILE_CALLBACK_URL=http://host.docker.internal:8085/…
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  donnees:
+  outils:
+
+networks:
+  default:
+    # réseau partagé avec TraceAgile en conteneur sur la même machine
+    name: traceagile-reseau

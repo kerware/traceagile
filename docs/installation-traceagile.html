@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Installation TraceAgile</title>
-<meta name="description" content="Installation de TraceAgile et du serveur d’exécution sur des machines indépendantes, sans Docker">
+<meta name="description" content="Installation de TraceAgile et du serveur d’exécution, hors Docker ou en conteneur, sur une ou plusieurs machines">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -64,77 +64,312 @@ th { font-weight: 600; background: var(--accent-doux); }
 <nav aria-label="Chapitres">
 <p class="marque">TraceAgile · installation</p>
 <ol>
-<li><a href="#1-prérequis"><span class="num">1</span>Prérequis</a></li>
-<li><a href="#2-produire-les-deux-jars-distribuables"><span class="num">2</span>Produire les deux jars distribuables</a></li>
-<li><a href="#3-créer-la-base-de-données"><span class="num">3</span>Créer la base de données</a></li>
-<li><a href="#4-configurer-traceagile"><span class="num">4</span>Configurer TraceAgile</a></li>
-<li><a href="#5-démarrer-traceagile"><span class="num">5</span>Démarrer TraceAgile</a></li>
-<li><a href="#6-démarrer-en-service"><span class="num">6</span>Démarrer en service</a></li>
-<li><a href="#7-installer-le-serveur-dexécution"><span class="num">7</span>Installer le serveur d'exécution</a></li>
-<li><a href="#8-https-et-proxy-inverse"><span class="num">8</span>HTTPS et proxy inverse</a></li>
-<li><a href="#9-sauvegarde-mise-à-jour-désinstallation"><span class="num">9</span>Sauvegarde, mise à jour, désinstallation</a></li>
-<li><a href="#10-dépannage"><span class="num">10</span>Dépannage</a></li>
-<li><a href="#11-limites-de-la-démonstration"><span class="num">11</span>Limites de la démonstration</a></li>
+<li><a href="#1-choisir-le-type-dinstallation"><span class="num">1</span>Choisir le type d'installation</a></li>
+<li><a href="#2-prérequis"><span class="num">2</span>Prérequis</a></li>
+<li><a href="#3-produire-la-distribution"><span class="num">3</span>Produire la distribution</a></li>
+<li><a href="#4-base-de-données-postgresql-existante"><span class="num">4</span>Base de données PostgreSQL existante</a></li>
+<li><a href="#5-traceagile-hors-docker"><span class="num">5</span>TraceAgile hors Docker</a></li>
+<li><a href="#6-traceagile-en-conteneur-docker"><span class="num">6</span>TraceAgile en conteneur Docker</a></li>
+<li><a href="#7-serveur-dexécution-hors-docker"><span class="num">7</span>Serveur d'exécution hors Docker</a></li>
+<li><a href="#8-serveur-dexécution-en-conteneur-docker"><span class="num">8</span>Serveur d'exécution en conteneur Docker</a></li>
+<li><a href="#9-relier-traceagile-et-le-serveur-dexécution"><span class="num">9</span>Relier TraceAgile et le serveur d'exécution</a></li>
+<li><a href="#10-réseau-et-pare-feu"><span class="num">10</span>Réseau et pare-feu</a></li>
+<li><a href="#11-https-et-proxy-inverse"><span class="num">11</span>HTTPS et proxy inverse</a></li>
+<li><a href="#12-sauvegarde-mise-à-jour-désinstallation"><span class="num">12</span>Sauvegarde, mise à jour, désinstallation</a></li>
+<li><a href="#13-dépannage"><span class="num">13</span>Dépannage</a></li>
+<li><a href="#14-limites-de-la-démonstration"><span class="num">14</span>Limites de la démonstration</a></li>
 </ol>
 </nav>
 <main>
 <header class="entete">
-<p class="surtitre">Deux jars · PostgreSQL · démo SwagLabs</p>
-<h1>Installation de TraceAgile hors Docker</h1>
-<p>Cette note décrit l&#39;installation de TraceAgile et de son serveur d&#39;exécution sur des machines
-indépendantes, sans Docker : deux jars Java autonomes, une base PostgreSQL, et en option le jeu de
-démonstration SwagLabs. Pour un poste de développement, <code>docker compose up</code> reste plus simple
-(voir <span class="chemin" title="Fichier du dépôt : CLAUDE.md">CLAUDE.md</span>). Les choix techniques sont dans l&#39;<span class="chemin" title="Fichier du dépôt : docs/adr/0027-installation-hors-docker.md">ADR-0027</span>.</p>
+<p class="surtitre">Hors Docker ou conteneur · 8 combinaisons · démo SwagLabs</p>
+<h1>Installation de TraceAgile et du serveur d’exécution</h1>
+<p>Cette note décrit l&#39;installation des deux logiciels livrés : <strong>TraceAgile</strong> (API, interface web et
+guide d&#39;utilisation) et son <strong>serveur d&#39;exécution</strong> des tests automatisés. Chacun s&#39;installe au
+choix <strong>hors Docker</strong> (un jar Java lancé comme un service) ou <strong>en conteneur Docker</strong> (image construite
+sur place à partir du même jar), sur la même machine ou sur des machines séparées. TraceAgile utilise
+une base PostgreSQL, existante ou dans un conteneur, vide ou avec la démonstration SwagLabs. Les
+choix techniques sont dans l&#39;<span class="chemin" title="Fichier du dépôt : docs/adr/0027-installation-hors-docker.md">ADR-0027</span>.</p>
 <pre><code> Machine A : TraceAgile                       Machine B : serveur d&#39;exécution
  +------------------------------+    jobs     +-------------------------------+
  | traceagile-api.jar  :8085    | ----------&gt; | execution-server.jar  :8091   |
  | (API + interface + guide)    |             | (API + interface, base H2)    |
- |                              | &lt;---------- | Java 21, Git, Node.js, Python |
+ | jar ou conteneur             | &lt;---------- | jar ou conteneur              |
  +--------------+---------------+  résultats  +-------------------------------+
                 |                 (webhooks)
                 | JDBC
  +--------------v---------------+
- | PostgreSQL 16+  :5432        |   (machine A ou une machine dédiée)
+ | PostgreSQL 16+  :5432        |   (serveur existant ou conteneur)
  +------------------------------+
 </code></pre>
-<p>Les deux jars peuvent aussi tourner sur la même machine, et plusieurs serveurs d&#39;exécution peuvent
-être rattachés à un même TraceAgile.</p>
+<p>Plusieurs serveurs d&#39;exécution peuvent être rattachés à un même TraceAgile, chacun installé dans le
+mode qui convient à sa machine.</p>
 
 </header>
-<h2 id="1-prérequis">1. Prérequis</h2>
+<h2 id="1-choisir-le-type-dinstallation">1. Choisir le type d&#39;installation</h2>
+<h3 id="11-les-deux-modes">1.1 Les deux modes</h3>
 <div class="tableau"><table>
 <thead>
 <tr>
-<th>Machine</th>
-<th>Logiciel</th>
-<th>Remarque</th>
+<th></th>
+<th>Hors Docker</th>
+<th>En conteneur Docker</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Livrable</td>
+<td>le jar et ses scripts <code>demarrer.sh</code> / <code>demarrer.ps1</code></td>
+<td>le même dossier : <code>Dockerfile</code> et <code>docker-compose.yml</code> construisent l&#39;image à partir du jar</td>
+</tr>
+<tr>
+<td>Prérequis de la machine</td>
+<td>Java 21 ; pour le serveur d&#39;exécution, aussi Git, Node.js, Python selon les frameworks</td>
+<td>Docker Engine 24+ et Docker Compose 2.20+ (Docker Desktop sous Windows et macOS)</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td><code>traceagile.env</code> / <code>serveur-execution.env</code></td>
+<td>les mêmes variables, dans un fichier <code>.env</code></td>
+</tr>
+<tr>
+<td>Démarrage automatique</td>
+<td>service systemd ou service Windows (§5.3)</td>
+<td><code>restart: unless-stopped</code> (démarre avec Docker)</td>
+</tr>
+<tr>
+<td>Données</td>
+<td>dossiers de la machine</td>
+<td>volumes Docker</td>
+</tr>
+<tr>
+<td>Conseillé quand</td>
+<td>la machine n&#39;a pas Docker, ou le serveur d&#39;exécution doit piloter des navigateurs ou outils déjà installés sur la machine (Windows en particulier)</td>
+<td>la machine a Docker : prérequis inclus dans l&#39;image, mises à jour par reconstruction</td>
+</tr>
+</tbody></table>
+</div>
+<p>Le mode de l&#39;un ne contraint pas le mode de l&#39;autre : ils ne communiquent que par HTTP.</p>
+<h3 id="12-les-combinaisons">1.2 Les combinaisons</h3>
+<p>Deux réglages dépendent de la combinaison choisie :</p>
+<ul>
+<li>l&#39;<strong>adresse du serveur d&#39;exécution</strong>, déclarée dans TraceAgile (§9) ; elle doit être joignable
+depuis TraceAgile ;</li>
+<li><strong><code>TRACEAGILE_CALLBACK_URL</code></strong>, réglée dans la configuration de TraceAgile ; c&#39;est l&#39;adresse à
+laquelle le serveur d&#39;exécution renvoie les résultats, et elle doit être joignable depuis le
+serveur d&#39;exécution.</li>
+</ul>
+<p><code>machine-a</code> et <code>machine-b</code> désignent le nom DNS ou l&#39;adresse IP des machines de TraceAgile et du
+serveur d&#39;exécution ; les ports sont ceux par défaut.</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Combinaison</th>
+<th>TraceAgile</th>
+<th>Serveur d&#39;exécution</th>
+<th>Machines</th>
+<th>Adresse du serveur dans TraceAgile</th>
+<th><code>TRACEAGILE_CALLBACK_URL</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A1</td>
+<td>hors Docker</td>
+<td>hors Docker</td>
+<td>une seule</td>
+<td><code>http://localhost:8091</code></td>
+<td><code>http://localhost:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>A2</td>
+<td>hors Docker</td>
+<td>hors Docker</td>
+<td>deux</td>
+<td><code>http://machine-b:8091</code></td>
+<td><code>http://machine-a:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>B1</td>
+<td>conteneur</td>
+<td>conteneur</td>
+<td>une seule</td>
+<td><code>http://serveur-execution:8091</code></td>
+<td><code>http://traceagile:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>B2</td>
+<td>conteneur</td>
+<td>conteneur</td>
+<td>deux</td>
+<td><code>http://machine-b:8091</code></td>
+<td><code>http://machine-a:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>C1</td>
+<td>conteneur</td>
+<td>hors Docker</td>
+<td>une seule</td>
+<td><code>http://host.docker.internal:8091</code></td>
+<td><code>http://localhost:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>C2</td>
+<td>conteneur</td>
+<td>hors Docker</td>
+<td>deux</td>
+<td><code>http://machine-b:8091</code></td>
+<td><code>http://machine-a:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>D1</td>
+<td>hors Docker</td>
+<td>conteneur</td>
+<td>une seule</td>
+<td><code>http://localhost:8091</code></td>
+<td><code>http://host.docker.internal:8085/api/v1/execution-callbacks</code></td>
+</tr>
+<tr>
+<td>D2</td>
+<td>hors Docker</td>
+<td>conteneur</td>
+<td>deux</td>
+<td><code>http://machine-b:8091</code></td>
+<td><code>http://machine-a:8085/api/v1/execution-callbacks</code></td>
+</tr>
+</tbody></table>
+</div>
+<p>Explications :</p>
+<ul>
+<li><strong>Machines différentes</strong> (A2, B2, C2, D2) : le mode ne change rien, on utilise toujours les noms
+des machines et les ports publiés. Ne jamais mettre <code>localhost</code> : dans un conteneur, <code>localhost</code>
+désigne le conteneur lui-même.</li>
+<li><strong>Deux conteneurs sur la même machine</strong> (B1) : les deux fichiers <code>docker-compose.yml</code> rejoignent le
+même réseau Docker <code>traceagile-reseau</code>. Les conteneurs s&#39;y appellent par leur nom de service,
+<code>traceagile</code> et <code>serveur-execution</code>.</li>
+<li><strong>Un conteneur et un jar sur la même machine</strong> (C1, D1) : le conteneur joint la machine hôte par
+<code>host.docker.internal</code> (déclaré dans les deux <code>docker-compose.yml</code>, y compris sous Linux), et le
+jar joint le conteneur par le port publié sur <code>localhost</code>.</li>
+</ul>
+<h3 id="13-la-base-de-données">1.3 La base de données</h3>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Pour</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PostgreSQL existant (installé sur une machine, ou service géré)</td>
+<td>TraceAgile dans les deux modes</td>
+<td><code>base-de-donnees/installer-base.(sh|ps1)</code> crée le rôle et la base (§4.1)</td>
+</tr>
+<tr>
+<td>PostgreSQL dans un conteneur, géré avec TraceAgile</td>
+<td>TraceAgile en conteneur</td>
+<td>profil <code>base-locale</code> du <code>docker-compose.yml</code> de TraceAgile (§6.2) ; rien à créer à la main</td>
+</tr>
+</tbody></table>
+</div>
+<p>La <strong>démonstration SwagLabs</strong> s&#39;injecte dans tous les cas, dans une base vide, avant le premier
+démarrage de TraceAgile :</p>
+<ul>
+<li>avec <code>installer-base --demo</code> (§4.3) ;</li>
+<li>ou, si TraceAgile est en conteneur, avec le service <code>installation-demo</code> (§6.3).</li>
+</ul>
+<p>Sans démonstration, TraceAgile crée lui-même au premier démarrage le schéma, les données de
+démarrage et l&#39;administrateur.</p>
+<p>Le serveur d&#39;exécution n&#39;a pas de base à installer : il garde ses données dans une base H2 créée
+au premier démarrage.</p>
+<h3 id="14-ordre-dinstallation">1.4 Ordre d&#39;installation</h3>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Étape</th>
+<th>Hors Docker</th>
+<th>En conteneur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. Produire la distribution</td>
+<td>§3 (une fois, sur un poste de développement)</td>
+<td>§3</td>
+</tr>
+<tr>
+<td>2. Base de données</td>
+<td>§4 (PostgreSQL existant)</td>
+<td>§4 (PostgreSQL existant) ou rien (profil <code>base-locale</code>)</td>
+</tr>
+<tr>
+<td>3. Démo SwagLabs (option)</td>
+<td>§4.3</td>
+<td>§4.3 ou §6.3</td>
+</tr>
+<tr>
+<td>4. TraceAgile</td>
+<td>§5</td>
+<td>§6</td>
+</tr>
+<tr>
+<td>5. Serveur d&#39;exécution</td>
+<td>§7</td>
+<td>§8</td>
+</tr>
+<tr>
+<td>6. Relier les deux, installer les outils de test</td>
+<td>§9</td>
+<td>§9</td>
+</tr>
+<tr>
+<td>7. Réseau, HTTPS</td>
+<td>§10, §11</td>
+<td>§10, §11</td>
+</tr>
+</tbody></table>
+</div>
+<p>La pile <code>docker-compose.yml</code> à la racine du dépôt est autre chose : c&#39;est l&#39;environnement de
+<strong>développement</strong>, avec un profil de démonstration différent (projet SHOP), un simulateur et des
+secrets connus. Elle se construit depuis les sources et ne sert pas à une installation.</p>
+<h2 id="2-prérequis">2. Prérequis</h2>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Rôle</th>
+<th>Hors Docker</th>
+<th>En conteneur</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>TraceAgile</td>
-<td>Java 21 (JRE suffit)</td>
-<td><code>java -version</code> doit afficher 21 ou plus.</td>
+<td>Java 21 (un JRE suffit)</td>
+<td>Docker Engine 24+ / Docker Desktop, Compose 2.20+</td>
 </tr>
 <tr>
 <td>Base de données</td>
-<td>PostgreSQL <strong>16 ou plus</strong>, avec <code>psql</code></td>
-<td>Le jeu de démonstration est un export PostgreSQL 16. Un superutilisateur (ex. <code>postgres</code>) est nécessaire pour la création du rôle et de la base.</td>
+<td>PostgreSQL <strong>16 ou plus</strong> et <code>psql</code> ; un superutilisateur (ex. <code>postgres</code>) pour créer le rôle et la base</td>
+<td>idem, ou rien avec le profil <code>base-locale</code> (image <code>postgres:16-alpine</code>)</td>
 </tr>
 <tr>
 <td>Serveur d&#39;exécution</td>
-<td>Java 21, Git</td>
-<td>Node.js 22, Python 3.10+ selon les frameworks utilisés (Playwright, Cypress, Robot Framework). L&#39;interface du serveur détecte ces prérequis et explique comment les installer. Les outils de test eux-mêmes s&#39;installent depuis cette interface.</td>
+<td>Java 21 et Git. Node.js 22 et Python 3.10+ selon les frameworks (Playwright, Cypress, Robot Framework). L&#39;interface du serveur détecte ces prérequis et explique comment les installer</td>
+<td>Docker : l&#39;image contient JDK 21, Git, Node.js 22, Python 3 et les bibliothèques des navigateurs (Linux x64)</td>
 </tr>
 <tr>
-<td>Construction des jars</td>
-<td>Java 21, Maven 3.9</td>
-<td>Node.js est téléchargé par Maven. À faire une fois, sur un poste de développement.</td>
+<td>Construction de la distribution</td>
+<td>Java 21, Maven 3.9 (Node.js est téléchargé par Maven)</td>
+<td>idem ; les images sont construites ensuite sur chaque machine cible, sans Maven</td>
 </tr>
 </tbody></table>
 </div>
-<p>Système : Windows 10/11 ou Server 2019+, Linux (x64 ou arm64), macOS. Mémoire : 1 Go pour
-TraceAgile, 512 Mo pour le serveur d&#39;exécution, plus ce que demandent les navigateurs des tests.</p>
-<h2 id="2-produire-les-deux-jars-distribuables">2. Produire les deux jars distribuables</h2>
+<p>Le jeu de démonstration est un export PostgreSQL 16 : la base doit être en version 16 ou plus.</p>
+<p>Systèmes :</p>
+<ul>
+<li><strong>Hors Docker</strong> : Windows 10/11 ou Server 2019+, Linux (x64 ou arm64), macOS.</li>
+<li><strong>En conteneur</strong> : toute machine qui exécute des conteneurs Linux. L&#39;image du serveur
+d&#39;exécution est prévue pour x64.</li>
+</ul>
+<p>Mémoire : 1 Go pour TraceAgile, 512 Mo pour le serveur d&#39;exécution, plus ce que demandent les
+navigateurs des tests.</p>
+<h2 id="3-produire-la-distribution">3. Produire la distribution</h2>
 <p>Depuis la racine du dépôt :</p>
 <pre><code class="language-bash">scripts/construire-distribution.sh
 </code></pre>
@@ -145,24 +380,26 @@ TraceAgile, 512 Mo pour le serveur d&#39;exécution, plus ce que demandent les n
 puis assemble <code>dist/traceagile-&lt;version&gt;/</code> :</p>
 <pre><code>dist/
   traceagile-&lt;version&gt;/
-    INSTALLATION.md                 cette note
+    INSTALLATION.md .html .docx       cette note
     traceagile/
-      traceagile-api.jar            API, interface web et guide d&#39;utilisation (≈ 105 Mo)
-      traceagile.env.exemple        configuration à copier en traceagile.env
-      demarrer.sh  demarrer.ps1     lancement (lit traceagile.env)
-      traceagile.service            service systemd
+      traceagile-api.jar              API, interface web et guide d&#39;utilisation (≈ 105 Mo)
+      traceagile.env.exemple          configuration (traceagile.env hors Docker, .env en conteneur)
+      demarrer.sh  demarrer.ps1       lancement hors Docker
+      traceagile.service              service systemd
+      Dockerfile  docker-compose.yml  installation en conteneur
     serveur-execution/
-      execution-server.jar          serveur d&#39;exécution et son interface
+      execution-server.jar            serveur d&#39;exécution et son interface
       serveur-execution.env.exemple
-      demarrer.sh  demarrer.ps1
-      serveur-execution.service
+      demarrer.sh  demarrer.ps1  serveur-execution.service
+      Dockerfile  docker-compose.yml
     base-de-donnees/
       installer-base.sh  installer-base.ps1   création du rôle et de la base, démo en option
+      installer-demo-docker.sh        démo pour TraceAgile en conteneur (service installation-demo)
       creer-base.sql  apres-demo.sql
-      demo/swaglabs.sql             jeu de démonstration SwagLabs (projet SWAG)
-      demo/pieces-jointes/          captures jointes de la démo
-  traceagile-&lt;version&gt;.zip          traceagile/ + base-de-donnees/ + note
-  serveur-execution-&lt;version&gt;.zip   serveur-execution/ + note
+      demo/swaglabs.sql               jeu de démonstration SwagLabs (projet SWAG)
+      demo/pieces-jointes/            captures jointes de la démo
+  traceagile-&lt;version&gt;.zip            traceagile/ + base-de-donnees/ + note
+  serveur-execution-&lt;version&gt;.zip     serveur-execution/ + note
 </code></pre>
 <p>Sans le script, les jars s&#39;obtiennent ainsi :</p>
 <pre><code class="language-bash">cd backend
@@ -170,11 +407,21 @@ mvn -pl traceagile-api -am package -Pdistribution -DskipTests   # → traceagile
 mvn -pl execution-server -am package -DskipTests                # → execution-server/target/execution-server.jar
 </code></pre>
 <p>Le profil <code>distribution</code> construit l&#39;interface React (<code>frontend/</code>) et l&#39;embarque dans le jar, avec le
-guide d&#39;utilisation. Sans lui, le jar ne contient que l&#39;API (c&#39;est le cas de l&#39;image Docker, où nginx
-sert l&#39;interface).</p>
-<p>Copier <code>traceagile-&lt;version&gt;.zip</code> sur la machine A et <code>serveur-execution-&lt;version&gt;.zip</code> sur la
-machine B, puis les décompresser (ex. <code>/opt/traceagile</code>, <code>C:\TraceAgile</code>).</p>
-<h2 id="3-créer-la-base-de-données">3. Créer la base de données</h2>
+guide d&#39;utilisation. Sans lui, le jar ne contient que l&#39;API. C&#39;est le cas de l&#39;image de la pile de
+développement, où nginx sert l&#39;interface.</p>
+<p>Copier les archives sur les machines cibles et les décompresser, par exemple dans <code>/opt/traceagile</code>
+ou <code>C:\TraceAgile</code> :</p>
+<ul>
+<li><code>traceagile-&lt;version&gt;.zip</code> sur la machine de TraceAgile ;</li>
+<li><code>serveur-execution-&lt;version&gt;.zip</code> sur chaque machine de serveur d&#39;exécution.</li>
+</ul>
+<p>Pour TraceAgile en conteneur, garder <code>traceagile/</code> et <code>base-de-donnees/</code> côte à côte : le service
+<code>installation-demo</code> lit <code>../base-de-donnees</code>. Les images Docker se construisent sur place à partir
+du jar. Aucun registre n&#39;est nécessaire.</p>
+<h2 id="4-base-de-données-postgresql-existante">4. Base de données PostgreSQL existante</h2>
+<p>Cette partie concerne une base sur un serveur PostgreSQL existant, quel que soit le mode de
+TraceAgile. Avec le profil <code>base-locale</code> (§6.2), il n&#39;y a rien à faire ici.</p>
+<h3 id="41-script-de-création">4.1 Script de création</h3>
 <p>Le script <code>base-de-donnees/installer-base.(sh|ps1)</code> se lance depuis toute machine qui a <code>psql</code> et
 accède au serveur PostgreSQL. Il :</p>
 <ol>
@@ -183,8 +430,8 @@ accède au serveur PostgreSQL. Il :</p>
 <li>prépare le serveur d&#39;exécution de la démo (adresse, appairage à refaire) ;</li>
 <li>copie les pièces jointes de la démo.</li>
 </ol>
-<p>Le mot de passe du superutilisateur est demandé par <code>psql</code> (ou lu dans <code>PGPASSWORD</code>, <code>~/.pgpass</code>,
-<code>%APPDATA%\postgresql\pgpass.conf</code>).</p>
+<p>Le mot de passe du superutilisateur est demandé par <code>psql</code>, ou lu dans <code>PGPASSWORD</code>, <code>~/.pgpass</code>
+ou <code>%APPDATA%\postgresql\pgpass.conf</code>.</p>
 <div class="tableau"><table>
 <thead>
 <tr>
@@ -234,42 +481,54 @@ accède au serveur PostgreSQL. Il :</p>
 <td><code>--url-serveur</code></td>
 <td><code>-UrlServeur</code></td>
 <td>inchangée</td>
-<td>adresse du serveur d&#39;exécution de la démo</td>
+<td>adresse du serveur d&#39;exécution de la démo (colonne « Adresse du serveur » du §1.2)</td>
 </tr>
 <tr>
 <td><code>--pieces-jointes</code></td>
 <td><code>-PiecesJointes</code></td>
 <td>aucune copie</td>
-<td>dossier <code>TRACEAGILE_ATTACHMENTS_DIR</code> où copier les pièces jointes de la démo</td>
+<td>dossier <code>TRACEAGILE_ATTACHMENTS_DIR</code> où copier les pièces jointes de la démo (TraceAgile hors Docker)</td>
 </tr>
 </tbody></table>
 </div>
-<p><code>PSQL</code> (variable d&#39;environnement) remplace la commande <code>psql</code>, par exemple
-<code>PSQL=&quot;/usr/lib/postgresql/16/bin/psql&quot;</code> ou, sous Windows,
-<code>$env:PSQL = &#39;C:\Program Files\PostgreSQL\16\bin\psql.exe&#39;</code>.</p>
-<h3 id="31-base-vide-production">3.1 Base vide (production)</h3>
+<p>La variable d&#39;environnement <code>PSQL</code> remplace la commande <code>psql</code>, par exemple :</p>
+<ul>
+<li><code>PSQL=&quot;/usr/lib/postgresql/16/bin/psql&quot;</code> ;</li>
+<li>sous Windows, <code>$env:PSQL = &#39;C:\Program Files\PostgreSQL\16\bin\psql.exe&#39;</code>.</li>
+</ul>
+<h3 id="42-base-vide-production">4.2 Base vide (production)</h3>
 <pre><code class="language-bash">cd base-de-donnees
 ./installer-base.sh --hote db.example.org --mot-de-passe &#39;motDePasseDuRole&#39;
 </code></pre>
 <pre><code class="language-powershell">cd base-de-donnees
 .\installer-base.ps1 -Hote db.example.org -MotDePasse &#39;motDePasseDuRole&#39;
 </code></pre>
-<p>La base reste vide. <strong>Au premier démarrage, TraceAgile crée lui-même le schéma</strong> (migrations
-Flyway), les données de démarrage (référentiels : statuts, types, priorités…) et le compte
-administrateur défini par <code>TRACEAGILE_ADMIN_LOGIN</code> / <code>TRACEAGILE_ADMIN_PASSWORD</code> (§4). Ce compte
-n&#39;est créé que si la base ne contient aucun utilisateur.</p>
-<h3 id="32-base-avec-la-démonstration-swaglabs">3.2 Base avec la démonstration SwagLabs</h3>
+<p>La base reste vide. <strong>Au premier démarrage, TraceAgile crée lui-même</strong> :</p>
+<ul>
+<li>le schéma (migrations Flyway) ;</li>
+<li>les données de démarrage (référentiels : statuts, types, priorités…) ;</li>
+<li>le compte administrateur défini par <code>TRACEAGILE_ADMIN_LOGIN</code> / <code>TRACEAGILE_ADMIN_PASSWORD</code> (§5.1).
+Ce compte n&#39;est créé que si la base ne contient aucun utilisateur.</li>
+</ul>
+<h3 id="43-base-avec-la-démonstration-swaglabs">4.3 Base avec la démonstration SwagLabs</h3>
 <pre><code class="language-bash">./installer-base.sh --hote db.example.org --mot-de-passe &#39;motDePasseDuRole&#39; --demo \
   --url-serveur http://machine-b:8091 --pieces-jointes /opt/traceagile/pieces-jointes
 </code></pre>
 <pre><code class="language-powershell">.\installer-base.ps1 -Hote db.example.org -MotDePasse &#39;motDePasseDuRole&#39; -Demo `
   -UrlServeur http://machine-b:8091 -PiecesJointes C:\TraceAgile\pieces-jointes
 </code></pre>
+<p>Si TraceAgile tourne en conteneur, omettre <code>--pieces-jointes</code> et injecter plutôt la démo par le
+service <code>installation-demo</code> (§6.3). Ce service copie aussi les pièces jointes dans le volume du
+conteneur.</p>
 <p>La démo contient le projet <strong>SWAG</strong> (application Swag Labs, <a href="http://www.saucedemo.com">www.saucedemo.com</a>), décrit dans le
-<span class="chemin" title="Fichier du dépôt : docs/guide/README.md">guide d&#39;utilisation</span> : backlog, critères Gherkin, ENF, atelier Example Mapping,
-tests manuels, automatisés, BDD, chartes exploratoires, deux sprints joués avec campagnes, runs
-automatisés réels, session exploratoire, anomalies, bilans. Comptes (mot de passe <strong><code>SwagLabs-2026</code></strong>,
-à changer après la première connexion) :</p>
+<span class="chemin" title="Fichier du dépôt : docs/guide/README.md">guide d&#39;utilisation</span> :</p>
+<ul>
+<li>backlog, critères Gherkin, ENF, atelier Example Mapping ;</li>
+<li>tests manuels, automatisés, BDD et chartes exploratoires ;</li>
+<li>deux sprints joués, avec campagnes, runs automatisés réels et une session exploratoire ;</li>
+<li>anomalies et bilans.</li>
+</ul>
+<p>Comptes (mot de passe <strong><code>SwagLabs-2026</code></strong>, à changer après la première connexion) :</p>
 <div class="tableau"><table>
 <thead>
 <tr>
@@ -299,15 +558,23 @@ automatisés réels, session exploratoire, anomalies, bilans. Comptes (mot de pa
 </tr>
 </tbody></table>
 </div>
-<p>Le script refuse d&#39;injecter la démo dans une base qui contient déjà des tables : ajouter
-<code>--remplacer</code> pour repartir de zéro (après une sauvegarde si besoin).</p>
-<p>Le serveur d&#39;exécution de la démo garde son nom (« Serveur d&#39;exécution ») ; son adresse devient
-celle de <code>--url-serveur</code> et il est <strong>à appairer</strong> (§7.3). Les jetons de la machine qui a produit la
-démo ne sont jamais distribués.</p>
-<h2 id="4-configurer-traceagile">4. Configurer TraceAgile</h2>
-<p>Dans le dossier <code>traceagile/</code>, copier <code>traceagile.env.exemple</code> en <code>traceagile.env</code>, l&#39;adapter, et
-le protéger (<code>chmod 600 traceagile.env</code>, ou droits NTFS réservés au compte du service) : il contient
-des secrets.</p>
+<p>Le script refuse d&#39;injecter la démo dans une base qui contient déjà des tables. Pour repartir de
+zéro, ajouter <code>--remplacer</code>, après une sauvegarde si besoin.</p>
+<p>Le serveur d&#39;exécution de la démo garde son nom (« Serveur d&#39;exécution ») :</p>
+<ul>
+<li>son adresse devient celle de <code>--url-serveur</code> ;</li>
+<li>il est <strong>à appairer</strong> (§9) ;</li>
+<li>les jetons de la machine qui a produit la démo ne sont jamais distribués.</li>
+</ul>
+<h2 id="5-traceagile-hors-docker">5. TraceAgile hors Docker</h2>
+<h3 id="51-configuration">5.1 Configuration</h3>
+<p>Dans le dossier <code>traceagile/</code> :</p>
+<ol>
+<li>copier <code>traceagile.env.exemple</code> en <code>traceagile.env</code> ;</li>
+<li>l&#39;adapter ;</li>
+<li>le protéger, car il contient des secrets : <code>chmod 600 traceagile.env</code>, ou droits NTFS réservés
+au compte du service.</li>
+</ol>
 <div class="tableau"><table>
 <thead>
 <tr>
@@ -329,7 +596,7 @@ des secrets.</p>
 <tr>
 <td><code>TRACEAGILE_DB_USER</code>, <code>TRACEAGILE_DB_PASSWORD</code></td>
 <td><code>traceagile</code></td>
-<td>rôle et mot de passe du §3</td>
+<td>rôle et mot de passe du §4</td>
 </tr>
 <tr>
 <td><code>TRACEAGILE_JWT_SECRET</code></td>
@@ -354,7 +621,7 @@ des secrets.</p>
 <tr>
 <td><code>TRACEAGILE_CALLBACK_URL</code></td>
 <td><code>http://localhost:8085/api/v1/execution-callbacks</code></td>
-<td>adresse de TraceAgile <strong>vue depuis le serveur d&#39;exécution</strong> (nom ou IP de la machine A, jamais <code>localhost</code> si le serveur est ailleurs)</td>
+<td>adresse de TraceAgile <strong>vue depuis le serveur d&#39;exécution</strong> : voir le §1.2</td>
 </tr>
 <tr>
 <td><code>TRACEAGILE_ATTACHMENTS_DIR</code></td>
@@ -368,17 +635,21 @@ des secrets.</p>
 </tr>
 </tbody></table>
 </div>
-<p>Générer un secret : <code>openssl rand -base64 48</code>, ou en PowerShell
-<code>[Convert]::ToBase64String((1..48 | % { Get-Random -Max 256 }) -as [byte[]])</code>.</p>
-<p>Toute propriété Spring Boot peut aussi se régler par variable d&#39;environnement ou par un fichier
-<code>config/application.yml</code> à côté du jar. <strong>Ne pas activer le profil <code>demo</code></strong> : il charge un autre jeu
-de démonstration (projet SHOP) et appaire le simulateur de développement.</p>
-<h2 id="5-démarrer-traceagile">5. Démarrer TraceAgile</h2>
+<p>Pour générer un secret :</p>
+<ul>
+<li><code>openssl rand -base64 48</code> ;</li>
+<li>ou en PowerShell : <code>[Convert]::ToBase64String((1..48 | % { Get-Random -Max 256 }) -as [byte[]])</code>.</li>
+</ul>
+<p>Toute propriété Spring Boot peut aussi se régler par variable d&#39;environnement, ou par un fichier
+<code>config/application.yml</code> à côté du jar.</p>
+<p><strong>Ne pas activer le profil <code>demo</code></strong> : il charge un autre jeu de démonstration (projet SHOP) et
+appaire le simulateur de développement.</p>
+<h3 id="52-démarrage">5.2 Démarrage</h3>
 <pre><code class="language-bash">cd /opt/traceagile/traceagile &amp;&amp; ./demarrer.sh
 </code></pre>
 <pre><code class="language-powershell">cd C:\TraceAgile\traceagile; .\demarrer.ps1
 </code></pre>
-<p>Au premier démarrage sur une base vide, le journal indique les migrations Flyway puis la création
+<p>Au premier démarrage sur une base vide, le journal indique les migrations Flyway, puis la création
 de l&#39;administrateur. Vérifications :</p>
 <ul>
 <li><code>http://machine-a:8085/actuator/health</code> répond <code>{&quot;status&quot;:&quot;UP&quot;}</code> ;</li>
@@ -386,24 +657,98 @@ de l&#39;administrateur. Vérifications :</p>
 <li>le menu <strong>Documentation</strong> (<code>/guide/</code>) ouvre le guide d&#39;utilisation ;</li>
 <li><code>http://machine-a:8085/swagger-ui.html</code> décrit l&#39;API.</li>
 </ul>
-<h2 id="6-démarrer-en-service">6. Démarrer en service</h2>
-<p><strong>Linux (systemd).</strong> Créer un compte sans connexion (<code>sudo useradd -r -s /usr/sbin/nologin traceagile</code>),
-lui donner le dossier (<code>sudo chown -R traceagile: /opt/traceagile</code>), puis :</p>
+<h3 id="53-service">5.3 Service</h3>
+<p><strong>Linux (systemd).</strong></p>
+<ol>
+<li>Créer un compte sans connexion : <code>sudo useradd -r -s /usr/sbin/nologin traceagile</code>.</li>
+<li>Lui donner le dossier : <code>sudo chown -R traceagile: /opt/traceagile</code>.</li>
+<li>Installer et démarrer le service :</li>
+</ol>
 <pre><code class="language-bash">sudo cp /opt/traceagile/traceagile/traceagile.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now traceagile
 journalctl -u traceagile -f
 </code></pre>
-<p>Adapter dans le fichier <code>WorkingDirectory</code>, <code>EnvironmentFile</code> et le chemin du jar s&#39;ils diffèrent de
-<code>/opt/traceagile</code>. Les variables y sont lues par systemd : ne pas mettre de guillemets autour des
-valeurs.</p>
+<p>Si l&#39;installation n&#39;est pas dans <code>/opt/traceagile</code>, adapter dans le fichier de service
+<code>WorkingDirectory</code>, <code>EnvironmentFile</code> et le chemin du jar. Ces variables sont lues par systemd : ne
+pas mettre de guillemets autour des valeurs.</p>
 <p><strong>Windows.</strong> Le plus simple est <a href="https://github.com/winsw/winsw">WinSW</a> ou
-<a href="https://nssm.cc/">NSSM</a> : service qui lance <code>powershell -ExecutionPolicy Bypass -File C:\TraceAgile\traceagile\demarrer.ps1</code>, démarrage automatique, compte de service ayant les droits sur
-le dossier. Sinon, une tâche planifiée « au démarrage du système » fait l&#39;affaire.</p>
-<p>Le serveur d&#39;exécution s&#39;installe de la même façon avec <code>serveur-execution.service</code> (compte
-<code>executeur</code>) ou son <code>demarrer.ps1</code>.</p>
-<h2 id="7-installer-le-serveur-dexécution">7. Installer le serveur d&#39;exécution</h2>
-<h3 id="71-configuration-et-démarrage">7.1 Configuration et démarrage</h3>
+<a href="https://nssm.cc/">NSSM</a>, réglé ainsi :</p>
+<ul>
+<li>commande : <code>powershell -ExecutionPolicy Bypass -File C:\TraceAgile\traceagile\demarrer.ps1</code> ;</li>
+<li>démarrage automatique ;</li>
+<li>compte de service ayant les droits sur le dossier.</li>
+</ul>
+<p>Une tâche planifiée « au démarrage du système » fait aussi l&#39;affaire.</p>
+<h2 id="6-traceagile-en-conteneur-docker">6. TraceAgile en conteneur Docker</h2>
+<h3 id="61-configuration">6.1 Configuration</h3>
+<p>Dans le dossier <code>traceagile/</code>, copier <code>traceagile.env.exemple</code> en <strong><code>.env</code></strong> et le régler comme au
+§5.1, avec ces différences :</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>En conteneur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SERVER_PORT</code></td>
+<td>port <strong>publié sur la machine</strong> (le conteneur écoute toujours sur 8085)</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_DB_URL</code></td>
+<td>base existante : <code>jdbc:postgresql://&lt;hôte&gt;:5432/&lt;base&gt;</code> ; si PostgreSQL tourne sur la même machine hors Docker, <code>&lt;hôte&gt;</code> = <code>host.docker.internal</code>. Base en conteneur : <code>jdbc:postgresql://postgres:5432/traceagile</code></td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_ATTACHMENTS_DIR</code></td>
+<td>ignorée : les pièces jointes vont dans le volume <code>pieces-jointes</code></td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_CALLBACK_URL</code></td>
+<td>selon la combinaison (§1.2)</td>
+</tr>
+<tr>
+<td><code>COMPOSE_PROFILES</code></td>
+<td><code>base-locale</code> pour une base PostgreSQL en conteneur (§6.2), sinon absente</td>
+</tr>
+<tr>
+<td><code>TRACEAGILE_DEMO_URL_SERVEUR</code></td>
+<td>adresse du serveur d&#39;exécution de la démo, utilisée par le service <code>installation-demo</code> (§6.3)</td>
+</tr>
+</tbody></table>
+</div>
+<p>Docker Compose lit aussi ce fichier pour ses propres réglages. Une valeur contenant <code>$</code> doit
+l&#39;écrire <code>$$</code>.</p>
+<h3 id="62-démarrage">6.2 Démarrage</h3>
+<pre><code class="language-bash">cd /opt/traceagile/traceagile
+docker compose up -d --build
+docker compose logs -f traceagile
+</code></pre>
+<p>Ce que fait cette commande :</p>
+<ul>
+<li>elle construit l&#39;image <code>traceagile:local</code> à partir du jar ;</li>
+<li>elle démarre le conteneur <code>traceagile</code> avec le volume <code>pieces-jointes</code> ;</li>
+<li>avec <code>COMPOSE_PROFILES=base-locale</code>, elle démarre aussi le conteneur <code>postgres</code> (volume <code>base</code>).
+Son rôle et sa base sont créés au premier démarrage avec <code>TRACEAGILE_DB_USER</code> /
+<code>TRACEAGILE_DB_PASSWORD</code>. Cette base n&#39;est pas exposée hors de Docker.</li>
+</ul>
+<p>Les vérifications sont les mêmes qu&#39;au §5.2. Le conteneur redémarre avec Docker
+(<code>restart: unless-stopped</code>) : il n&#39;y a pas de service à créer.</p>
+<h3 id="63-démonstration-swaglabs-en-conteneur">6.3 Démonstration SwagLabs en conteneur</h3>
+<p>Le service <code>installation-demo</code> injecte la démo dans la base de <code>TRACEAGILE_DB_URL</code> (en conteneur
+ou existante) et copie les pièces jointes dans le volume. Il se lance <strong>une fois, sur une base vide,
+avant le premier démarrage de TraceAgile</strong> :</p>
+<pre><code class="language-bash">cd /opt/traceagile/traceagile
+docker compose run --rm installation-demo   # démarre aussi postgres avec le profil base-locale
+docker compose up -d --build
+</code></pre>
+<p>Si TraceAgile a déjà démarré une fois, la base contient son schéma et le service refuse d&#39;injecter
+la démo. Pour repartir de zéro :</p>
+<ol>
+<li><code>docker compose down -v</code> (<strong>supprime</strong> la base en conteneur et les pièces jointes) ;</li>
+<li>pour une base existante, la recréer avec <code>installer-base --remplacer</code>.</li>
+</ol>
+<h2 id="7-serveur-dexécution-hors-docker">7. Serveur d&#39;exécution hors Docker</h2>
 <p>Dans <code>serveur-execution/</code>, copier <code>serveur-execution.env.exemple</code> en <code>serveur-execution.env</code> :</p>
 <div class="tableau"><table>
 <thead>
@@ -450,32 +795,67 @@ le dossier. Sinon, une tâche planifiée « au démarrage du système » fait l&
 </tr>
 </tbody></table>
 </div>
-<p>Puis <code>./demarrer.sh</code> (ou <code>.\demarrer.ps1</code>). La base H2 est créée au premier démarrage : il n&#39;y a
-pas de base à installer pour le serveur d&#39;exécution.</p>
-<h3 id="72-outils-de-test">7.2 Outils de test</h3>
-<p>Ouvrir <code>http://machine-b:8091</code>, se connecter avec le compte ci-dessus, puis la page <strong>Outils</strong> :</p>
+<p>Lancer ensuite <code>./demarrer.sh</code> (ou <code>.\demarrer.ps1</code>). La base H2 est créée au premier démarrage.</p>
+<p>Pour en faire un service :</p>
 <ul>
-<li>les prérequis (Java, Git, Node.js, Python) sont détectés ; ceux qui manquent s&#39;installent avec les
-droits d&#39;administrateur de la machine, en suivant l&#39;aide affichée ;</li>
-<li>l&#39;<strong>assistant d&#39;installation</strong> propose, pour les frameworks choisis (Playwright, Cypress,
-Selenium, Robot Framework, JUnit, Maven, JDK, Gatling…), un plan ordonné qui s&#39;installe sans droits
-particuliers dans <code>EXECUTION_SERVER_TOOLS_DIR</code>.</li>
+<li>sous Linux : <code>serveur-execution.service</code>, à installer comme au §5.3, avec le compte <code>executeur</code> ;</li>
+<li>sous Windows : WinSW ou NSSM avec <code>demarrer.ps1</code>.</li>
 </ul>
-<p>Pour rejouer la démo SwagLabs : Node.js et l&#39;outil <strong>Playwright</strong> (avec ses navigateurs).</p>
-<h3 id="73-relier-traceagile-au-serveur">7.3 Relier TraceAgile au serveur</h3>
+<p>Les prérequis manquants (Java, Git, Node.js, Python) s&#39;installent avec les droits d&#39;administrateur
+de la machine. La page <strong>Outils</strong> du serveur les détecte et explique comment faire (§9.2).</p>
+<h2 id="8-serveur-dexécution-en-conteneur-docker">8. Serveur d&#39;exécution en conteneur Docker</h2>
+<p>Dans <code>serveur-execution/</code>, copier <code>serveur-execution.env.exemple</code> en <strong><code>.env</code></strong> et le régler comme
+au §7, avec ces différences :</p>
+<ul>
+<li><code>SERVER_PORT</code> est le port <strong>publié sur la machine</strong> ; le conteneur écoute toujours sur 8091 ;</li>
+<li><code>EXECUTION_SERVER_DATA_DIR</code> et <code>EXECUTION_SERVER_TOOLS_DIR</code> sont ignorées : les données vont dans
+les volumes <code>donnees</code> et <code>outils</code>.</li>
+</ul>
+<p>Puis :</p>
+<pre><code class="language-bash">cd /opt/serveur-execution/serveur-execution
+docker compose up -d --build
+docker compose logs -f serveur-execution
+</code></pre>
+<p>L&#39;image <code>traceagile-serveur-execution:local</code> est construite à partir du jar. Elle contient déjà
+JDK 21, Git, Node.js 22, Python 3 et les bibliothèques système des navigateurs : la page <strong>Outils</strong>
+n&#39;a plus qu&#39;à installer les frameworks de test (§9.2), dans le volume <code>outils</code>, qui est conservé lors
+des mises à jour. Le conteneur redémarre avec Docker.</p>
+<p>Les tests s&#39;exécutent dans le conteneur, sous Linux et sans écran (navigateurs en mode headless,
+Xvfb fourni). Pour des tests qui ont besoin de Windows, d&#39;un navigateur installé sur la machine ou
+d&#39;un écran, préférer le serveur hors Docker (§7).</p>
+<p>Les dépôts de tests sont clonés depuis leur URL Git, par HTTPS ou SSH. Un dépôt local de la machine
+n&#39;est visible qu&#39;après l&#39;avoir monté dans le conteneur. Exemple, à ajouter sous <code>volumes</code> du service
+dans <code>docker-compose.yml</code> :</p>
+<pre><code class="language-yaml">      - /srv/depots:/depots:ro     # puis file:///depots/&lt;projet&gt; dans la fiche des tests
+</code></pre>
+<h2 id="9-relier-traceagile-et-le-serveur-dexécution">9. Relier TraceAgile et le serveur d&#39;exécution</h2>
+<h3 id="91-appairage">9.1 Appairage</h3>
 <ol>
-<li>Dans TraceAgile, en administrateur : <strong>Administration → Serveurs d&#39;exécution</strong>. Déclarer le
-serveur avec l&#39;adresse <code>http://machine-b:8091</code> (pour la démo, il existe déjà avec l&#39;adresse donnée
-par <code>--url-serveur</code> ; corriger l&#39;adresse si besoin).</li>
-<li><strong>Appairer</strong> en saisissant le compte administrateur du serveur d&#39;exécution : TraceAgile demande un
-jeton et un secret de signature des webhooks, les chiffre, puis ne garde plus le mot de passe.</li>
-<li>L&#39;état passe à <strong>En ligne</strong> au bout de quelques secondes (sonde de santé périodique).</li>
+<li>Dans TraceAgile, en administrateur, ouvrir <strong>Administration → Serveurs d&#39;exécution</strong>.</li>
+<li>Déclarer le serveur avec l&#39;adresse de la colonne « Adresse du serveur dans TraceAgile » du §1.2.
+Pour la démo, le serveur existe déjà avec l&#39;adresse donnée lors de l&#39;injection : la corriger si
+besoin.</li>
+<li><strong>Appairer</strong> en saisissant le compte administrateur du serveur d&#39;exécution. TraceAgile demande
+un jeton et un secret de signature des webhooks, les chiffre, puis ne garde pas le mot de passe.</li>
+<li>Au bout de quelques secondes, l&#39;état passe à <strong>En ligne</strong> (sonde de santé périodique).</li>
 </ol>
 <p>Ensuite, un run automatisé lancé dans TraceAgile envoie un job au serveur. Le serveur clone le dépôt
-Git du projet, exécute les tests et renvoie l&#39;avancement et les résultats à <code>TRACEAGILE_CALLBACK_URL</code>.
-Les journaux et artefacts (captures, traces) restent sur le serveur d&#39;exécution et sont relus par
-TraceAgile à la demande.</p>
-<h3 id="74-réseau">7.4 Réseau</h3>
+Git du test, exécute les tests et renvoie l&#39;avancement et les résultats à <code>TRACEAGILE_CALLBACK_URL</code>.
+Les journaux et artefacts (captures, traces) restent sur le serveur d&#39;exécution, et TraceAgile les
+relit à la demande.</p>
+<h3 id="92-outils-de-test">9.2 Outils de test</h3>
+<p>Ouvrir l&#39;interface du serveur (<code>http://machine-b:8091</code>), se connecter avec son compte
+administrateur, puis aller sur la page <strong>Outils</strong> :</p>
+<ul>
+<li>les prérequis (Java, Git, Node.js, Python) sont détectés ; en conteneur, ils sont déjà présents ;</li>
+<li>l&#39;<strong>assistant d&#39;installation</strong> propose un plan ordonné pour les frameworks choisis (Playwright,
+Cypress, Selenium, Robot Framework, JUnit, Maven, JDK, Gatling…). Ce plan s&#39;installe sans droits
+particuliers dans le dossier ou le volume des outils.</li>
+</ul>
+<p>Pour rejouer la démo SwagLabs, il faut Node.js et l&#39;outil <strong>Playwright</strong> avec ses navigateurs.</p>
+<p>Pour un dépôt Git privé, saisir les identifiants de son hôte dans la page <strong>Paramètres</strong> du serveur
+d&#39;exécution.</p>
+<h2 id="10-réseau-et-pare-feu">10. Réseau et pare-feu</h2>
 <div class="tableau"><table>
 <thead>
 <tr>
@@ -486,34 +866,43 @@ TraceAgile à la demande.</p>
 </thead>
 <tbody><tr>
 <td>Navigateurs des utilisateurs</td>
-<td>postes → machine A</td>
+<td>postes → TraceAgile</td>
 <td>8085 (ou 443 derrière un proxy)</td>
 </tr>
 <tr>
 <td>Connexion à la base</td>
-<td>machine A → PostgreSQL</td>
-<td>5432</td>
+<td>TraceAgile → PostgreSQL</td>
+<td>5432 (interne à Docker avec <code>base-locale</code>)</td>
 </tr>
 <tr>
 <td>Jobs, santé, artefacts</td>
-<td>machine A → machine B</td>
+<td>TraceAgile → serveur d&#39;exécution</td>
 <td>8091</td>
 </tr>
 <tr>
 <td>Webhooks de résultats</td>
-<td>machine B → machine A</td>
+<td>serveur d&#39;exécution → TraceAgile</td>
 <td>8085 (<code>TRACEAGILE_CALLBACK_URL</code>)</td>
 </tr>
 <tr>
+<td>Interface du serveur d&#39;exécution</td>
+<td>postes des administrateurs → serveur d&#39;exécution</td>
+<td>8091</td>
+</tr>
+<tr>
 <td>Clonage des dépôts de tests</td>
-<td>machine B → serveur Git</td>
+<td>serveur d&#39;exécution → serveur Git</td>
 <td>443 / 22</td>
 </tr>
 </tbody></table>
 </div>
-<p>Ouvrir ces ports dans les pare-feu (sous Windows : <code>New-NetFirewallRule -DisplayName TraceAgile -Direction Inbound -Protocol TCP -LocalPort 8085 -Action Allow</code>, idem 8091 sur la machine B).
-Les dépôts Git privés : identifiants par hôte dans l&#39;interface du serveur d&#39;exécution (page <strong>Paramètres</strong>).</p>
-<h2 id="8-https-et-proxy-inverse">8. HTTPS et proxy inverse</h2>
+<p>Sur des machines séparées, ouvrir ces ports en entrée. Sous Windows, par exemple :
+<code>New-NetFirewallRule -DisplayName TraceAgile -Direction Inbound -Protocol TCP -LocalPort 8085 -Action Allow</code>,
+et de même pour 8091 sur la machine du serveur.</p>
+<p>Sous Linux, Docker publie les ports des conteneurs en contournant les règles <code>ufw</code> : restreindre
+l&#39;accès au besoin, par exemple en publiant sur une seule interface
+(<code>&quot;127.0.0.1:${SERVER_PORT:-8085}:8085&quot;</code> derrière un proxy local).</p>
+<h2 id="11-https-et-proxy-inverse">11. HTTPS et proxy inverse</h2>
 <p>En production, placer TraceAgile derrière un proxy TLS (nginx, Apache, IIS ARR, Traefik) et régler
 <code>TRACEAGILE_COOKIE_SECURE=true</code>. Le suivi des runs en direct utilise des flux SSE : désactiver la
 mise en mémoire tampon pour <code>/api/</code>. Exemple nginx :</p>
@@ -527,17 +916,50 @@ mise en mémoire tampon pour <code>/api/</code>. Exemple nginx :</p>
 }
 </code></pre>
 <p><code>TRACEAGILE_CALLBACK_URL</code> prend alors l&#39;adresse HTTPS publique. Le serveur d&#39;exécution peut être
-protégé de la même façon (son adresse dans TraceAgile devient <code>https://…</code>).</p>
-<h2 id="9-sauvegarde-mise-à-jour-désinstallation">9. Sauvegarde, mise à jour, désinstallation</h2>
-<p><strong>Sauvegarde</strong> : la base (<code>pg_dump -Fc -d traceagile &gt; traceagile.dump</code>) <strong>et</strong> le dossier
-<code>TRACEAGILE_ATTACHMENTS_DIR</code>. Côté serveur d&#39;exécution, <code>EXECUTION_SERVER_DATA_DIR</code> (jetons, jobs) ;
-les outils se réinstallent.</p>
-<p><strong>Mise à jour</strong> : arrêter le service, remplacer le jar, redémarrer. Les nouvelles migrations Flyway
-s&#39;appliquent seules au démarrage. Sauvegarder avant ; une version antérieure ne peut pas rouvrir une
-base migrée.</p>
-<p><strong>Désinstallation</strong> : arrêter et retirer les services, supprimer les dossiers, puis
-<code>DROP DATABASE traceagile; DROP ROLE traceagile;</code> avec un superutilisateur.</p>
-<h2 id="10-dépannage">10. Dépannage</h2>
+protégé de la même façon ; son adresse dans TraceAgile devient <code>https://…</code>.</p>
+<h2 id="12-sauvegarde-mise-à-jour-désinstallation">12. Sauvegarde, mise à jour, désinstallation</h2>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th></th>
+<th>Hors Docker</th>
+<th>En conteneur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sauvegarder TraceAgile</td>
+<td>la base (<code>pg_dump -Fc -d traceagile &gt; traceagile.dump</code>) et le dossier <code>TRACEAGILE_ATTACHMENTS_DIR</code></td>
+<td>la base (avec <code>base-locale</code> : <code>docker compose exec -T postgres pg_dump -Fc -U traceagile traceagile &gt; traceagile.dump</code>) et le volume <code>pieces-jointes</code></td>
+</tr>
+<tr>
+<td>Sauvegarder le serveur d&#39;exécution</td>
+<td><code>EXECUTION_SERVER_DATA_DIR</code> (jetons, jobs) ; les outils se réinstallent</td>
+<td>le volume <code>donnees</code></td>
+</tr>
+<tr>
+<td>Mettre à jour</td>
+<td>arrêter le service, remplacer le jar, redémarrer</td>
+<td>remplacer le jar dans le dossier, puis <code>docker compose up -d --build</code></td>
+</tr>
+<tr>
+<td>Désinstaller</td>
+<td>retirer le service, supprimer le dossier, puis <code>DROP DATABASE traceagile; DROP ROLE traceagile;</code></td>
+<td><code>docker compose down</code> (garde les volumes) ou <code>docker compose down -v</code> (<strong>supprime</strong> les volumes), puis supprimer le dossier</td>
+</tr>
+</tbody></table>
+</div>
+<p>À chaque mise à jour, les nouvelles migrations Flyway s&#39;appliquent seules au démarrage. Sauvegarder
+avant : une version antérieure ne peut pas rouvrir une base migrée.</p>
+<p>Pour sauvegarder un volume Docker, par exemple :
+<code>docker run --rm -v traceagile-app_pieces-jointes:/v -v &quot;$PWD&quot;:/s alpine tar czf /s/pieces-jointes.tgz -C /v .</code>.</p>
+<p>Changer de mode plus tard ne demande que de transporter les données :</p>
+<ul>
+<li>TraceAgile : sa base et ses pièces jointes ;</li>
+<li>serveur d&#39;exécution : son dossier de données ;</li>
+<li>une nouvelle base se remplit par <code>pg_restore</code> ;</li>
+<li>un serveur d&#39;exécution réinstallé à neuf est simplement à réappairer.</li>
+</ul>
+<h2 id="13-dépannage">13. Dépannage</h2>
 <div class="tableau"><table>
 <thead>
 <tr>
@@ -547,7 +969,11 @@ base migrée.</p>
 </thead>
 <tbody><tr>
 <td><code>FATAL: password authentication failed</code></td>
-<td>Mot de passe ou rôle de <code>TRACEAGILE_DB_*</code> différent de celui du §3 ; ou <code>pg_hba.conf</code> n&#39;autorise pas l&#39;hôte de TraceAgile.</td>
+<td>Mot de passe ou rôle de <code>TRACEAGILE_DB_*</code> différent de celui de la base ; ou <code>pg_hba.conf</code> n&#39;autorise pas l&#39;hôte de TraceAgile (en conteneur, l&#39;adresse vue est celle du réseau Docker).</td>
+</tr>
+<tr>
+<td><code>Connection refused</code> vers la base depuis le conteneur</td>
+<td><code>TRACEAGILE_DB_URL</code> vise <code>localhost</code>, c&#39;est-à-dire le conteneur lui-même : utiliser <code>postgres</code> (profil <code>base-locale</code>), <code>host.docker.internal</code> ou le nom de la machine de la base.</td>
 </tr>
 <tr>
 <td><code>traceagile.security.jwt-secret doit comporter au moins 32 octets</code></td>
@@ -555,19 +981,31 @@ base migrée.</p>
 </tr>
 <tr>
 <td>Aucun administrateur ne peut se connecter</td>
-<td>Le compte n&#39;est créé que sur une base sans utilisateur : relire le journal du premier démarrage (mot de passe aléatoire) ; sinon le changer depuis un autre administrateur.</td>
+<td>Le compte n&#39;est créé que sur une base sans utilisateur. Relire le journal du premier démarrage (mot de passe aléatoire) ; sinon, changer le mot de passe depuis un autre compte administrateur.</td>
 </tr>
 <tr>
 <td>Serveur d&#39;exécution « Hors ligne »</td>
-<td>Pare-feu ou adresse déclarée injoignable depuis la machine A.</td>
+<td>L&#39;adresse déclarée n&#39;est pas joignable depuis TraceAgile (§1.2), ou un pare-feu bloque. En conteneur, tester depuis TraceAgile : <code>docker compose exec traceagile wget -qO- &lt;adresse&gt;/api/v1/health</code>.</td>
 </tr>
 <tr>
 <td>Run bloqué « En cours »</td>
-<td>Le serveur ne joint pas <code>TRACEAGILE_CALLBACK_URL</code> : tester <code>curl &lt;url&gt;</code> depuis la machine B.</td>
+<td>Le serveur ne joint pas <code>TRACEAGILE_CALLBACK_URL</code>. Tester depuis la machine ou le conteneur du serveur : <code>curl &lt;url&gt;</code> ou <code>docker compose exec serveur-execution curl &lt;url&gt;</code>.</td>
 </tr>
 <tr>
 <td>Serveur « Non autorisé »</td>
-<td>Jeton révoqué côté serveur ou <code>TRACEAGILE_ENCRYPTION_KEY</code> changée : appairer à nouveau.</td>
+<td>Jeton révoqué côté serveur, ou <code>TRACEAGILE_ENCRYPTION_KEY</code> changée : appairer à nouveau.</td>
+</tr>
+<tr>
+<td><code>host.docker.internal</code> introuvable</td>
+<td>Docker trop ancien (option <code>host-gateway</code> : Docker 20.10+), ou le service a été lancé sans le <code>docker-compose.yml</code> fourni.</td>
+</tr>
+<tr>
+<td>Avertissement <code>a network with name traceagile-reseau exists but was not created for project …</code></td>
+<td>Normal quand les deux logiciels sont en conteneur sur la même machine : le second rejoint le réseau créé par le premier. De même, <code>docker compose down</code> de l&#39;un signale que le réseau est encore utilisé par l&#39;autre.</td>
+</tr>
+<tr>
+<td><code>depends_on … required</code> refusé</td>
+<td>Docker Compose antérieur à 2.20 : le mettre à jour.</td>
 </tr>
 <tr>
 <td>Windows : <code>Unable to establish loopback connection</code></td>
@@ -583,20 +1021,20 @@ base migrée.</p>
 </tr>
 </tbody></table>
 </div>
-<h2 id="11-limites-de-la-démonstration">11. Limites de la démonstration</h2>
+<h2 id="14-limites-de-la-démonstration">14. Limites de la démonstration</h2>
 <ul>
-<li>Les runs automatisés de la démo ont été exécutés lors de la génération : leurs résultats, statuts
+<li>Les runs automatisés de la démo ont été exécutés lors de la génération. Leurs résultats, statuts
 et rapports sont dans la base, mais leurs journaux et artefacts (captures, traces) sont restés sur
 le serveur d&#39;origine. Rejouer un run sur le nouveau serveur les rend disponibles.</li>
 <li>Les dates de la démo sont celles de sa génération (sprints, campagnes, bilans).</li>
 <li>Les tests automatisés de SWAG pointent vers le dépôt Git de la génération
-(<code>file:///depots/traceagile</code>) : pour rejouer les runs, indiquer dans la fiche de chaque test
-automatisé (champs Dépôt et Branche) un dépôt accessible depuis le serveur d&#39;exécution qui contient
-le dossier <code>saucedemo/</code> de TraceAgile.</li>
+(<code>file:///depots/traceagile</code>). Pour rejouer les runs, renseigner dans la fiche de chaque test
+automatisé (champs Dépôt et Branche) un dépôt accessible depuis le serveur d&#39;exécution qui
+contient le dossier <code>saucedemo/</code> de TraceAgile.</li>
 </ul>
 <p>Pour régénérer le jeu de démonstration après une évolution du schéma ou du guide (mainteneurs) :
-<code>install/base-de-donnees/generer-demo-swaglabs.sh</code> (pile Docker démarrée, jar construit avec
-<code>-Pdistribution</code>).</p>
+<code>install/base-de-donnees/generer-demo-swaglabs.sh</code>. Il faut la pile Docker de développement
+démarrée et le jar construit avec <code>-Pdistribution</code>.</p>
 
 </main>
 </div>

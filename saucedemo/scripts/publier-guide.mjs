@@ -23,9 +23,9 @@ const DOCUMENTS = {
   },
   installation: {
     dossier: join(RACINE, 'docs'), source: 'installation.md', sortie: 'installation-traceagile',
-    titre: 'Installation de TraceAgile hors Docker', onglet: 'Installation TraceAgile', marque: 'TraceAgile · installation',
-    description: 'Installation de TraceAgile et du serveur d’exécution sur des machines indépendantes, sans Docker',
-    surtitre: 'Deux jars · PostgreSQL · démo SwagLabs', chapitreParPage: false, copieApplication: false,
+    titre: 'Installation de TraceAgile et du serveur d’exécution', onglet: 'Installation TraceAgile', marque: 'TraceAgile · installation',
+    description: 'Installation de TraceAgile et du serveur d’exécution, hors Docker ou en conteneur, sur une ou plusieurs machines',
+    surtitre: 'Hors Docker ou conteneur · 8 combinaisons · démo SwagLabs', chapitreParPage: false, copieApplication: false,
   },
 };
 const option = process.argv.indexOf('--document');

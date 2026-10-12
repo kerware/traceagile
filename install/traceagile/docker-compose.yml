@@ -1,0 +1,67 @@
+# TraceAgile en conteneur (docs/installation.md §6). Configuration : .env (copie de traceagile.env.exemple).
+#   docker compose up -d --build                       TraceAgile seul, base PostgreSQL existante
+#   COMPOSE_PROFILES=base-locale dans .env             + base PostgreSQL dans un conteneur
+#   docker compose run --rm installation-demo          injecte la démo SwagLabs (base vide, avant le 1er démarrage)
+name: traceagile-app
+
+services:
+  traceagile:
+    build: .
+    image: traceagile:local
+    env_file: .env
+    environment:
+      # valeurs propres au conteneur (le reste vient de .env)
+      SERVER_PORT: "8085"
+      TRACEAGILE_ATTACHMENTS_DIR: /data/pieces-jointes
+    ports:
+      - "${SERVER_PORT:-8085}:8085"
+    volumes:
+      - pieces-jointes:/data/pieces-jointes
+    extra_hosts:
+      # serveur d'exécution installé hors Docker sur la même machine : http://host.docker.internal:8091
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+    restart: unless-stopped
+
+  # Base PostgreSQL dans un conteneur (profil base-locale) : TRACEAGILE_DB_URL=jdbc:postgresql://postgres:5432/traceagile
+  postgres:
+    image: postgres:16-alpine
+    profiles: [base-locale]
+    environment:
+      POSTGRES_DB: traceagile
+      POSTGRES_USER: ${TRACEAGILE_DB_USER:-traceagile}
+      POSTGRES_PASSWORD: ${TRACEAGILE_DB_PASSWORD:?TRACEAGILE_DB_PASSWORD manque dans .env}
+    volumes:
+      - base:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d traceagile"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # Démo SwagLabs : à lancer une fois, base vide, avant le premier démarrage de TraceAgile
+  installation-demo:
+    image: postgres:16-alpine
+    profiles: [demo]
+    env_file: .env
+    entrypoint: ["sh", "/base-de-donnees/installer-demo-docker.sh"]
+    volumes:
+      - ../base-de-donnees:/base-de-donnees:ro
+      - pieces-jointes:/pieces-jointes
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+
+volumes:
+  base:
+  pieces-jointes:
+
+networks:
+  default:
+    # réseau partagé avec le serveur d'exécution en conteneur sur la même machine
+    name: traceagile-reseau
