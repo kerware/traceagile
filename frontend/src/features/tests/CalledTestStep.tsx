@@ -29,6 +29,14 @@ export function CalledTestStep({ project, testKey, step, position, onChange, rea
     options.unshift({ value: step.calledTestKey, label: `${step.calledTestKey} — ${step.calledTestTitle ?? called?.title ?? ''}` });
   }
   const values = step.callParameters ?? {};
+  // une ligne d'un jeu de données de l'appelé fixe d'un coup la valeur de tous ses paramètres
+  const rows = (called?.dataSets ?? []).flatMap((dataSet, d) =>
+    dataSet.rows.map((row, r) => {
+      const rowValues = Object.fromEntries(Object.entries(row).map(([name, value]) => [name, String(value ?? '')]));
+      const first = called?.parameters.map((p) => rowValues[p.name]).find(Boolean) ?? String(r + 1);
+      return { value: `${d}:${r}`, label: `${dataSet.name} › ${first}`, values: rowValues };
+    }),
+  );
 
   return (
     <Stack gap={6} flex={1}>
@@ -53,6 +61,21 @@ export function CalledTestStep({ project, testKey, step, position, onChange, rea
         disabled={readOnly}
         data-testid={`step-called-${position}`}
       />
+      {called && rows.length > 0 && (
+        <Select
+          size="xs"
+          label={t('steps.callRow')}
+          placeholder={t('steps.callRowPlaceholder')}
+          data={rows.map((r) => ({ value: r.value, label: r.label }))}
+          value={null}
+          onChange={(value) => {
+            const row = rows.find((r) => r.value === value);
+            if (row) onChange({ callParameters: row.values });
+          }}
+          disabled={readOnly}
+          data-testid={`step-call-row-${position}`}
+        />
+      )}
       {called && called.parameters.length > 0 && (
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" data-testid={`step-call-parameters-${position}`}>
           {called.parameters.map((p) => (

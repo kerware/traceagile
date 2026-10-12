@@ -5,7 +5,8 @@ import { Api, capturer, connexion, elements, fermerNotifications, IMAGES, P, RAC
 
 /**
  * Guide § 7 à § 10 — sprint 2 « Panier » (sprint actif) : exécution manuelle en échec et anomalie
- * créée depuis le pas avec la capture du défaut, session exploratoire (notes, bogue converti en
+ * créée depuis le pas avec la capture du défaut, test qui en appelle un autre (TC-13 déroule TC-1),
+ * session exploratoire (notes, bogue converti en
  * anomalie, TBS, débriefing PROOF approuvé par le PO), run automatisé avec un échec et ses
  * artefacts, mesure de l'ENF de performance, import du rapport JUnit réel de saucedemo/app-tests.
  */
@@ -33,7 +34,7 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await qa.post('/campaigns/CMP-2/items/select', { strategy: 'MANUAL', testKeys: ['TC-11'] });
     for (const element of await elements(qa, 'CMP-2')) {
       if (element.test.key === 'TC-2') await qa.patch(`/campaign-items/${element.id}`, { assignee: 'qa2' });
-      if (element.test.key === 'TC-12') await qa.patch(`/campaign-items/${element.id}`, { assignee: 'qa1' });
+      if (element.test.key === 'TC-12' || element.test.key === 'TC-13') await qa.patch(`/campaign-items/${element.id}`, { assignee: 'qa1' });
     }
   });
 
@@ -66,6 +67,24 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await page.getByTestId('defect-submit').click();
     await expect(page.getByText('Anomalie DEF-1 créée')).toBeVisible();
     await expect(page.getByTestId('linked-defect-DEF-1')).toBeVisible();
+  });
+
+  await test.step('qa1 joue TC-13 : les pas de TC-1 sont déroulés avec standard_user, puis ceux du panier', async () => {
+    await connexion(page, 'qa1');
+    await page.goto(`/p/${P}/my-executions`);
+    await page.getByTestId('run-TC-13').first().click();
+    await expect(page.getByTestId('step-called-from')).toContainText('TC-1');
+    await page.getByTestId('step-PASSED').click();
+    await expect(page.getByTestId('step-action')).toContainText('standard_user');
+    await capturer(page, 'execution-appel');
+    for (let pas = 2; pas <= 4; pas++) await page.getByTestId('step-PASSED').click();
+    await expect(page.getByTestId('execution-status')).toHaveText('Réussi');
+    // ligne 2 du jeu « Produits » (API)
+    for (const element of await elements(qa, 'CMP-2')) {
+      if (element.test.key !== 'TC-13' || element.attempts > 0) continue;
+      const execution = await qa.post(`/campaign-items/${element.id}/executions`);
+      for (const position of [1, 2, 3, 4]) await qa.put(`/executions/${execution.id}/steps/${position}`, { status: 'PASSED' });
+    }
   });
 
   await test.step('qa1 démarre la session exploratoire de la charte « Explorer le panier »', async () => {

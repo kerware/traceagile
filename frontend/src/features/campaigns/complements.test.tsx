@@ -109,6 +109,42 @@ describe('ADR-0018 appel d’un cas de test comme pas', () => {
     );
   });
 
+  it('remplit les paramètres de l’appel avec une ligne d’un jeu de données de l’appelé', async () => {
+    useAuthStore.getState().setSession('jwt', TESTER);
+    let body: Record<string, unknown> | undefined;
+    server.use(
+      http.get(`${P}/test-cases/TC-1`, () => HttpResponse.json(testDetail('TC-1'))),
+      http.get(`${P}/test-cases/TC-5`, () =>
+        HttpResponse.json(testDetail('TC-5', {
+          title: 'Se connecter',
+          parameters: [{ name: 'login', defaultValue: 'invité', detected: true }, { name: 'attendu', detected: true }],
+          dataSets: [{ name: 'Comptes', rows: [{ login: 'alice', attendu: 'Catalogue' }, { login: 'bloqué', attendu: 'Refus' }] }],
+        })),
+      ),
+      http.get(`${P}/test-cases`, () => HttpResponse.json(page([testSummary('TC-5', { title: 'Se connecter', status: 'READY' })]))),
+      http.get('/api/v1/reference/frameworks', () => HttpResponse.json([])),
+      http.patch(`${P}/test-cases/TC-1`, async ({ request }) => {
+        body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(testDetail('TC-1'));
+      }),
+    );
+    renderElement(<TestCaseDetailView project="SHOP" testKey="TC-1" />);
+
+    await userEvent.click(await screen.findByTestId('step-add-call'));
+    await userEvent.click(screen.getByTestId('step-called-2'));
+    await userEvent.click(await screen.findByRole('option', { name: 'TC-5 — Se connecter' }));
+    await userEvent.click(await screen.findByTestId('step-call-row-2'));
+    await userEvent.click(await screen.findByRole('option', { name: 'Comptes › bloqué' }));
+    expect(screen.getByTestId('step-call-2-login')).toHaveValue('bloqué');
+    await userEvent.click(screen.getByTestId('test-save'));
+
+    await waitFor(() =>
+      expect((body?.steps as unknown[])[1]).toEqual(
+        { action: null, expectedResult: null, testData: null, calledTestKey: 'TC-5', callParameters: { login: 'bloqué', attendu: 'Refus' } },
+      ),
+    );
+  });
+
   it('exécution : un pas déroulé depuis un test appelé affiche sa provenance', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     const execution: ExecutionDetail = {

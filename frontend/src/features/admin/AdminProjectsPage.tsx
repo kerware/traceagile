@@ -71,35 +71,41 @@ function MembersEditor({ projectKey }: { projectKey: string }) {
     <Stack data-testid="members-editor">
       <Title order={4}>{t('admin.members', { key: projectKey })}</Title>
       {rows.map((row, index) => (
-        <Group key={index} wrap="nowrap">
-          <Select
-            aria-label={t('admin.login')}
-            data={userOptions}
-            value={row.login || null}
-            onChange={(login) => update(index, { login: login ?? '' })}
-            searchable
-            w={280}
-            data-testid={`member-login-${index}`}
-          />
-          <Select
-            aria-label={t('admin.role')}
-            data={roleOptions}
-            value={row.role}
-            onChange={(role) => role && update(index, { role: role as Role })}
-            allowDeselect={false}
-            w={200}
-            data-testid={`member-role-${index}`}
-          />
-          <ActionIcon
-            variant="subtle"
-            color="red"
-            aria-label={t('admin.remove')}
-            onClick={() => setRows((current) => current.filter((_, i) => i !== index))}
-            data-testid={`member-remove-${index}`}
-          >
-            <IconTrash size={16} />
-          </ActionIcon>
-        </Group>
+        <Stack key={index} gap={4}>
+          <Group wrap="nowrap">
+            <Select
+              aria-label={t('admin.login')}
+              data={userOptions}
+              value={row.login || null}
+              onChange={(login) => update(index, { login: login ?? '' })}
+              searchable
+              w={280}
+              data-testid={`member-login-${index}`}
+            />
+            <Select
+              aria-label={t('admin.role')}
+              data={roleOptions}
+              value={row.role}
+              onChange={(role) => role && update(index, { role: role as Role })}
+              allowDeselect={false}
+              w={200}
+              data-testid={`member-role-${index}`}
+            />
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              aria-label={t('admin.remove')}
+              onClick={() => setRows((current) => current.filter((_, i) => i !== index))}
+              data-testid={`member-remove-${index}`}
+            >
+              <IconTrash size={16} />
+            </ActionIcon>
+          </Group>
+          {/* §2.2 ce que le profil permet et ne permet pas, au moment de l'affecter */}
+          <Text size="xs" c="dimmed" maw={560} data-testid={`member-rights-${index}`}>
+            {t(`roleRights.${row.role}`)}
+          </Text>
+        </Stack>
       ))}
       <Group>
         <Button

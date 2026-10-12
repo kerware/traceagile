@@ -4,11 +4,14 @@ import { Api, BRANCHE, capturer, connexion, DEPOT, fermerNotifications, P } from
 
 /**
  * Guide § 4 — le référentiel de tests : un exemple de chaque nature et de chaque technique.
- * - manuels : TC-1 (jeu de données « Comptes », 3 lignes), TC-2 (révèle le défaut de problem_user) ;
+ * - manuels : TC-1 (jeu de données « Comptes », 3 lignes), TC-2 (révèle le défaut de problem_user,
+ *   jeu « Compte du défaut »), TC-13 (réutilise TC-1 comme premier pas avec la ligne standard_user) ;
  * - automatisés Playwright de saucedemo/app-tests : TC-3 piloté par les données (même jeu « Comptes »),
  *   TC-4 à TC-6 (UI), TC-7 (API), TC-8 (BDD généré depuis le critère Gherkin de REQ-10),
  *   TC-9 et TC-10 (UI), TC-11 (performance, lié à l'ENF REQ-16) ;
  * - exploratoire : TC-12, charte sur le panier.
+ * Tout test manuel à paramètres a au moins un jeu de données. TC-13 est créé en dernier : les clés des
+ * tests précédents ne changent pas.
  * Les identifiants des tests automatisés sont les noms des tests du rapport JUnit de Playwright.
  */
 
@@ -57,6 +60,7 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
         { action: 'Revenir au catalogue et cliquer « Remove » sur Sauce Labs Backpack', expectedResult: 'Le badge du panier disparaît' },
       ],
       parameters: [{ name: 'utilisateur', defaultValue: 'problem_user' }],
+      dataSets: [{ name: 'Compte du défaut', rows: [{ utilisateur: 'problem_user' }] }],
       links: [{ requirementKey: 'REQ-11', linkType: 'PARTIALLY_VERIFIES' }, { requirementKey: 'REQ-12', linkType: 'VERIFIES' }],
     }, 'TC-2');
   });
@@ -117,12 +121,32 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
     }, 'TC-12');
   });
 
+  await test.step('Le testeur réutilise TC-1 comme premier pas d’un nouveau test manuel, avec la ligne standard_user (API)', async () => {
+    const standard = comptes.find((c) => c.utilisateur === 'standard_user')!;
+    await creer(qa, {
+      kind: 'MANUAL', title: 'Ajouter un produit au panier après connexion', folder: 'Panier', priority: 'SHOULD', estimatedDurationMin: 4,
+      objective: 'Vérifier le panier d’un client connecté, sans réécrire la connexion : TC-1 est appelé comme premier pas.',
+      steps: [
+        // ADR-0018 appel de TC-1 avec les valeurs de sa ligne standard_user du jeu « Comptes »
+        { calledTestKey: 'TC-1', callParameters: { utilisateur: standard.utilisateur, resultat_attendu: 'Le catalogue « Products » s’affiche' } },
+        { action: 'Cliquer « Add to cart » sur ${produit}', expectedResult: 'Le badge du panier affiche 1' },
+        { action: 'Ouvrir le panier', expectedResult: '${produit} est listé : quantité 1, ${prix}' },
+      ],
+      parameters: [{ name: 'produit', defaultValue: 'Sauce Labs Backpack' }, { name: 'prix', defaultValue: '$29.99' }],
+      dataSets: [{ name: 'Produits', rows: [{ produit: 'Sauce Labs Backpack', prix: '$29.99' }, { produit: 'Sauce Labs Bike Light', prix: '$9.99' }] }],
+      links: verifie('REQ-11'),
+    }, 'TC-13');
+  });
+
   await test.step('Fiches des tests : pas et jeu de données, automatisation, charte', async () => {
     await page.goto(`/p/${P}/tests/TC-1`);
     await expect(page.getByTestId('manual-steps')).toBeVisible();
     await capturer(page, 'test-manuel-pas', page.getByTestId('manual-steps'), { marge: 8 });
     await page.getByTestId('parameters-panel').scrollIntoViewIfNeeded();
     await capturer(page, 'test-manuel-jeu-de-donnees', page.getByTestId('parameters-panel'), { marge: 8 });
+    await page.goto(`/p/${P}/tests/TC-13`);
+    await expect(page.getByTestId('step-called-1')).toBeVisible();
+    await capturer(page, 'test-manuel-appel', page.getByTestId('manual-steps'), { marge: 8 });
     await page.goto(`/p/${P}/tests/TC-3`);
     await expect(page.getByTestId('automation-identifier')).toBeVisible();
     await capturer(page, 'test-automatise');
@@ -133,7 +157,7 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
 
   await test.step('Le référentiel de tests', async () => {
     await page.goto(`/p/${P}/tests`);
-    await expect(page.getByTestId('test-row-TC-12').or(page.getByTestId('tree-test-TC-12'))).toBeVisible();
+    await expect(page.getByTestId('test-row-TC-13').or(page.getByTestId('tree-test-TC-13'))).toBeVisible();
     await capturer(page, 'tests-referentiel', undefined, { pleinePage: true });
   });
 });

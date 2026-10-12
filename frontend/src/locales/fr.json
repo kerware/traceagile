@@ -60,6 +60,13 @@
     "VIEWER": "Lecteur",
     "SYSTEM_ADMIN": "Administrateur système"
   },
+  "roleRights": {
+    "ADMINISTRATOR": "Peut tout faire sur le projet, y compris gérer ses membres et ses paramètres. Aucune restriction.",
+    "PRODUCT_OWNER": "Peut rédiger, prioriser et valider les exigences, planifier releases et sprints, commenter et produire les rapports. Ne peut pas écrire de tests, préparer de campagnes, exécuter de tests, ni lancer de run automatisé.",
+    "TESTER": "Peut écrire tous les tests, préparer les campagnes, exécuter les tests et les sessions exploratoires, créer des anomalies, proposer des critères d’acceptation, commenter et produire les rapports. Ne peut pas modifier les exigences ni la planification, ni lancer de run automatisé.",
+    "DEVELOPER": "Peut écrire les tests automatisés, lancer les runs automatisés et commenter les exigences. Ne peut pas modifier les exigences, les tests manuels, la planification ni les campagnes, ni exécuter de test manuel.",
+    "VIEWER": "Peut tout consulter. Ne peut rien créer, modifier ni commenter."
+  },
   "admin": {
     "title": "Administration",
     "users": "Utilisateurs",
@@ -927,6 +934,8 @@
     "addCall": "Appeler un cas de test",
     "calledTest": "Cas de test appelé",
     "calledTestPlaceholder": "Rechercher un test manuel…",
+    "callRow": "Valeurs d'une ligne du jeu de données",
+    "callRowPlaceholder": "Remplir avec une ligne…",
     "openCalled": "Ouvrir",
     "inherit": "valeur héritée ou par défaut",
     "calledSteps_one": "{{count}} pas joué à la place de cet appel, avec ces valeurs.",

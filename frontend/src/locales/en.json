@@ -60,6 +60,13 @@
     "VIEWER": "Viewer",
     "SYSTEM_ADMIN": "System administrator"
   },
+  "roleRights": {
+    "ADMINISTRATOR": "Can do everything in the project, including managing its members and settings. No restriction.",
+    "PRODUCT_OWNER": "Can write, prioritise and approve requirements, plan releases and sprints, comment and produce reports. Cannot write tests, prepare campaigns, execute tests or launch automated runs.",
+    "TESTER": "Can write all tests, prepare campaigns, execute tests and exploratory sessions, log defects, propose acceptance criteria, comment and produce reports. Cannot change requirements or planning, nor launch automated runs.",
+    "DEVELOPER": "Can write automated tests, launch automated runs and comment on requirements. Cannot change requirements, manual tests, planning or campaigns, nor execute manual tests.",
+    "VIEWER": "Can view everything. Cannot create, change or comment on anything."
+  },
   "admin": {
     "title": "Administration",
     "users": "Users",
@@ -927,6 +934,8 @@
     "addCall": "Call a test case",
     "calledTest": "Called test case",
     "calledTestPlaceholder": "Search a manual test…",
+    "callRow": "Values from a data set row",
+    "callRowPlaceholder": "Fill from a row…",
     "openCalled": "Open",
     "inherit": "inherited or default value",
     "calledSteps_one": "{{count}} step played instead of this call, with these values.",

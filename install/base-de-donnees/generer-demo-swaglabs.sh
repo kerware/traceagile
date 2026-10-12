@@ -8,9 +8,13 @@
 #   - le jar distribuable construit : cd backend && mvn -pl traceagile-api -am package -Pdistribution -DskipTests ;
 #   - saucedemo/ installé (npm ci) et la branche courante committée (le serveur d'exécution la clone).
 #
+# --captures : refait aussi les captures du guide (docs/guide/images), puis « npm run publier ».
+#
 # Étapes : base temporaire → TraceAgile sur :8086 → tests réels de saucedemo (rapport JUnit) → scénario du
 # guide sans captures (données du projet SWAG, runs réellement exécutés) → pg_dump → nettoyage.
 set -euo pipefail
+CAPTURES=0
+[ "${1:-}" = "--captures" ] && CAPTURES=1
 
 ICI="$(cd "$(dirname "$0")" && pwd)"
 RACINE="$(cd "$ICI/../.." && pwd)"
@@ -49,7 +53,7 @@ cd "$RACINE/saucedemo"
 [ -f results/junit-saucedemo.xml ] || npx playwright test > "$TRAVAIL/app-tests.log" 2>&1 || true
 
 echo "4/6 Scénario du guide sans captures : projet SWAG, deux sprints, runs exécutés par le serveur d'exécution"
-TRACEAGILE_URL="http://localhost:$PORT" GUIDE_PROJET=SWAG GUIDE_MOT_DE_PASSE="$MOT_DE_PASSE_DEMO" GUIDE_SANS_CAPTURES=1 \
+TRACEAGILE_URL="http://localhost:$PORT" GUIDE_PROJET=SWAG GUIDE_MOT_DE_PASSE="$MOT_DE_PASSE_DEMO" GUIDE_SANS_CAPTURES=$((1 - CAPTURES)) \
 GUIDE_EXECUTEUR_URL_DEPUIS_TRACEAGILE="${GUIDE_EXECUTEUR_URL_DEPUIS_TRACEAGILE:-http://localhost:8091}" \
   npx playwright test -c guide.config.ts --reporter=line
 kill $PID

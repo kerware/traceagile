@@ -72,7 +72,8 @@ Plusieurs comptes simulent des situations particulières :
 
 ### L'équipe
 
-Chaque compte de démonstration a un rôle dans le projet (mot de passe : `demo`).
+Chaque compte de démonstration a un rôle dans le projet. Mot de passe : `SwagLabs-2026` dans la démo
+installée ([note d'installation](../installation.md)), `demo` sur la pile de développement.
 
 | Compte | Personne | Rôle dans le projet | Ce qu'il fait dans ce guide |
 | --- | --- | --- | --- |
@@ -96,16 +97,18 @@ L'administrateur crée le projet. Sa **clé** (`SWAG`) préfixe toutes les URL.
 
 ![Création du projet SWAG](images/admin-creer-projet.png)
 
-Il affecte ensuite un rôle à chaque membre (**Administration › Projets**).
+Il affecte ensuite un rôle à chaque membre (**Administration › Projets**). Sous chaque membre, une
+phrase rappelle ce que son profil permet et ne permet pas. Par exemple, un testeur écrit et exécute
+les tests, mais ne lance pas les runs automatisés : c'est le rôle du développeur.
 
 ![Membres du projet et leurs rôles](images/admin-membres.png)
 
 L'onglet **Utilisateurs** liste les comptes. L'onglet **Serveurs d'exécution** montre les serveurs
-qui jouent les tests automatisés :
-- le **serveur d'exécution** réel, qui exécute vraiment les tests (voir le [chapitre 15](#15-le-serveur-dexécution)) ;
-- le **simulateur**, qui imite un serveur pour les démonstrations.
+qui jouent les tests automatisés. Ici, le **serveur d'exécution** réel exécute vraiment les tests
+(voir le [chapitre 15](#15-le-serveur-dexécution)). Sur la pile de développement, un second serveur,
+le **simulateur**, imite un serveur pour les démonstrations.
 
-Chacun est **appairé** par un jeton qu'il a lui-même émis et apparaît **en ligne**, avec les
+Chaque serveur est **appairé** par un jeton qu'il a lui-même émis et apparaît **en ligne**, avec les
 techniques qu'il sait exécuter.
 
 ![Serveurs d'exécution](images/admin-serveurs-execution.png)
@@ -224,7 +227,8 @@ nature** :
 | Nature | Exemple | Particularité |
 | --- | --- | --- |
 | Manuel | TC-1 « Se connecter avec les comptes de démonstration » | Paramètres et **jeu de données de 3 lignes** |
-| Manuel | TC-2 « Retirer un produit depuis le catalogue et le panier » | Révèle le défaut de problem_user |
+| Manuel | TC-2 « Retirer un produit depuis le catalogue et le panier » | Révèle le défaut de problem_user (jeu « Compte du défaut ») |
+| Manuel | TC-13 « Ajouter un produit au panier après connexion » | **Appelle TC-1** comme premier pas, avec la ligne `standard_user` ; jeu « Produits » de 2 lignes |
 | Automatisé, piloté par les données | TC-3 « Connexion pilotée par les données » | Même jeu « Comptes » que TC-1 (`data/comptes.json`) |
 | Automatisé UI (Playwright) | TC-4, TC-5, TC-6, TC-9, TC-10 | Catalogue et panier |
 | Automatisé API | TC-7 « Contrat HTTP : manifeste et icônes » | Vérifie l'ENF « Contrat HTTP du site » |
@@ -246,6 +250,22 @@ exécution :
 ![Pas d'un test manuel](images/test-manuel-pas.png)
 
 ![Paramètres et jeu de données « Comptes »](images/test-manuel-jeu-de-donnees.png)
+
+Tout test manuel qui a des paramètres a au moins un jeu de données : TC-2 a le sien, d'une ligne
+(`problem_user`).
+
+### Réutiliser un test manuel comme pas
+
+Un pas peut **appeler un autre cas de test manuel** au lieu de décrire une action (bouton « Appeler
+un cas de test » sous les pas). À l'exécution, les pas du test appelé sont déroulés à sa place. TC-13 ne
+réécrit pas la connexion : son premier pas appelle TC-1.
+
+Les paramètres du test appelé reçoivent une valeur fixe ou un `${nom}` du test appelant. La liste
+« Valeurs d'une ligne du jeu de données » les remplit d'un coup avec une ligne d'un jeu de l'appelé :
+ici, la ligne `standard_user` du jeu « Comptes ». TC-13 a ses propres paramètres (`${produit}`,
+`${prix}`) et son jeu « Produits » de deux lignes.
+
+![TC-13 appelle TC-1 avec la ligne standard_user](images/test-manuel-appel.png)
 
 ### Test automatisé
 
@@ -379,7 +399,7 @@ quel par son lien permanent.
 La campagne « Recette sprint 2 » répartit le travail :
 
 - le test manuel TC-2 est confié à `qa2` ;
-- la charte exploratoire TC-12 est confiée à `qa1` ;
+- le test TC-13 et la charte exploratoire TC-12 sont confiés à `qa1` ;
 - les tests automatisés sont joués par le serveur d'exécution.
 
 ![Mes exécutions de qa2](images/mes-executions.png)
@@ -401,6 +421,12 @@ Avec `problem_user`, le pas 4 échoue. La testeuse :
 La capture du pas est reprise dans l'anomalie.
 
 ![Anomalie créée depuis le pas en échec](images/anomalie-depuis-pas.png)
+
+De son côté, `qa1` joue TC-13. Les deux premiers pas sont ceux de TC-1, déroulés avec
+`standard_user` : leur provenance est indiquée au-dessus de l'action. Viennent ensuite les pas du
+panier, avec le produit de la ligne du jeu « Produits ».
+
+![Exécution de TC-13 : pas venus de TC-1](images/execution-appel.png)
 
 ---
 
@@ -790,7 +816,7 @@ son jeton, avec les identifiants de l'administrateur.
 | Élément | Contenu |
 | --- | --- |
 | Exigences | REQ-1 épic ; REQ-2, 5, 9, 13 features ; REQ-3, 4, 6, 7, 8 (sprint 1) ; REQ-10, 11, 12 (sprint 2) ; REQ-14, 15 (commande, non développée) ; REQ-16, 17 ENF |
-| Tests | TC-1, TC-2 manuels ; TC-3 à TC-11 automatisés (dont TC-8 BDD) ; TC-12 exploratoire |
+| Tests | TC-1, TC-2, TC-13 manuels (TC-13 appelle TC-1) ; TC-3 à TC-11 automatisés (dont TC-8 BDD) ; TC-12 exploratoire |
 | Planification | REL-1 « Swag Labs 1.0 » ; SPR-1 clos ; SPR-2 actif |
 | Campagnes | CMP-1 « Recette sprint 1 » (terminée) ; CMP-2 « Recette sprint 2 » ; CMP-3 « Intégration continue — main » (import JUnit) |
 | Runs | RUN-1 (5/5 réussis) ; RUN-2 (TC-10 en échec), exécutés par le serveur d'exécution |
