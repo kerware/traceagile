@@ -53,7 +53,7 @@ cd "$RACINE/saucedemo"
 [ -f results/junit-saucedemo.xml ] || npx playwright test > "$TRAVAIL/app-tests.log" 2>&1 || true
 
 echo "4/6 Scénario du guide sans captures : projet SWAG, deux sprints, runs exécutés par le serveur d'exécution"
-TRACEAGILE_URL="http://localhost:$PORT" GUIDE_PROJET=SWAG GUIDE_MOT_DE_PASSE="$MOT_DE_PASSE_DEMO" GUIDE_SANS_CAPTURES=$((1 - CAPTURES)) \
+TRACEAGILE_URL="http://localhost:$PORT" GUIDE_PROJET=SWAG GUIDE_BASE="$BASE" GUIDE_CONTENEUR_PG="$CONTENEUR" GUIDE_MOT_DE_PASSE="$MOT_DE_PASSE_DEMO" GUIDE_SANS_CAPTURES=$((1 - CAPTURES)) \
 GUIDE_EXECUTEUR_URL_DEPUIS_TRACEAGILE="${GUIDE_EXECUTEUR_URL_DEPUIS_TRACEAGILE:-http://localhost:8091}" \
   npx playwright test -c guide.config.ts --reporter=line
 kill $PID

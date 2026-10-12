@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { Api, capturer, connexion, elements, fermerNotifications, IMAGES, P, RACINE_SAUCEDEMO, SERVEUR } from './outils';
+import { Api, capturer, connexion, elements, fermerNotifications, IMAGES, P, RACINE_SAUCEDEMO, SERVEUR, sqlDemo } from './outils';
 
 /**
  * Guide § 7 à § 10 — sprint 2 « Panier » (sprint actif) : exécution manuelle en échec et anomalie
@@ -11,6 +11,19 @@ import { Api, capturer, connexion, elements, fermerNotifications, IMAGES, P, RAC
  * artefacts, mesure de l'ENF de performance, import du rapport JUnit réel de saucedemo/app-tests.
  */
 const JUNIT = join(RACINE_SAUCEDEMO, 'results', 'junit-saucedemo.xml');
+
+/**
+ * Horaires « mockés » de la session de TC-12 (le scénario la joue en quelques secondes) : début à 15 h
+ * (heure de Paris, jour de la génération), notes réparties sur l'heure, 55 min actives pour 60 prévues,
+ * débriefing à 16 h 10 et approbation à 16 h 25.
+ */
+const SESSION_TC12 = `with s as (
+    select x.id, x.execution_id from exploratory_sessions x join executions e on e.id = x.execution_id
+    join test_cases t on t.id = e.test_case_id join projects p on p.id = t.project_id
+    where p.key = '${P}' and t.key = 'TC-12'),
+  base as (select (current_date + time '15:00') at time zone 'Europe/Paris' as t0)`;
+const DECALAGES_NOTES = [252, 760, 1590, 2280, 3060]; // 04:12, 12:40, 26:30, 38:00, 51:00
+const DUREE_ACTIVE = 55 * 60;
 
 test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JUnit', async ({ page, request }) => {
   expect(existsSync(JUNIT), 'lancer d’abord les tests de saucedemo : npm test (ou npm run tout)').toBeTruthy();
@@ -113,6 +126,15 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await noter('problem_user : « Add to cart » sans effet sur Bolt T-Shirt, Fleece Jacket et Test.allTheThings() T-Shirt', 'Control+4');
     await noter('Le panier doit-il survivre à une déconnexion ? (conservé aujourd’hui)', 'Control+2');
     await noter('Afficher le total du panier avant le checkout', 'Control+5');
+    // horaires de démonstration : notes étalées sur l'heure, chronomètre à 55 min moins 10 s (la session continue)
+    sqlDemo(`${SESSION_TC12},
+      decalages as (select n.id, (array[${DECALAGES_NOTES.join(', ')}])[row_number() over (order by n.noted_at, n.created_at)] as d
+        from session_notes n join s on n.session_id = s.id)
+      update session_notes n set offset_seconds = d.d, noted_at = base.t0 + make_interval(secs => d.d) from decalages d, base where n.id = d.id;
+      ${SESSION_TC12} update executions e set started_at = base.t0 from s, base where e.id = s.execution_id;
+      ${SESSION_TC12} update exploratory_sessions x set active_seconds = ${DUREE_ACTIVE - 10}, resumed_at = now() from s where x.id = s.id;`);
+    await page.reload();
+    await expect(page.getByTestId('session-notes')).toContainText('51:00');
     await capturer(page, 'session-notes');
   });
 
@@ -134,6 +156,11 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await capturer(page, 'session-tbs', page.getByTestId('session-finish'), { marge: 10 });
     await page.getByTestId('session-finish-submit').click();
     await expect(page.getByTestId('session-state')).toHaveText('Terminée');
+    // fin de démonstration : 55 min actives, session terminée à 15 h 55
+    sqlDemo(`${SESSION_TC12} update exploratory_sessions x set active_seconds = ${DUREE_ACTIVE}, resumed_at = null from s where x.id = s.id;
+      ${SESSION_TC12} update executions e set ended_at = base.t0 + interval '55 minutes', duration_ms = ${DUREE_ACTIVE * 1000}
+        from s, base where e.id = s.execution_id;`);
+    await page.reload();
   });
 
   await test.step('Débriefing PROOF ; le PO l’approuve', async () => {
@@ -150,7 +177,10 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await page.goto(url);
     await page.getByTestId('debrief-approve').click();
     await expect(page.getByTestId('session-state')).toHaveText('Débriefée');
-    await fermerNotifications(page);
+    sqlDemo(`${SESSION_TC12} update exploratory_sessions x set debriefed_at = base.t0 + interval '70 minutes',
+      approved_at = base.t0 + interval '85 minutes' from s, base where x.id = s.id;`);
+    await page.reload();
+    await expect(page.getByTestId('session-state')).toHaveText('Débriefée');
     await capturer(page, 'session-debriefee', undefined, { pleinePage: true });
   });
 

@@ -1,5 +1,5 @@
 import { expect, type APIRequestContext, type Locator, type Page } from '@playwright/test';
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +21,17 @@ export const BRANCHE = process.env.GUIDE_BRANCHE ?? execSync('git rev-parse --ab
 export const SERVEUR = process.env.GUIDE_SERVEUR ?? "Serveur d'exécution";
 export const EXECUTEUR_URL = process.env.GUIDE_EXECUTEUR_URL ?? 'http://localhost:8091';
 export const EXECUTEUR_MOT_DE_PASSE = process.env.EXECUTION_SERVER_ADMIN_PASSWORD ?? 'executeur';
+
+/**
+ * Données de démonstration « mockées » directement en base, quand l'application ne peut pas les produire
+ * en quelques secondes (horaires d'une session exploratoire d'une heure). Base PostgreSQL de la pile Docker
+ * (GUIDE_BASE : base de l'instance visée, ex. traceagile_swaglabs pour generer-demo-swaglabs.sh).
+ */
+export const BASE_PG = process.env.GUIDE_BASE ?? 'traceagile';
+export const CONTENEUR_PG = process.env.GUIDE_CONTENEUR_PG ?? 'traceagile-postgres-1';
+export function sqlDemo(sql: string): void {
+  execFileSync('docker', ['exec', '-i', CONTENEUR_PG, 'psql', '-U', 'traceagile', '-d', BASE_PG, '-q', '-v', 'ON_ERROR_STOP=1'], { input: sql });
+}
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 export const RACINE_SAUCEDEMO = join(ICI, '..');
