@@ -854,8 +854,49 @@ Cypress, Selenium, Robot Framework, JUnit, Maven, JDK, Gatling…). Ce plan s&#3
 particuliers dans le dossier ou le volume des outils.</li>
 </ul>
 <p>Pour rejouer la démo SwagLabs, il faut Node.js et l&#39;outil <strong>Playwright</strong> avec ses navigateurs.</p>
-<p>Pour un dépôt Git privé, saisir les identifiants de son hôte dans la page <strong>Paramètres</strong> du serveur
-d&#39;exécution.</p>
+<h3 id="93-dépôts-git-des-tests">9.3 Dépôts Git des tests</h3>
+<p>Les dépôts des tests automatisés se déclarent dans TraceAgile, <strong>Administration › Dépôts Git</strong> :</p>
+<ul>
+<li>un dépôt est l&#39;adresse d&#39;un compte ou d&#39;une organisation (<code>https://github.com/kerware</code>,
+<code>git@gitlab.example.org:qa</code>) ;</li>
+<li>on y déclare ses projets (<code>saucedemo-e2e</code>), avec leur branche par défaut ;</li>
+<li>les fiches de tests automatisés proposent ces projets.</li>
+</ul>
+<p>Authentification d&#39;un dépôt privé :</p>
+<div class="tableau"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>À saisir</th>
+<th>Clone par le serveur d&#39;exécution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Public</td>
+<td>rien</td>
+<td><code>https://…/projet</code></td>
+</tr>
+<tr>
+<td>Jeton d&#39;accès</td>
+<td>jeton personnel (lecture des dépôts) ; utilisateur facultatif sur GitHub</td>
+<td><code>https://utilisateur:jeton@…/projet</code></td>
+</tr>
+<tr>
+<td>Clé SSH</td>
+<td>clé privée OpenSSH, sans phrase de passe ; la clé publique est déclarée sur le dépôt (clé de déploiement)</td>
+<td><code>git@hôte:compte/projet.git</code>, avec une clé écrite pour le seul clone</td>
+</tr>
+</tbody></table>
+</div>
+<p>Le jeton ou la clé est chiffré par TraceAgile (<code>TRACEAGILE_ENCRYPTION_KEY</code>), n&#39;est jamais réaffiché,
+et accompagne chaque job envoyé au serveur d&#39;exécution. Le serveur l&#39;utilise pour le clone puis
+l&#39;oublie : il ne l&#39;enregistre pas et le masque dans ses journaux. Servez donc le serveur
+d&#39;exécution en HTTPS dès qu&#39;il est sur une autre machine (§11).</p>
+<p>Un <strong>dépôt local</strong> se déclare avec une adresse <code>file:///dossier</code>, sans authentification : c&#39;est le
+dossier tel que le voit le serveur d&#39;exécution. En conteneur, il faut le monter dans le conteneur
+(§8). C&#39;est ce que fait la démonstration (<code>file:///depots</code>, projet <code>traceagile</code>).</p>
+<p>Les identifiants par hôte de la page <strong>Paramètres</strong> du serveur d&#39;exécution restent possibles. Ils
+servent aux tests saisis avec une adresse libre.</p>
 <h2 id="10-réseau-et-pare-feu">10. Réseau et pare-feu</h2>
 <div class="tableau"><table>
 <thead>
