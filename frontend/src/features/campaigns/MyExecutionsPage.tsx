@@ -63,7 +63,7 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
   const canExecute = useCanExecute(project);
   const start = useStartExecution(project);
   const startSession = useStartSession(project);
-  const rows = item.dataSets.flatMap((d) => Array.from({ length: d.rows }, (_, i) => ({ value: `${d.name}|${i}`, label: t('executions.dataRow', { name: d.name, row: i + 1 }) })));
+  const rows = item.dataSets.flatMap((d) => Array.from({ length: d.rows }, (_, i) => ({ value: `${d.name}|${i}`, label: t('executions.dataRow', { name: d.name, row: d.rowNames[i] ?? i + 1 }) })));
   const [row, setRow] = useState<string | null>(null);
 
   const go = () => {
@@ -119,7 +119,7 @@ function Row({ project, item }: { project: string; item: MyExecution }) {
           <Group gap={4} justify="flex-end" wrap="nowrap">
             {item.dataSetName && (
               <Text size="xs" c="dimmed" data-testid={`my-dataset-${item.test.key}`}>
-                {t('executions.dataRow', { name: item.dataSetName, row: (item.dataSetRow ?? 0) + 1 })}
+                {t('executions.dataRow', { name: item.dataSetName, row: item.dataSetRowName ?? (item.dataSetRow ?? 0) + 1 })}
               </Text>
             )}
             {!item.dataSetName && rows.length > 0 && item.lastStatus !== 'RUNNING' && (

@@ -6,13 +6,15 @@ import { parseCell } from './model';
 /**
  * Lignes d'un jeu de données (ADR-0013) : une colonne par paramètre du test, une ligne par
  * exécution ; une cellule vide prend la valeur par défaut. Avec {@code typed} (tests automatisés),
- * nombres et booléens sont reconnus.
+ * nombres et booléens sont reconnus. ADR-0029 chaque ligne a un nom, par lequel on la désigne
+ * (appel du test, campagne) ; vide, le serveur prend la première valeur de la ligne.
  */
 export function DataSetGrid({
   testId,
   columns,
   defaults,
   rows,
+  names,
   onChange,
   readOnly,
   typed = false,
@@ -21,21 +23,28 @@ export function DataSetGrid({
   columns: string[];
   defaults: Record<string, string>;
   rows: Record<string, unknown>[];
-  onChange: (rows: Record<string, unknown>[]) => void;
+  names: string[];
+  onChange: (rows: Record<string, unknown>[], names: string[]) => void;
   readOnly: boolean;
   typed?: boolean;
 }) {
   const { t } = useTranslation();
+  const rowNames = rows.map((_, i) => names[i] ?? '');
   const setCell = (rowIndex: number, column: string, value: string) =>
-    onChange(rows.map((row, i) => (i === rowIndex ? { ...row, [column]: typed ? parseCell(value) : value } : row)));
-  const addRow = () => onChange([...rows, Object.fromEntries(columns.map((c) => [c, '']))]);
+    onChange(rows.map((row, i) => (i === rowIndex ? { ...row, [column]: typed ? parseCell(value) : value } : row)), rowNames);
+  const setName = (rowIndex: number, value: string) => onChange(rows, rowNames.map((n, i) => (i === rowIndex ? value : n)));
+  const addRow = () => onChange([...rows, Object.fromEntries(columns.map((c) => [c, '']))], [...rowNames, '']);
+  const removeRow = (rowIndex: number) => onChange(rows.filter((_, i) => i !== rowIndex), rowNames.filter((_, i) => i !== rowIndex));
+  // nom proposé tant qu'il n'est pas saisi : première valeur de la ligne, comme le serveur
+  const fallback = (row: Record<string, unknown>, rowIndex: number) =>
+    Object.values(row).map((v) => (v === undefined || v === null ? '' : String(v).trim())).find((v) => v !== '') ?? t('grid.rowFallback', { n: rowIndex + 1 });
 
   return (
     <div>
       <Table withTableBorder withColumnBorders data-testid={`${testId}-grid`}>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th w={40}>#</Table.Th>
+            <Table.Th w={170}>{t('grid.rowName')}</Table.Th>
             {columns.map((column) => (
               <Table.Th key={column}>{column}</Table.Th>
             ))}
@@ -54,7 +63,19 @@ export function DataSetGrid({
           )}
           {rows.map((row, rowIndex) => (
             <Table.Tr key={rowIndex}>
-              <Table.Td>{rowIndex + 1}</Table.Td>
+              <Table.Td p={2}>
+                <TextInput
+                  variant="unstyled"
+                  px={6}
+                  fw={600}
+                  aria-label={t('grid.rowNameOf', { n: rowIndex + 1 })}
+                  placeholder={fallback(row, rowIndex)}
+                  value={rowNames[rowIndex]}
+                  onChange={(e) => setName(rowIndex, e.currentTarget.value)}
+                  readOnly={readOnly}
+                  data-testid={`${testId}-name-${rowIndex}`}
+                />
+              </Table.Td>
               {columns.map((column) => (
                 <Table.Td key={column} p={2}>
                   <TextInput
@@ -71,7 +92,7 @@ export function DataSetGrid({
               ))}
               {!readOnly && (
                 <Table.Td>
-                  <ActionIcon variant="subtle" color="red" onClick={() => onChange(rows.filter((_, i) => i !== rowIndex))} aria-label={t('grid.removeRow')}>
+                  <ActionIcon variant="subtle" color="red" onClick={() => removeRow(rowIndex)} aria-label={t('grid.removeRow')}>
                     <IconTrash size={14} />
                   </ActionIcon>
                 </Table.Td>

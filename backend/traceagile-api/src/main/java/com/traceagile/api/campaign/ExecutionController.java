@@ -11,8 +11,8 @@ import com.traceagile.api.campaign.CampaignDtos.RequirementExecutionResponse;
 import com.traceagile.api.campaign.CampaignDtos.StartExecutionRequest;
 import com.traceagile.api.campaign.CampaignDtos.StepResultRequest;
 import com.traceagile.application.campaign.CampaignService;
-import com.traceagile.application.defect.DefectService;
 import com.traceagile.application.defect.DefectService.DefectCommand;
+import com.traceagile.application.defect.DefectService;
 import com.traceagile.application.execution.ExecutionRepository;
 import com.traceagile.application.execution.ExecutionService;
 import com.traceagile.application.requirement.RequirementService;
@@ -22,6 +22,7 @@ import com.traceagile.domain.defect.Defect;
 import com.traceagile.domain.defect.DefectDraft;
 import com.traceagile.domain.execution.Execution;
 import com.traceagile.domain.execution.ExecutionStatus;
+import com.traceagile.domain.testcase.DataSetRow;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -85,8 +86,11 @@ public class ExecutionController {
     @PreAuthorize(WRITE)
     public ResponseEntity<ExecutionDetail> start(@PathVariable String projectKey, @PathVariable UUID id, Authentication authentication,
                                                  @Valid @RequestBody(required = false) StartExecutionRequest request) {
-        Execution execution = executions.start(projectKey, id, authentication.getName(),
-                request == null ? null : request.dataSetName(), request == null ? null : request.row());
+        Integer row = request == null ? null : request.row();
+        if (request != null && request.rowName() != null && request.dataSetName() != null) {
+            row = DataSetRow.named(campaigns.item(projectKey, id).getTestCase(), request.dataSetName(), request.rowName()).row();
+        }
+        Execution execution = executions.start(projectKey, id, authentication.getName(), request == null ? null : request.dataSetName(), row);
         return ResponseEntity.created(URI.create("/api/v1/projects/" + projectKey + "/executions/" + execution.getId()))
                 .body(mapper.execution(execution, List.of()));
     }

@@ -155,6 +155,25 @@ class TestCaseTest {
     }
 
     @Test
+    @DisplayName("ADR-0029 chaque ligne d'un jeu a un nom unique : donné, sinon sa première valeur ou « Ligne n »")
+    void dataSetRowNames() {
+        DataSet set = DataSet.of("Comptes", List.of(Map.of("login", "alice"), Map.of("login", "alice"), Map.of("login", "")),
+                List.of("", "", ""));
+        assertThat(set.rowNames()).containsExactly("alice", "alice (2)", "Ligne 3");
+        assertThat(DataSet.of("Comptes", List.of(Map.of("login", "bob")), List.of("Client principal")).rowNames()).containsExactly("Client principal");
+        assertThat(set.indexOf("ALICE (2)")).isEqualTo(1);
+
+        TestCase test = manual();
+        test.addStep("Se connecter avec ${login}", "OK", null);
+        assertThatThrownBy(() -> test.setDataSets(List.of(DataSet.of("Comptes", List.of(Map.of("login", "a"), Map.of("login", "b")),
+                List.of("Même", "même"))))).extracting("code").isEqualTo("TEST_DATASET_ROW_NAME_DUPLICATED");
+        // les noms survivent à une modification des paramètres
+        test.setDataSets(List.of(DataSet.of("Comptes", List.of(Map.of("login", "a")), List.of("Principal"))));
+        test.setParameters(List.of(new TestParameter("login", "x", null)));
+        assertThat(test.getDataSets().get(0).rowNames()).containsExactly("Principal");
+    }
+
+    @Test
     @DisplayName("ADR-0028 un test manuel à paramètres ne passe à READY qu'avec au moins un jeu de données non vide")
     void readinessRequiresDataSetForParameters() {
         TestCase test = manual();

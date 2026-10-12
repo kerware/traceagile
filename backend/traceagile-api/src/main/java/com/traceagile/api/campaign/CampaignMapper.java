@@ -49,7 +49,16 @@ public class CampaignMapper {
     }
 
     List<DataSetRef> dataSets(TestCase test) {
-        return test.getDataSets().stream().map(d -> new DataSetRef(d.name(), d.rows().size())).toList();
+        return test.getDataSets().stream().map(d -> new DataSetRef(d.name(), d.rows().size(), d.rowNames())).toList();
+    }
+
+    /** ADR-0029 nom de la ligne prévue ou jouée ({@code null} sans jeu, ou ligne disparue du test). */
+    static String rowName(TestCase test, String dataSetName, Integer row) {
+        if (dataSetName == null || row == null) {
+            return null;
+        }
+        return test.getDataSets().stream().filter(d -> d.name().equalsIgnoreCase(dataSetName)).findFirst()
+                .filter(d -> row >= 0 && row < d.rowNames().size()).map(d -> d.rowNames().get(row)).orElse(null);
     }
 
     CampaignSummary summary(Campaign c) {
@@ -65,7 +74,8 @@ public class CampaignMapper {
         return new ItemResponse(i.getId(), i.getPosition(), test(i.getTestCase()), i.getTestCaseVersion(), user(i.getAssignee()),
                 i.isExecutedByServer(), i.getRiskScore(), i.lastStatus(), i.getExecutions().size(), latest == null ? null : latest.getId(),
                 latest == null ? null : latest.getEndedAt() != null ? latest.getEndedAt() : latest.getStartedAt(),
-                i.getDataSetName(), i.getDataSetRow(), i.dataSetValues(), dataSets(i.getTestCase()));
+                i.getDataSetName(), i.getDataSetRow(), rowName(i.getTestCase(), i.getDataSetName(), i.getDataSetRow()), i.dataSetValues(),
+                dataSets(i.getTestCase()));
     }
 
     CampaignDetail detail(Campaign c) {
@@ -77,12 +87,13 @@ public class CampaignMapper {
     MyExecutionResponse mine(CampaignItem i) {
         Execution latest = i.latest();
         return new MyExecutionResponse(i.getId(), ref(i.getCampaign()), test(i.getTestCase()), i.getPosition(), i.lastStatus(),
-                i.getExecutions().size(), latest == null ? null : latest.getId(), dataSets(i.getTestCase()), i.getDataSetName(), i.getDataSetRow());
+                i.getExecutions().size(), latest == null ? null : latest.getId(), dataSets(i.getTestCase()), i.getDataSetName(), i.getDataSetRow(),
+                rowName(i.getTestCase(), i.getDataSetName(), i.getDataSetRow()));
     }
 
     AttemptResponse attempt(Execution e) {
         return new AttemptResponse(e.getId(), e.getAttempt(), e.getStatus(), e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin(),
-                e.getDataSetName(), e.getDataSetRow());
+                e.getDataSetName(), e.getDataSetRow(), rowName(e.getTestCase(), e.getDataSetName(), e.getDataSetRow()));
     }
 
     DefectRef defectRef(Defect d) {
@@ -95,7 +106,7 @@ public class CampaignMapper {
         return new ExecutionDetail(e.getId(), item.getId(), test(e.getTestCase()), ref(item.getCampaign()), e.getAttempt(),
                 e.getTestCaseVersion(), e.getStatus(), e.derivedStatus(), e.isStatusOverridden(), e.getStartedAt(), e.getEndedAt(),
                 e.getDurationMs(), e.getComment(), e.getExecutedBy(), e.getOrigin(), e.getDataSetName(), e.getDataSetRow(),
-                e.getParameterValues(),
+                rowName(e.getTestCase(), e.getDataSetName(), e.getDataSetRow()), e.getParameterValues(),
                 e.getSteps().stream().map(s -> new StepResultResponse(s.getId(), s.getPosition(), s.getAction(), s.getExpectedResult(), s.getTestData(),
                         s.getStatus(), s.getActualResult(), s.getCalledFrom())).toList(),
                 defects.stream().map(this::defectRef).toList(),
@@ -106,7 +117,8 @@ public class CampaignMapper {
 
     RequirementExecutionResponse requirementExecution(Execution e) {
         return new RequirementExecutionResponse(e.getId(), test(e.getTestCase()), ref(e.getItem().getCampaign()), e.getAttempt(), e.getStatus(),
-                e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin(), e.getDataSetName(), e.getDataSetRow());
+                e.getStartedAt(), e.getEndedAt(), e.getExecutedBy(), e.getOrigin(), e.getDataSetName(), e.getDataSetRow(),
+                rowName(e.getTestCase(), e.getDataSetName(), e.getDataSetRow()));
     }
 
     DefectSummary defectSummary(Defect d) {

@@ -85,7 +85,7 @@ describe('F-MAN-01 test manuel', () => {
     await userEvent.type(screen.getByTestId('dataset-0-cell-0-nom-produit'), 'Cahier');
     await userEvent.click(screen.getByTestId('test-save'));
 
-    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Recette', rows: [{ 'nom-produit': 'Cahier', devise: '' }] }]));
+    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Recette', rows: [{ 'nom-produit': 'Cahier', devise: '' }], rowNames: [''] }]));
     expect(sent.body?.parameters).toEqual([
       { name: 'devise', defaultValue: 'EUR', description: null },
       { name: 'nom-produit', defaultValue: 'Stylo', description: null },
@@ -96,7 +96,7 @@ describe('F-MAN-01 test manuel', () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     serve(testDetail('TC-1', {
       parameters: [{ name: 'a', detected: false }, { name: 'b', detected: false }],
-      dataSets: [{ name: 'Recette', rows: [{ a: '1', b: '2' }] }],
+      dataSets: [{ name: 'Recette', rows: [{ a: '1', b: '2' }], rowNames: ['Nominal'] }],
     }));
     const sent = capturePatch();
     view();
@@ -106,7 +106,7 @@ describe('F-MAN-01 test manuel', () => {
     await userEvent.click(screen.getByTestId('param-remove-b'));
     await userEvent.click(screen.getByTestId('test-save'));
 
-    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Recette', rows: [{ a: '1' }] }]));
+    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Recette', rows: [{ a: '1' }], rowNames: ['Nominal'] }]));
     expect(sent.body?.parameters).toEqual([{ name: 'a', defaultValue: null, description: null }]);
   });
 });
@@ -168,7 +168,7 @@ describe('§6 test automatisé', () => {
     await userEvent.type(screen.getByTestId('dataset-0-cell-0-montant'), '49.99');
     await userEvent.click(screen.getByTestId('test-save'));
 
-    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Jeu 1', rows: [{ montant: 49.99 }] }]));
+    await waitFor(() => expect(sent.body?.dataSets).toEqual([{ name: 'Jeu 1', rows: [{ montant: 49.99 }], rowNames: [''] }]));
   });
 
   it('F-AUT-08 signale un test absent du dépôt', async () => {

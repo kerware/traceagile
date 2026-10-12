@@ -130,6 +130,31 @@ class ExecutionTest {
     }
 
     @Test
+    @DisplayName("ADR-0029 appel avec un jeu de données nommé de l'appelé : valeurs lues à l'exécution, complétées par l'appel")
+    void callWithNamedDataSet() {
+        TestCase login = TestCase.manual(shop, "TC-5", "Se connecter");
+        login.addStep("Saisir ${login} / ${langue}", "Connecté", null);
+        login.setDataSets(List.of(DataSet.of("Comptes", List.of(Map.of("login", "alice", "langue", "fr"), Map.of("login", "bob", "langue", "de")),
+                List.of("Alice", "Bob"))));
+        TestCase cart = TestCase.manual(shop, "TC-6", "Ouvrir son panier");
+        cart.addStep(new StepContent(null, null, null, login, Map.of("langue", "en"), "comptes", "bob"));
+        assertThat(cart.getSteps().get(0).getCallDataSet()).isEqualTo("Comptes");
+        assertThat(cart.getSteps().get(0).getCallRow()).isEqualTo("Bob");
+        assertThatThrownBy(() -> cart.addStep(new StepContent(null, null, null, login, Map.of(), "Comptes", "Carole")))
+                .extracting("code").isEqualTo("TEST_CALL_DATASET_UNKNOWN");
+        // la ligne nommée est relue à l'exécution : une valeur changée dans l'appelé est prise en compte
+        login.setDataSets(List.of(DataSet.of("Comptes", List.of(Map.of("login", "alice"), Map.of("login", "robert", "langue", "de")),
+                List.of("Alice", "Bob"))));
+        cart.changeStatus(TestCaseStatus.READY);
+        Campaign campaign = new Campaign(shop, "CMP-1", "Régression", CampaignScope.REGRESSION, null, null, null, null, null, null);
+
+        Execution execution = Execution.manual(campaign.add(cart, 1), "qa1", t0, null, null);
+
+        assertThat(execution.getSteps()).extracting(StepResult::getAction).containsExactly("Saisir robert / en");
+        assertThat(execution.getSteps()).extracting(StepResult::getCalledFrom).containsExactly("TC-5 Se connecter (Bob)");
+    }
+
+    @Test
     @DisplayName("ADR-0018 appels imbriqués : pas déroulés dans l'ordre, chaîne d'appels, valeurs de l'appel puis paramètres de même nom")
     void nestedCalls() {
         TestCase login = TestCase.manual(shop, "TC-5", "Se connecter");

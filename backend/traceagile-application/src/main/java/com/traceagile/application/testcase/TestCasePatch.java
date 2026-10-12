@@ -59,11 +59,19 @@ public record TestCasePatch(
         Optional<List<String>> executionTags,
         Optional<Map<String, String>> environmentRequirements) {
 
-    /** ADR-0018 {@code calledTestKey} : pas d'appel d'un autre cas de test, avec ses valeurs de paramètres. */
-    public record StepDraft(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters) {
+    /**
+     * ADR-0018 {@code calledTestKey} : pas d'appel d'un autre cas de test, avec ses valeurs de paramètres ;
+     * ADR-0029 {@code callDataSet} / {@code callRow} : jeu de données nommé de l'appelé.
+     */
+    public record StepDraft(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters,
+                            String callDataSet, String callRow) {
 
         public StepDraft(String action, String expectedResult, String testData) {
             this(action, expectedResult, testData, null, null);
+        }
+
+        public StepDraft(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters) {
+            this(action, expectedResult, testData, calledTestKey, callParameters, null, null);
         }
     }
 
@@ -104,7 +112,7 @@ public record TestCasePatch(
             test.replaceSteps(steps.orElse(List.of()).stream()
                     .map(s -> new StepContent(s.action(), s.expectedResult(), s.testData(),
                             s.calledTestKey() == null || s.calledTestKey().isBlank() ? null : callable.apply(s.calledTestKey().strip()),
-                            s.callParameters()))
+                            s.callParameters(), s.callDataSet(), s.callRow()))
                     .toList());
         }
         // Après les pas (paramètres détectés), avant les jeux (dont les colonnes inconnues sont déclarées).

@@ -54,7 +54,7 @@ public interface TestCaseMapper {
     }
 
     default DataSetDto toResponse(DataSet set) {
-        return new DataSetDto(set.name(), set.rows());
+        return new DataSetDto(set.name(), set.rows(), set.rowNames());
     }
 
     @Mapping(target = "name", source = "name")

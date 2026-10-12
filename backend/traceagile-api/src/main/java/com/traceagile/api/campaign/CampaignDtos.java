@@ -58,7 +58,8 @@ public final class CampaignDtos {
 
     public record DataSetRef(
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int rows) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int rows,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0029 nom de chaque ligne") List<String> rowNames) {
     }
 
     public record DefectRef(
@@ -109,6 +110,7 @@ public final class CampaignDtos {
             Instant lastExecutedAt,
             @Schema(description = "ADR-0018 jeu de données prévu (absent : valeurs par défaut)") String dataSetName,
             @Schema(description = "Ligne du jeu, base 0") Integer dataSetRow,
+            @Schema(description = "ADR-0029 nom de la ligne") String dataSetRowName,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Valeurs de la ligne prévue") Map<String, String> dataSetValues,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetRef> dataSets) {
     }
@@ -175,7 +177,8 @@ public final class CampaignDtos {
 
     /** F-CMP-04 merge-patch : {@code assignee: null} désaffecte. */
     /** F-CMP-04 affectation ; ADR-0018 ligne de jeu de données ({@code dataSetName: null} = valeurs par défaut). */
-    public record ItemPatchRequest(String assignee, @Size(max = 100) String dataSetName, @Min(0) Integer dataSetRow) {
+    public record ItemPatchRequest(String assignee, @Size(max = 100) String dataSetName, @Min(0) Integer dataSetRow,
+                                   @Schema(description = "ADR-0029 ligne désignée par son nom (prioritaire sur dataSetRow)") @Size(max = 100) String dataSetRowName) {
     }
 
     public record ExpandDataSetRequest(@NotBlank @Size(max = 100) String dataSetName) {
@@ -203,7 +206,8 @@ public final class CampaignDtos {
             String executedBy,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin,
             String dataSetName,
-            Integer dataSetRow) {
+            Integer dataSetRow,
+            String dataSetRowName) {
     }
 
     public record ExecutionDetail(
@@ -224,6 +228,7 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin,
             String dataSetName,
             Integer dataSetRow,
+            String dataSetRowName,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Map<String, String> parameterValues,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<StepResultResponse> steps,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DefectRef> defects,
@@ -232,7 +237,8 @@ public final class CampaignDtos {
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetRef> dataSets) {
     }
 
-    public record StartExecutionRequest(@Size(max = 100) String dataSetName, @Min(0) Integer row) {
+    /** ADR-0029 la ligne se désigne par son nom ({@code rowName}) ou, à défaut, par son index ({@code row}). */
+    public record StartExecutionRequest(@Size(max = 100) String dataSetName, @Min(0) Integer row, @Size(max = 100) String rowName) {
     }
 
     public record StepResultRequest(@NotNull ExecutionStatus status, @Size(max = 4000) String actualResult) {
@@ -251,7 +257,8 @@ public final class CampaignDtos {
             UUID latestExecutionId,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<DataSetRef> dataSets,
             @Schema(description = "ADR-0018 jeu de données prévu dans la campagne") String dataSetName,
-            Integer dataSetRow) {
+            Integer dataSetRow,
+            String dataSetRowName) {
     }
 
     public record DefectDraftResponse(
@@ -273,7 +280,8 @@ public final class CampaignDtos {
             String executedBy,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) ExecutionOrigin origin,
             String dataSetName,
-            Integer dataSetRow) {
+            Integer dataSetRow,
+            String dataSetRowName) {
     }
 
     // ---------------------------------------------------------------- anomalies

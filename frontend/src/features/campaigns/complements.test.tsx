@@ -69,7 +69,7 @@ describe('ADR-0018 traçabilité des anomalies et fiche test', () => {
     );
 
     expect(await screen.findByTestId('test-executions')).toHaveTextContent('CMP-1');
-    expect(screen.getByTestId('test-executions')).toHaveTextContent('Recette #2');
+    expect(screen.getByTestId('test-executions')).toHaveTextContent('Recette › 2');
     expect(await screen.findByTestId('test-defects')).toHaveTextContent('DEF-3');
     expect(screen.getByTestId('test-defects')).toHaveTextContent('REQ-2');
   });
@@ -104,12 +104,12 @@ describe('ADR-0018 appel d’un cas de test comme pas', () => {
     await waitFor(() =>
       expect(body?.steps).toEqual([
         { action: 'Ouvrir la fiche', expectedResult: 'La fiche s’affiche', testData: null },
-        { action: null, expectedResult: null, testData: null, calledTestKey: 'TC-5', callParameters: { login: '${client}' } },
+        { action: null, expectedResult: null, testData: null, calledTestKey: 'TC-5', callParameters: { login: '${client}' }, callDataSet: null, callRow: null },
       ]),
     );
   });
 
-  it('remplit les paramètres de l’appel avec une ligne d’un jeu de données de l’appelé', async () => {
+  it('ADR-0029 appelle le test avec un jeu de données nommé de l’appelé ; le PATCH envoie le jeu et la ligne par leur nom', async () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     let body: Record<string, unknown> | undefined;
     server.use(
@@ -118,7 +118,7 @@ describe('ADR-0018 appel d’un cas de test comme pas', () => {
         HttpResponse.json(testDetail('TC-5', {
           title: 'Se connecter',
           parameters: [{ name: 'login', defaultValue: 'invité', detected: true }, { name: 'attendu', detected: true }],
-          dataSets: [{ name: 'Comptes', rows: [{ login: 'alice', attendu: 'Catalogue' }, { login: 'bloqué', attendu: 'Refus' }] }],
+          dataSets: [{ name: 'Comptes', rows: [{ login: 'alice', attendu: 'Catalogue' }, { login: 'bloqué', attendu: 'Refus' }], rowNames: ['alice', 'Compte bloqué'] }],
         })),
       ),
       http.get(`${P}/test-cases`, () => HttpResponse.json(page([testSummary('TC-5', { title: 'Se connecter', status: 'READY' })]))),
@@ -133,15 +133,17 @@ describe('ADR-0018 appel d’un cas de test comme pas', () => {
     await userEvent.click(await screen.findByTestId('step-add-call'));
     await userEvent.click(screen.getByTestId('step-called-2'));
     await userEvent.click(await screen.findByRole('option', { name: 'TC-5 — Se connecter' }));
-    await userEvent.click(await screen.findByTestId('step-call-row-2'));
-    await userEvent.click(await screen.findByRole('option', { name: 'Comptes › bloqué' }));
-    expect(screen.getByTestId('step-call-2-login')).toHaveValue('bloqué');
+    await userEvent.click(await screen.findByTestId('step-call-dataset-2'));
+    await userEvent.click(await screen.findByRole('option', { name: 'Comptes › Compte bloqué' }));
+    // les valeurs ne sont pas recopiées : elles s'affichent en indication et restent lues à l'exécution
+    expect(screen.getByTestId('step-call-2-login')).toHaveValue('');
+    expect(screen.getByTestId('step-call-2-login')).toHaveAttribute('placeholder', 'bloqué');
     await userEvent.click(screen.getByTestId('test-save'));
 
     await waitFor(() =>
-      expect((body?.steps as unknown[])[1]).toEqual(
-        { action: null, expectedResult: null, testData: null, calledTestKey: 'TC-5', callParameters: { login: 'bloqué', attendu: 'Refus' } },
-      ),
+      expect((body?.steps as unknown[])[1]).toEqual({
+        action: null, expectedResult: null, testData: null, calledTestKey: 'TC-5', callParameters: {}, callDataSet: 'Comptes', callRow: 'Compte bloqué',
+      }),
     );
   });
 
@@ -170,7 +172,7 @@ describe('ADR-0018 jeu de données choisi dans la campagne', () => {
   const detail = (items: CampaignDetail['items']): CampaignDetail => ({
     campaign: { ...summary('CMP-1', 'Recette SPR-1'), status: 'IN_PROGRESS' }, items, workload: [],
   });
-  const item = { id: 'i1', position: 1, test: test1, testCaseVersion: 1, executedByServer: false, riskScore: 16, lastStatus: 'NOT_RUN' as const, attempts: 0, dataSetValues: {}, dataSets: [{ name: 'Recette', rows: 2 }] };
+  const item = { id: 'i1', position: 1, test: test1, testCaseVersion: 1, executedByServer: false, riskScore: 16, lastStatus: 'NOT_RUN' as const, attempts: 0, dataSetValues: {}, dataSets: [{ name: 'Recette', rows: 2, rowNames: ['L1', 'L2'] }] };
 
   function serve(current: () => CampaignDetail) {
     server.use(
@@ -208,7 +210,7 @@ describe('ADR-0018 jeu de données choisi dans la campagne', () => {
     renderRoutes([{ path: '/p/:key/campaigns/:ck', element: <CampaignPage /> }], '/p/SHOP/campaigns/CMP-1');
 
     await userEvent.click(await screen.findByTestId('item-dataset-TC-1'));
-    await userEvent.click(await screen.findByRole('option', { name: 'Recette, ligne 2' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Recette › L2' }));
     await waitFor(() => expect(calls).toEqual([{ dataSetName: 'Recette', dataSetRow: 1 }]));
     expect(await screen.findByTestId('item-TC-1-2')).toBeInTheDocument();
 
@@ -224,7 +226,7 @@ describe('ADR-0018 jeu de données choisi dans la campagne', () => {
     serve(() => detail([{ ...item, attempts: 1, lastStatus: 'PASSED', dataSetName: 'Recette', dataSetRow: 0, dataSetValues: { produit: 'Stylo' } }]));
     renderRoutes([{ path: '/p/:key/campaigns/:ck', element: <CampaignPage /> }], '/p/SHOP/campaigns/CMP-1');
 
-    expect(await screen.findByTestId('item-dataset-TC-1-1')).toHaveTextContent('Recette, ligne 1');
+    expect(await screen.findByTestId('item-dataset-TC-1-1')).toHaveTextContent('Recette › 1');
     expect(screen.queryByTestId('item-expand-TC-1-1')).not.toBeInTheDocument();
   });
 });

@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traceagile.api.campaign.CampaignDtos.CampaignDetail;
 import com.traceagile.api.campaign.CampaignDtos.CampaignSummary;
 import com.traceagile.api.campaign.CampaignDtos.CopyCampaignRequest;
-import com.traceagile.api.campaign.CampaignDtos.ExpandDataSetRequest;
 import com.traceagile.api.campaign.CampaignDtos.CopyCampaignResponse;
 import com.traceagile.api.campaign.CampaignDtos.CreateCampaignRequest;
+import com.traceagile.api.campaign.CampaignDtos.ExpandDataSetRequest;
 import com.traceagile.api.campaign.CampaignDtos.ItemPatchRequest;
 import com.traceagile.api.campaign.CampaignDtos.ItemResponse;
 import com.traceagile.api.campaign.CampaignDtos.OrderRequest;
@@ -19,16 +19,17 @@ import com.traceagile.api.campaign.CampaignDtos.UpdateCampaignRequest;
 import com.traceagile.api.campaign.CampaignDtos.UserRef;
 import com.traceagile.api.web.MergePatch;
 import com.traceagile.api.web.Versions;
-import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.application.campaign.CampaignService.CampaignCommand;
 import com.traceagile.application.campaign.CampaignService.CampaignPatch;
 import com.traceagile.application.campaign.CampaignService.CopyCommand;
 import com.traceagile.application.campaign.CampaignService.CopyResult;
 import com.traceagile.application.campaign.CampaignService.SelectionParams;
 import com.traceagile.application.campaign.CampaignService.SelectionResult;
+import com.traceagile.application.campaign.CampaignService;
 import com.traceagile.domain.campaign.Campaign;
 import com.traceagile.domain.campaign.CampaignItem;
 import com.traceagile.domain.campaign.CampaignStatus;
+import com.traceagile.domain.testcase.DataSetRow;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -187,11 +188,15 @@ public class CampaignController {
         var assignee = f.field("assignee", String.class);
         var dataSetName = f.field("dataSetName", String.class);
         var dataSetRow = f.field("dataSetRow", Integer.class);
+        var dataSetRowName = f.field("dataSetRowName", String.class);
         CampaignItem item = campaigns.item(projectKey, id);
-        if (dataSetName != null || dataSetRow != null) {
-            // champ absent : valeur actuelle ; nouveau jeu sans ligne : première ligne
+        if (dataSetName != null || dataSetRow != null || dataSetRowName != null) {
+            // champ absent : valeur actuelle ; nouveau jeu sans ligne : première ligne ; ADR-0029 un nom de ligne l'emporte
             String name = dataSetName != null ? dataSetName.orElse(null) : item.getDataSetName();
             Integer row = dataSetRow != null ? dataSetRow.orElse(null) : dataSetName != null || name == null ? null : item.getDataSetRow();
+            if (name != null && dataSetRowName != null && dataSetRowName.isPresent()) {
+                row = DataSetRow.named(item.getTestCase(), name, dataSetRowName.get()).row();
+            }
             item = campaigns.bindDataSet(projectKey, id, name, row);
         }
         if (assignee != null) {

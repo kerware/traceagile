@@ -21,5 +21,5 @@ paramètres doit avoir au moins un jeu de données.
 **Conséquences.**
 - Sélectionné dans une campagne, un tel test est décliné sur les lignes de son premier jeu (ADR-0022) :
   ses éléments de campagne portent le suffixe de ligne (`-1`, `-2`…).
-- Démo SwagLabs : TC-2 reçoit le jeu « Compte du défaut » ; TC-13 réutilise TC-1 avec sa ligne
-  `standard_user` et a son propre jeu « Produits ». La démo SHOP respectait déjà la règle.
+- Démo SwagLabs : TC-2 et TC-13 appellent TC-1 avec un jeu nommé (ADR-0029) ; TC-13 a son propre jeu
+  « Produits ». La démo SHOP respectait déjà la règle.

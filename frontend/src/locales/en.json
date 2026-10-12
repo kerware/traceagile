@@ -736,7 +736,7 @@
   "executions": {
     "overridden": "status forced",
     "version": "version {{version}}",
-    "dataRow": "{{name}}, row {{row}}",
+    "dataRow": "{{name}} › {{row}}",
     "attempt": "Attempt {{n}}",
     "newAttempt": "New attempt",
     "readOnly": "Read-only attempt (a newer attempt exists, or the campaign is over).",
@@ -934,8 +934,9 @@
     "addCall": "Call a test case",
     "calledTest": "Called test case",
     "calledTestPlaceholder": "Search a manual test…",
-    "callRow": "Values from a data set row",
-    "callRowPlaceholder": "Fill from a row…",
+    "callDataSet": "Data set of the called test",
+    "callDataSetPlaceholder": "None: values below",
+    "callDataSetHint": "The chosen data set is read at execution time; a value typed below overrides it.",
     "openCalled": "Open",
     "inherit": "inherited or default value",
     "calledSteps_one": "{{count}} step played instead of this call, with these values.",
@@ -945,6 +946,9 @@
     "addRow": "Add a row",
     "removeRow": "Remove row",
     "empty": "No row.",
+    "rowName": "Name",
+    "rowNameOf": "Name of row {{n}}",
+    "rowFallback": "Row {{n}}",
     "noColumns": "Declare at least one parameter to enter rows."
   },
   "charter": {

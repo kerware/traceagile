@@ -36,7 +36,7 @@ function ExecutionsTable({ project, data, showTest, testId }: { project: string;
               <Text size="sm">
                 {showTest ? `${e.campaign.key} · ` : ''}
                 {t('executions.attempt', { n: e.attempt })}
-                {e.dataSetName ? ` · ${e.dataSetName} #${(e.dataSetRow ?? 0) + 1}` : ''}
+                {e.dataSetName ? ` · ${e.dataSetName} › ${e.dataSetRowName ?? (e.dataSetRow ?? 0) + 1}` : ''}
               </Text>
             </Table.Td>
             <Table.Td>

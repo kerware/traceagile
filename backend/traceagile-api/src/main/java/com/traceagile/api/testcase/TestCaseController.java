@@ -341,7 +341,7 @@ public class TestCaseController {
                 f.field("steps", new TypeReference<List<TestCaseDtos.StepRequest>>() { }) == null ? null
                         : f.field("steps", new TypeReference<List<TestCaseDtos.StepRequest>>() { })
                         .map(list -> list.stream().map(s -> new StepDraft(s.action(), s.expectedResult(), s.testData(), s.calledTestKey(),
-                                s.callParameters())).toList()),
+                                s.callParameters(), s.callDataSet(), s.callRow())).toList()),
                 f.field("parameters", new TypeReference<List<TestCaseDtos.ParameterRequest>>() { }) == null ? null
                         : f.field("parameters", new TypeReference<List<TestCaseDtos.ParameterRequest>>() { })
                         .map(list -> list.stream().map(p -> new TestParameter(p.name(), p.defaultValue(), p.description())).toList()),
@@ -354,7 +354,7 @@ public class TestCaseController {
                 f.field("path", String.class), f.field("testIdentifier", String.class), f.field("gherkinSource", String.class),
                 f.field("dataSets", new TypeReference<List<TestCaseDtos.DataSetDto>>() { }) == null ? null
                         : f.field("dataSets", new TypeReference<List<TestCaseDtos.DataSetDto>>() { })
-                        .map(list -> list.stream().map(d -> new DataSet(d.name(), d.rows())).toList()),
+                        .map(list -> list.stream().map(d -> new DataSet(d.name(), d.rows(), d.rowNames())).toList()),
                 f.field("configuration", new TypeReference<Map<String, Object>>() { }),
                 f.field("executionTags", new TypeReference<List<String>>() { }),
                 f.field("environmentRequirements", new TypeReference<Map<String, String>>() { }));

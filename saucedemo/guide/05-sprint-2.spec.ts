@@ -43,7 +43,7 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await page.goto(`/p/${P}/my-executions`);
     await capturer(page, 'mes-executions');
     await page.getByTestId('run-TC-2').click();
-    // pas 1 et 2 : ceux de TC-1, avec le compte problem_user de la ligne de TC-2
+    // pas 1 et 2 : ceux de TC-1, joués avec son jeu « Comptes › problem_user »
     await expect(page.getByTestId('step-called-from')).toContainText('TC-1');
     await page.getByTestId('step-PASSED').click();
     await expect(page.getByTestId('step-action')).toContainText('problem_user');

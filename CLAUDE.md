@@ -248,6 +248,10 @@ Découpage par fonctionnalité dans chaque module : `administration`, `requireme
   décline d'office un test manuel à jeu de données sur les lignes de son premier jeu (`Campaign.select`, ADR-0022).
   Un test manuel à paramètres ne passe à READY qu'avec un jeu de données non vide (`TEST_DATASET_REQUIRED`,
   ADR-0028) : dans les tests et les données de démo, donner un jeu à tout test manuel paramétré.
+  Chaque ligne d'un jeu a un nom (`DataSet.rowNames`, défaut : première valeur) ; on la désigne par
+  « jeu › nom » (`DataSetRow.named`), et un pas d'appel peut citer un jeu nommé de l'appelé
+  (`callDataSet` / `callRow`, valeurs lues à l'exécution, ADR-0029). L'index reste stocké dans les
+  éléments de campagne et exécutions ; les réponses portent `dataSetRowName`.
 - Campagnes et exécutions (ADR-0016) : règles dans `Campaign`, `CampaignItem`, `Execution`
   (statut déduit : `ExecutionRules`), `Defect`, `DefectDraft` (domaine). Après avoir ajouté des
   éléments à une collection en cascade, `flush()` avant de renvoyer leurs identifiants.

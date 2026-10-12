@@ -9174,6 +9174,9 @@
           "dataSetRow" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "dataSetRowName" : {
+            "type" : "string"
           }
         },
         "required" : [ "attempt", "id", "origin", "startedAt", "status" ]
@@ -9209,9 +9212,16 @@
           "rows" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "rowNames" : {
+            "type" : "array",
+            "description" : "ADR-0029 nom de chaque ligne",
+            "items" : {
+              "type" : "string"
+            }
           }
         },
-        "required" : [ "name", "rows" ]
+        "required" : [ "name", "rowNames", "rows" ]
       },
       "DefectRef" : {
         "type" : "object",
@@ -9298,6 +9308,9 @@
           "dataSetRow" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "dataSetRowName" : {
+            "type" : "string"
           },
           "parameterValues" : {
             "type" : "object",
@@ -9691,6 +9704,10 @@
             "type" : "integer",
             "format" : "int32",
             "description" : "Ligne du jeu, base 0"
+          },
+          "dataSetRowName" : {
+            "type" : "string",
+            "description" : "ADR-0029 nom de la ligne"
           },
           "dataSetValues" : {
             "type" : "object",
@@ -10106,9 +10123,18 @@
               "type" : "object",
               "additionalProperties" : { }
             }
+          },
+          "rowNames" : {
+            "type" : "array",
+            "description" : "ADR-0029 nom de chaque ligne, unique dans le jeu ; absent : première valeur de la ligne",
+            "items" : {
+              "type" : "string",
+              "maxLength" : 100,
+              "minLength" : 0
+            }
           }
         },
-        "required" : [ "name", "rows" ]
+        "required" : [ "name", "rowNames", "rows" ]
       },
       "ParameterRequest" : {
         "type" : "object",
@@ -10151,6 +10177,12 @@
             "additionalProperties" : {
               "type" : "string"
             }
+          },
+          "callDataSet" : {
+            "type" : "string"
+          },
+          "callRow" : {
+            "type" : "string"
           }
         }
       },
@@ -10477,6 +10509,14 @@
               "type" : "string"
             },
             "description" : "ADR-0018 valeurs des paramètres de l'appelé"
+          },
+          "callDataSet" : {
+            "type" : "string",
+            "description" : "ADR-0029 jeu de données nommé de l'appelé : nom du jeu"
+          },
+          "callRow" : {
+            "type" : "string",
+            "description" : "ADR-0029 jeu de données nommé de l'appelé : nom de la ligne"
           }
         },
         "required" : [ "callParameters", "id", "position" ]
@@ -12110,6 +12150,11 @@
             "type" : "integer",
             "format" : "int32",
             "minimum" : 0
+          },
+          "rowName" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
           }
         }
       },
@@ -12725,6 +12770,12 @@
             "type" : "integer",
             "format" : "int32",
             "minimum" : 0
+          },
+          "dataSetRowName" : {
+            "type" : "string",
+            "description" : "ADR-0029 ligne désignée par son nom (prioritaire sur dataSetRow)",
+            "maxLength" : 100,
+            "minLength" : 0
           }
         }
       },
@@ -13228,6 +13279,9 @@
           "dataSetRow" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "dataSetRowName" : {
+            "type" : "string"
           }
         },
         "required" : [ "attempt", "campaign", "id", "origin", "startedAt", "status", "test" ]
@@ -13955,6 +14009,9 @@
           "dataSetRow" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "dataSetRowName" : {
+            "type" : "string"
           }
         },
         "required" : [ "attempts", "campaign", "dataSets", "itemId", "lastStatus", "position", "test" ]

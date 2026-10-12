@@ -4,8 +4,8 @@ import { Api, BRANCHE, capturer, connexion, DEPOT, fermerNotifications, P } from
 
 /**
  * Guide § 4 — le référentiel de tests : un exemple de chaque nature et de chaque technique.
- * - manuels : TC-1 (jeu de données « Comptes », 3 lignes), TC-2 (appelle TC-1 avec son ${utilisateur},
- *   jeu « Compte du défaut » : révèle le défaut de problem_user), TC-13 (appelle TC-1 avec la ligne standard_user) ;
+ * - manuels : TC-1 (jeu de données « Comptes », une ligne nommée par compte), TC-2 (appelle TC-1 avec
+ *   « Comptes › problem_user » : révèle le défaut), TC-13 (appelle TC-1 avec « Comptes › standard_user ») ;
  * - automatisés Playwright de saucedemo/app-tests : TC-3 piloté par les données (même jeu « Comptes »),
  *   TC-4 à TC-6 (UI), TC-7 (API), TC-8 (BDD généré depuis le critère Gherkin de REQ-10),
  *   TC-9 et TC-10 (UI), TC-11 (performance, lié à l'ENF REQ-16) ;
@@ -47,21 +47,19 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
       dataSets: [{ name: 'Comptes', rows: comptes.map((c) => ({
         utilisateur: c.utilisateur,
         resultat_attendu: c.resultat === 'catalogue' ? 'Le catalogue « Products » s’affiche' : `Message « ${c.message} »`,
-      })) }],
+      })), rowNames: comptes.map((c) => c.utilisateur) }],
       automationCandidate: true, automationJustification: 'Rejoué à chaque sprint ; automatisé par TC-3 avec le même jeu de données.',
       links: verifie('REQ-3', 'REQ-4'),
     }, 'TC-1');
     await creer(qa, {
       kind: 'MANUAL', title: 'Retirer un produit depuis le catalogue et le panier', folder: 'Panier', priority: 'MUST', estimatedDurationMin: 5,
       steps: [
-        // ADR-0018 la connexion est celle de TC-1, jouée avec le compte de la ligne de TC-2
-        { calledTestKey: 'TC-1', callParameters: { utilisateur: '${utilisateur}', resultat_attendu: 'Le catalogue « Products » s’affiche' } },
+        // ADR-0029 la connexion est celle de TC-1, jouée avec son jeu de données nommé « Comptes › problem_user »
+        { calledTestKey: 'TC-1', callDataSet: 'Comptes', callRow: 'problem_user' },
         { action: 'Cliquer « Add to cart » sur Sauce Labs Backpack', expectedResult: 'Le badge du panier affiche 1' },
         { action: 'Ouvrir le panier', expectedResult: 'Sauce Labs Backpack est listé : quantité 1, $29.99' },
         { action: 'Revenir au catalogue et cliquer « Remove » sur Sauce Labs Backpack', expectedResult: 'Le badge du panier disparaît' },
       ],
-      parameters: [{ name: 'utilisateur', defaultValue: 'problem_user' }],
-      dataSets: [{ name: 'Compte du défaut', rows: [{ utilisateur: 'problem_user' }] }],
       links: [{ requirementKey: 'REQ-11', linkType: 'PARTIALLY_VERIFIES' }, { requirementKey: 'REQ-12', linkType: 'VERIFIES' }],
     }, 'TC-2');
   });
@@ -123,18 +121,18 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
   });
 
   await test.step('Le testeur réutilise TC-1 comme premier pas d’un nouveau test manuel, avec la ligne standard_user (API)', async () => {
-    const standard = comptes.find((c) => c.utilisateur === 'standard_user')!;
     await creer(qa, {
       kind: 'MANUAL', title: 'Ajouter un produit au panier après connexion', folder: 'Panier', priority: 'SHOULD', estimatedDurationMin: 4,
       objective: 'Vérifier le panier d’un client connecté, sans réécrire la connexion : TC-1 est appelé comme premier pas.',
       steps: [
-        // ADR-0018 appel de TC-1 avec les valeurs de sa ligne standard_user du jeu « Comptes »
-        { calledTestKey: 'TC-1', callParameters: { utilisateur: standard.utilisateur, resultat_attendu: 'Le catalogue « Products » s’affiche' } },
+        // ADR-0029 appel de TC-1 avec son jeu de données nommé « Comptes › standard_user »
+        { calledTestKey: 'TC-1', callDataSet: 'Comptes', callRow: 'standard_user' },
         { action: 'Cliquer « Add to cart » sur ${produit}', expectedResult: 'Le badge du panier affiche 1' },
         { action: 'Ouvrir le panier', expectedResult: '${produit} est listé : quantité 1, ${prix}' },
       ],
       parameters: [{ name: 'produit', defaultValue: 'Sauce Labs Backpack' }, { name: 'prix', defaultValue: '$29.99' }],
-      dataSets: [{ name: 'Produits', rows: [{ produit: 'Sauce Labs Backpack', prix: '$29.99' }, { produit: 'Sauce Labs Bike Light', prix: '$9.99' }] }],
+      dataSets: [{ name: 'Produits', rows: [{ produit: 'Sauce Labs Backpack', prix: '$29.99' }, { produit: 'Sauce Labs Bike Light', prix: '$9.99' }],
+        rowNames: ['Sac à dos', 'Lampe de vélo'] }],
       links: verifie('REQ-11'),
     }, 'TC-13');
   });

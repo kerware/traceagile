@@ -9,6 +9,7 @@ import type { StepDraft } from './draft';
 /**
  * ADR-0018 pas qui appelle un autre cas de test manuel : choix de l'appelé, valeur de chacun de ses
  * paramètres (texte fixe ou ${nom} d'un paramètre de ce test ; vide = défaut ou paramètre de même nom).
+ * ADR-0029 l'appel peut désigner par son nom un jeu de données de l'appelé (« Comptes › standard_user »).
  */
 export function CalledTestStep({ project, testKey, step, position, onChange, readOnly }: {
   project: string;
@@ -29,14 +30,15 @@ export function CalledTestStep({ project, testKey, step, position, onChange, rea
     options.unshift({ value: step.calledTestKey, label: `${step.calledTestKey} — ${step.calledTestTitle ?? called?.title ?? ''}` });
   }
   const values = step.callParameters ?? {};
-  // une ligne d'un jeu de données de l'appelé fixe d'un coup la valeur de tous ses paramètres
-  const rows = (called?.dataSets ?? []).flatMap((dataSet, d) =>
-    dataSet.rows.map((row, r) => {
-      const rowValues = Object.fromEntries(Object.entries(row).map(([name, value]) => [name, String(value ?? '')]));
-      const first = called?.parameters.map((p) => rowValues[p.name]).find(Boolean) ?? String(r + 1);
-      return { value: `${d}:${r}`, label: `${dataSet.name} › ${first}`, values: rowValues };
-    }),
+  // ADR-0029 jeux nommés de l'appelé : « jeu › ligne », valeurs relues à l'exécution
+  const rows = (called?.dataSets ?? []).flatMap((dataSet) =>
+    dataSet.rows.map((row, r) => ({
+      value: `${dataSet.name}|${dataSet.rowNames[r]}`,
+      label: `${dataSet.name} › ${dataSet.rowNames[r]}`,
+      values: Object.fromEntries(Object.entries(row).map(([name, value]) => [name, String(value ?? '')])) as Record<string, string>,
+    })),
   );
+  const selected = step.callDataSet ? rows.find((r) => r.value.toLowerCase() === `${step.callDataSet}|${step.callRow}`.toLowerCase()) : undefined;
 
   return (
     <Stack gap={6} flex={1}>
@@ -55,7 +57,7 @@ export function CalledTestStep({ project, testKey, step, position, onChange, rea
         placeholder={t('steps.calledTestPlaceholder')}
         data={options}
         value={step.calledTestKey || null}
-        onChange={(key) => onChange({ calledTestKey: key ?? '', calledTestTitle: options.find((o) => o.value === key)?.label.split(' — ')[1], callParameters: {} })}
+        onChange={(key) => onChange({ calledTestKey: key ?? '', calledTestTitle: options.find((o) => o.value === key)?.label.split(' — ')[1], callParameters: {}, callDataSet: '', callRow: '' })}
         searchable
         onSearchChange={setSearch}
         disabled={readOnly}
@@ -64,16 +66,18 @@ export function CalledTestStep({ project, testKey, step, position, onChange, rea
       {called && rows.length > 0 && (
         <Select
           size="xs"
-          label={t('steps.callRow')}
-          placeholder={t('steps.callRowPlaceholder')}
+          label={t('steps.callDataSet')}
+          description={t('steps.callDataSetHint')}
+          placeholder={t('steps.callDataSetPlaceholder')}
           data={rows.map((r) => ({ value: r.value, label: r.label }))}
-          value={null}
+          value={selected?.value ?? null}
           onChange={(value) => {
-            const row = rows.find((r) => r.value === value);
-            if (row) onChange({ callParameters: row.values });
+            const [dataSet, row] = value ? value.split('|') : ['', ''];
+            onChange({ callDataSet: dataSet, callRow: row });
           }}
+          clearable
           disabled={readOnly}
-          data-testid={`step-call-row-${position}`}
+          data-testid={`step-call-dataset-${position}`}
         />
       )}
       {called && called.parameters.length > 0 && (
@@ -83,7 +87,7 @@ export function CalledTestStep({ project, testKey, step, position, onChange, rea
               key={p.name}
               size="xs"
               label={`\${${p.name}}`}
-              placeholder={p.defaultValue ?? t('steps.inherit')}
+              placeholder={selected?.values[p.name] || p.defaultValue || t('steps.inherit')}
               value={values[p.name] ?? ''}
               onChange={(e) => onChange({ callParameters: { ...values, [p.name]: e.currentTarget.value } })}
               disabled={readOnly}

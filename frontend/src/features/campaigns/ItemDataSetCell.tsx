@@ -30,7 +30,7 @@ export function ItemDataSetCell({ project, campaignKey, item, editable }: { proj
       </Text>
     );
   }
-  const label = item.dataSetName ? t('executions.dataRow', { name: item.dataSetName, row: (item.dataSetRow ?? 0) + 1 }) : t('executions.defaultValues');
+  const label = item.dataSetName ? t('executions.dataRow', { name: item.dataSetName, row: item.dataSetRowName ?? (item.dataSetRow ?? 0) + 1 }) : t('executions.defaultValues');
 
   if (!editable || item.attempts > 0) {
     return (
@@ -44,7 +44,7 @@ export function ItemDataSetCell({ project, campaignKey, item, editable }: { proj
 
   const options = [
     { value: '', label: t('executions.defaultValues') },
-    ...item.dataSets.flatMap((d) => Array.from({ length: d.rows }, (_, i) => ({ value: `${d.name}|${i}`, label: t('executions.dataRow', { name: d.name, row: i + 1 }) }))),
+    ...item.dataSets.flatMap((d) => Array.from({ length: d.rows }, (_, i) => ({ value: `${d.name}|${i}`, label: t('executions.dataRow', { name: d.name, row: d.rowNames[i] ?? i + 1 }) }))),
   ];
   const onChange = (value: string | null) => {
     const [name, row] = value ? value.split('|') : [null, null];

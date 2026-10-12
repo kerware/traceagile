@@ -12,6 +12,9 @@ export interface StepDraft {
   calledTestKey?: string;
   calledTestTitle?: string;
   callParameters?: Record<string, string>;
+  /** ADR-0029 jeu de données nommé de l'appelé (nom du jeu, nom de la ligne). */
+  callDataSet?: string;
+  callRow?: string;
 }
 
 export interface ParameterDraft {
@@ -23,6 +26,8 @@ export interface ParameterDraft {
 export interface DataSetDraft {
   name: string;
   rows: Record<string, unknown>[];
+  /** ADR-0029 nom de chaque ligne (vide : le serveur prend la première valeur de la ligne). */
+  rowNames: string[];
 }
 
 export interface TestDraft {
@@ -83,14 +88,15 @@ export function toDraft(test: TestCaseDetail): TestDraft {
     automationJustification: test.automationJustification ?? '',
     steps: test.steps.map((s) =>
       s.calledTest
-        ? { action: s.action ?? '', expectedResult: s.expectedResult ?? '', testData: s.testData ?? '', calledTestKey: s.calledTest.key, calledTestTitle: s.calledTest.title, callParameters: { ...s.callParameters } }
+        ? { action: s.action ?? '', expectedResult: s.expectedResult ?? '', testData: s.testData ?? '', calledTestKey: s.calledTest.key, calledTestTitle: s.calledTest.title, callParameters: { ...s.callParameters },
+            callDataSet: s.callDataSet ?? '', callRow: s.callRow ?? '' }
         : { action: s.action ?? '', expectedResult: s.expectedResult ?? '', testData: s.testData ?? '' },
     ),
     // Un paramètre seulement détecté, sans détail, n'est pas « déclaré » : il disparaît avec son ${nom}.
     parameters: test.parameters
       .filter((p) => !p.detected || p.defaultValue || p.description)
       .map((p) => ({ name: p.name, defaultValue: p.defaultValue ?? '', description: p.description ?? '' })),
-    dataSets: test.dataSets.map((d) => ({ name: d.name, rows: d.rows })),
+    dataSets: test.dataSets.map((d) => ({ name: d.name, rows: d.rows, rowNames: [...d.rowNames] })),
     explore: c?.explore ?? '',
     with: c?.with ?? '',
     toDiscover: c?.toDiscover ?? '',
@@ -128,6 +134,8 @@ export function toPatch(kind: TestCaseDetail['kind'], initial: TestDraft, draft:
               testData: null,
               calledTestKey: s.calledTestKey || null,
               callParameters: Object.fromEntries(Object.entries(s.callParameters ?? {}).filter(([, v]) => v.trim() !== '')),
+              callDataSet: s.callDataSet || null,
+              callRow: s.callRow || null,
             }
           : { action: s.action, expectedResult: s.expectedResult.trim() || null, testData: s.testData.trim() || null },
       );

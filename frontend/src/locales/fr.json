@@ -736,7 +736,7 @@
   "executions": {
     "overridden": "statut forcé",
     "version": "version {{version}}",
-    "dataRow": "{{name}}, ligne {{row}}",
+    "dataRow": "{{name}} › {{row}}",
     "attempt": "Tentative {{n}}",
     "newAttempt": "Nouvelle tentative",
     "readOnly": "Tentative en lecture seule (une tentative plus récente existe, ou la campagne est terminée).",
@@ -934,8 +934,9 @@
     "addCall": "Appeler un cas de test",
     "calledTest": "Cas de test appelé",
     "calledTestPlaceholder": "Rechercher un test manuel…",
-    "callRow": "Valeurs d'une ligne du jeu de données",
-    "callRowPlaceholder": "Remplir avec une ligne…",
+    "callDataSet": "Jeu de données de l'appelé",
+    "callDataSetPlaceholder": "Aucun : valeurs ci-dessous",
+    "callDataSetHint": "Les valeurs du jeu choisi sont lues à l'exécution ; une valeur saisie ci-dessous les remplace.",
     "openCalled": "Ouvrir",
     "inherit": "valeur héritée ou par défaut",
     "calledSteps_one": "{{count}} pas joué à la place de cet appel, avec ces valeurs.",
@@ -945,7 +946,10 @@
     "addRow": "Ajouter une ligne",
     "removeRow": "Supprimer la ligne",
     "empty": "Aucune ligne.",
-    "noColumns": "Déclarez au moins un paramètre pour saisir des lignes."
+    "noColumns": "Déclarez au moins un paramètre pour saisir des lignes.",
+    "rowName": "Nom",
+    "rowNameOf": "Nom de la ligne {{n}}",
+    "rowFallback": "Ligne {{n}}"
   },
   "charter": {
     "mission": "Mission",

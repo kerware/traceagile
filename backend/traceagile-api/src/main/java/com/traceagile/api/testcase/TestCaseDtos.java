@@ -57,7 +57,9 @@ public interface TestCaseDtos {
             String expectedResult,
             String testData,
             @Schema(description = "ADR-0018 cas de test appelé par ce pas") CalledTestRef calledTest,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0018 valeurs des paramètres de l'appelé") Map<String, String> callParameters) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0018 valeurs des paramètres de l'appelé") Map<String, String> callParameters,
+            @Schema(description = "ADR-0029 jeu de données nommé de l'appelé : nom du jeu") String callDataSet,
+            @Schema(description = "ADR-0029 jeu de données nommé de l'appelé : nom de la ligne") String callRow) {
     }
 
     record CalledTestRef(
@@ -106,7 +108,9 @@ public interface TestCaseDtos {
     /** ADR-0013 jeu de données nommé : une ligne par exécution, valeurs scalaires. */
     record DataSetDto(
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotBlank @Size(max = 100) String name,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotNull List<Map<String, Object>> rows) {
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotNull List<Map<String, Object>> rows,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "ADR-0029 nom de chaque ligne, unique dans le jeu ; absent : première valeur de la ligne")
+            List<@Size(max = 100) String> rowNames) {
     }
 
     record ParameterRequest(@NotBlank @Size(max = 60) String name, @Size(max = 500) String defaultValue,
@@ -181,7 +185,8 @@ public interface TestCaseDtos {
     // ---------------------------------------------------------------- écriture
 
     /** F-MAN-01 pas ; ADR-0018 {@code calledTestKey} : appel d'un autre cas de test (action alors facultative). */
-    record StepRequest(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters) {
+    record StepRequest(String action, String expectedResult, String testData, String calledTestKey, Map<String, String> callParameters,
+                       String callDataSet, String callRow) {
     }
 
     record LinkRequest(@NotBlank String requirementKey, @NotNull LinkType linkType, List<Integer> criterionPositions) {

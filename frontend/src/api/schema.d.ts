@@ -3016,6 +3016,7 @@ export interface components {
             dataSetName?: string;
             /** Format: int32 */
             dataSetRow?: number;
+            dataSetRowName?: string;
         };
         CampaignRef: {
             key: string;
@@ -3029,6 +3030,8 @@ export interface components {
             name: string;
             /** Format: int32 */
             rows: number;
+            /** @description ADR-0029 nom de chaque ligne */
+            rowNames: string[];
         };
         DefectRef: {
             key: string;
@@ -3070,6 +3073,7 @@ export interface components {
             dataSetName?: string;
             /** Format: int32 */
             dataSetRow?: number;
+            dataSetRowName?: string;
             parameterValues: {
                 [key: string]: string;
             };
@@ -3238,6 +3242,8 @@ export interface components {
              * @description Ligne du jeu, base 0
              */
             dataSetRow?: number;
+            /** @description ADR-0029 nom de la ligne */
+            dataSetRowName?: string;
             /** @description Valeurs de la ligne prévue */
             dataSetValues: {
                 [key: string]: string;
@@ -3394,6 +3400,8 @@ export interface components {
             rows: {
                 [key: string]: unknown;
             }[];
+            /** @description ADR-0029 nom de chaque ligne, unique dans le jeu ; absent : première valeur de la ligne */
+            rowNames: string[];
         };
         ParameterRequest: {
             name: string;
@@ -3408,6 +3416,8 @@ export interface components {
             callParameters?: {
                 [key: string]: string;
             };
+            callDataSet?: string;
+            callRow?: string;
         };
         TestCaseFieldsRequest: {
             title?: string;
@@ -3512,6 +3522,10 @@ export interface components {
             callParameters: {
                 [key: string]: string;
             };
+            /** @description ADR-0029 jeu de données nommé de l'appelé : nom du jeu */
+            callDataSet?: string;
+            /** @description ADR-0029 jeu de données nommé de l'appelé : nom de la ligne */
+            callRow?: string;
         };
         TestCaseDetail: {
             /** Format: uuid */
@@ -4096,6 +4110,7 @@ export interface components {
             dataSetName?: string;
             /** Format: int32 */
             row?: number;
+            rowName?: string;
         };
         CampaignFolderRequest: {
             path: string;
@@ -4301,6 +4316,8 @@ export interface components {
             dataSetName?: string;
             /** Format: int32 */
             dataSetRow?: number;
+            /** @description ADR-0029 ligne désignée par son nom (prioritaire sur dataSetRow) */
+            dataSetRowName?: string;
         };
         UpdateCriterionRequest: {
             /** @enum {string} */
@@ -4491,6 +4508,7 @@ export interface components {
             dataSetName?: string;
             /** Format: int32 */
             dataSetRow?: number;
+            dataSetRowName?: string;
         };
         TestCaseGroup: {
             /** @description Dossier ou fonctionnalité ; vide = non classé */
@@ -4766,6 +4784,7 @@ export interface components {
             dataSetName?: string;
             /** Format: int32 */
             dataSetRow?: number;
+            dataSetRowName?: string;
         };
         StepUsageResponse: {
             text: string;

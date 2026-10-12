@@ -49,6 +49,13 @@ public class ManualStep extends AuditableEntity {
     @Column(name = "call_parameters", nullable = false, columnDefinition = "jsonb")
     private Map<String, String> callParameters = new LinkedHashMap<>();
 
+    /** ADR-0029 jeu de données nommé de l'appelé (nom du jeu, nom de la ligne) ; valeurs lues à l'exécution. */
+    @Column(name = "call_data_set")
+    private String callDataSet;
+
+    @Column(name = "call_data_row")
+    private String callRow;
+
     protected ManualStep() {
     }
 
@@ -61,7 +68,7 @@ public class ManualStep extends AuditableEntity {
     /** Passe par le test pour respecter son statut ; F-AUT-10 change sa version. */
     public void rewrite(String action, String expectedResult, String testData) {
         testCase.ensureEditable();
-        rewriteFields(new StepContent(action, expectedResult, testData, calledTest, callParameters));
+        rewriteFields(new StepContent(action, expectedResult, testData, calledTest, callParameters, callDataSet, callRow));
     }
 
     private void rewriteFields(StepContent content) {
@@ -74,6 +81,20 @@ public class ManualStep extends AuditableEntity {
         this.testData = blankToNull(content.testData());
         this.calledTest = content.calledTest();
         this.callParameters = new LinkedHashMap<>();
+        this.callDataSet = null;
+        this.callRow = null;
+        if (call && (content.callDataSet() != null || content.callRow() != null)) {
+            if (content.callDataSet() == null || content.callRow() == null) {
+                throw new BusinessRuleException("TEST_CALL_DATASET_UNKNOWN", "Un appel désigne un jeu de données par son jeu et le nom de sa ligne.");
+            }
+            try {
+                DataSetRow row = DataSetRow.named(content.calledTest(), content.callDataSet(), content.callRow());
+                this.callDataSet = row.dataSetName();
+                this.callRow = row.rowName();
+            } catch (BusinessRuleException e) {
+                throw new BusinessRuleException("TEST_CALL_DATASET_UNKNOWN", e.getMessage());
+            }
+        }
         if (call) {
             new TreeMap<>(content.callParameters()).forEach((name, value) -> {
                 if (name != null && !name.isBlank() && value != null && !value.isBlank()) {
@@ -84,7 +105,7 @@ public class ManualStep extends AuditableEntity {
     }
 
     StepContent toContent() {
-        return new StepContent(action, expectedResult, testData, calledTest, callParameters);
+        return new StepContent(action, expectedResult, testData, calledTest, callParameters, callDataSet, callRow);
     }
 
     public TestCase getTestCase() {
@@ -119,6 +140,14 @@ public class ManualStep extends AuditableEntity {
         return Collections.unmodifiableMap(callParameters);
     }
 
+    public String getCallDataSet() {
+        return callDataSet;
+    }
+
+    public String getCallRow() {
+        return callRow;
+    }
+
     public boolean isCall() {
         return calledTest != null;
     }
@@ -126,12 +155,13 @@ public class ManualStep extends AuditableEntity {
     /** Contenu du pas, pour l'empreinte de version et les instantanés. */
     List<String> content() {
         return Arrays.asList(action, expectedResult, testData, calledTest == null ? null : calledTest.getKey(),
-                callParameters.isEmpty() ? null : callParameters.toString());
+                callParameters.isEmpty() ? null : callParameters.toString(), callDataSet == null ? null : callDataSet + " › " + callRow);
     }
 
     String describe() {
         if (calledTest != null) {
-            return position + ". ↳ " + calledTest.getKey() + (callParameters.isEmpty() ? "" : " " + callParameters)
+            return position + ". ↳ " + calledTest.getKey() + (callDataSet == null ? "" : " [" + callDataSet + " › " + callRow + "]")
+                    + (callParameters.isEmpty() ? "" : " " + callParameters)
                     + (action == null ? "" : " — " + action) + (expectedResult == null ? "" : " → " + expectedResult);
         }
         return position + ". " + action + (expectedResult == null ? "" : " → " + expectedResult)

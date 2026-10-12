@@ -27,7 +27,7 @@ const progress = { total: 2, byStatus: { NOT_RUN: 1, FAILED: 1 }, executed: 1, e
 const CAMPAIGN: CampaignDetail = {
   campaign: { key: 'CMP-1', name: 'Recette SPR-1', scopeType: 'SPRINT', sprintKey: 'SPR-1', environment: 'recette', buildVersion: '2.0.0-rc1', status: 'IN_PROGRESS', progress, version: 0 },
   items: [
-    { id: 'i1', position: 1, test: test1, testCaseVersion: 1, executedByServer: false, riskScore: 16, lastStatus: 'NOT_RUN', attempts: 0, dataSetValues: {}, dataSets: [{ name: 'Recette', rows: 2 }] },
+    { id: 'i1', position: 1, test: test1, testCaseVersion: 1, executedByServer: false, riskScore: 16, lastStatus: 'NOT_RUN', attempts: 0, dataSetValues: {}, dataSets: [{ name: 'Recette', rows: 2, rowNames: ['L1', 'L2'] }] },
     { id: 'i2', position: 2, test: { ...test1, key: 'TC-3', title: 'API panier', kind: 'AUTOMATED', technique: 'API' }, testCaseVersion: 1, executedByServer: true, riskScore: 12, lastStatus: 'FAILED', attempts: 1, latestExecutionId: 'x2', dataSetValues: {}, dataSets: [] },
   ],
   workload: [{ tests: 1, manualMinutes: 10, exploratoryMinutes: 0, unestimated: 0 }],
@@ -265,7 +265,7 @@ describe('F-EXE-01 « Mes exécutions »', () => {
     useAuthStore.getState().setSession('jwt', TESTER);
     const mine: MyExecution[] = [{
       itemId: 'i1', campaign: { key: 'CMP-2', name: 'Recette SPR-2', environment: 'recette', status: 'IN_PROGRESS' }, test: test1, position: 1,
-      lastStatus: 'NOT_RUN', attempts: 0, dataSets: [{ name: 'Recette', rows: 2 }],
+      lastStatus: 'NOT_RUN', attempts: 0, dataSets: [{ name: 'Recette', rows: 2, rowNames: ['L1', 'L2'] }],
     }];
     let body: unknown;
     server.use(
@@ -280,7 +280,7 @@ describe('F-EXE-01 « Mes exécutions »', () => {
 
     expect(await screen.findByTestId('my-item-TC-1')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('dataset-TC-1'));
-    await userEvent.click(await screen.findByRole('option', { name: 'Recette, ligne 2' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Recette › L2' }));
     await userEvent.click(screen.getByTestId('run-TC-1'));
 
     await waitFor(() => expect(body).toEqual({ dataSetName: 'Recette', row: 1 }));

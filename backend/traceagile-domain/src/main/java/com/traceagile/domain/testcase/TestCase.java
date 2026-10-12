@@ -253,13 +253,15 @@ public class TestCase extends AuditableEntity {
      * revenir, directement ou non, vers ce test.
      */
     private void checkCall(TestCase called) {
-        boolean sameProject = called.project == project || (called.project.getId() != null && called.project.getId().equals(project.getId()));
-        if (called.kind != TestKind.MANUAL || called.status == TestCaseStatus.OBSOLETE || !sameProject) {
+        // accesseurs, jamais les champs : l'appelé peut être un proxy Hibernate
+        Project calledProject = called.getProject();
+        boolean sameProject = calledProject == project || (calledProject.getId() != null && calledProject.getId().equals(project.getId()));
+        if (called.getKind() != TestKind.MANUAL || called.getStatus() == TestCaseStatus.OBSOLETE || !sameProject) {
             throw new BusinessRuleException("TEST_CALL_INVALID",
-                    called.key + " ne peut pas être appelé : seul un test manuel non obsolète du projet peut l'être.");
+                    called.getKey() + " ne peut pas être appelé : seul un test manuel non obsolète du projet peut l'être.");
         }
         if (same(called, this) || called.calls(this, new HashSet<>())) {
-            throw new BusinessRuleException("TEST_CALL_CYCLE", "Appeler " + called.key + " depuis " + key + " créerait une boucle d'appels.");
+            throw new BusinessRuleException("TEST_CALL_CYCLE", "Appeler " + called.getKey() + " depuis " + key + " créerait une boucle d'appels.");
         }
     }
 
@@ -268,7 +270,8 @@ public class TestCase extends AuditableEntity {
         if (!visited.add(this)) {
             return false;
         }
-        for (ManualStep step : steps) {
+        // getSteps() : sur un proxy Hibernate, une méthode privée verrait des champs vides
+        for (ManualStep step : getSteps()) {
             TestCase called = step.getCalledTest();
             if (called != null && (same(called, target) || called.calls(target, visited))) {
                 return true;
@@ -369,10 +372,11 @@ public class TestCase extends AuditableEntity {
         this.parameters = cleaned;
         Set<String> known = getParameters().stream().map(TestParameter::name).collect(Collectors.toSet());
         this.dataSets = new ArrayList<>(dataSets.stream()
-                .map(d -> DataSet.of(d.name(), d.rows().stream()
+                .map(d -> new DataSet(d.name(), d.rows().stream()
                         .map(row -> row.entrySet().stream().filter(e -> known.contains(e.getKey()))
                                 .collect(LinkedHashMap<String, Object>::new, (m, e) -> m.put(e.getKey(), e.getValue()), Map::putAll))
-                        .toList()))
+                        .map(row -> (Map<String, Object>) row)
+                        .toList(), d.rowNames()))
                 .toList());
     }
 
@@ -399,6 +403,11 @@ public class TestCase extends AuditableEntity {
                     throw new BusinessRuleException("TEST_DATASET_VALUE_INVALID",
                             "Les valeurs du jeu « " + set.name() + " » sont du texte, des nombres ou des booléens.");
                 }
+            }
+            // ADR-0029 une ligne se désigne par son nom : il est unique dans son jeu
+            if (!set.duplicatedRowNames().isEmpty()) {
+                throw new BusinessRuleException("TEST_DATASET_ROW_NAME_DUPLICATED",
+                        "Le jeu « " + set.name() + " » a deux lignes nommées « " + set.duplicatedRowNames().get(0) + " ».");
             }
         }
         // Une colonne devient un paramètre déclaré, même détecté : il survit au retrait du ${nom} des pas.

@@ -158,7 +158,8 @@ public class Execution extends AuditableEntity {
     /**
      * ADR-0018 pas à jouer : ceux du test, un appel étant remplacé par les pas (courants) du test
      * appelé. Valeurs de l'appelé : ses défauts, puis toutes les valeurs de l'appelant (même nom),
-     * puis les valeurs de l'appel (où les {@code ${nom}} de l'appelant sont remplacés).
+     * puis le jeu de données nommé de l'appel (ADR-0029, lu au moment de l'exécution), puis les valeurs
+     * de l'appel (où les {@code ${nom}} de l'appelant sont remplacés).
      */
     private void unfold(TestCase test, Map<String, String> values, String from, Deque<TestCase> path) {
         path.push(test);
@@ -180,8 +181,11 @@ public class Execution extends AuditableEntity {
             }
             // toutes les valeurs de l'appelant descendent, y compris vers les appels imbriqués
             calledValues.putAll(values);
+            if (step.getCallDataSet() != null) {
+                calledValues.putAll(DataSetRow.named(called, step.getCallDataSet(), step.getCallRow()).values());
+            }
             step.getCallParameters().forEach((name, value) -> calledValues.put(name, ParameterResolver.resolve(value, values)));
-            String label = called.getKey() + " " + called.getTitle();
+            String label = called.getKey() + " " + called.getTitle() + (step.getCallDataSet() == null ? "" : " (" + step.getCallRow() + ")");
             unfold(called, calledValues, from == null ? label : from + " › " + label, path);
         }
         path.pop();

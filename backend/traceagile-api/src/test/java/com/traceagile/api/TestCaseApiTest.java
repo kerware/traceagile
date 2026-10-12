@@ -181,6 +181,31 @@ class TestCaseApiTest extends AbstractApiTest {
     }
 
     @Test
+    @DisplayName("ADR-0029 lignes nommées ; un pas appelle un test avec un jeu de données nommé de l'appelé (422 si inconnu)")
+    void callWithNamedDataSet() throws Exception {
+        String login = create("qa1", Map.of("kind", "MANUAL", "title", "Se connecter",
+                "steps", List.of(Map.of("action", "Saisir ${login}")),
+                "dataSets", List.of(Map.of("name", "Comptes", "rows", List.of(Map.of("login", "alice"), Map.of("login", "bob")),
+                        "rowNames", List.of("", "Client bloqué")))));
+        mvc.perform(get(BASE + "/" + login).header("Authorization", qa))
+                .andExpect(jsonPath("$.dataSets[0].rowNames", contains("alice", "Client bloqué")));
+        String caller = create("qa1", Map.of("kind", "MANUAL", "title", "Commander",
+                "steps", List.of(Map.of("calledTestKey", login, "callDataSet", "comptes", "callRow", "client bloqué"))));
+        mvc.perform(get(BASE + "/" + caller).header("Authorization", qa))
+                .andExpect(jsonPath("$.steps[0].callDataSet", is("Comptes")))
+                .andExpect(jsonPath("$.steps[0].callRow", is("Client bloqué")));
+        mvc.perform(patch(BASE + "/" + caller).header("Authorization", qa).contentType("application/merge-patch+json")
+                        .content(toJson(Map.of("steps", List.of(Map.of("calledTestKey", login, "callDataSet", "Comptes", "callRow", "carole"))))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_CALL_DATASET_UNKNOWN")));
+        mvc.perform(patch(BASE + "/" + login).header("Authorization", qa).contentType("application/merge-patch+json")
+                        .content(toJson(Map.of("dataSets", List.of(Map.of("name", "Comptes", "rows", List.of(Map.of("login", "a"), Map.of("login", "b")),
+                                "rowNames", List.of("Même", "même")))))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code", is("TEST_DATASET_ROW_NAME_DUPLICATED")));
+    }
+
+    @Test
     @DisplayName("ADR-0028 422 TEST_DATASET_REQUIRED : test manuel à paramètres sans jeu de données passé à READY")
     void readyRequiresDataSet() throws Exception {
         String key = create("qa1", Map.of("kind", "MANUAL", "title", "Connexion",

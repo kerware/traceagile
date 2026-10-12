@@ -158,7 +158,7 @@ export function ParametersPanel({ manual, typed, draft, onChange, readOnly }: { 
                 {!readOnly && (
                   <Group gap={2} wrap="nowrap">
                     <Tooltip label={t('parameters.duplicateDataSet')}>
-                      <ActionIcon variant="subtle" onClick={() => setDataSets([...draft.dataSets.slice(0, index + 1), { name: freeName(set.name), rows: set.rows.map((r) => ({ ...r })) }, ...draft.dataSets.slice(index + 1)])} aria-label={t('parameters.duplicateDataSet')} data-testid={`dataset-duplicate-${index}`}>
+                      <ActionIcon variant="subtle" onClick={() => setDataSets([...draft.dataSets.slice(0, index + 1), { name: freeName(set.name), rows: set.rows.map((r) => ({ ...r })), rowNames: [...set.rowNames] }, ...draft.dataSets.slice(index + 1)])} aria-label={t('parameters.duplicateDataSet')} data-testid={`dataset-duplicate-${index}`}>
                         <IconCopy size={16} />
                       </ActionIcon>
                     </Tooltip>
@@ -170,13 +170,14 @@ export function ParametersPanel({ manual, typed, draft, onChange, readOnly }: { 
                   </Group>
                 )}
               </Group>
-              <DataSetGrid testId={`dataset-${index}`} columns={columns} defaults={defaults} rows={set.rows} onChange={(next) => updateDataSet(index, { rows: next })} readOnly={readOnly} typed={typed} />
+              <DataSetGrid testId={`dataset-${index}`} columns={columns} defaults={defaults} rows={set.rows} names={set.rowNames}
+                onChange={(next, names) => updateDataSet(index, { rows: next, rowNames: names })} readOnly={readOnly} typed={typed} />
             </Stack>
           </Paper>
         ))}
         {!readOnly && (
           <Group>
-            <Button size="xs" variant="default" leftSection={<IconPlus size={14} />} onClick={() => setDataSets([...draft.dataSets, { name: freeName(t('parameters.dataSetBase')), rows: [] }])} data-testid="dataset-add">
+            <Button size="xs" variant="default" leftSection={<IconPlus size={14} />} onClick={() => setDataSets([...draft.dataSets, { name: freeName(t('parameters.dataSetBase')), rows: [], rowNames: [] }])} data-testid="dataset-add">
               {t('parameters.addDataSet')}
             </Button>
           </Group>

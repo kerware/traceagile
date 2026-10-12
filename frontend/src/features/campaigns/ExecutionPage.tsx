@@ -85,7 +85,7 @@ function ExecutionView({ project, execution }: { project: string; execution: Exe
             </Anchor>
             {` · ${t('campaigns.environment')} : ${execution.campaign.environment ?? '—'} · ${t('campaigns.build')} : ${execution.campaign.buildVersion ?? '—'}`}
             {` · ${t('executions.version', { version: execution.testCaseVersion })}`}
-            {execution.dataSetName && ` · ${t('executions.dataRow', { name: execution.dataSetName, row: (execution.dataSetRow ?? 0) + 1 })}`}
+            {execution.dataSetName && ` · ${t('executions.dataRow', { name: execution.dataSetName, row: execution.dataSetRowName ?? (execution.dataSetRow ?? 0) + 1 })}`}
           </Text>
         </Stack>
         <Group>
