@@ -57,7 +57,7 @@ test('Jeu de données en campagne, appel de cas de test, dossiers de campagnes',
     await expect(page.getByTestId(`item-${appelant.key}-2`)).toBeVisible();
   });
 
-  await test.step('La ligne 2 s’exécute : pas de l’appelé déroulés avec client = carol', async () => {
+  await test.step('La ligne « carol » s’exécute : pas de l’appelé déroulés avec client = carol', async () => {
     await page.getByTestId(`execute-${appelant.key}-2`).click();
     await expect(page.getByTestId('step-action')).toHaveText('Saisir carol');
     await expect(page.getByTestId('step-called-from')).toContainText(appele.key);
@@ -67,7 +67,7 @@ test('Jeu de données en campagne, appel de cas de test, dossiers de campagnes',
   await test.step('La fiche du test montre l’exécution ; l’appelé liste son appelant', async () => {
     await page.goto(`/p/SHOP/tests/${appelant.key}`);
     await page.getByTestId('test-tab-executions').click();
-    await expect(page.getByTestId('test-executions')).toContainText('Clients #2');
+    await expect(page.getByTestId('test-executions')).toContainText('Clients › carol');
     await page.goto(`/p/SHOP/tests/${appele.key}`);
     await expect(page.getByTestId('test-called-by')).toContainText(appelant.key);
   });
