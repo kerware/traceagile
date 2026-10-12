@@ -454,7 +454,9 @@ de sa charte :
 ### Prendre des notes
 
 Pendant la session (minuteur, durée cible de 60 min), le testeur note ce qu'il observe. Chaque
-note est horodatée et typée au clavier :
+note est horodatée par rapport au début de la session et typée au clavier. Dans l'exemple, la
+session a commencé à 15 h : les notes s'échelonnent de 04:12 à 51:00 et la session se termine après
+55 minutes actives.
 
 | Raccourci | Type de note |
 | --- | --- |
