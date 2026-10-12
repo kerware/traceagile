@@ -38,13 +38,16 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     }
   });
 
-  await test.step('qa2 exécute TC-2 avec problem_user : le pas 4 échoue, la capture est jointe au pas', async () => {
+  await test.step('qa2 exécute TC-2 avec problem_user : connexion de TC-1, puis le pas 5 échoue, la capture est jointe au pas', async () => {
     await connexion(page, 'qa2');
     await page.goto(`/p/${P}/my-executions`);
     await capturer(page, 'mes-executions');
     await page.getByTestId('run-TC-2').click();
+    // pas 1 et 2 : ceux de TC-1, avec le compte problem_user de la ligne de TC-2
+    await expect(page.getByTestId('step-called-from')).toContainText('TC-1');
+    await page.getByTestId('step-PASSED').click();
     await expect(page.getByTestId('step-action')).toContainText('problem_user');
-    for (let pas = 1; pas <= 3; pas++) await page.getByTestId('step-PASSED').click();
+    for (let pas = 2; pas <= 4; pas++) await page.getByTestId('step-PASSED').click();
     await expect(page.getByTestId('step-action')).toContainText('Remove');
     await page.getByTestId('step-actual').fill('Le badge reste à 1 : le bouton « Remove » du catalogue est sans effet.');
     const selecteur = page.waitForEvent('filechooser');
@@ -53,7 +56,7 @@ test('Sprint 2 : échec manuel, session exploratoire, run automatisé, import JU
     await expect(page.getByTestId('attachment-sd-defaut-problem-user.png')).toBeVisible();
     await page.getByTestId('step-FAILED').click();
     await expect(page.getByTestId('execution-status')).toHaveText('Échoué');
-    await page.getByTestId('step-nav-4').click();
+    await page.getByTestId('step-nav-5').click();
     await capturer(page, 'execution-echec');
   });
 

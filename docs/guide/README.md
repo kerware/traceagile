@@ -227,7 +227,7 @@ nature** :
 | Nature | Exemple | Particularité |
 | --- | --- | --- |
 | Manuel | TC-1 « Se connecter avec les comptes de démonstration » | Paramètres et **jeu de données de 3 lignes** |
-| Manuel | TC-2 « Retirer un produit depuis le catalogue et le panier » | Révèle le défaut de problem_user (jeu « Compte du défaut ») |
+| Manuel | TC-2 « Retirer un produit depuis le catalogue et le panier » | **Appelle TC-1** pour se connecter avec son `${utilisateur}` ; jeu « Compte du défaut » (`problem_user`) : révèle le défaut |
 | Manuel | TC-13 « Ajouter un produit au panier après connexion » | **Appelle TC-1** comme premier pas, avec la ligne `standard_user` ; jeu « Produits » de 2 lignes |
 | Automatisé, piloté par les données | TC-3 « Connexion pilotée par les données » | Même jeu « Comptes » que TC-1 (`data/comptes.json`) |
 | Automatisé UI (Playwright) | TC-4, TC-5, TC-6, TC-9, TC-10 | Catalogue et panier |
@@ -251,21 +251,28 @@ exécution :
 
 ![Paramètres et jeu de données « Comptes »](images/test-manuel-jeu-de-donnees.png)
 
-Tout test manuel qui a des paramètres a au moins un jeu de données : TC-2 a le sien, d'une ligne
-(`problem_user`).
+Tout test manuel qui a des paramètres a au moins un jeu de données : sans lui, il ne passe pas à
+« Prêt ». TC-2 a le sien, d'une ligne (`problem_user`).
 
 ### Réutiliser un test manuel comme pas
 
 Un pas peut **appeler un autre cas de test manuel** au lieu de décrire une action (bouton « Appeler
-un cas de test » sous les pas). À l'exécution, les pas du test appelé sont déroulés à sa place. TC-13 ne
-réécrit pas la connexion : son premier pas appelle TC-1.
+un cas de test » sous les pas). À l'exécution, les pas du test appelé sont déroulés à sa place. La
+connexion n'est écrite qu'une fois, dans TC-1 ; deux tests l'appellent comme premier pas :
 
-Les paramètres du test appelé reçoivent une valeur fixe ou un `${nom}` du test appelant. La liste
-« Valeurs d'une ligne du jeu de données » les remplit d'un coup avec une ligne d'un jeu de l'appelé :
-ici, la ligne `standard_user` du jeu « Comptes ». TC-13 a ses propres paramètres (`${produit}`,
-`${prix}`) et son jeu « Produits » de deux lignes.
+- **TC-2** transmet son propre paramètre : `${utilisateur}` de TC-1 reçoit `${utilisateur}` de TC-2,
+  donc le compte de la ligne de TC-2 (`problem_user`) ;
+- **TC-13** fixe les valeurs avec une ligne du jeu de TC-1. La liste « Valeurs d'une ligne du jeu de
+  données » remplit d'un coup tous les paramètres de l'appel : ici, la ligne `standard_user` du jeu
+  « Comptes ». TC-13 a ses propres paramètres (`${produit}`, `${prix}`) et son jeu « Produits » de
+  deux lignes.
+
+![TC-2 appelle TC-1 en lui transmettant son ${utilisateur}](images/test-manuel-appel-parametre.png)
 
 ![TC-13 appelle TC-1 avec la ligne standard_user](images/test-manuel-appel.png)
+
+La fiche de TC-1 indique les tests qui l'appellent (« Appelé par TC-2, TC-13 ») : avant de le
+modifier, on sait quels tests seront touchés.
 
 ### Test automatisé
 
@@ -404,7 +411,8 @@ La campagne « Recette sprint 2 » répartit le travail :
 
 ![Mes exécutions de qa2](images/mes-executions.png)
 
-Avec `problem_user`, le pas 4 échoue. La testeuse :
+Les deux premiers pas sont ceux de TC-1, appelé par TC-2 : la connexion se joue avec `problem_user`,
+le compte de la ligne de TC-2. Puis le pas 5 échoue. La testeuse :
 - saisit le **résultat obtenu** ;
 - **joint la capture** du défaut au pas (bouton « Ajouter un fichier », ou collage d'une image) ;
 - marque le pas « Échoué ». Le statut de l'exécution est **déduit** des pas.

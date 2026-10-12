@@ -4,8 +4,8 @@ import { Api, BRANCHE, capturer, connexion, DEPOT, fermerNotifications, P } from
 
 /**
  * Guide § 4 — le référentiel de tests : un exemple de chaque nature et de chaque technique.
- * - manuels : TC-1 (jeu de données « Comptes », 3 lignes), TC-2 (révèle le défaut de problem_user,
- *   jeu « Compte du défaut »), TC-13 (réutilise TC-1 comme premier pas avec la ligne standard_user) ;
+ * - manuels : TC-1 (jeu de données « Comptes », 3 lignes), TC-2 (appelle TC-1 avec son ${utilisateur},
+ *   jeu « Compte du défaut » : révèle le défaut de problem_user), TC-13 (appelle TC-1 avec la ligne standard_user) ;
  * - automatisés Playwright de saucedemo/app-tests : TC-3 piloté par les données (même jeu « Comptes »),
  *   TC-4 à TC-6 (UI), TC-7 (API), TC-8 (BDD généré depuis le critère Gherkin de REQ-10),
  *   TC-9 et TC-10 (UI), TC-11 (performance, lié à l'ENF REQ-16) ;
@@ -54,7 +54,8 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
     await creer(qa, {
       kind: 'MANUAL', title: 'Retirer un produit depuis le catalogue et le panier', folder: 'Panier', priority: 'MUST', estimatedDurationMin: 5,
       steps: [
-        { action: 'Se connecter avec ${utilisateur}', expectedResult: 'Le catalogue s’affiche' },
+        // ADR-0018 la connexion est celle de TC-1, jouée avec le compte de la ligne de TC-2
+        { calledTestKey: 'TC-1', callParameters: { utilisateur: '${utilisateur}', resultat_attendu: 'Le catalogue « Products » s’affiche' } },
         { action: 'Cliquer « Add to cart » sur Sauce Labs Backpack', expectedResult: 'Le badge du panier affiche 1' },
         { action: 'Ouvrir le panier', expectedResult: 'Sauce Labs Backpack est listé : quantité 1, $29.99' },
         { action: 'Revenir au catalogue et cliquer « Remove » sur Sauce Labs Backpack', expectedResult: 'Le badge du panier disparaît' },
@@ -144,6 +145,9 @@ test('Tests : manuels avec jeu de données, automatisés, BDD généré, charte 
     await capturer(page, 'test-manuel-pas', page.getByTestId('manual-steps'), { marge: 8 });
     await page.getByTestId('parameters-panel').scrollIntoViewIfNeeded();
     await capturer(page, 'test-manuel-jeu-de-donnees', page.getByTestId('parameters-panel'), { marge: 8 });
+    await page.goto(`/p/${P}/tests/TC-2`);
+    await expect(page.getByTestId('step-called-1')).toBeVisible();
+    await capturer(page, 'test-manuel-appel-parametre', page.getByTestId('manual-steps'), { marge: 8 });
     await page.goto(`/p/${P}/tests/TC-13`);
     await expect(page.getByTestId('step-called-1')).toBeVisible();
     await capturer(page, 'test-manuel-appel', page.getByTestId('manual-steps'), { marge: 8 });
